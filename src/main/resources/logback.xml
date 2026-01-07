@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ✅ Spring 로그 완전히 줄이기 -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.web" level="ERROR"/>
+    <logger name="org.springframework.web.servlet" level="ERROR"/>
+
+    <!-- ✅ 내 프로젝트만 상세히 -->
+    <logger name="com.flyway.template" level="DEBUG"/>
+
+    <!-- ✅ HikariCP 로그 줄이기 -->
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="com.zaxxer.hikari.pool" level="WARN"/>
+
+    <!-- ✅ MyBatis SQL 보기 -->
+    <logger name="com.flyway.template.mapper" level="DEBUG"/>
+
+    <!-- ✅ Swagger 로그 줄이기 -->
+    <logger name="springfox" level="WARN"/>
+    <logger name="io.springfox" level="WARN"/>
+
+    <!-- Root Logger -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
