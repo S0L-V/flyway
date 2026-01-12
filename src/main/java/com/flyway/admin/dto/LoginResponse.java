@@ -1,11 +1,11 @@
 package com.flyway.admin.dto;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import com.flyway.admin.domain.Role;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LoginResponse {
 	private String adminId;
 	private String adminName;
