@@ -1,7 +1,6 @@
 package com.flyway.admin.domain;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import com.flyway.template.domain.BaseEntity;
 
