@@ -18,7 +18,7 @@ public enum ErrorCode {
 	UNAUTHORIZED(401, "C003", "인증이 필요합니다."),
 	FORBIDDEN(403, "C004", "권한이 없습니다."),
 	RESOURCE_NOT_FOUND(404, "C005", "요청한 리소스를 찾을 수 없습니다."),
-	METHOD_NOT_ALLOWED(405, "C006", "허용되지 않은 HTTP 메서드입니다.")
+	METHOD_NOT_ALLOWED(405, "C006", "허용되지 않은 HTTP 메서드입니다."),
 
 	// ==================== 회원 (U) ====================
 	// 예시 (팀원들이 추가)
@@ -26,7 +26,15 @@ public enum ErrorCode {
 	// DUPLICATE_EMAIL(400, "U002", "이미 사용 중인 이메일입니다."),
 	// INVALID_PASSWORD(400, "U003", "비밀번호가 일치하지 않습니다."),
 
-
+	// ==================== 관리자 (A) ====================
+	ADMIN_NOT_FOUND(404, "A001", "관리자를 찾을 수 없습니다."),
+	ADMIN_LOGIN_FAILED(401, "A002", "이메일 또는 비밀번호가 일치하지 않습니다."),
+	ADMIN_ACCOUNT_LOCKED(403, "A003", "계정이 잠겼습니다. 잠시 후 다시 시도해주세요."),
+	ADMIN_ACCOUNT_INACTIVE(403, "A004", "비활성화된 계정입니다."),
+	ADMIN_INVALID_TOKEN(401, "A005", "유효하지 않은 토큰입니다."),
+	ADMIN_TOKEN_EXPIRED(401, "A006", "만료된 토큰입니다."),
+	ADMIN_INSUFFICIENT_PERMISSION(403, "A007", "권한이 없습니다."),
+	ADMIN_DUPLICATE_EMAIL(400, "A008", "이미 사용 중인 이메일입니다.")
 	;
 
 	private final int status;
