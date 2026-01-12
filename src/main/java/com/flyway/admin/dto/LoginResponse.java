@@ -5,8 +5,17 @@ import java.util.UUID;
 
 import com.flyway.admin.domain.Role;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginResponse {
-	private UUID adminId;
+	private String adminId;
 	private String adminName;
 	private String email;
 	private Role role;
