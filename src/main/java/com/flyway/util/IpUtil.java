@@ -22,7 +22,7 @@ public class IpUtil {
 
 		String ip = null;
 
-		// 1. X-Forwarded-For 헤더 확인 (가장 일반적)
+		// 1. X-Forwarded-For 헤더 확인 (nginx 표준)
 		ip = req.getHeader("X-Forwarded-For");
 		if (isValidIp(ip)) {
 			// 여러 IP가 있을 경우 첫 번째가 실제 클라이언트 IP
@@ -34,9 +34,10 @@ public class IpUtil {
 			}
 		}
 
-		// 2. Proxy-Client-IP 헤더
-		ip = req.getHeader("Proxy-Client-IP");
+		// 2. X-Real-IP 헤더 (nginx)
+		ip = req.getHeader("X-Real-IP");
 		if (isValidIp(ip)) {
+			log.debug("Client IP from X-Real-IP: {}", ip);
 			return ip;
 		}
 
@@ -72,10 +73,16 @@ public class IpUtil {
 		return true;
 	}
 
+	/**
+	 * IPv6 여부 확인
+	 */
 	public static boolean isIPv6(String ip) {
 		return ip != null && ip.contains(":");
 	}
 
+	/**
+	 * 로컬 IP 여부 확인
+	 */
 	public static boolean isLocalhost(String ip) {
 		if (ip == null) {
 			return false;
