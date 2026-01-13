@@ -1,33 +1,33 @@
-name: Discord PR Notify (opened + merged)
+# name: Discord PR Notify (opened + merged)
 
-on:
-  pull_request:
-    types: [opened, closed]
+# on:
+#   pull_request:
+#     types: [opened, closed]
 
-jobs:
-  notify:
-    runs-on: ubuntu-latest
+# jobs:
+#   notify:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Send Discord notification
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          # PR OPENED
-          if [ "${{ github.event.action }}" = "opened" ]; then
-            MSG="🆕 PR 생성\n**#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}**\n${{ github.event.pull_request.html_url }}\n작성자: ${{ github.actor }}"
-          fi
+#     steps:
+#       - name: Send Discord notification
+#         env:
+#           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+#         run: |
+#           # PR OPENED
+#           if [ "${{ github.event.action }}" = "opened" ]; then
+#             MSG="🆕 PR 생성\n**#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}**\n${{ github.event.pull_request.html_url }}\n작성자: ${{ github.actor }}"
+#           fi
 
-          # PR CLOSED (merged only)
-          if [ "${{ github.event.action }}" = "closed" ]; then
-            if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
-              MSG="✅ PR 머지됨\n**#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}**\n${{ github.event.pull_request.html_url }}\n머지한 사람: ${{ github.actor }}"
-            else
-              exit 0
-            fi
-          fi
+#           # PR CLOSED (merged only)
+#           if [ "${{ github.event.action }}" = "closed" ]; then
+#             if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
+#               MSG="✅ PR 머지됨\n**#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}**\n${{ github.event.pull_request.html_url }}\n머지한 사람: ${{ github.actor }}"
+#             else
+#               exit 0
+#             fi
+#           fi
 
-          curl -sS -X POST \
-            -H "Content-Type: application/json" \
-            -d "{\"content\":\"$MSG\"}" \
-            "$DISCORD_WEBHOOK_URL"
+#           curl -sS -X POST \
+#             -H "Content-Type: application/json" \
+#             -d "{\"content\":\"$MSG\"}" \
+#             "$DISCORD_WEBHOOK_URL"
