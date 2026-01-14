@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.flyway.admin.domain.Admin;
 
 /**
- * 관리자 MaBatis Mapper 인터페이스
+ * 관리자 MyBatis Mapper 인터페이스
  */
 @Mapper
 public interface AdminMapper {

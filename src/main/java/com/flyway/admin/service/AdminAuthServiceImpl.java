@@ -51,7 +51,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 				String.format("계정이 잠겼습니다. %s 이후 다시 시도해주세요.", admin.getLockedUntil()));
 		}
 
-		// 3. 게정 활성화 확인
+		// 3. 계정 활성화 확인
 		if (!"Y".equals(admin.getIsActive())) {
 			log.warn("Login failed - inactive account: {}", admin.getEmail());
 			throw new BusinessException(ErrorCode.ADMIN_ACCOUNT_INACTIVE);
@@ -74,7 +74,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 		log.info("Login success: {}, IP: {}", admin.getEmail(), ipAddress);
 
 
-		// 6. JWP 토큰 생성
+		// 6. JWT 토큰 생성
 		String accessToken = adminJwtUtil.generateToken(
 			admin.getAdminId(),
 			admin.getEmail(),

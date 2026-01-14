@@ -131,6 +131,6 @@ public class AdminAuthController {
 			return ApiResponse.error(null, "토큰이 없습니다.");
 		}
 
-		return ApiResponse.success(true, "유요한 토큰입니다.");
+		return ApiResponse.success(true, "유효한 토큰입니다.");
  	}
 }

@@ -88,7 +88,7 @@ public class IpUtil {
 			return false;
 		}
 
-		return "127:0:0:1".equals(ip) ||
+		return "127.0.0.1".equals(ip) ||
 				"0:0:0:0:0:0:0:1".equals(ip) ||
 				"::1".equals(ip) ||
 				"localhost".equalsIgnoreCase(ip);

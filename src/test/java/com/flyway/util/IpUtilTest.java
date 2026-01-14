@@ -25,7 +25,7 @@ class IpUtilTest {
 	}
 
 	@Test
-	@DisplayName("헤더 없을 떄 RemoteAddr 사용")
+	@DisplayName("헤더 없을 때 RemoteAddr 사용")
 	void testRemoteAddr() {
 		// given
 		HttpServletRequest req = mock(HttpServletRequest.class);
@@ -37,7 +37,7 @@ class IpUtilTest {
 	}
 
 	@Test
-	@DisplayName("IPv6 lcoalhost를 IPv4로 변환")
+	@DisplayName("IPv6 localhost를 IPv4로 변환")
 	void testIPv6Localhost() {
 		// given
 		HttpServletRequest req = mock(HttpServletRequest.class);
