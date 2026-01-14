@@ -38,7 +38,7 @@ public class AdminRepositoryImpl implements AdminRepository {
 
 	@Override
 	public void handleLoginFailure(String adminId) {
-		LocalDateTime lockedUntil = LocalDateTime.now().plusMonths(30);
+		LocalDateTime lockedUntil = LocalDateTime.now().plusMinutes(30);
 
 		// Atomic 업데이트 (단일 쿼리)
 		adminMapper.handleLoginFailureAtomic(adminId, lockedUntil);
