@@ -92,8 +92,14 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 			.build();
 	}
 
+	/**
+	 * 로그아웃 처리
+	 * (JWT stateless 로그 기록용)
+	 * @param adminId
+	 */
 	@Override
 	public void logout(String adminId) {
-
+		log.info("Logout: adminId={}", adminId);
+		// 활동 로그 추가
 	}
 }
