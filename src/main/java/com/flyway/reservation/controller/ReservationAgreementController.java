@@ -1,4 +1,4 @@
-package com.flyway.template.controller;
+package com.flyway.reservation.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +15,10 @@ public class ReservationAgreementController {
 
     @GetMapping("/agreement")
     public String AgreementPage(@PathVariable String reservationId) {
-        return "reservaiton/agreement";
+        return "reservation/agreement";
     }
 
-    @PostMapping("/agreemet")
+    @PostMapping("/agreement")
     public String submitAgreement(
             @PathVariable String reservationId,
             @RequestParam(name = "agreeAll", defaultValue = "false") boolean agreeAll,
@@ -32,7 +32,7 @@ public class ReservationAgreementController {
         agreed.add(reservationId);
         session.setAttribute(AGREED_RESERVATION_IDS, agreed);
 
-        return "redirect:/reservations/" + reservationId + "/booking";
+        return "redirect:/reservation/" + reservationId + "/booking";
     }
         @SuppressWarnings("unchecked")
         private Set<String> getOrCreateAgreedSet(HttpSession session) {
