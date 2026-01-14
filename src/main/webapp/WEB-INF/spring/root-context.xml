@@ -3,16 +3,18 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
-       xsi:schemaLocation="
-      http://www.springframework.org/schema/beans
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context
       http://www.springframework.org/schema/context/spring-context.xsd
       http://mybatis.org/schema/mybatis-spring
-      http://mybatis.org/schema/mybatis-spring.xsd">
+      http://mybatis.org/schema/mybatis-spring.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <!-- Properties 파일 로드 -->
-    <context:property-placeholder location="classpath:config/application-dev.properties"/>
+    <context:property-placeholder
+            location="classpath:config/application-dev.properties"
+            ignore-unresolvable="true"/>
 
     <context:component-scan base-package="com.flyway">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
@@ -54,5 +56,14 @@
 
     <!-- MyBatis Mapper Scanner -->
     <mybatis-spring:scan base-package="com.flyway"/>
+
+    <!-- Transaction Manager -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- Transaction Annotation 활성화 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
 
 </beans>
