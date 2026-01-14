@@ -1,10 +1,8 @@
 package com.flyway.admin.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +17,8 @@ import com.flyway.admin.domain.Role;
 import com.flyway.admin.dto.LoginRequest;
 import com.flyway.admin.dto.LoginResponse;
 import com.flyway.admin.repository.AdminRepository;
+import com.flyway.template.exception.BusinessException;
+import com.flyway.template.exception.ErrorCode;
 import com.flyway.util.AdminJwtUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,5 +80,60 @@ class AdminAuthServiceImplTest {
 		// 메서드 호출 검증
 		then(adminRepository).should().handleLoginSuccess("test-admin-id");
 		then(adminRepository).should().updateLoginInfo("test-admin-id", ipAddress);
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 존재하지 않는 관리자")
+	void loginFail_AdminNotFound() {
+		// given
+		given(adminRepository.findByEmail(anyString())).willReturn(null);
+
+		// when & then
+		assertThatThrownBy(() -> adminAuthService.login(loginRequest, "192.168.1.1"))
+			.isInstanceOf(BusinessException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ADMIN_LOGIN_FAILED);
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 비활성화 계정")
+	void loginFail_InactiveAccount() {
+		// given
+		testAdmin.setIsActive("N");
+		given(adminRepository.findByEmail(anyString())).willReturn(testAdmin);
+
+		// when & then
+		assertThatThrownBy(() -> adminAuthService.login(loginRequest, "192.168.1.1"))
+			.isInstanceOf(BusinessException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ADMIN_ACCOUNT_INACTIVE);
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 잘못된 비밀번호")
+	void loginFail_InvalidPassword() {
+		// given
+		given(adminRepository.findByEmail(anyString())).willReturn(testAdmin);
+		given(passwordEncoder.matches(anyString(), anyString())).willReturn(false);
+
+		// when & then
+		assertThatThrownBy(() -> adminAuthService.login(loginRequest, "192.168.1.1"))
+			.isInstanceOf(BusinessException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ADMIN_LOGIN_FAILED);
+
+		// 실패 처리 메서드 호출 검증
+		then(adminRepository).should().handleLoginFailure("test-admin-id");
+	}
+
+	@Test
+	@DisplayName("로그아웃")
+	void logout() {
+		// given
+		String adminId = "test-admin-id";
+
+		// when
+		adminAuthService.logout(adminId);
+
+		// then
+		assertThatCode(() -> adminAuthService.logout(adminId))
+			.doesNotThrowAnyException();
 	}
 }

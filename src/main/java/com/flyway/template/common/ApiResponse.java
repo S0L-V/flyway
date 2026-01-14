@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 
 /**
  * API 공통 응답 형식
+ *
+ * @Param <T> 응답 데이터 확인
  */
 @Getter
 @NoArgsConstructor
@@ -14,11 +16,14 @@ public class ApiResponse<T> {
 
 	private boolean success;
 	private T data;
-	private String message;
 	private String errorCode;
+	private String message;
 
 	/**
 	 * 성공 응답 (데이터만)
+	 * @param data
+	 * @return
+	 * @param <T>
 	 */
 	public static <T> ApiResponse<T> success(T data) {
 		return new ApiResponse<>(true, data, null, null);
@@ -26,16 +31,23 @@ public class ApiResponse<T> {
 
 	/**
 	 * 성공 응답 (데이터 + 메시지)
+	 * @param data
+	 * @param message
+	 * @return
+	 * @param <T>
 	 */
 	public static <T> ApiResponse<T> success(T data, String message) {
-		return new ApiResponse<>(true, data, message, null);
+		return new ApiResponse<>(true, data, null, message);
 	}
 
 	/**
 	 * 실패 응답
+	 * @param errorCode
+	 * @param message
+	 * @return
+	 * @param <T>
 	 */
-	public static <T> ApiResponse<T> error(String message, String errorCode) {
-		return new ApiResponse<>(false, null, message, errorCode);
+	public static <T> ApiResponse<T> error(String errorCode, String message) {
+		return new ApiResponse<>(false, null, errorCode, message);
 	}
-
 }

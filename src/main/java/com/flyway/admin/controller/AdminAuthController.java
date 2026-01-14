@@ -1,22 +1,14 @@
 package com.flyway.admin.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import net.bytebuddy.matcher.StringMatcher;
 
 import com.flyway.admin.dto.LoginRequest;
 import com.flyway.admin.dto.LoginResponse;
@@ -24,10 +16,7 @@ import com.flyway.admin.service.AdminAuthService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.util.IpUtil;
-import com.sun.jna.platform.win32.WinDef;
 
-import io.swagger.annotations.Api;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -107,7 +96,7 @@ public class AdminAuthController {
 			return ApiResponse.error(e.getMessage(), e.getErrorCode().getCode());
 		} catch (Exception e) {
 			log.error("Unexpected error during login", e);
-			return ApiResponse.error("서버 오류가 발생했습니다.", "C002");
+			return ApiResponse.error("C002","서버 오류가 발생했습니다.");
 		}
 	}
 
@@ -139,7 +128,7 @@ public class AdminAuthController {
 		String token = (String)session.getAttribute("adminToken");
 
 		if (token == null) {
-			return ApiResponse.error("토큰이 없습니다.", null);
+			return ApiResponse.error(null, "토큰이 없습니다.");
 		}
 
 		return ApiResponse.success(true, "유요한 토큰입니다.");
