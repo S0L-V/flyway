@@ -124,6 +124,7 @@ public class AdminAuthController {
 	 * GET /admin/api/auth/validate
 	 */
 	@GetMapping("/admin/api/auth/validate")
+	@ResponseBody
 	public ApiResponse<Boolean> validateToken(HttpSession session) {
 		String token = (String)session.getAttribute("adminToken");
 
