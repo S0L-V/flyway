@@ -12,48 +12,47 @@
       http://mybatis.org/schema/mybatis-spring.xsd">
 
     <!-- Properties 파일 로드 -->
-    <context:property-placeholder location="classpath:config/application-dev.properties" />
+    <context:property-placeholder location="classpath:config/application-dev.properties"/>
 
-    <context:component-scan base-package="com.flyway.template">
+    <context:component-scan base-package="com.flyway">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
 
     <!-- HikariCP 설정 (Properties에서 값 주입) -->
     <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
-        <property name="driverClassName" value="${db.driver}" />
-        <property name="jdbcUrl" value="${db.url}" />
-        <property name="username" value="${db.username}" />
-        <property name="password" value="${db.password}" />
-        <property name="maximumPoolSize" value="${db.hikari.maximum-pool-size}" />
-        <property name="minimumIdle" value="${db.hikari.minimum-idle}" />
-        <property name="connectionTimeout" value="${db.hikari.connection-timeout}" />
+        <property name="driverClassName" value="${db.driver}"/>
+        <property name="jdbcUrl" value="${db.url}"/>
+        <property name="username" value="${db.username}"/>
+        <property name="password" value="${db.password}"/>
+        <property name="maximumPoolSize" value="${db.hikari.maximum-pool-size}"/>
+        <property name="minimumIdle" value="${db.hikari.minimum-idle}"/>
+        <property name="connectionTimeout" value="${db.hikari.connection-timeout}"/>
     </bean>
 
 
     <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
-        <constructor-arg ref="hikariConfig" />
+        <constructor-arg ref="hikariConfig"/>
     </bean>
 
     <!-- MyBatis SqlSessionFactory -->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource" />
-        <!--  mapper 파일 생성 후 주석 제거   -->
-<!--        <property name="mapperLocations" value="classpath:mapper/**/*.xml" />-->
-        <property name="typeAliasesPackage" value="com.flyway.template.domain" />
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath:mapper/**/*.xml"/>
+        <property name="typeAliasesPackage" value="com.flyway"/>
         <property name="configuration">
             <bean class="org.apache.ibatis.session.Configuration">
-                <property name="mapUnderscoreToCamelCase" value="true" />
-                <property name="jdbcTypeForNull" value="NULL" />
+                <property name="mapUnderscoreToCamelCase" value="true"/>
+                <property name="jdbcTypeForNull" value="NULL"/>
             </bean>
         </property>
     </bean>
 
     <!-- MyBatis SqlSession Template -->
     <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
-        <constructor-arg ref="sqlSessionFactory" />
+        <constructor-arg ref="sqlSessionFactory"/>
     </bean>
 
     <!-- MyBatis Mapper Scanner -->
-    <mybatis-spring:scan base-package="com.flyway.template.mapper" />
+    <mybatis-spring:scan base-package="com.flyway"/>
 
 </beans>
