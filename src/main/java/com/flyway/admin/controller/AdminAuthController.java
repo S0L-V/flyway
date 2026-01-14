@@ -21,9 +21,12 @@ import net.bytebuddy.matcher.StringMatcher;
 import com.flyway.admin.dto.LoginRequest;
 import com.flyway.admin.dto.LoginResponse;
 import com.flyway.admin.service.AdminAuthService;
+import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.util.IpUtil;
+import com.sun.jna.platform.win32.WinDef;
 
+import io.swagger.annotations.Api;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,12 +70,12 @@ public class AdminAuthController {
 
 
 	/**
-	 * 로그인 처리
+	 * 로그인 처리 (AJAX)
 	 * POST /admin/api/auth/login
 	 */
 	@PostMapping("/admin/api/auth/login")
 	@ResponseBody
-	public Map<String, Object> login(
+	public ApiResponse<LoginResponse> login(
 		@RequestBody LoginRequest loginRequest,
 		HttpServletRequest httpRequest,
 		HttpSession session) {
@@ -98,30 +101,13 @@ public class AdminAuthController {
 
 			log.info("Login success: adminId={}, role={}", loginResponse.getAdminId(), loginResponse.getRole());
 
-			// 성공 응답
-			Map<String, Object> response = new HashMap<>();
-			response.put("success", true);
-			response.put("data", loginResponse);
-			response.put("message", "로그인 성공");
-			return response;
+			return ApiResponse.success(loginResponse, "로그인 성공");
 		} catch (BusinessException e) {
 			log.error("Login failed: {}", e.getMessage());
-
-			// 실패 응답
-			Map<String, Object> response = new HashMap<>();
-			response.put("success", false);
-			response.put("message", e.getMessage());
-			response.put("errorCode", e.getErrorCode().getCode());
-			return response;
+			return ApiResponse.error(e.getMessage(), e.getErrorCode().getCode());
 		} catch (Exception e) {
 			log.error("Unexpected error during login", e);
-
-			// 예상치 못한 에러
-			Map<String, Object> response = new HashMap<>();
-			response.put("success", false);
-			response.put("message", "서버 오류가 발생했습니다.");
-			response.put("errorCode", "C002");
-			return response;
+			return ApiResponse.error("서버 오류가 발생했습니다.", "C002");
 		}
 	}
 
@@ -141,7 +127,6 @@ public class AdminAuthController {
 
 		// 세션 무효화
 		session.invalidate();
-
 		return "redirect:/admin/login";
 	}
 
@@ -150,19 +135,13 @@ public class AdminAuthController {
 	 * GET /admin/api/auth/validate
 	 */
 	@GetMapping("/admin/api/auth/validate")
-	public Map<String, Object> validateToken(HttpSession session) {
+	public ApiResponse<Boolean> validateToken(HttpSession session) {
 		String token = (String)session.getAttribute("adminToken");
 
-		Map<String, Object> response = new HashMap<>();
-
 		if (token == null) {
-			response.put("success", false);
-			response.put("message", "토큰이 없습니다.");
-		} else {
-			response.put("success", true);
-			response.put("message", "유효한 토큰입니다.");
+			return ApiResponse.error("토큰이 없습니다.", null);
 		}
 
-		return response;
+		return ApiResponse.success(true, "유요한 토큰입니다.");
  	}
 }
