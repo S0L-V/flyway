@@ -5,6 +5,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,4 +61,21 @@ public class AdminAuthController {
 
 		return ResponseEntity.ok(ApiResponse.success(res, "로그인 성공"));
 	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<ApiResponse<Void>> logout(HttpSession session) {
+		// 세션에서 관리자 ID 가져오기
+		String adminId = (String)session.getAttribute("adminId");
+
+		if (adminId != null) {
+			log.info("Logout: adminId={}", adminId);
+			adminAuthService.logout(adminId);
+		}
+
+		// 세션 무효화
+		session.invalidate();
+
+		return ResponseEntity.ok(ApiResponse.success(null, "로그아웃 성공"));
+	}
+
 }
