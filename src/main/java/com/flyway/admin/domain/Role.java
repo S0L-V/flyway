@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum Role {
-	SUPER_ADMIN("슈퍼관리지", "모든 권한"),
+	SUPER_ADMIN("슈퍼관리자", "모든 권한"),
 	ADMIN("관리자", "일반 관리 업무"),
 	VIEWER("뷰어", "조회만 가능");
 
