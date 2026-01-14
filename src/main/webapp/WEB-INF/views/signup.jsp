@@ -6,7 +6,6 @@
 <head>
     <meta charset="UTF-8">
     <title>회원가입</title>
-
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/resources/auth/signup.css">
 </head>

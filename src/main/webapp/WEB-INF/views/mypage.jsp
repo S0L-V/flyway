@@ -1,6 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<link rel="stylesheet"
-      href="${pageContext.request.contextPath}/resources/user/mypage.css">
 <%
     // 세션 확인 (로그인 여부 체크)
     String sessionId = (String) session.getAttribute("userID");
@@ -23,6 +21,8 @@
 <head>
     <meta charset="UTF-8">
     <title>마이페이지</title>
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/resources/user/mypage.css">
 </head>
 <body>
 
