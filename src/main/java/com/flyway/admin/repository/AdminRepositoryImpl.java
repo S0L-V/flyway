@@ -2,7 +2,6 @@ package com.flyway.admin.repository;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.flyway.admin.domain.Admin;
