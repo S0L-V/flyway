@@ -93,7 +93,7 @@ public class AdminAuthController {
 			return ApiResponse.success(loginResponse, "로그인 성공");
 		} catch (BusinessException e) {
 			log.error("Login failed: {}", e.getMessage());
-			return ApiResponse.error(e.getMessage(), e.getErrorCode().getCode());
+			return ApiResponse.error(e.getErrorCode().getCode(), e.getMessage());
 		} catch (Exception e) {
 			log.error("Unexpected error during login", e);
 			return ApiResponse.error("C002","서버 오류가 발생했습니다.");
