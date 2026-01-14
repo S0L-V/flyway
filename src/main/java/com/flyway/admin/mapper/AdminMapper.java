@@ -33,11 +33,6 @@ public interface AdminMapper {
 	);
 
 	/**
-	 * 로그인 실패 횟수 증가
-	 */
-	void incrementFailedCount(@Param("adminId") String adminId);
-
-	/**
 	 * 계정 잠금 (30분)
 	 */
 	void lockAccount(
@@ -59,4 +54,13 @@ public interface AdminMapper {
 	 * 관리자 정보 수정
 	 */
 	void update(Admin admin);
+
+	/**
+	 * 로그인 실패 처리 (Atomic)
+	 * 실패 횟수 증가 + 5회 이상 시 자동 잠금
+	 */
+	void handleLoginFailureAtomic(
+			@Param("adminId") String adminId,
+			@Param("lockedUntil") LocalDateTime lockedUntil
+	);
 }

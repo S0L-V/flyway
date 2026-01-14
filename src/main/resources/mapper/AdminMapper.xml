@@ -55,14 +55,6 @@
         WHERE admin_id = #{adminId}
     </update>
 
-    <!-- 로그인 실패 횟수 증가 -->
-    <update id="incrementFailedCount">
-        UPDATE admin
-        SET failed_login_count = COALESCE(failed_login_count, 0) + 1,
-            updated_at = NOW()
-        WHERE admin_id = #{adminId}
-    </update>
-
     <!-- 로그인 실패 횟수 초기화 및 잠금 해제 -->
     <update id="resetFailedCount">
         UPDATE admin
@@ -106,6 +98,19 @@
             role = #{role},
             is_active = #{isActive},
             updated_by = #{updatedBy},
+            updated_at = NOW()
+        WHERE admin_id = #{adminId}
+    </update>
+
+    <!-- Atomic 로그인 실패 처리 -->
+    <update id="handleLoginFailureAtomic">
+        UPDATE admin
+        SET failed_login_count = COALESCE(failed_login_count, 0) + 1,
+            locked_until = CASE
+                WHEN COALESCE(failed_login_count, 0) + 1 >= 5
+                THEN #{lockedUntil}
+                ELSE locked_until
+            END,
             updated_at = NOW()
         WHERE admin_id = #{adminId}
     </update>

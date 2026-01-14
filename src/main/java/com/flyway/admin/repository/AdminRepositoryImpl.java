@@ -39,20 +39,21 @@ public class AdminRepositoryImpl implements AdminRepository {
 
 	@Override
 	public void handleLoginFailure(String adminId) {
-		// 1. 실패 횟수 증가
-		adminMapper.incrementFailedCount(adminId);
+		LocalDateTime lockedUntil = LocalDateTime.now().plusMonths(30);
+
+		// Atomic 업데이트 (단일 쿼리)
+		adminMapper.handleLoginFailureAtomic(adminId, lockedUntil);
 		
-		// 2. 현재 실패 횟수 조회
+		// 로그 확인
 		Admin admin = adminMapper.findById(adminId);
 		int failedCount = admin.getFailedLoginCount() != null ? admin.getFailedLoginCount() : 0;
 
 		log.debug("Login failed for admin: {}, failed count: {}", adminId, failedCount);
 
-		// 3. 5회 이상 실패 시 30분 잠금
 		if (failedCount >= 5) {
-			LocalDateTime lockedUntil = LocalDateTime.now().plusMinutes(30);
-			adminMapper.lockAccount(adminId, lockedUntil);
 			log.warn("Account locked until {} for admin: {}", lockedUntil, adminId);
+		} else {
+			log.debug("Login failed for admin: {}, failed count: {}", adminId, failedCount);
 		}
 	}
 
