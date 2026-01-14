@@ -17,7 +17,9 @@
 
     <!-- 에러 메시지 출력 -->
     <c:if test="${not empty error}">
-        <div class="error">${error}</div>
+        <div class="error">
+            <c:out value="${error}" />
+        </div>
     </c:if>
 
     <!-- Spring MVC 컨트롤러로 POST -->

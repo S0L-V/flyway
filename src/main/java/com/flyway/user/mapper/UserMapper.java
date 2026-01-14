@@ -26,15 +26,6 @@ public interface UserMapper {
     );
 
     /**
-     * 비밀번호 해시 업데이트
-     */
-    void updatePasswordHash(
-            @Param("userId") String userId,
-            @Param("passwordHash") String passwordHash
-    );
-
-
-    /**
      * 사용자 상태 변경
      */
     void updateStatus(

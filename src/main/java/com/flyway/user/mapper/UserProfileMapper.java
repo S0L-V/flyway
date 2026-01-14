@@ -7,9 +7,19 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface UserProfileMapper {
 
-    void insertProfile(UserProfile profile); // 회원가입 시 이름 추가
+    /**
+     * 회원가입 시 이름 추가
+     */
+    void insertProfile(UserProfile profile);
 
-    UserProfile findByUserId(@Param("userId") String userId); // userId로 프로필 조회
+    /**
+     * userId로 프로필 조회
+     */
+    UserProfile findByUserId(@Param("userId") String userId);
 
-    void updateProfile(UserProfile profile); // 프로필 업데이트 (동적 SQL, null이 아닌 필드만 업데이트)
+
+    /**
+     * 프로필 업데이트 (동적 SQL, null이 아닌 필드만 업데이트)
+     */
+    void updateProfile(UserProfile profile);
 }

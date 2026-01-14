@@ -34,7 +34,7 @@
     </a>
 
     <div class="footer-links">
-        계정이 없으신가요? <a href="/signup">회원가입</a>
+        계정이 없으신가요? <a href="${pageContext.request.contextPath}/signup">회원가입</a>
     </div>
 </div>
 
