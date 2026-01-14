@@ -59,10 +59,10 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
 		// 4. 비밀번호 검증
 		if (!passwordEncoder.matches(req.getPassword(), admin.getPasswordHash())) {
-			log.warn("Login failed - invalid password: {}", admin.getEmail(), ipAddress);
+			log.warn("Login failed - invalid password: {}, IP: {}", admin.getEmail(), ipAddress);
 
 			// 로그인 실패 처리 (실패 횟수 증가 + 5회 시 잠금)
-			adminRepository.handleLoginFailure(admin.getEmail());
+			adminRepository.handleLoginFailure(admin.getAdminId());
 
 			throw new BusinessException(ErrorCode.ADMIN_LOGIN_FAILED);
 		}
