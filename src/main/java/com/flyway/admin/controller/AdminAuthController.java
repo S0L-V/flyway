@@ -4,12 +4,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.flyway.admin.dto.LoginRequest;
@@ -33,6 +31,9 @@ public class AdminAuthController {
 
 	private final AdminAuthService adminAuthService;
 
+	/**
+	 * 관리자 로그인
+	 */
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<LoginResponse>> login(
 		@RequestBody LoginRequest req,
@@ -62,6 +63,9 @@ public class AdminAuthController {
 		return ResponseEntity.ok(ApiResponse.success(res, "로그인 성공"));
 	}
 
+	/**
+	 * 관리자 로그아웃
+	 */
 	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(HttpSession session) {
 		// 세션에서 관리자 ID 가져오기
@@ -78,6 +82,10 @@ public class AdminAuthController {
 		return ResponseEntity.ok(ApiResponse.success(null, "로그아웃 성공"));
 	}
 
+	/**
+	 * 토큰 검증
+	 * 프론트엔드에서 토큰 유효성 확인용
+	 */
 	@GetMapping("/validate")
 	public ResponseEntity<ApiResponse<Boolean>> validateToken(HttpSession session) {
 		String token = (String)session.getAttribute("adminToken");
