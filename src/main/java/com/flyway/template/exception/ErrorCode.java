@@ -21,10 +21,14 @@ public enum ErrorCode {
 	METHOD_NOT_ALLOWED(405, "C006", "허용되지 않은 HTTP 메서드입니다."),
 
 	// ==================== 회원 (U) ====================
-	// 예시 (팀원들이 추가)
-	// USER_NOT_FOUND(404, "U001", "사용자를 찾을 수 없습니다."),
-	// DUPLICATE_EMAIL(400, "U002", "이미 사용 중인 이메일입니다."),
-	// INVALID_PASSWORD(400, "U003", "비밀번호가 일치하지 않습니다."),
+	USER_INVALID_INPUT(400, "U001", "입력값이 올바르지 않습니다."),
+	USER_EMAIL_ALREADY_EXISTS(409, "U002", "이미 가입된 이메일입니다."),
+	USER_OAUTH_ALREADY_LINKED(409, "U003", "이미 연결된 OAuth 계정입니다."),
+	USER_EMAIL_REQUIRED(400, "U004", "이메일 정보가 필요합니다."),
+	USER_BLOCKED(403, "U005", "차단된 계정입니다."),
+	USER_PASSWORD_ENCODE_ERROR(500, "U006", "비밀번호 처리 중 오류가 발생했습니다."),
+	USER_DB_ERROR(500, "U007", "회원 정보 저장 중 오류가 발생했습니다."),
+	USER_INTERNAL_ERROR(500, "U999", "회원 처리 중 알 수 없는 오류가 발생했습니다."),
 
 	// ==================== 관리자 (A) ====================
 	ADMIN_NOT_FOUND(404, "A001", "관리자를 찾을 수 없습니다."),
