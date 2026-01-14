@@ -78,4 +78,14 @@ public class AdminAuthController {
 		return ResponseEntity.ok(ApiResponse.success(null, "로그아웃 성공"));
 	}
 
+	@GetMapping("/validate")
+	public ResponseEntity<ApiResponse<Boolean>> validateToken(HttpSession session) {
+		String token = (String)session.getAttribute("adminToken");
+
+		if (token == null) {
+			return ResponseEntity.ok(ApiResponse.success(false, "토큰이 없습니다."));
+		}
+
+		return ResponseEntity.ok(ApiResponse.success(true, "유효한 토큰입니다."));
+ 	}
 }
