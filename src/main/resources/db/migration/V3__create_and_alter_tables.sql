@@ -89,6 +89,7 @@ CREATE TABLE email_verification_token (
                                           created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                           PRIMARY KEY (email_verification_token_id),
                                           KEY idx_evt_user_id (user_id),
+                                          UNIQUE KEY uq_evt_token_hash (token_hash),
                                           CONSTRAINT fk_evt_user
                                               FOREIGN KEY (user_id) REFERENCES users(user_id)
                                                   ON DELETE CASCADE
