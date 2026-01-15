@@ -54,7 +54,7 @@
     </bean>
 
     <!-- MyBatis Mapper Scanner -->
-    <mybatis-spring:scan base-package="com.flyway"/>
+    <mybatis-spring:scan base-package="com.flyway" annotation="org.apache.ibatis.annotations.Mapper"/>
 
     <!-- Transaction Manager -->
     <bean id="transactionManager"

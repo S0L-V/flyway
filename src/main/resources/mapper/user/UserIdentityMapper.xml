@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.user.mapper.UserIdentityMapper">
+
+    <!-- (EMAIL/KAKAO) Identity 생성 -->
+    <insert id="insertIdentity" parameterType="com.flyway.user.domain.UserIdentity">
+        INSERT INTO user_identity (user_identity_id,
+                                   user_id,
+                                   provider,
+                                   provider_user_id,
+                                   created_at)
+        VALUES (#{userIdentityId},
+                #{userId},
+                #{provider},
+                #{providerUserId},
+                #{createdAt})
+    </insert>
+
+    <!-- Email 가입 회원 중 중복 이메일 보유 회원 조회 -->
+    <select id="existsEmailIdentity" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM user_identity
+        WHERE provider = 'EMAIL'
+          AND provider_user_id = #{email}
+    </select>
+
+    <!-- provider + provider_user_id 로 Identity 조회 (OAuth 재로그인 시 기존 회원 조회) -->
+    <select id="findByProviderUserId" parameterType="map" resultType="com.flyway.user.domain.UserIdentity">
+        SELECT user_identity_id,
+               user_id,
+               provider,
+               provider_user_id,
+               created_at
+        FROM user_identity
+        WHERE provider = #{provider}
+          AND provider_user_id = #{providerUserId}
+    </select>
+
+</mapper>
