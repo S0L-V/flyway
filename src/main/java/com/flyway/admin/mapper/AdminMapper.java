@@ -10,6 +10,7 @@ import com.flyway.admin.domain.Admin;
 /**
  * 관리자 MyBatis Mapper 인터페이스
  */
+@Mapper
 public interface AdminMapper {
 
 	/**
