@@ -13,7 +13,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          MSG="👀 리뷰 요청!\n**#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}**\n${{ github.event.pull_request.html_url }}\n작성자: ${{ github.event.pull_request.user.login }}"
+          MSG="🚨 **PR 리뷰 요청!**\n\n**#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}**\n${{ github.event.pull_request.html_url }}\n작성자: ${{ github.event.pull_request.user.login }}"
 
           curl -sS -X POST \
             -H "Content-Type: application/json" \
