@@ -1,33 +1,20 @@
 package com.flyway.reservation.mapper;
 
 import com.flyway.reservation.domain.FlightSnapshot;
+import com.flyway.reservation.dto.ReservationInsertDTO;
+import com.flyway.reservation.dto.ReservationSegmentInsertDTO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
 
+import java.time.LocalDateTime;
+@Mapper
 public interface ReservationDraftMapper {
 
     FlightSnapshot selectFlightSnapshot(@Param("flightId") String flightId);
 
-    int insertReservation (
-            @Param("reservationId") String reservationId,
-            @Param("userId") String userId,
-            @Param("reservedAt")LocalDateTime reservedAt,
-            @Param("passengerCount") int passengerCount,
-            @Param("tripType") String tripType,
-            @Param("expiredAt") LocalDateTime expiredAt
-            );
+    int insertReservation(ReservationInsertDTO param);
 
-    int insertReservationSegment (
-            @Param("reservationSegmentId") String reservationSegmentId,
-            @Param("flightId")  String flightId,
-            @Param("segmentOrder")  String segmentOrder,
-            @Param("snapDepartureAirport") String snapDepartureAirport,
-            @Param("snapArrivalAirport") String snapArrivalAirport,
-            @Param("snapDepartureTime") String snapDepartureTime,
-            @Param("snapArrivalTime") String snapArrivalTime,
-            @Param("snapFlightNumber")  String snapFlightNumber,
-            @Param("snapCabinClassCode") String snapCabinClassCode
-    );
+    int insertReservationSegment(ReservationSegmentInsertDTO param);
 
 }

@@ -8,6 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DraftCreateResponse {
+
     private String reservationId;
     private String nextUrl;
+
 }

@@ -331,7 +331,7 @@
         </c:if>
 
         <form method="post" id="agreeForm">
-            <!-- ✅ 서버는 agreeAll 파라미터만 보므로, 아래 JS가 true/false를 세팅 -->
+            <!-- 서버는 agreeAll 파라미터만 보므로, 아래 JS가 true/false를 세팅 -->
             <input type="hidden" name="agreeAll" id="agreeAllHidden" value="false"/>
 
             <!-- 전체 동의 -->

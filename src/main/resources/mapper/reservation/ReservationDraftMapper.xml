@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.reservation.mapper.ReservationDraftMapper">
+
+    <select id="selectFlightSnapshot" parameterType="string"
+            resultType="com.flyway.reservation.domain.FlightSnapshot">
+        SELECT
+            flight_id AS flightId,
+            departure_airport AS departureAirport,
+            arrival_airport AS arrivalAirport,
+            departure_time AS departureTime,
+            arrival_time AS arrivalTime,
+            flight_number AS flightNumber
+        FROM flight
+        WHERE flight_id = #{flightId}
+    </select>
+
+    <insert id="insertReservation" parameterType="com.flyway.reservation.dto.ReservationInsertDTO">
+        INSERT INTO reservation (
+            reservation_id,
+            user_id,
+            reserved_at,
+            status,
+            passenger_count,
+            trip_type,
+            expired_at
+        ) VALUES (
+            #{reservationId},
+            #{userId},
+            #{reservedAt},
+            #{status},
+            #{passengerCount},
+            #{tripType},
+            #{expiredAt}
+                 )
+    </insert>
+
+    <insert id="insertReservationSegment" parameterType="com.flyway.reservation.dto.ReservationSegmentInsertDTO">
+        INSERT INTO reservation_segment (
+            reservation_segment_id,
+            flight_id,
+            reservation_id,
+            segment_order,
+            snap_departure_airport,
+            snap_arrival_airport,
+            snap_departure_time,
+            snap_arrival_time,
+            snap_flight_number,
+            snap_cabin_class_code
+        ) VALUES (
+            #{reservationSegmentId},
+            #{flightId},
+            #{reservationId},
+            #{segmentOrder},
+            #{snapDepartureAirport},
+            #{snapArrivalAirport},
+            #{snapDepartureTime},
+            #{snapArrivalTime},
+            #{snapFlightNumber},
+            #{snapCabinClassCode}
+                 )
+    </insert>
+
+</mapper>

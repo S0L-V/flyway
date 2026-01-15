@@ -8,14 +8,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Controller
-@RequestMapping("/reservation/{reservationId}")
+@RequestMapping("/reservations/{reservationId}")
 public class ReservationAgreementController {
 
     private static final  String AGREED_RESERVATION_IDS = "reservationId";
 
     @GetMapping("/agreement")
     public String AgreementPage(@PathVariable String reservationId) {
-        return "reservation/agreement";
+        return "reservations/agreement";
     }
 
     @PostMapping("/agreement")
@@ -25,14 +25,14 @@ public class ReservationAgreementController {
             HttpSession session
     ) {
         if (!agreeAll) {
-            return "redirect:/reservation" + reservationId + "/agreement?error= agreeRequired";
+            return "redirect:/reservations/" + reservationId + "/agreement?error=agreeRequired";
         }
 
         Set<String> agreed = getOrCreateAgreedSet(session);
         agreed.add(reservationId);
         session.setAttribute(AGREED_RESERVATION_IDS, agreed);
 
-        return "redirect:/reservation/" + reservationId + "/booking";
+        return "redirect:/reservations/" + reservationId + "/booking";
     }
         @SuppressWarnings("unchecked")
         private Set<String> getOrCreateAgreedSet(HttpSession session) {

@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class DraftCreateRequest {
-    private String OutFlightId;
-    private String InFlightId;
-    private String CabinClassCode;
-    private int PassengerCount;
+    private String outFlightId;
+    private String inFlightId;
+    private int passengerCount;
+    private String cabinClassCode;
 }
