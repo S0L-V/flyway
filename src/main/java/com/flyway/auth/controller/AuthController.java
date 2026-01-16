@@ -2,6 +2,7 @@ package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
 import com.flyway.auth.service.SignUpService;
+import com.flyway.template.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -24,7 +25,7 @@ public class AuthController {
         try {
             signUpService.signUp(form);
             return "redirect:/login";
-        } catch (IllegalStateException e) {
+        } catch (BusinessException | IllegalStateException e) {
             model.addAttribute("error", e.getMessage());
             return "signup";
         } catch (Exception e) {
