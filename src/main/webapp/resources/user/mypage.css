@@ -17,3 +17,5 @@ h2 { text-align: center; color: #333; margin-bottom: 30px; border-bottom: 2px so
 .btn-edit:hover { background-color: #0056b3; }
 .btn-logout { background-color: #6c757d; color: white; }
 .btn-logout:hover { background-color: #5a6268; }
+
+button {background: none; border: none; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer;}

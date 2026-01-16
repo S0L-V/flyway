@@ -1,0 +1,88 @@
+/* 카드 */
+.card {
+    background: #ffffff;
+    padding: 42px 40px;
+    border-radius: 16px;
+    width: 420px;
+    box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.08),
+            0 2px 8px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+/* 버튼 그룹 */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* 버튼 공통 */
+.btn {
+    width: 100%;
+    padding: 14px 0;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+/* 로그인 */
+.btn-login {
+    background: linear-gradient(135deg, #007bff, #3399ff);
+    color: #fff;
+}
+
+/* 회원가입 */
+.btn-signup {
+    background: #ffffff;
+    color: #007bff;
+    border: 1px solid #d0e3ff;
+}
+
+.btn-signup:hover {
+    background: #f0f6ff;
+}
+
+/* 구분선 */
+.divider {
+    height: 1px;
+    margin: 18px 0;
+    background: linear-gradient(
+            to right,
+            transparent,
+            #e5e7eb,
+            transparent
+    );
+}
+
+/* 마이페이지 */
+.btn-mypage {
+    background: linear-gradient(135deg, #f8fafc, #eef2f7);
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.btn-mypage:hover {
+    background: #f1f5f9;
+}
+
+/* a 태그 기본 스타일 제거 */
+a {
+    text-decoration: none;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: linear-gradient(180deg, #f4f6fb, #eef1f6);
+    font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
