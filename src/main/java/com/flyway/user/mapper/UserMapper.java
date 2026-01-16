@@ -18,6 +18,11 @@ public interface UserMapper {
     User findById(@Param("userId") String userId);
 
     /**
+     * 이메일 로그인 회원 중 email로 회원 조회
+     */
+    User findByEmailForLogin(@Param("email") String email);
+
+    /**
      * 이메일 업데이트 (OAuth 온보딩 완료 시)
      */
     void updateEmail(
