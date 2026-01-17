@@ -3,8 +3,6 @@ package com.flyway.user.repository;
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.user.domain.User;
 
-import java.time.LocalDateTime;
-
 public interface UserRepository {
 
     /**
