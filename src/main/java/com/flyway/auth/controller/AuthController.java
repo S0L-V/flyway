@@ -3,13 +3,19 @@ package com.flyway.auth.controller;
 import com.flyway.auth.dto.EmailSignUpRequest;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
+import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
+import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +34,15 @@ public class AuthController {
 
     private final SignUpService signUpService;
     private final KakaoLoginService kakaoLoginService;
+    private final EmailUserDetailsService emailUserDetailsService;
+    private final LoginSuccessHandler loginSuccessHandler;
 
     @PostMapping("/auth/signup")
     public String postSignUp(
             @ModelAttribute("form") EmailSignUpRequest form,
             @RequestParam(value = "oauthSignUp", required = false) Boolean oauthSignUp,
+            HttpServletRequest req,
+            HttpServletResponse res,
             Model model
     ) {
         try {
@@ -42,7 +52,8 @@ public class AuthController {
                 return "redirect:/";
             } else {
                 signUpService.signUp(form);
-                return "redirect:/login";
+                autoLoginByEmail(form.getEmail(), req, res);
+                return "redirect:/";
             }
         } catch (BusinessException | IllegalStateException e) {
             model.addAttribute("error", e.getMessage());
@@ -83,5 +94,20 @@ public class AuthController {
             return ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
         }
         throw new BusinessException(ErrorCode.UNAUTHORIZED);
+    }
+
+    private void autoLoginByEmail(String email, HttpServletRequest req, HttpServletResponse res) {
+        UserDetails userDetails = emailUserDetailsService.loadUserByUsername(email);
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+
+        HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
+        repo.saveContext(context, req, res);
+
+        loginSuccessHandler.issueAccessTokenCookie(res, userDetails.getUsername());
     }
 }

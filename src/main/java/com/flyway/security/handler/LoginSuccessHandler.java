@@ -35,14 +35,12 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     ) throws IOException {
 
         String userId = extractUserId(authentication);
-        String accessToken = jwtProvider.createAccessToken(userId);
-
-        long ttl = jwtProperties.getAccessTokenTtlSeconds();
-        addAccessTokenCookie(response, accessToken, ttl);
+        issueAccessTokenCookie(response, userId);
 
         log.debug("[AUTH] login success. userId={}", userId);
         redirectToTarget(request, response);
     }
+
 
     private String extractUserId(Authentication authentication) {
         Object principal = authentication.getPrincipal();
@@ -53,6 +51,12 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
             return ((UserDetails) principal).getUsername();
         }
         throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
+    }
+
+    public void issueAccessTokenCookie(HttpServletResponse response, String userId) {
+        String accessToken = jwtProvider.createAccessToken(userId);
+        long ttl = jwtProperties.getAccessTokenTtlSeconds();
+        addAccessTokenCookie(response, accessToken, ttl);
     }
 
     private void addAccessTokenCookie(HttpServletResponse response, String token, long ttl) {

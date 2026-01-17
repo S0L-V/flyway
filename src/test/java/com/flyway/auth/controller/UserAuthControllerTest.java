@@ -3,7 +3,9 @@ package com.flyway.auth.controller;
 import com.flyway.auth.dto.EmailSignUpRequest;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
+import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
+import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -29,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,14 +41,23 @@ class UserAuthControllerTest {
 
     private MockMvc mockMvc;
     private SignUpService signUpService;
+    private EmailUserDetailsService emailUserDetailsService;
+    private LoginSuccessHandler loginSuccessHandler;
 
 
     @BeforeEach
     void setUp() {
         signUpService = Mockito.mock(SignUpService.class);
         KakaoLoginService kakaoLoginService = Mockito.mock(KakaoLoginService.class);
+        emailUserDetailsService = Mockito.mock(EmailUserDetailsService.class);
+        loginSuccessHandler = Mockito.mock(LoginSuccessHandler.class);
 
-        AuthController controller = new AuthController(signUpService, kakaoLoginService);
+        AuthController controller = new AuthController(
+                signUpService,
+                kakaoLoginService,
+                emailUserDetailsService,
+                loginSuccessHandler
+        );
 
         InternalResourceViewResolver vr = new InternalResourceViewResolver();
         vr.setPrefix("/WEB-INF/views/");
@@ -61,6 +74,13 @@ class UserAuthControllerTest {
     void signUp_success_redirect() throws Exception {
         // given
         doNothing().when(signUpService).signUp(any(EmailSignUpRequest.class));
+        UserDetails principal = org.springframework.security.core.userdetails.User.withUsername("user-123")
+                .password("pw")
+                .authorities("ROLE_USER")
+                .build();
+        when(emailUserDetailsService.loadUserByUsername("test@example.com"))
+                .thenReturn(principal);
+        doNothing().when(loginSuccessHandler).issueAccessTokenCookie(any(), anyString());
 
         // when & then
         mockMvc.perform(post("/auth/signup")
@@ -68,7 +88,7 @@ class UserAuthControllerTest {
                         .param("email", "test@example.com")
                         .param("rawPassword", "password1234"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl("/"));
 
         verify(signUpService).signUp(any(EmailSignUpRequest.class));
     }
