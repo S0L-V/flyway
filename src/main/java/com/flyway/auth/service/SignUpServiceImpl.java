@@ -129,6 +129,37 @@ public class SignUpServiceImpl implements SignUpService {
         return user;
     }
 
+    @Override
+    @Transactional
+    public void completeOauthSignUp(String userId, EmailSignUpRequest request) {
+        validateOauthRequest(request);
+        if (userId == null || userId.isBlank()) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+
+        User user = userRepository.findById(userId);
+        if (user == null || user.getStatus() != AuthStatus.ONBOARDING) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+
+        String email = request.getEmail();
+        if (email != null && !email.isBlank()) {
+            boolean existing = userIdentityRepository.existsEmailIdentity(email);
+            if (existing) {
+                throw new BusinessException(ErrorCode.USER_EMAIL_ALREADY_EXISTS);
+            }
+            userRepository.updateEmail(userId, email);
+        }
+
+        userRepository.updateStatus(userId, AuthStatus.ACTIVE);
+
+        UserProfile profile = UserProfile.builder()
+                .userId(userId)
+                .name(request.getName())
+                .build();
+        userProfileRepository.updateProfile(profile);
+    }
+
     /**
      *  이메일 회원가입 입력값 검증
      */
@@ -141,6 +172,21 @@ public class SignUpServiceImpl implements SignUpService {
         }
         if (request.getRawPassword() == null || request.getRawPassword().isBlank()) {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+        if (request.getName() == null || request.getName().isBlank()) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+    }
+
+    /**
+     * OAuth 최종 회원가입 입력값 검증
+     */
+    private void validateOauthRequest(EmailSignUpRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new BusinessException(ErrorCode.USER_EMAIL_REQUIRED);
         }
         if (request.getName() == null || request.getName().isBlank()) {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);

@@ -21,7 +21,6 @@
         </div>
     </c:if>
 
-    <!-- Spring MVC 컨트롤러로 POST -->
     <form action="${pageContext.request.contextPath}/auth/signup" method="post">
         <div class="form-group">
             <label for="name">이름</label>
@@ -30,13 +29,21 @@
 
         <div class="form-group">
             <label for="email">이메일</label>
-            <input type="email" id="email" name="email" placeholder="example@mail.com" required>
+            <input type="email" id="email" name="email" placeholder="example@mail.com"
+                   value="${signupEmail}" required>
         </div>
 
-        <div class="form-group">
-            <label for="rawPassword">비밀번호</label>
-            <input type="password" id="rawPassword" name="rawPassword" placeholder="비밀번호를 입력하세요" required>
-        </div>
+        <c:if test="${oauthSignUp}">
+            <input type="hidden" name="oauthSignUp" value="true">
+        </c:if>
+
+        <c:if test="${not oauthSignUp}">
+            <div class="form-group">
+                <label for="rawPassword">비밀번호</label>
+                <input type="password" id="rawPassword" name="rawPassword"
+                       placeholder="비밀번호를 입력하세요" required>
+            </div>
+        </c:if>
 
         <button type="submit" class="btn-submit">가입하기</button>
     </form>

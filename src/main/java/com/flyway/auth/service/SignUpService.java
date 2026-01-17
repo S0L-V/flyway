@@ -19,4 +19,10 @@ public interface SignUpService {
      * - users/user_identity/user_profile 생성 후 반환
      */
     User signUpKakaoUser(KakaoUserInfo userInfo);
+
+    /**
+     * OAuth 최종 회원가입
+     * - email/이름 업데이트 및 status 활성화
+     */
+    void completeOauthSignUp(String userId, EmailSignUpRequest request);
 }
