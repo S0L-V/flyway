@@ -6,13 +6,19 @@ import com.flyway.user.dto.UserProfileResponse;
 import com.flyway.user.repository.UserProfileRepository;
 import com.flyway.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserProfileServiceImpl implements UserProfileService {
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+    private static final DateTimeFormatter CREATED_AT_FMT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
@@ -20,16 +26,19 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public UserProfileResponse getUserProfile(String userId) {
         UserProfile profile = userProfileRepository.findByUserId(userId);
-        User userInfo = userRepository.findById(userId);
-        String createdAt = userInfo.getCreatedAt()
-                .atZone(ZoneId.of("Asia/Seoul"))
-                .toOffsetDateTime()
-                .toString();
-
-
         if (profile == null) {
+            throw new IllegalArgumentException("User profile not found. userId=" + userId);
+        }
+
+        User userInfo = userRepository.findById(userId);
+        if (userInfo == null) {
             throw new IllegalArgumentException("User not found. userId=" + userId);
         }
+
+        String createdAt = userInfo.getCreatedAt()
+                .atZone(KST)
+                .toOffsetDateTime()
+                .format(CREATED_AT_FMT);
 
         UserProfileResponse response = UserProfileResponse.builder()
                 .userId(userId)
@@ -44,19 +53,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .createdAt(createdAt)
                 .build();
 
-        System.out.println(response);
-
-        return  response;
-
+        log.debug("getUserProfile userId={}, response={}", userId, response);
+        return response;
     }
 }
-
-/**
- * private String userId;
- * private String name; // 한글 이름
- * private String passportNo;
- * private String country; // 국적
- * private String gender; // M | F
- * private String firstName; // 영문 이름
- * private String lastName; // 영문 성
- */
