@@ -1,7 +1,6 @@
 async function loadProfile() {
     try {
         const base = window.APP?.contextPath ?? "";
-        console.log(base);
 
         const response = await fetch(
             `${base}/api/profile`,

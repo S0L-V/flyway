@@ -4,9 +4,8 @@
     padding: 42px 40px;
     border-radius: 16px;
     width: 420px;
-    box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.08),
-            0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.05);
     text-align: center;
 }
 
@@ -69,6 +68,20 @@
     background: #f1f5f9;
 }
 
+/* 로그아웃 */
+.btn-logout {
+    background: #ffffff;
+    color: #007bff;
+    border: 1px solid #d0e3ff;
+    padding: 0;
+}
+.btn-logout button {
+    width: 100%;
+    height: 100%;
+    padding: 14px 0;
+}
+
+
 /* a 태그 기본 스타일 제거 */
 a {
     text-decoration: none;
@@ -86,3 +99,12 @@ body {
     font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
