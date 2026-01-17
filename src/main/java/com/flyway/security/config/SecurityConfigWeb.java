@@ -29,7 +29,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/", "/login", "/loginProc", "/logout", "/signup", "/admin/**", "/auth/**"
+            "/", "/login", "/loginProc", "/logout", "/signup", "/admin", "/admin/**", "/auth/**", "/search"
     };
 
     private final JwtProvider jwtProvider;
