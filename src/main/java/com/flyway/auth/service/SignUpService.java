@@ -15,10 +15,8 @@ public interface SignUpService {
     void signUp(EmailSignUpRequest request);
 
     /**
-     * OAuth(KAKAO) 로그인/가입 처리
-     * - (provider, providerUserId)로 user_identity 조회
-     * - 있으면 기존 user 반환(로그인 처리)
-     * - 없으면 users/user_identity/user_profile 생성 후 반환
+     * OAuth(KAKAO) 신규 가입 처리
+     * - users/user_identity/user_profile 생성 후 반환
      */
-    User handleKakaoLogin(KakaoUserInfo userInfo);
+    User signUpKakaoUser(KakaoUserInfo userInfo);
 }

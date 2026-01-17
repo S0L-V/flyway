@@ -2,8 +2,8 @@ package com.flyway.auth.service;
 
 import com.flyway.auth.domain.AuthProvider;
 import com.flyway.auth.domain.AuthStatus;
+import com.flyway.auth.domain.KakaoUserInfo;
 import com.flyway.auth.dto.EmailSignUpRequest;
-import com.flyway.auth.dto.KakaoLoginRequest;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -86,23 +86,21 @@ public class SignUpServiceImpl implements SignUpService {
 
     @Override
     @Transactional
-    public User handleKakaoLogin(KakaoLoginRequest request) {
-        UserIdentity existingIdentity =
-                userIdentityRepository.findByProviderUserId(AuthProvider.KAKAO, request.getKakaoUserId());
-
-        // 이미 가입된 사용자: 회원가입 생략, 기존 사용자 식별
-        if (existingIdentity != null) {
-            return userRepository.findById(existingIdentity.getUserId());
-        }
+    public User signUpKakaoUser(KakaoUserInfo userInfo) {
+        validateKakaoUserInfo(userInfo);
+        String kakaoUserId = String.valueOf(userInfo.getId());
+        KakaoUserInfo.KakaoAccount account = userInfo.getKakaoAccount();
+        String email = (account != null) ? account.getEmail() : null;
+        String nickname = (account != null && account.getProfile() != null)
+                ? account.getProfile().getNickname()
+                : null;
 
         // 신규 사용자 생성
         String userId = UUID.randomUUID().toString();
         LocalDateTime now = LocalDateTime.now();
-
-
         User user = User.builder()
                 .userId(userId)
-                .email(null)
+                .email(email)
                 .passwordHash(null)
                 .status(AuthStatus.ONBOARDING)
                 .createdAt(now)
@@ -115,7 +113,7 @@ public class SignUpServiceImpl implements SignUpService {
                 .userIdentityId(UUID.randomUUID().toString())
                 .userId(userId)
                 .provider(AuthProvider.KAKAO)
-                .providerUserId(request.getKakaoUserId())
+                .providerUserId(kakaoUserId)
                 .createdAt(now)
                 .build();
 
@@ -123,6 +121,7 @@ public class SignUpServiceImpl implements SignUpService {
 
         UserProfile profile = UserProfile.builder()
                 .userId(userId)
+                .name(nickname)
                 .build();
 
         userProfileRepository.createProfile(profile);
@@ -130,6 +129,9 @@ public class SignUpServiceImpl implements SignUpService {
         return user;
     }
 
+    /**
+     *  이메일 회원가입 입력값 검증
+     */
     private void validateRequest(EmailSignUpRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
@@ -141,6 +143,15 @@ public class SignUpServiceImpl implements SignUpService {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
         }
         if (request.getName() == null || request.getName().isBlank()) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+    }
+
+    /**
+     *  카카오 사용자 정보 필수값 검증
+     */
+    private void validateKakaoUserInfo(KakaoUserInfo userInfo) {
+        if (userInfo == null || userInfo.getId() == null) {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
         }
     }
