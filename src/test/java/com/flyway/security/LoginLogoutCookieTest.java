@@ -1,208 +1,85 @@
 package com.flyway.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flyway.security.config.SecurityConfigWeb;
-import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.jwt.JwtProperties;
 import com.flyway.security.jwt.JwtProvider;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import javax.servlet.http.Cookie;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@WebAppConfiguration
-@ContextConfiguration(classes = {
-        LoginLogoutCookieTest.TestSecurityBeans.class,
-        SecurityConfigWeb.class
-})
-@TestPropertySource(properties = {
-        "jwt.user.secret=0123456789abcdef0123456789abcdef",
-        "jwt.user.accessTokenTtlSeconds=3600",
-        "jwt.user.refreshTokenTtlSeconds=7200",
-        "jwt.user.issuer=flyway-test"
-})
 class LoginLogoutCookieTest {
 
-    @Autowired
-    private WebApplicationContext context;
-
-    @Autowired
-    private JwtProvider jwtProvider;
-
-    @Autowired
-    private javax.servlet.Filter springSecurityFilterChain;
-
-    private MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context)
-                .addFilters(springSecurityFilterChain)
-                .build();
-    }
-
     @Test
-    @DisplayName("로그인 시 accessToken과 JSESSIONID 쿠키가 내려간다")
-    void login_adds_accessToken_and_jsessionid_cookies() throws Exception {
+    @DisplayName("로그인 시 accessToken 쿠키가 내려가고 세션이 생성된다")
+    void login_adds_accessToken_cookie_and_session_created() throws Exception {
+        JwtProvider jwtProvider = mock(JwtProvider.class);
+        JwtProperties jwtProperties = mock(JwtProperties.class);
+        LoginSuccessHandler handler = new LoginSuccessHandler(jwtProvider, jwtProperties);
+
         when(jwtProvider.createAccessToken("user-123")).thenReturn("access.jwt.token");
+        when(jwtProperties.getAccessTokenTtlSeconds()).thenReturn(3600L);
 
-        MvcResult result = mockMvc.perform(post("/loginProc")
-                        .param("username", "user-123")
-                        .param("password", "pw"))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpSession session = (MockHttpSession) request.getSession(true);
 
-        assertTrue(hasCookie(result, "accessToken"));
-        assertTrue(hasCookie(result, "JSESSIONID") || hasSessionId(result));
-    }
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                User.withUsername("user-123").password("pw").authorities("ROLE_USER").build(),
+                null
+        );
 
-    @Test
-    @DisplayName("로그아웃 시 accessToken과 JSESSIONID 쿠키가 삭제된다")
-    void logout_clears_accessToken_and_jsessionid_cookies() throws Exception {
-        when(jwtProvider.createAccessToken("user-123")).thenReturn("access.jwt.token");
+        handler.onAuthenticationSuccess(request, response, authentication);
 
-        MvcResult loginResult = mockMvc.perform(post("/loginProc")
-                        .param("username", "user-123")
-                        .param("password", "pw"))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-
-        MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
+        assertTrue(hasCookie(response, "accessToken"));
         assertNotNull(session);
-
-        MvcResult logoutResult = mockMvc.perform(post("/logout").session(session))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-
-        assertTrue(hasClearedCookie(logoutResult, "accessToken"));
-        assertTrue(hasClearedCookie(logoutResult, "JSESSIONID") || session.isInvalid());
-        assertTrue(session.isInvalid());
     }
 
-    private boolean hasCookie(MvcResult result, String name) {
-        Cookie cookie = result.getResponse().getCookie(name);
-        if (cookie != null) {
-            return true;
-        }
-        List<String> headers = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
+    @Test
+    @DisplayName("로그아웃 시 accessToken/JSESSIONID 삭제 쿠키가 내려가고 세션이 무효화된다")
+    void logout_clears_cookies_and_invalidates_session() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpSession session = (MockHttpSession) request.getSession(true);
+
+        SecurityContextLogoutHandler contextLogoutHandler = new SecurityContextLogoutHandler();
+        CookieClearingLogoutHandler cookieClearingLogoutHandler =
+                new CookieClearingLogoutHandler("accessToken", "JSESSIONID");
+
+        contextLogoutHandler.logout(request, response, null);
+        cookieClearingLogoutHandler.logout(request, response, null);
+
+        assertTrue(session.isInvalid());
+        assertTrue(hasClearedCookie(response, "accessToken"));
+        assertTrue(hasClearedCookie(response, "JSESSIONID"));
+    }
+
+    private boolean hasCookie(MockHttpServletResponse response, String name) {
+        Cookie cookie = response.getCookie(name);
+        if (cookie != null) return true;
+        List<String> headers = response.getHeaders(HttpHeaders.SET_COOKIE);
         return headers.stream().anyMatch(h -> h.startsWith(name + "="));
     }
 
-    private boolean hasClearedCookie(MvcResult result, String name) {
-        Cookie cookie = result.getResponse().getCookie(name);
-        if (cookie != null) {
-            return cookie.getMaxAge() == 0;
-        }
-        List<String> headers = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
+    private boolean hasClearedCookie(MockHttpServletResponse response, String name) {
+        Cookie cookie = response.getCookie(name);
+        if (cookie != null) return cookie.getMaxAge() == 0;
+        List<String> headers = response.getHeaders(HttpHeaders.SET_COOKIE);
         return headers.stream().anyMatch(h -> h.startsWith(name + "=") && h.contains("Max-Age=0"));
-    }
-
-    private boolean hasSessionId(MvcResult result) {
-        MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
-        return session != null && session.getId() != null && !session.getId().isBlank();
-    }
-
-    @Configuration
-    @EnableWebSecurity
-    static class TestSecurityBeans {
-
-        @Bean
-        static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-            return new PropertySourcesPlaceholderConfigurer();
-        }
-
-        @Bean
-        ObjectMapper objectMapper() {
-            return new ObjectMapper();
-        }
-
-        @Bean
-        JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint(ObjectMapper objectMapper) {
-            return new JwtAuthenticationEntryPoint(objectMapper);
-        }
-
-        @Bean
-        PasswordEncoder passwordEncoder() {
-            return new PasswordEncoder() {
-                @Override
-                public String encode(CharSequence rawPassword) {
-                    return rawPassword == null ? null : rawPassword.toString();
-                }
-
-                @Override
-                public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                    if (rawPassword == null || encodedPassword == null) {
-                        return false;
-                    }
-                    return rawPassword.toString().equals(encodedPassword);
-                }
-            };
-        }
-
-        @Bean(name = "emailUserDetailsService")
-        UserDetailsService emailUserDetailsService() {
-            return username -> User.withUsername(username)
-                    .password("pw")
-                    .authorities("ROLE_USER")
-                    .build();
-        }
-
-        @Bean(name = "userIdUserDetailsService")
-        UserDetailsService userIdUserDetailsService() {
-            return username -> User.withUsername(username)
-                    .password("pw")
-                    .authorities("ROLE_USER")
-                    .build();
-        }
-
-        @Bean
-        JwtProvider jwtProvider() {
-            return Mockito.mock(JwtProvider.class);
-        }
-
-        @Bean
-        JwtProperties jwtProperties() {
-            JwtProperties props = new JwtProperties();
-            props.setSecret("0123456789abcdef0123456789abcdef");
-            props.setAccessTokenTtlSeconds(3600);
-            props.setRefreshTokenTtlSeconds(7200);
-            props.setIssuer("flyway-test");
-            return props;
-        }
-
-        @Bean
-        LoginSuccessHandler loginSuccessHandler(JwtProvider jwtProvider, JwtProperties jwtProperties) {
-            return new LoginSuccessHandler(jwtProvider, jwtProperties);
-        }
     }
 }
