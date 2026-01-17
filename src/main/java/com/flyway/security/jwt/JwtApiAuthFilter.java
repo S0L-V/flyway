@@ -26,7 +26,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtApiAuthFilter extends OncePerRequestFilter {
 
-    private static final String API_PREFIX = "/api/";
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     private static final int TOKEN_LOG_PREFIX_LEN = 20;
 
@@ -36,7 +35,14 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return !resolvePath(request).startsWith(API_PREFIX);
+        String path = resolvePath(request);
+
+        if (!path.startsWith("/api/")) {
+            return true;
+        }
+
+        return path.startsWith("/api/public/")
+                || path.startsWith("/api/auth/");
     }
 
     @Override
