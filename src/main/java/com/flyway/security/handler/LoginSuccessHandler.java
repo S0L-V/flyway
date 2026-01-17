@@ -21,6 +21,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    public static final String REDIRECT_PATH_ATTRIBUTE = "AUTH_REDIRECT_PATH";
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
     private final JwtProvider jwtProvider;
@@ -40,7 +41,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         addAccessTokenCookie(response, accessToken, ttl);
 
         log.debug("[AUTH] login success. userId={}", userId);
-        redirectToMyPage(request, response);
+        redirectToTarget(request, response);
     }
 
     private String extractUserId(Authentication authentication) {
@@ -66,8 +67,19 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private void redirectToMyPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String targetUrl = request.getContextPath() + "/";
+    private void redirectToTarget(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String targetUrl = request.getContextPath() + resolveTargetPath(request);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    private String resolveTargetPath(HttpServletRequest request) {
+        Object attribute = request.getAttribute(REDIRECT_PATH_ATTRIBUTE);
+        if (attribute instanceof String) {
+            String path = ((String) attribute).trim();
+            if (path.startsWith("/")) {
+                return path;
+            }
+        }
+        return "/";
     }
 }
