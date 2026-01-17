@@ -1,6 +1,7 @@
 package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.template.exception.BusinessException;
@@ -37,11 +38,13 @@ class UserAuthControllerTest {
     private MockMvc mockMvc;
     private SignUpService signUpService;
 
+
     @BeforeEach
     void setUp() {
         signUpService = Mockito.mock(SignUpService.class);
+        KakaoLoginService kakaoLoginService = Mockito.mock(KakaoLoginService.class);
 
-        AuthController controller = new AuthController(signUpService);
+        AuthController controller = new AuthController(signUpService, kakaoLoginService);
 
         InternalResourceViewResolver vr = new InternalResourceViewResolver();
         vr.setPrefix("/WEB-INF/views/");
