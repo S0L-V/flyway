@@ -57,6 +57,12 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
 
                 .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() //CORS Preflight 허용
 
+                // 비회원 허용 API
+                .antMatchers(
+                        "/api/auth/**",
+                        "/api/public/**"
+                ).permitAll()
+
                 .anyRequest().authenticated()
                 .and()
 
