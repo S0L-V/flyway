@@ -6,6 +6,7 @@ import com.flyway.auth.service.SignUpService;
 import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
+import com.flyway.security.service.UserIdUserDetailsService;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class AuthController {
     private final SignUpService signUpService;
     private final KakaoLoginService kakaoLoginService;
     private final EmailUserDetailsService emailUserDetailsService;
+    private final UserIdUserDetailsService userIdUserDetailsService;
     private final LoginSuccessHandler loginSuccessHandler;
 
     @PostMapping("/auth/signup")
@@ -49,6 +51,7 @@ public class AuthController {
             if (Boolean.TRUE.equals(oauthSignUp)) {
                 String userId = extractAuthenticatedUserId();
                 signUpService.completeOauthSignUp(userId, form);
+                refreshAuthentication(userId, req, res);
                 return "redirect:/";
             } else {
                 signUpService.signUp(form);
@@ -98,6 +101,16 @@ public class AuthController {
 
     private void autoLoginByEmail(String email, HttpServletRequest req, HttpServletResponse res) {
         UserDetails userDetails = emailUserDetailsService.loadUserByUsername(email);
+        authenticateAndSave(userDetails, req, res);
+        loginSuccessHandler.issueAccessTokenCookie(res, userDetails.getUsername());
+    }
+
+    private void refreshAuthentication(String userId, HttpServletRequest req, HttpServletResponse res) {
+        UserDetails userDetails = userIdUserDetailsService.loadUserByUsername(userId);
+        authenticateAndSave(userDetails, req, res);
+    }
+
+    private void authenticateAndSave(UserDetails userDetails, HttpServletRequest req, HttpServletResponse res) {
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
@@ -107,7 +120,5 @@ public class AuthController {
 
         HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
         repo.saveContext(context, req, res);
-
-        loginSuccessHandler.issueAccessTokenCookie(res, userDetails.getUsername());
     }
 }

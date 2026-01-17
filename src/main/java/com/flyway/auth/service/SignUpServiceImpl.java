@@ -144,10 +144,6 @@ public class SignUpServiceImpl implements SignUpService {
 
         String email = request.getEmail();
         if (email != null && !email.isBlank()) {
-            boolean existing = userIdentityRepository.existsEmailIdentity(email);
-            if (existing) {
-                throw new BusinessException(ErrorCode.USER_EMAIL_ALREADY_EXISTS);
-            }
             userRepository.updateEmail(userId, email);
         }
 

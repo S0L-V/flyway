@@ -6,6 +6,7 @@ import com.flyway.auth.service.SignUpService;
 import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
+import com.flyway.security.service.UserIdUserDetailsService;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -50,12 +52,14 @@ class UserAuthControllerTest {
         signUpService = Mockito.mock(SignUpService.class);
         KakaoLoginService kakaoLoginService = Mockito.mock(KakaoLoginService.class);
         emailUserDetailsService = Mockito.mock(EmailUserDetailsService.class);
+        UserIdUserDetailsService userIdUserDetailsService = Mockito.mock(UserIdUserDetailsService.class);
         loginSuccessHandler = Mockito.mock(LoginSuccessHandler.class);
 
         AuthController controller = new AuthController(
                 signUpService,
                 kakaoLoginService,
                 emailUserDetailsService,
+                userIdUserDetailsService,
                 loginSuccessHandler
         );
 
@@ -178,9 +182,9 @@ class UserAuthControllerTest {
 
             @Override
             public Object resolveArgument(
-                    MethodParameter parameter,
+                   @NonNull MethodParameter parameter,
                     ModelAndViewContainer mavContainer,
-                    NativeWebRequest webRequest,
+                   @NonNull NativeWebRequest webRequest,
                     WebDataBinderFactory binderFactory
             ) {
                 return principal;
