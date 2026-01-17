@@ -2,6 +2,7 @@ package com.flyway.security.config;
 
 import com.flyway.security.handler.JwtAccessDeniedHandler;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
+import com.flyway.security.filter.OnboardingAccessFilter;
 import com.flyway.security.jwt.JwtApiAuthFilter;
 import com.flyway.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +67,7 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
 
-                .addFilterBefore(jwtApiAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtApiAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new OnboardingAccessFilter(), JwtApiAuthFilter.class);
     }
 }
