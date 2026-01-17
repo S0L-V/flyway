@@ -6,7 +6,6 @@ import com.flyway.security.jwt.JwtProvider;
 import com.flyway.security.jwt.JwtWebAuthFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -37,11 +36,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final PasswordEncoder passwordEncoder;
     private final LoginSuccessHandler loginSuccessHandler;
-
-    @Qualifier("userIdUserDetailsService")
     private final UserDetailsService userIdUserDetailsService;
-
-    @Qualifier("emailUserDetailsService")
     private final UserDetailsService emailUserDetailsService;
 
     @Bean

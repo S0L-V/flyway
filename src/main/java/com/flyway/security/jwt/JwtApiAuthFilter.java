@@ -3,6 +3,7 @@ package com.flyway.security.jwt;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,15 +35,15 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userIdUserDetailsService;
 
     @Override
-    protected boolean shouldNotFilter(@org.springframework.lang.NonNull HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return !resolvePath(request).startsWith(API_PREFIX);
     }
 
     @Override
     protected void doFilterInternal(
-            @org.springframework.lang.NonNull HttpServletRequest req,
-            @org.springframework.lang.NonNull HttpServletResponse res,
-            @org.springframework.lang.NonNull FilterChain chain
+            @NonNull HttpServletRequest req,
+            @NonNull HttpServletResponse res,
+            @NonNull FilterChain chain
     ) throws ServletException, IOException {
 
         String uri = req.getRequestURI();
@@ -78,7 +79,6 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
     }
 
     private void authenticate(String token) {
-        // ✅ Provider에서 "서명/만료/형식 + subject blank"까지 책임지게
         String userId = jwtProvider.getSubjectOrThrow(token);
 
         UserDetails userDetails = userIdUserDetailsService.loadUserByUsername(userId);

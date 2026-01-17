@@ -5,7 +5,6 @@ import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.jwt.JwtApiAuthFilter;
 import com.flyway.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -26,8 +25,6 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-
-    @Qualifier("userIdUserDetailsService")
     private final UserDetailsService userIdUserDetailsService;
 
     @Bean
