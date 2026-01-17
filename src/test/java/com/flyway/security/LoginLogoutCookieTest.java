@@ -192,7 +192,12 @@ class LoginLogoutCookieTest {
 
         @Bean
         JwtProperties jwtProperties() {
-            return new JwtProperties();
+            JwtProperties props = new JwtProperties();
+            props.setSecret("0123456789abcdef0123456789abcdef");
+            props.setAccessTokenTtlSeconds(3600);
+            props.setRefreshTokenTtlSeconds(7200);
+            props.setIssuer("flyway-test");
+            return props;
         }
 
         @Bean
