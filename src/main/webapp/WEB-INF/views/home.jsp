@@ -14,16 +14,16 @@
 
     <div class="button-group">
         <sec:authorize access="isAnonymous()">
-            <a href="/login">
+            <a href="${pageContext.request.contextPath}/login">
                 <button class="btn btn-login">로그인</button>
             </a>
 
-            <a href="/signup">
+            <a href="${pageContext.request.contextPath}/signup">
                 <button class="btn btn-signup">회원가입</button>
             </a>
         </sec:authorize>
         <sec:authorize access="isAuthenticated()">
-            <a href="/mypage">
+            <a href="${pageContext.request.contextPath}/mypage">
                 <button class="btn btn-mypage">마이페이지</button>
             </a>
             <form class="btn btn-logout" action="${pageContext.request.contextPath}/logout" method="post">
