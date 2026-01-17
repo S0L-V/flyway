@@ -1,7 +1,7 @@
 package com.flyway.auth.service;
 
+import com.flyway.auth.domain.KakaoUserInfo;
 import com.flyway.auth.dto.EmailSignUpRequest;
-import com.flyway.auth.dto.KakaoLoginRequest;
 import com.flyway.user.domain.User;
 
 public interface SignUpService {
@@ -20,5 +20,5 @@ public interface SignUpService {
      * - 있으면 기존 user 반환(로그인 처리)
      * - 없으면 users/user_identity/user_profile 생성 후 반환
      */
-    User handleKakaoLogin(KakaoLoginRequest request);
+    User handleKakaoLogin(KakaoUserInfo userInfo);
 }
