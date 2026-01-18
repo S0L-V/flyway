@@ -7,6 +7,8 @@ import com.flyway.user.dto.UserProfileResponse;
 import com.flyway.user.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,19 +22,21 @@ public class UserApiController {
     private final UserProfileService userProfileService;
 
     @GetMapping("/api/profile")
-    public ApiResponse<UserProfileResponse> profile(@AuthenticationPrincipal CustomUserDetails principal) {
+    public ResponseEntity<ApiResponse<UserProfileResponse>> profile(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
         String userId = (principal != null) ? principal.getUserId() : null;
 
         log.debug("[API] /api/profile userId={}", userId);
 
         if (!StringUtils.hasText(userId)) {
-            return ApiResponse.error(
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(
                     ErrorCode.UNAUTHORIZED.getCode(),
                     ErrorCode.UNAUTHORIZED.getMessage()
-            );
+            ));
         }
 
         UserProfileResponse profile = userProfileService.getUserProfile(userId);
-        return ApiResponse.success(profile);
+        return ResponseEntity.ok(ApiResponse.success(profile));
     }
 }

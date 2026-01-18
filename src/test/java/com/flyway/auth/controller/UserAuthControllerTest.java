@@ -205,4 +205,37 @@ class UserAuthControllerTest {
                 .andExpect(jsonPath("$.data.email").value("test@example.com"))
                 .andExpect(jsonPath("$.data.createdAt").value("2026-01-16T10:00:00"));
     }
+
+    @Test
+    @DisplayName("GET /api/profile - 인증 정보 없으면 401 반환")
+    void getProfile_unauthorized_returns401() throws Exception {
+        UserProfileService userProfileService = Mockito.mock(UserProfileService.class);
+        UserApiController controller = new UserApiController(userProfileService);
+        HandlerMethodArgumentResolver resolver = new HandlerMethodArgumentResolver() {
+            @Override
+            public boolean supportsParameter(MethodParameter parameter) {
+                return CustomUserDetails.class.isAssignableFrom(parameter.getParameterType());
+            }
+
+            @Override
+            public Object resolveArgument(
+                    @NonNull MethodParameter parameter,
+                    ModelAndViewContainer mavContainer,
+                    @NonNull NativeWebRequest webRequest,
+                    WebDataBinderFactory binderFactory
+            ) {
+                return null;
+            }
+        };
+
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setCustomArgumentResolvers(resolver)
+                .build();
+
+        mockMvc.perform(get("/api/profile")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.UNAUTHORIZED.getCode()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.UNAUTHORIZED.getMessage()));
+    }
 }
