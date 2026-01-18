@@ -64,6 +64,9 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
                 );
 
         log.debug("[KAKAO] token response status={}", response.getStatusCode());
+        if (response.getBody() == null) {
+            throw new IllegalStateException("Kakao token response body is null");
+        }
         return response.getBody();
     }
 
@@ -76,6 +79,9 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
         ResponseEntity<KakaoUserInfo> response =
                 restTemplate.exchange(USER_INFO_URL, HttpMethod.GET, request, KakaoUserInfo.class);
         log.debug("[KAKAO] user info response status={}", response.getStatusCode());
+        if (response.getBody() == null) {
+            throw new IllegalStateException("Kakao user info response body is null");
+        }
         return response.getBody();
     }
 

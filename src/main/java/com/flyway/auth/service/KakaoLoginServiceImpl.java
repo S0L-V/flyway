@@ -103,6 +103,9 @@ public class KakaoLoginServiceImpl implements KakaoLoginService {
      */
     private KakaoUserInfo fetchKakaoUser(String code) {
         KakaoToken token = kakaoOAuthService.exchangeCodeForToken(code);
+        if (token == null || token.getAccessToken() == null || token.getAccessToken().isBlank()) {
+            throw new BusinessException(ErrorCode.USER_INTERNAL_ERROR);
+        }
         return kakaoOAuthService.getUserInfo(token.getAccessToken());
     }
 
