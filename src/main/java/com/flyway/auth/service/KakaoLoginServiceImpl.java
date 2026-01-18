@@ -165,7 +165,11 @@ public class KakaoLoginServiceImpl implements KakaoLoginService {
                 userIdentityRepository.findByProviderUserId(AuthProvider.KAKAO, kakaoUserId);
 
         if (existingIdentity != null) {
-            return userRepository.findById(existingIdentity.getUserId());
+            User user = userRepository.findById(existingIdentity.getUserId());
+            if (user == null) {
+                throw new BusinessException(ErrorCode.USER_INTERNAL_ERROR);
+            }
+            return user;
         }
 
         return signUpService.signUpKakaoUser(userInfo);

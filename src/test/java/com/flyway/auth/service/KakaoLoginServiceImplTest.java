@@ -6,6 +6,8 @@ import com.flyway.auth.domain.KakaoToken;
 import com.flyway.auth.domain.KakaoUserInfo;
 import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.service.UserIdUserDetailsService;
+import com.flyway.template.exception.BusinessException;
+import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
 import com.flyway.user.domain.UserIdentity;
 import com.flyway.user.repository.UserIdentityRepository;
@@ -224,6 +226,37 @@ class KakaoLoginServiceImplTest {
         assertNotNull(session);
         assertEquals(Boolean.TRUE, session.getAttribute("OAUTH_SIGNUP"));
         assertEquals("onboarding@example.com", session.getAttribute("OAUTH_SIGNUP_EMAIL"));
+    }
+
+    @Test
+    @DisplayName("카카오 Identity가 있으나 User가 없으면 BusinessException(USER_INTERNAL_ERROR) 발생")
+    void handleCallback_orphanIdentity_throwsBusinessException() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.getSession(true).setAttribute("KAKAO_OAUTH_STATE", "ok");
+
+        KakaoToken token = new KakaoToken();
+        token.setAccessToken("kakao-token");
+        KakaoUserInfo kakaoUser = kakaoUserInfo(999L, "orphan@example.com");
+
+        when(kakaoOAuthService.exchangeCodeForToken("code")).thenReturn(token);
+        when(kakaoOAuthService.getUserInfo("kakao-token")).thenReturn(kakaoUser);
+
+        UserIdentity identity = UserIdentity.builder()
+                .userIdentityId("identity-3")
+                .userId("missing-user")
+                .provider(AuthProvider.KAKAO)
+                .providerUserId("999")
+                .build();
+        when(userIdentityRepository.findByProviderUserId(AuthProvider.KAKAO, "999"))
+                .thenReturn(identity);
+        when(userRepository.findById("missing-user")).thenReturn(null);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> service.handleCallback("code", "ok", request, response));
+
+        assertEquals(ErrorCode.USER_INTERNAL_ERROR, ex.getErrorCode());
+        verify(loginSuccessHandler, never()).onAuthenticationSuccess(any(), any(), any());
     }
 
     private KakaoUserInfo kakaoUserInfo(Long id, String email) {
