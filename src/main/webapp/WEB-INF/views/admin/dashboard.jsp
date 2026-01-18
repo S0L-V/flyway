@@ -1,8 +1,8 @@
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ include file="layout/head.jspf" %>
-<%@ include file="layout/sidebar.jspf" %>
-<%@ include file="layout/topbar.jspf" %>
+<%@ include file="layout/head.jsp" %>
+<%@ include file="layout/sidebar.jsp" %>
+<%@ include file="layout/topbar.jsp" %>
 
 <main class="pl-64 pt-16 min-h-screen">
     <div class="p-8 max-w-[1600px] mx-auto space-y-8">
