@@ -33,11 +33,12 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
 
     public String buildAuthorizeUrl(String state) {
         String redirectUri = URLEncoder.encode(kakaoRedirectUri, StandardCharsets.UTF_8);
+        String encodedState = URLEncoder.encode(state, StandardCharsets.UTF_8);
         return AUTHORIZE_URL
                 + "?response_type=code"
                 + "&client_id=" + kakaoClientId
                 + "&redirect_uri=" + redirectUri
-                + "&state=" + state;
+                + "&state=" + encodedState;
     }
 
     public KakaoToken exchangeCodeForToken(String code) {
