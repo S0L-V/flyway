@@ -3,12 +3,19 @@ package com.flyway.user.repository;
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.user.domain.User;
 
+import java.time.LocalDateTime;
+
 public interface UserRepository {
 
     /**
      * 사용자 ID로 조회
      */
     User findById(String userId);
+
+    /**
+     * 이메일 로그인 회원 중 email로 회원 조회
+     */
+    User findByEmailForLogin(String email);
 
     /**
      * 사용자 생성

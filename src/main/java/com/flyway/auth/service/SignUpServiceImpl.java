@@ -32,6 +32,8 @@ public class SignUpServiceImpl implements SignUpService {
     @Override
     @Transactional
     public void signUp(EmailSignUpRequest request) {
+        validateRequest(request);
+
         // 이메일 가입 회원 중 중복 체크
         boolean existing = userIdentityRepository.existsEmailIdentity(request.getEmail());
         if (existing) {
@@ -42,10 +44,21 @@ public class SignUpServiceImpl implements SignUpService {
         String userId = UUID.randomUUID().toString();
         LocalDateTime now = LocalDateTime.now();
 
+        String encodedPassword;
+        try {
+            encodedPassword = passwordEncoder.encode(request.getRawPassword());
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.USER_PASSWORD_ENCODE_ERROR);
+        }
+
+        if (encodedPassword == null || encodedPassword.isBlank()) {
+            throw new BusinessException(ErrorCode.USER_PASSWORD_ENCODE_ERROR);
+        }
+
         User user = User.builder()
                 .userId(userId)
                 .email(request.getEmail())
-                .passwordHash(passwordEncoder.encode(request.getRawPassword()))
+                .passwordHash(encodedPassword)
                 .status(AuthStatus.ACTIVE)
                 .createdAt(now)
                 .build();
@@ -115,5 +128,20 @@ public class SignUpServiceImpl implements SignUpService {
         userProfileRepository.createProfile(profile);
 
         return user;
+    }
+
+    private void validateRequest(EmailSignUpRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new BusinessException(ErrorCode.USER_EMAIL_REQUIRED);
+        }
+        if (request.getRawPassword() == null || request.getRawPassword().isBlank()) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
+        if (request.getName() == null || request.getName().isBlank()) {
+            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+        }
     }
 }

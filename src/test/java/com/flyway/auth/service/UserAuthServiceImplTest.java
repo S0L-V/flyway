@@ -1,6 +1,7 @@
 package com.flyway.auth.service;
 
 import com.flyway.auth.domain.AuthProvider;
+import com.flyway.auth.domain.AuthStatus;
 import com.flyway.auth.dto.EmailSignUpRequest;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
@@ -103,7 +104,7 @@ class UserAuthServiceImplTest {
         assertEquals("test@example.com", savedUser.getEmail());
         assertEquals("ENCODED_PW", savedUser.getPasswordHash());
         assertNotNull(savedUser.getCreatedAt(), "createdAt은 설정되어야 함");
-        assertNotNull(savedUser.getStatus(), "status는 설정되어야 함"); // ACTIVE인지까지 체크해도 됨(도메인 접근 가능하면)
+        assertEquals(AuthStatus.ACTIVE, savedUser.getStatus());
 
         // then - UserIdentity 저장값 검증
         ArgumentCaptor<UserIdentity> identityCaptor = ArgumentCaptor.forClass(UserIdentity.class);
@@ -129,6 +130,98 @@ class UserAuthServiceImplTest {
         inOrder.verify(userRepository).save(any(User.class));
         inOrder.verify(userIdentityRepository).save(any(UserIdentity.class));
         inOrder.verify(userProfileRepository).createProfile(any(UserProfile.class));
+    }
+
+    @Test
+    @DisplayName("비밀번호 인코딩 결과가 없으면 BusinessException(USER_PASSWORD_ENCODE_ERROR) 발생")
+    void signUp_passwordEncodingMissing_throwBusinessException() {
+        // given
+        EmailSignUpRequest req = new EmailSignUpRequest();
+        req.setName("홍길동");
+        req.setEmail("test@example.com");
+        req.setRawPassword("password1234");
+
+        when(userIdentityRepository.existsEmailIdentity("test@example.com"))
+                .thenReturn(false);
+        when(passwordEncoder.encode("password1234"))
+                .thenReturn(null);
+
+        // when
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> signUpService.signUp(req)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_PASSWORD_ENCODE_ERROR, ex.getErrorCode());
+        verify(userRepository, never()).save(any(User.class));
+        verify(userIdentityRepository, never()).save(any(UserIdentity.class));
+        verify(userProfileRepository, never()).createProfile(any(UserProfile.class));
+    }
+
+    @Test
+    @DisplayName("이메일이 없으면 BusinessException(USER_EMAIL_REQUIRED) 발생")
+    void signUp_missingEmail_throwBusinessException() {
+        // given
+        EmailSignUpRequest req = new EmailSignUpRequest();
+        req.setName("홍길동");
+        req.setEmail(null);
+        req.setRawPassword("password1234");
+
+        // when
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> signUpService.signUp(req)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_EMAIL_REQUIRED, ex.getErrorCode());
+        verifyNoInteractions(userRepository);
+        verifyNoInteractions(userIdentityRepository);
+        verifyNoInteractions(userProfileRepository);
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
+    @DisplayName("비밀번호가 없으면 BusinessException(USER_INVALID_INPUT) 발생")
+    void signUp_missingPassword_throwBusinessException() {
+        // given
+        EmailSignUpRequest req = new EmailSignUpRequest();
+        req.setName("홍길동");
+        req.setEmail("test@example.com");
+        req.setRawPassword(null);
+
+        // when
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> signUpService.signUp(req)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_INVALID_INPUT, ex.getErrorCode());
+        verifyNoInteractions(userRepository);
+        verifyNoInteractions(userIdentityRepository);
+        verifyNoInteractions(userProfileRepository);
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
+    @DisplayName("이름이 없으면 BusinessException(USER_INVALID_INPUT) 발생")
+    void signUp_missingName_throwBusinessException() {
+        // given
+        EmailSignUpRequest req = new EmailSignUpRequest();
+        req.setName(null);
+        req.setEmail("test@example.com");
+        req.setRawPassword("password1234");
+
+        // when
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> signUpService.signUp(req)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_INVALID_INPUT, ex.getErrorCode());
+        verifyNoInteractions(userRepository);
+        verifyNoInteractions(userIdentityRepository);
+        verifyNoInteractions(userProfileRepository);
+        verifyNoInteractions(passwordEncoder);
     }
 
     @Test

@@ -30,6 +30,24 @@
         WHERE user_id = #{userId}
     </select>
 
+    <!-- 이메일 로그인 회원 중에서 email로 회원 조회 -->
+    <select id="findByEmailForLogin"
+            parameterType="string"
+            resultType="com.flyway.user.domain.User">
+
+        SELECT u.user_id,
+               u.email,
+               u.password_hash,
+               u.status,
+               u.created_at
+        FROM users u
+                 INNER JOIN user_identity ui
+                            ON ui.user_id = u.user_id
+        WHERE u.email = #{email}
+          AND ui.provider = 'EMAIL'
+    </select>
+
+
     <!-- 이메일 업데이트 (OAuth 온보딩에서 이메일 입력 완료 시) -->
     <update id="updateEmail" parameterType="map">
         UPDATE users

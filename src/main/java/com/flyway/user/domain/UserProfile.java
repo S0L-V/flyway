@@ -1,12 +1,14 @@
 package com.flyway.user.domain;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class UserProfile {
     private String userId;
     private String name; // 한글 이름

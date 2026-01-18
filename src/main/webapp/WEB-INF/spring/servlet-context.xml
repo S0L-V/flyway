@@ -11,7 +11,11 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <mvc:annotation-driven />
+    <mvc:annotation-driven>
+            <mvc:argument-resolvers>
+                <bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver"/>
+            </mvc:argument-resolvers>
+    </mvc:annotation-driven>
 
     <context:property-placeholder
             location="classpath:config/application-dev.properties"

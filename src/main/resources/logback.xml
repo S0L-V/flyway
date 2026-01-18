@@ -8,24 +8,27 @@
         </encoder>
     </appender>
 
-    <!-- ✅ Spring 로그 완전히 줄이기 -->
+    <!-- Spring 로그 -->
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.springframework.web" level="ERROR"/>
     <logger name="org.springframework.web.servlet" level="ERROR"/>
 
-    <!-- ✅ 내 프로젝트만 상세히 -->
+    <!-- 프로젝트 상세히 -->
     <logger name="com.flyway.template" level="DEBUG"/>
 
-    <!-- ✅ HikariCP 로그 줄이기 -->
+    <!-- HikariCP -->
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <logger name="com.zaxxer.hikari.pool" level="WARN"/>
 
-    <!-- ✅ MyBatis SQL 보기 -->
-    <logger name="com.flyway.template.mapper" level="DEBUG"/>
-
-    <!-- ✅ Swagger 로그 줄이기 -->
+    <!-- Swagger -->
     <logger name="springfox" level="WARN"/>
     <logger name="io.springfox" level="WARN"/>
+
+    <!-- Spring Security -->
+    <logger name="org.springframework.security" level="DEBUG"/>
+    <logger name="org.springframework.security.web.FilterChainProxy" level="DEBUG"/>
+    <logger name="org.springframework.security.web.access" level="DEBUG"/>
+    <logger name="org.springframework.security.authentication" level="DEBUG"/>
 
     <!-- Root Logger -->
     <root level="WARN">

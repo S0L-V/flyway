@@ -18,6 +18,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public User findByEmailForLogin(String email) { return userMapper.findByEmailForLogin(email); }
+
+    @Override
     public void save(User user) {
         userMapper.insertUser(user);
     }
