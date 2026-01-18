@@ -21,6 +21,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    public static final String REDIRECT_PATH_ATTRIBUTE = "AUTH_REDIRECT_PATH";
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
     private final JwtProvider jwtProvider;
@@ -34,14 +35,12 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     ) throws IOException {
 
         String userId = extractUserId(authentication);
-        String accessToken = jwtProvider.createAccessToken(userId);
-
-        long ttl = jwtProperties.getAccessTokenTtlSeconds();
-        addAccessTokenCookie(response, accessToken, ttl);
+        issueAccessTokenCookie(response, userId);
 
         log.debug("[AUTH] login success. userId={}", userId);
-        redirectToMyPage(request, response);
+        redirectToTarget(request, response);
     }
+
 
     private String extractUserId(Authentication authentication) {
         Object principal = authentication.getPrincipal();
@@ -52,6 +51,12 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
             return ((UserDetails) principal).getUsername();
         }
         throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
+    }
+
+    public void issueAccessTokenCookie(HttpServletResponse response, String userId) {
+        String accessToken = jwtProvider.createAccessToken(userId);
+        long ttl = jwtProperties.getAccessTokenTtlSeconds();
+        addAccessTokenCookie(response, accessToken, ttl);
     }
 
     private void addAccessTokenCookie(HttpServletResponse response, String token, long ttl) {
@@ -66,8 +71,19 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private void redirectToMyPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String targetUrl = request.getContextPath() + "/";
+    private void redirectToTarget(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String targetUrl = request.getContextPath() + resolveTargetPath(request);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    private String resolveTargetPath(HttpServletRequest request) {
+        Object attribute = request.getAttribute(REDIRECT_PATH_ATTRIBUTE);
+        if (attribute instanceof String) {
+            String path = ((String) attribute).trim();
+            if (path.startsWith("/")) {
+                return path;
+            }
+        }
+        return "/";
     }
 }

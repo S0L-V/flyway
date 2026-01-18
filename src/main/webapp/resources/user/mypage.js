@@ -26,8 +26,6 @@ async function loadProfile() {
         const res = await response.json();
         const data = res.data;
 
-        console.log(data);
-
         document.getElementById("profileName").textContent =
             data.name ?? "-";
 

@@ -1,7 +1,7 @@
 package com.flyway.auth.service;
 
+import com.flyway.auth.domain.KakaoUserInfo;
 import com.flyway.auth.dto.EmailSignUpRequest;
-import com.flyway.auth.dto.KakaoLoginRequest;
 import com.flyway.user.domain.User;
 
 public interface SignUpService {
@@ -15,10 +15,14 @@ public interface SignUpService {
     void signUp(EmailSignUpRequest request);
 
     /**
-     * OAuth(KAKAO) 로그인/가입 처리
-     * - (provider, providerUserId)로 user_identity 조회
-     * - 있으면 기존 user 반환(로그인 처리)
-     * - 없으면 users/user_identity/user_profile 생성 후 반환
+     * OAuth(KAKAO) 신규 가입 처리
+     * - users/user_identity/user_profile 생성 후 반환
      */
-    User handleKakaoLogin(KakaoLoginRequest request);
+    User signUpKakaoUser(KakaoUserInfo userInfo);
+
+    /**
+     * OAuth 최종 회원가입
+     * - email/이름 업데이트 및 status 활성화
+     */
+    void completeOauthSignUp(String userId, EmailSignUpRequest request);
 }

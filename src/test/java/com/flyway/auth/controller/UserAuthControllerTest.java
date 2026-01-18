@@ -1,8 +1,12 @@
 package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
+import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
+import com.flyway.security.service.EmailUserDetailsService;
+import com.flyway.security.service.UserIdUserDetailsService;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -14,6 +18,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -28,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -36,12 +43,25 @@ class UserAuthControllerTest {
 
     private MockMvc mockMvc;
     private SignUpService signUpService;
+    private EmailUserDetailsService emailUserDetailsService;
+    private LoginSuccessHandler loginSuccessHandler;
+
 
     @BeforeEach
     void setUp() {
         signUpService = Mockito.mock(SignUpService.class);
+        KakaoLoginService kakaoLoginService = Mockito.mock(KakaoLoginService.class);
+        emailUserDetailsService = Mockito.mock(EmailUserDetailsService.class);
+        UserIdUserDetailsService userIdUserDetailsService = Mockito.mock(UserIdUserDetailsService.class);
+        loginSuccessHandler = Mockito.mock(LoginSuccessHandler.class);
 
-        AuthController controller = new AuthController(signUpService);
+        AuthController controller = new AuthController(
+                signUpService,
+                kakaoLoginService,
+                emailUserDetailsService,
+                userIdUserDetailsService,
+                loginSuccessHandler
+        );
 
         InternalResourceViewResolver vr = new InternalResourceViewResolver();
         vr.setPrefix("/WEB-INF/views/");
@@ -58,6 +78,13 @@ class UserAuthControllerTest {
     void signUp_success_redirect() throws Exception {
         // given
         doNothing().when(signUpService).signUp(any(EmailSignUpRequest.class));
+        UserDetails principal = org.springframework.security.core.userdetails.User.withUsername("user-123")
+                .password("pw")
+                .authorities("ROLE_USER")
+                .build();
+        when(emailUserDetailsService.loadUserByUsername("test@example.com"))
+                .thenReturn(principal);
+        doNothing().when(loginSuccessHandler).issueAccessTokenCookie(any(), anyString());
 
         // when & then
         mockMvc.perform(post("/auth/signup")
@@ -65,7 +92,7 @@ class UserAuthControllerTest {
                         .param("email", "test@example.com")
                         .param("rawPassword", "password1234"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl("/"));
 
         verify(signUpService).signUp(any(EmailSignUpRequest.class));
     }
@@ -155,9 +182,9 @@ class UserAuthControllerTest {
 
             @Override
             public Object resolveArgument(
-                    MethodParameter parameter,
+                   @NonNull MethodParameter parameter,
                     ModelAndViewContainer mavContainer,
-                    NativeWebRequest webRequest,
+                   @NonNull NativeWebRequest webRequest,
                     WebDataBinderFactory binderFactory
             ) {
                 return principal;
@@ -177,5 +204,38 @@ class UserAuthControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.email").value("test@example.com"))
                 .andExpect(jsonPath("$.data.createdAt").value("2026-01-16T10:00:00"));
+    }
+
+    @Test
+    @DisplayName("GET /api/profile - 인증 정보 없으면 401 반환")
+    void getProfile_unauthorized_returns401() throws Exception {
+        UserProfileService userProfileService = Mockito.mock(UserProfileService.class);
+        UserApiController controller = new UserApiController(userProfileService);
+        HandlerMethodArgumentResolver resolver = new HandlerMethodArgumentResolver() {
+            @Override
+            public boolean supportsParameter(MethodParameter parameter) {
+                return CustomUserDetails.class.isAssignableFrom(parameter.getParameterType());
+            }
+
+            @Override
+            public Object resolveArgument(
+                    @NonNull MethodParameter parameter,
+                    ModelAndViewContainer mavContainer,
+                    @NonNull NativeWebRequest webRequest,
+                    WebDataBinderFactory binderFactory
+            ) {
+                return null;
+            }
+        };
+
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setCustomArgumentResolvers(resolver)
+                .build();
+
+        mockMvc.perform(get("/api/profile")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.UNAUTHORIZED.getCode()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.UNAUTHORIZED.getMessage()));
     }
 }

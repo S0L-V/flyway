@@ -40,7 +40,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .toOffsetDateTime()
                 .format(CREATED_AT_FMT);
 
-        UserProfileResponse response = UserProfileResponse.builder()
+        return UserProfileResponse.builder()
                 .userId(userId)
                 .name(profile.getName())
                 .passportNo(profile.getPassportNo())
@@ -52,8 +52,5 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .email(userInfo.getEmail())
                 .createdAt(createdAt)
                 .build();
-
-        log.debug("getUserProfile userId={}, response={}", userId, response);
-        return response;
     }
 }

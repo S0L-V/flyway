@@ -2,10 +2,11 @@ package com.flyway.security.config;
 
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.handler.LoginSuccessHandler;
+import com.flyway.security.filter.OnboardingAccessFilter;
 import com.flyway.security.jwt.JwtProvider;
 import com.flyway.security.jwt.JwtWebAuthFilter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -21,7 +22,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Slf4j
 @Configuration
 @Order(2)
-@RequiredArgsConstructor
 public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
 
     private static final String[] STATIC_RESOURCES = {
@@ -38,6 +38,22 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     private final LoginSuccessHandler loginSuccessHandler;
     private final UserDetailsService userIdUserDetailsService;
     private final UserDetailsService emailUserDetailsService;
+
+    public SecurityConfigWeb(
+            JwtProvider jwtProvider,
+            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+            PasswordEncoder passwordEncoder,
+            LoginSuccessHandler loginSuccessHandler,
+            @Qualifier("userIdUserDetailsService") UserDetailsService userIdUserDetailsService,
+            @Qualifier("emailUserDetailsService") UserDetailsService emailUserDetailsService
+    ) {
+        this.jwtProvider = jwtProvider;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.passwordEncoder = passwordEncoder;
+        this.loginSuccessHandler = loginSuccessHandler;
+        this.userIdUserDetailsService = userIdUserDetailsService;
+        this.emailUserDetailsService = emailUserDetailsService;
+    }
 
     @Bean
     public JwtWebAuthFilter jwtWebAuthFilter() {
@@ -94,7 +110,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
 
-                .addFilterBefore(jwtWebAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtWebAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new OnboardingAccessFilter(), JwtWebAuthFilter.class);
     }
 }
-

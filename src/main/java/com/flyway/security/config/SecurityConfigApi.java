@@ -2,9 +2,10 @@ package com.flyway.security.config;
 
 import com.flyway.security.handler.JwtAccessDeniedHandler;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
+import com.flyway.security.filter.OnboardingAccessFilter;
 import com.flyway.security.jwt.JwtApiAuthFilter;
 import com.flyway.security.jwt.JwtProvider;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -19,13 +20,24 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @Order(1)
-@RequiredArgsConstructor
 public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
 
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final UserDetailsService userIdUserDetailsService;
+
+    public SecurityConfigApi(
+            JwtProvider jwtProvider,
+            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+            JwtAccessDeniedHandler jwtAccessDeniedHandler,
+            @Qualifier("userIdUserDetailsService") UserDetailsService userIdUserDetailsService
+    ) {
+        this.jwtProvider = jwtProvider;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+        this.userIdUserDetailsService = userIdUserDetailsService;
+    }
 
     @Bean
     public JwtApiAuthFilter jwtApiAuthFilter() {
@@ -66,6 +78,7 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
 
-                .addFilterBefore(jwtApiAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtApiAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new OnboardingAccessFilter(), JwtApiAuthFilter.class);
     }
 }

@@ -30,8 +30,9 @@
         <span>또는</span>
     </div>
 
-    <a href="${pageContext.request.contextPath}/api/auth/kakao" class="btn-kakao">
-        <img src="https://developers.kakao.com/tool/resource/static/img/button/login/full/ko/kakao_login_medium_narrow.png">
+    <a href="${pageContext.request.contextPath}/auth/kakao" class="btn-kakao">
+        <img src="https://developers.kakao.com/tool/resource/static/img/button/login/full/ko/kakao_login_medium_narrow.png"
+             alt="카카오 로그인">
     </a>
 
     <div class="footer-links">

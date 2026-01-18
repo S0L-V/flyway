@@ -37,7 +37,6 @@ class LoginLogoutCookieTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
-        MockHttpSession session = (MockHttpSession) request.getSession(true);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 User.withUsername("user-123").password("pw").authorities("ROLE_USER").build(),
@@ -47,7 +46,6 @@ class LoginLogoutCookieTest {
         handler.onAuthenticationSuccess(request, response, authentication);
 
         assertTrue(hasCookie(response, "accessToken"));
-        assertNotNull(session);
     }
 
     @Test
