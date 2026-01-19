@@ -11,8 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * /admin/** 경로만 담당
  * Spring Security FilterChain 분리
  * 세션 기반 인증 (Interceptor에서 체크)
- *
- * @Order(2) API(1) 다음, 일반 사용자(3) 이전 처리
  */
 @Configuration
 @EnableWebSecurity
@@ -38,7 +36,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/admin/api/auth/validate").permitAll()
 
 				// 정적 리소스는 누구나 접근 가능
-				.antMatchers("admin/resources/**").permitAll()
+				.antMatchers("/admin/resources/**").permitAll()
 				.antMatchers("/resources/**").permitAll()
 
 				// 나머지 permitAll (Interceptor 에서 세션 체크)
