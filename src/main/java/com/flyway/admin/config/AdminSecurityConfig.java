@@ -30,7 +30,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/admin/login").permitAll()
 
 				// 로그인 API는 누구나 접근 가능
-				.antMatchers("admin/api/auth/login").permitAll()
+				.antMatchers("/admin/api/auth/login").permitAll()
 
 				// JWT 검증 API는 누구나 접근 가능 (나중에 사용)
 				.antMatchers("/admin/api/auth/validate").permitAll()
