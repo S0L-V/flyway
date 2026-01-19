@@ -30,7 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				"/admin/login",
 				"/admin/api/auth/login",
 				"/admin/api/auth/validate",
-				"admin/resources/**",
+				"/admin/resources/**",
 				"/resources/**"
 			);
 	}
