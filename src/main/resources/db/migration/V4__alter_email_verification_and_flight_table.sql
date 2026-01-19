@@ -9,3 +9,9 @@ ALTER TABLE email_verification_token
 -- 3) user_id 컬럼 제거
 ALTER TABLE email_verification_token
     DROP COLUMN user_id;
+
+ALTER TABLE flight_seat
+    ADD UNIQUE KEY uk_flight_seat (flight_id, aircraft_seat_id);
+
+ALTER TABLE flight
+    ADD COLUMN duration_minutes INT COMMENT '비행 시간(분)';
