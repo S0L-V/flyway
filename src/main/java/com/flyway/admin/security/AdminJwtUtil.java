@@ -1,4 +1,4 @@
-package com.flyway.util;
+package com.flyway.admin.security;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
