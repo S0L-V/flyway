@@ -363,6 +363,20 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- 메일 발송(Spring Mail) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${org.springframework-version}</version>
+        </dependency>
+
+        <!-- JavaMail 구현체 -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
 
     </dependencies>
 
