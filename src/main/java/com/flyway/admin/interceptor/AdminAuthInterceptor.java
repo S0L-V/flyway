@@ -70,8 +70,8 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
 
 		// 로그
 		String adminId = (String)session.getAttribute("adminId");
-		String role = (String)session.getAttribute("role");
-		log.debug("Authorized - adminId: {}, role: {}, URI: {}", adminId, role, requestURI);
+		String adminRole = (String)session.getAttribute("adminRole");
+		log.debug("Authorized - adminId: {}, role: {}, URI: {}", adminId, adminRole, requestURI);
 
 		return true; //컨트롤러 실행 계속
 	}
