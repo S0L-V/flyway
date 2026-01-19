@@ -64,5 +64,4 @@
 
     <!-- Transaction Annotation 활성화 -->
     <tx:annotation-driven transaction-manager="transactionManager"/>
-
 </beans>
