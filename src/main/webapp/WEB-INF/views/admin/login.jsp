@@ -103,7 +103,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    adminId: adminId,
+                    email: adminId,
                     password: password
                 })
             });
