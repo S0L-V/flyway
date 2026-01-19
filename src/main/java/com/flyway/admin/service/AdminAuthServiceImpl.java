@@ -12,7 +12,7 @@ import com.flyway.admin.dto.LoginResponse;
 import com.flyway.admin.repository.AdminRepository;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
-import com.flyway.util.AdminJwtUtil;
+import com.flyway.admin.security.AdminJwtUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

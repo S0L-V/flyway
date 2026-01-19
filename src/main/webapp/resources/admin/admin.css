@@ -1,0 +1,73 @@
+/* ========================================
+   Flyway Admin - Global Styles
+   ======================================== */
+
+/* 기본 폰트 설정 */
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 커스텀 스크롤바 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 사이드바 메뉴 활성화 스타일 */
+.nav-link {
+    transition: all 0.2s ease;
+}
+
+.nav-link.active {
+    background-color: #1e40af !important;
+    color: white !important;
+    box-shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.3);
+}
+
+.nav-link.active i {
+    color: white !important;
+}
+
+/* 통계 카드 호버 효과 */
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* 로딩 애니메이션 */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* 페이드인 애니메이션 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}

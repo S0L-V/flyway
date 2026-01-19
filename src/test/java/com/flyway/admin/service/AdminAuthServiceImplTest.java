@@ -19,7 +19,7 @@ import com.flyway.admin.dto.LoginResponse;
 import com.flyway.admin.repository.AdminRepository;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
-import com.flyway.util.AdminJwtUtil;
+import com.flyway.admin.security.AdminJwtUtil;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("관리자 인증 서비스 테스트")
