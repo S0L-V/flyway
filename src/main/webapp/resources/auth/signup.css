@@ -1,8 +1,88 @@
-body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; }
-.register-container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
-.register-container h2 { text-align: center; color: #333; }
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; margin-bottom: 5px; color: #666; }
-.form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-.btn-submit { width: 100%; padding: 10px; background-color: #007bff; border: none; color: white; border-radius: 5px; cursor: pointer; font-size: 16px; }
-.btn-submit:hover { background-color: #0056b3; }
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.register-container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 350px;
+}
+
+.register-container h2 {
+    text-align: center;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+/* 기본 input */
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* 🔹 이메일 + 버튼 row */
+.email-row {
+    display: flex;
+    gap: 8px;
+}
+
+.email-row input {
+    flex: 1;
+    width: auto; /* 기존 100% 무효화 */
+}
+
+.email-row button {
+    padding: 10px 12px;
+    white-space: nowrap;
+    background-color: #6c757d;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.email-row button:hover {
+    background-color: #5a6268;
+}
+
+/* 공통 submit 버튼 */
+.btn-submit {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-submit:hover {
+    background-color: #0056b3;
+}
+
+/* 상태 메시지 (선택) */
+.status-text {
+    margin-top: 6px;
+    font-size: 0.85rem;
+}
