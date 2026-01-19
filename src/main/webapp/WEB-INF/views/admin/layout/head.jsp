@@ -16,9 +16,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Custom Admin CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/admin.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/admin/admin.css">
 
     <!-- Custom Admin JS (defer로 body 로드 후 실행) -->
-    <script src="${pageContext.request.contextPath}/resources/js/admin.js" defer></script>
+    <script src="${pageContext.request.contextPath}/resources/admin/admin.js" defer></script>
 </head>
 <body class="bg-[#f1f5f9]">

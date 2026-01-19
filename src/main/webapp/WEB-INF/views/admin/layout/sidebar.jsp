@@ -12,11 +12,11 @@
         <div>
             <p class="text-[10px] font-bold text-slate-500 tracking-wider mb-4 px-2 uppercase">주요 메뉴</p>
             <div class="space-y-1">
-                <a href="${pageContext.request.contextPath}/dashboard.do" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-white/5 hover:text-white">
+                <a href="${pageContext.request.contextPath}/dashboard" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-white/5 hover:text-white">
                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                     <span class="text-sm font-medium">대시보드</span>
                 </a>
-                <a href="${pageContext.request.contextPath}/flights.do" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-white/5 hover:text-white">
+                <a href="${pageContext.request.contextPath}/flights" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-white/5 hover:text-white">
                     <i data-lucide="plane" class="w-5 h-5"></i>
                     <span class="text-sm font-medium">항공편 관리</span>
                 </a>
