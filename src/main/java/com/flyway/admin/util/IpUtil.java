@@ -1,4 +1,4 @@
-package com.flyway.util;
+package com.flyway.admin.util;
 
 import javax.servlet.http.HttpServletRequest;
 

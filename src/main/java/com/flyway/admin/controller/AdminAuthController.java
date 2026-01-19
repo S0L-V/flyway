@@ -15,7 +15,7 @@ import com.flyway.admin.dto.LoginResponse;
 import com.flyway.admin.service.AdminAuthService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.BusinessException;
-import com.flyway.util.IpUtil;
+import com.flyway.admin.util.IpUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
