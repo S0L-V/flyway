@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.flyway.search.mapper.FlightMapper">
+
+    <select id="list" parameterType="com.flyway.search.domain.FlightVO" resultType="com.flyway.search.domain.FlightVO">
+        select departure_airport AS departureAirport,
+               arrival_airport AS arrivalAirport,
+               departure_time AS departureTime,
+               arrival_time AS arrivalTime,
+               flight_number AS flightNumber
+        from flight
+        LIMIT 20;
+    </select>
+
+    <select id="airport" parameterType="com.flyway.search.domain.AirportVO" resultType="com.flyway.search.domain.AirportVO">
+        select airport_id AS airportId,
+               country,
+               city
+        from airport;
+    </select>
+
+    <select id="outbound" parameterType="com.flyway.search.dto.FlightSearchRequestDTO" resultType="com.flyway.search.dto.FlightSearchResponseDTO">
+        SELECT
+        f.flight_id AS flightId,
+        f.departure_airport AS departureAirport,
+        f.arrival_airport   AS arrivalAirport,
+        f.departure_time    AS departureTime,
+        f.arrival_time      AS arrivalTime,
+        f.flight_number     AS flightNumber,
+        da.city             AS departureCity,
+        aa.city             AS arrivalCity,
+        <choose>
+            <when test="cabinClass == 'BIZ'"> fi.business_class_seat </when>
+            <when test="cabinClass == 'ECO'"> fi.economy_class_seat </when>
+            <when test="cabinClass == 'FST'"> fi.first_class_seat </when>
+            <otherwise> NULL </otherwise>
+        </choose> AS seatCount
+        FROM flight f
+        JOIN airport da      ON f.departure_airport = da.airport_id
+        JOIN airport aa      ON f.arrival_airport   = aa.airport_id
+        JOIN flight_info fi  ON f.flight_id = fi.flight_id
+        WHERE 1=1
+            AND f.departure_airport = #{to}
+            AND f.arrival_airport = #{from}
+
+            AND f.departure_time &gt;= #{dateStart}
+            AND f.departure_time &lt;  DATE_ADD(#{dateStart}, INTERVAL 1 DAY)
+
+        <!-- 좌석 수 조건(선택) -->
+        <if test="passengers != null">
+            AND
+            <choose>
+                <when test="cabinClass == 'BIZ'"> fi.business_class_seat &gt;= #{passengers} </when>
+                <when test="cabinClass == 'ECO'"> fi.economy_class_seat &gt;= #{passengers} </when>
+                <when test="cabinClass == 'FST'"> fi.first_class_seat &gt;= #{passengers} </when>
+                <otherwise> 1=1 </otherwise>
+            </choose>
+        </if>
+        LIMIT 20;
+    </select>
+
+    <select id="inbound" parameterType="com.flyway.search.dto.FlightSearchRequestDTO" resultType="com.flyway.search.dto.FlightSearchResponseDTO">
+        SELECT
+        f.flight_id AS flightId,
+        f.departure_airport AS departureAirport,
+        f.arrival_airport   AS arrivalAirport,
+        f.departure_time    AS departureTime,
+        f.arrival_time      AS arrivalTime,
+        f.flight_number     AS flightNumber,
+        da.city             AS departureCity,
+        aa.city             AS arrivalCity,
+        <choose>
+            <when test="cabinClass == 'BIZ'"> fi.business_class_seat </when>
+            <when test="cabinClass == 'ECO'"> fi.economy_class_seat </when>
+            <when test="cabinClass == 'FST'"> fi.first_class_seat </when>
+            <otherwise> NULL </otherwise>
+        </choose> AS seatCount
+        FROM flight f
+        JOIN airport da      ON f.departure_airport = da.airport_id
+        JOIN airport aa      ON f.arrival_airport   = aa.airport_id
+        JOIN flight_info fi  ON f.flight_id = fi.flight_id
+        WHERE 1=1
+        AND f.departure_airport = #{from}
+        AND f.arrival_airport = #{to}
+
+        AND f.departure_time &gt;= #{dateEnd}
+        AND f.departure_time &lt;  DATE_ADD(#{dateEnd}, INTERVAL 1 DAY)
+
+        <!-- 좌석 수 조건(선택) -->
+        <if test="passengers != null">
+            AND
+            <choose>
+                <when test="cabinClass == 'BIZ'"> fi.business_class_seat &gt;= #{passengers} </when>
+                <when test="cabinClass == 'ECO'"> fi.economy_class_seat &gt;= #{passengers} </when>
+                <when test="cabinClass == 'FST'"> fi.first_class_seat &gt;= #{passengers} </when>
+                <otherwise> 1=1 </otherwise>
+            </choose>
+        </if>
+        LIMIT 20;
+    </select>
+
+</mapper>
