@@ -1,0 +1,37 @@
+package com.flyway.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.flyway.admin.interceptor.AdminAuthInterceptor;
+
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Spring MVC 전역 설정
+ * - Interceptor 등록
+ */
+@Configuration
+@RequiredArgsConstructor
+public class WebMvcConfig implements WebMvcConfigurer {
+
+	private final AdminAuthInterceptor adminAuthInterceptor;
+
+	/**
+	 * Interceptor 등록
+	 */
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		// 관리자 인증 Interceptor
+		registry.addInterceptor(adminAuthInterceptor)
+			.addPathPatterns("/admin/**")
+			.excludePathPatterns(
+				"/admin/login",
+				"/admin/api/auth/login",
+				"/admin/api/auth/validate",
+				"admin/resources/**",
+				"/resources/**"
+			);
+	}
+}
