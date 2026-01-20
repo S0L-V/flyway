@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class FlightVO {
+public class Flight {
     private String flightId;
     private String departureAirport;
     private String arrivalAirport;

@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class FlightSearchResponseDTO {
+public class FlightSearchResponse {
     private String flightId;
     private String departureAirport;
     private String arrivalAirport;
@@ -15,4 +15,5 @@ public class FlightSearchResponseDTO {
     private LocalDateTime arrivalTime;
     private String flightNumber;
     private int seatCount;
+    //private int currentPrice;
 }
