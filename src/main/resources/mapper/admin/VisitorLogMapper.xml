@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.admin.mapper.VisitorLogMapper">
+
+    <!-- 방문 로그 저장 -->
+    <insert id="insertVisitorLog" parameterType="com.flyway.admin.domain.VisitorLog">
+        INSERT INTO visitor_log(
+            session_id,
+            user_id,
+            ip_address,
+            user_agent,
+            page_url,
+            referer,
+            visited_at
+        ) VALUES (
+            #{session_id},
+            #{userId},
+            #{ipAddress},
+            #{userAgent},
+            #{pageUrl},
+            #{referer},
+            NOW()
+        )
+    </insert>
+
+    <!-- 일일 방문자 수 조회 (유니크 세션 기준) -->
+    <select id="countDailyUniqueVisitors" resultType="long">
+        SELECT COUNT(DISTINCT session_id)
+        FROM visitor_log
+        WHERE DATE(visited_at) = CURDATE()
+    </select>
+
+    <!-- 특정 날짜의 방문자 수 조회 -->
+    <select id="countUniqueVisitorsByDate" resultType="long">
+        SELECT COUNT(DISTINCT session_id)
+        FROM visitor_log
+        WHERE DATE(visited_at) = #{date}
+    </select>
+
+    <!-- 특정 세션이 오늘 이미 기록되어있는지 확인 -->
+    <select id="existsTodayBySessionId" resultType="int">
+        SELECT COUNT(*)
+        FROM visitor_log
+        WHERE session_id = #{sessionId}
+            AND DATE(visited_at) = CURDATE()
+        LIMIT 1
+    </select>
+
+</mapper>
