@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DashboardStats {
+public class DashboardStatsDto {
 
 	// == 오늘 통계 ==
 	private long dailyVisitors; // 일일 방문자
