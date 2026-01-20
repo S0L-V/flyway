@@ -16,8 +16,9 @@ public class EmailVerificationToken {
     @ToString.Exclude
     private String tokenHash;
 
-    LocalDateTime expiresAt;
-    LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
+    private LocalDateTime usedAt;
+    private LocalDateTime createdAt;
 
     @Builder
     private EmailVerificationToken(
@@ -26,6 +27,7 @@ public class EmailVerificationToken {
             EmailVerificationPurpose purpose,
             String tokenHash,
             LocalDateTime expiresAt,
+            LocalDateTime usedAt,
             LocalDateTime createdAt
     ) {
         this.emailVerificationTokenId = emailVerificationTokenId;
@@ -33,6 +35,7 @@ public class EmailVerificationToken {
         this.purpose = purpose;
         this.tokenHash = tokenHash;
         this.expiresAt = expiresAt;
+        this.usedAt = usedAt;
         this.createdAt = createdAt;
     }
 }
