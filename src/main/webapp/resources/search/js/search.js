@@ -1,4 +1,5 @@
 let AIRPORTS = [];
+let allOptions = [];
 
 async function loadAirports() {
     const res = await fetch(`${CONTEXT_PATH}/api/public/airports`);
@@ -53,7 +54,7 @@ function initTripTabs() {
 
             // 편도로 바꾸면 오는날 값/표시 초기화
             if (trip === "OW") {
-                state.inDate = null;
+                state.dateEnd = null;
                 // 왕복용 인풋이 있다면 값도 같이 비움
                 const inInput = document.querySelector('[data-in-date-input]');
                 if (inInput) inInput.value = "";
@@ -104,7 +105,11 @@ function initDropdowns() {
             e.preventDefault();
 
             // 이미 열려있으면 유지(닫지 않음)
-            if (!panel.hidden) return;
+            if (!panel.hidden) {
+                panel.hidden = true;
+                dd.setAttribute("aria-expanded", "false");
+                return;
+            }
 
             closeAllDropdowns();
             panel.hidden = false;
@@ -324,7 +329,8 @@ function cabinText(code) {
 // -------------- 검색 버튼 --------------
 function initSearchButton() {
     document.getElementById("btnSearch").addEventListener("click", async () => {
-        // 1) 최소 검증
+
+        // 최소 검증
         if (!state.from || !state.to) {
             alert("출발/도착 공항을 선택해 주세요.");
             return;
@@ -340,6 +346,11 @@ function initSearchButton() {
         if (state.tripType === "RT" && !state.dateEnd) {
             alert("도착일을 선택해 주세요.");
             return;
+        }
+
+        // 검색 필터 초기화
+        if (typeof resetFilters === 'function'){
+            resetFilters();
         }
 
         // 2) DTO 1개로 보낼 payload 만들기 (POST)
@@ -387,3 +398,28 @@ function initSearchButton() {
     });
 }
 
+function handleSearchResult(data){
+    allOptions = data.options ?? [];
+
+    if(allOptions.length > 0) {
+        const prices = allOptions.map(f => f.totalPrice).filter(p => p !== undefined && p !== null && !isNaN(p));
+
+        if(prices.length > 0) {
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+
+            if(typeof initPriceSlider === 'function'){
+                initPriceSlider(minPrice, maxPrice);
+            }
+        } else {
+            // 가격 정보가 없는 경우
+            if (typeof initPriceSlider === 'function') initPriceSlider(0, 1000000);
+        }
+    }
+    if (typeof updateFilterStateAndRender === 'function') {
+        updateFilterStateAndRender();
+    } else {
+        renderByTripType(allOptions);
+    }
+    renderByTripType(allOptions);
+}
