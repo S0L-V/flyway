@@ -72,8 +72,8 @@ public class DynamicPricingCalculator {
         long hoursToDeparture = Duration.between(req.getNow(), req.getDepartureTime()).toHours();
         long daysToDeparture = Duration.between(req.getNow(), req.getDepartureTime()).toDays();
 
-        // (선택) Reader에서 걸러진다는 전제라도, 운영 안전장치로 남겨도 됨
-        // if (hoursToDeparture < 0) return PricingResponse.skipped(PricingSkipReason.DEPARTED);
+        if (hoursToDeparture < 0)
+            return PricingResponse.skipped(PricingSkipReason.DEPARTED);
 
         boolean hourMode = hoursToDeparture <= HOUR_MODE_THRESHOLD_HOURS;
 
