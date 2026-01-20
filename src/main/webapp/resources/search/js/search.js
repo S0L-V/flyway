@@ -421,5 +421,4 @@ function handleSearchResult(data){
     } else {
         renderByTripType(allOptions);
     }
-    renderByTripType(allOptions);
 }

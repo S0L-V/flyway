@@ -276,12 +276,21 @@ function applyFilters(allFlights, state) {
         // 1. 항공사 필터
         if (state.airline && state.airline.size > 0) {
             const outflightNum = flight.outbound.flightNumber;
-            const outAirlineCode = outflightNum.substring(0, 2); // 앞 2글자 자르기
-            const inFlightNum = flight.inbound.flightNumber;
-            const inAirlineCode = inFlightNum.substring(0, 2);
-
-            if (!state.airline.has(outAirlineCode) || !state.airline.has(inAirlineCode)) {
+            const outAirlineCode = outflightNum && outflightNum.length >= 2
+                ? outflightNum.substring(0, 2)
+                : null;
+            if (!outAirlineCode || !state.airline.has(outAirlineCode)) {
                 return false;
+            }
+
+            if (flight.inbound) {
+                const inFlightNum = flight.inbound.flightNumber;
+                const inAirlineCode = inFlightNum && inFlightNum.length >= 2
+                    ? inFlightNum.substring(0, 2)
+                    : null;
+                if (!inAirlineCode || !state.airline.has(inAirlineCode)) {
+                    return false;
+                }
             }
         }
 

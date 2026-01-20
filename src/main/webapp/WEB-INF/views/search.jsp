@@ -266,7 +266,7 @@
                         </div>
                     </div>
                     <div class="panel-actions">
-                        <button type="button" class="btn" data-action="apply-time" data-scope="out">적용</button>
+                        <button type="button" class="btn" data-action="apply-time" data-scope="in">적용</button>
                     </div>
                 </div>
             </div>
@@ -311,6 +311,7 @@
 <%-- 예약 폼 (숨김) --%>
 <form id="reservationForm" action="${pageContext.request.contextPath}/reservations/draft" method="POST"
       style="display:none;">
+    <sec:csrfInput />
     <input type="hidden" name="outFlightId" id="hiddenOutFlightId">
     <input type="hidden" name="inFlightId" id="hiddenInFlightId">
     <input type="hidden" name="passengerCount" id="hiddenPassengerCount">
