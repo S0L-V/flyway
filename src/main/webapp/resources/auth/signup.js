@@ -46,12 +46,21 @@
                 body: "email=" + encodeURIComponent(email)
             });
 
+            let data = null;
+            try {
+                data = await res.json();
+            } catch (e) {
+                data = null;
+            }
+
             if (!res.ok) {
-                setText(sendStatus, "인증메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.", false);
+                const msg = data?.message || "인증메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+                setText(sendStatus, msg, false);
                 return;
             }
 
-            setText(sendStatus, "인증메일을 발송했습니다. 메일함의 링크를 클릭해 주세요.", true);
+            const msg = data?.message || "인증메일을 발송했습니다. 메일함의 링크를 클릭해 주세요.";
+            setText(sendStatus, msg, true);
             verifyBox.classList.remove("is-hidden");
         } catch (e) {
             setText(sendStatus, "네트워크 오류가 발생했습니다.", false);

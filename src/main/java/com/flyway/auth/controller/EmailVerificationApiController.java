@@ -2,6 +2,7 @@ package com.flyway.auth.controller;
 
 import com.flyway.auth.service.EmailVerificationService;
 import com.flyway.template.common.ApiResponse;
+import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.template.exception.MailSendException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,12 @@ public class EmailVerificationApiController {
         try {
             emailVerificationService.issueSignupVerification(email);
             return ResponseEntity.ok(ApiResponse.success(null, "이메일 인증 메일을 전송했습니다."));
+        } catch (BusinessException e) {
+            return ResponseEntity.status(e.getErrorCode().getStatus())
+                    .body(ApiResponse.error(
+                            e.getErrorCode().getCode(),
+                            e.getMessage()
+                    ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(), e.getMessage()));

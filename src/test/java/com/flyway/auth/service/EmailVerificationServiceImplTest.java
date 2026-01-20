@@ -26,6 +26,7 @@ class EmailVerificationServiceImplTest {
     private EmailVerificationTokenMapper tokenMapper;
     private MailSender mailSender;
     private TokenHasher tokenHasher;
+    private com.flyway.user.mapper.UserMapper userMapper;
     private EmailVerificationServiceImpl service;
 
     @BeforeEach
@@ -33,8 +34,9 @@ class EmailVerificationServiceImplTest {
         tokenMapper = Mockito.mock(EmailVerificationTokenMapper.class);
         mailSender = Mockito.mock(MailSender.class);
         tokenHasher = Mockito.mock(TokenHasher.class);
+        userMapper = Mockito.mock(com.flyway.user.mapper.UserMapper.class);
 
-        service = new EmailVerificationServiceImpl(tokenMapper, mailSender, tokenHasher);
+        service = new EmailVerificationServiceImpl(tokenMapper, mailSender, tokenHasher, userMapper);
         ReflectionTestUtils.setField(service, "baseUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(service, "ttlMinutes", 15L);
     }
@@ -43,6 +45,7 @@ class EmailVerificationServiceImplTest {
     @DisplayName("회원가입 이메일 인증 발급 시 토큰 저장 후 메일 발송")
     void issueSignupVerification_savesTokenAndSendsMail() {
         when(tokenHasher.hash(anyString())).thenReturn("hash-value");
+        when(userMapper.findByEmailForLogin(anyString())).thenReturn(null);
 
         service.issueSignupVerification("test@example.com");
 

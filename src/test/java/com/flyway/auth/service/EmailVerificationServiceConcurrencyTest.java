@@ -5,6 +5,7 @@ import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.repository.EmailVerificationTokenMapper;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
+import com.flyway.user.mapper.UserMapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -273,6 +274,36 @@ class EmailVerificationServiceConcurrencyTest {
 
                 @Override
                 public void sendHtml(String to, String subject, String html) {
+                }
+            };
+        }
+
+        @Bean
+        public UserMapper userMapper() {
+            return new UserMapper() {
+                @Override
+                public void insertUser(com.flyway.user.domain.User user) {
+                    throw new UnsupportedOperationException("test stub");
+                }
+
+                @Override
+                public com.flyway.user.domain.User findById(String userId) {
+                    return null;
+                }
+
+                @Override
+                public com.flyway.user.domain.User findByEmailForLogin(String email) {
+                    return null;
+                }
+
+                @Override
+                public void updateEmail(String userId, String email) {
+                    throw new UnsupportedOperationException("test stub");
+                }
+
+                @Override
+                public void updateStatus(String userId, String status) {
+                    throw new UnsupportedOperationException("test stub");
                 }
             };
         }

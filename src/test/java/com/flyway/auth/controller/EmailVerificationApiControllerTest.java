@@ -3,6 +3,7 @@ package com.flyway.auth.controller;
 import com.flyway.auth.service.EmailVerificationService;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.template.exception.MailSendException;
+import com.flyway.template.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,6 +75,21 @@ class EmailVerificationApiControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errorCode").value(ErrorCode.INTERNAL_SERVER_ERROR.getCode()))
                 .andExpect(jsonPath("$.message").value("메일 전송에 실패했습니다."));
+    }
+
+    @Test
+    @DisplayName("이메일 인증 발급 실패 - 중복 이메일")
+    void issueSignupVerification_duplicateEmail() throws Exception {
+        doThrow(new BusinessException(ErrorCode.USER_EMAIL_ALREADY_EXISTS))
+                .when(emailVerificationService)
+                .issueSignupVerification(anyString());
+
+        mockMvc.perform(post("/api/auth/email/issue")
+                        .param("email", "dup@example.com"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.USER_EMAIL_ALREADY_EXISTS.getCode()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.USER_EMAIL_ALREADY_EXISTS.getMessage()));
     }
 
     @Test

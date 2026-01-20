@@ -5,7 +5,10 @@ import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.repository.EmailVerificationTokenMapper;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
+import com.flyway.template.exception.BusinessException;
+import com.flyway.template.exception.ErrorCode;
 import com.flyway.template.exception.MailSendException;
+import com.flyway.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +35,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final EmailVerificationTokenMapper emailVerificationTokenMapper;
     private final MailSender mailSender;
     private final TokenHasher tokenHasher;
+    private final UserMapper userMapper;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -42,6 +46,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     @Override
     public void issueSignupVerification(String email) {
         validateEmail(email);
+        ensureEmailNotRegistered(email);
 
         for (int attempt = 1; attempt <= MAX_RETRY; attempt++) {
             String token = UUID.randomUUID().toString();
@@ -113,6 +118,12 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private void validateEmail(String email) {
         if (!StringUtils.hasText(email) || !EMAIL_PATTERN.matcher(email).matches()) {
             throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
+        }
+    }
+
+    private void ensureEmailNotRegistered(String email) {
+        if (userMapper.findByEmailForLogin(email) != null) {
+            throw new BusinessException(ErrorCode.USER_EMAIL_ALREADY_EXISTS);
         }
     }
 
