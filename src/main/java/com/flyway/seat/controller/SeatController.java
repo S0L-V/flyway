@@ -1,17 +1,17 @@
 package com.flyway.seat.controller;
 
-import com.flyway.template.common.ApiResponse;
 import com.flyway.seat.dto.SeatDTO;
+import com.flyway.seat.dto.SeatHoldRequest;
+import com.flyway.seat.dto.SeatHoldResponse;
 import com.flyway.seat.service.SeatService;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import com.flyway.template.common.ApiResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 public class SeatController {
+
     private final SeatService seatService;
 
     public SeatController(SeatService seatService) {
@@ -20,8 +20,30 @@ public class SeatController {
 
     // 항공편별 좌석 맵 조회
     @GetMapping("/api/flights/{flightId}/seats")
-    public ApiResponse<List<SeatDTO>> getSeatMap(@PathVariable String flightId){
-        return ApiResponse.<List<SeatDTO>>success(seatService.getSeatMap(flightId));
+    public ApiResponse<List<SeatDTO>> getSeatMap(@PathVariable String flightId) {
+        return ApiResponse.success(seatService.getSeatMap(flightId));
+    }
 
+    // 예약(rid) + 구간(sid) 기반 좌석 맵 조회
+    @GetMapping("/api/public/reservations/{rid}/segments/{sid}/seats")
+    public ApiResponse<List<SeatDTO>> getSeatMapByReservationSegment(
+            @PathVariable("rid") String reservationId,
+            @PathVariable("sid") String reservationSegmentId
+    ) {
+        return ApiResponse.success(
+                seatService.getSeatMapByReservationSegment(reservationId, reservationSegmentId)
+        );
+    }
+
+    // 좌석 HOLD
+    @PostMapping("/api/public/reservations/{rid}/segments/{sid}/seats/hold")
+    public ApiResponse<SeatHoldResponse> holdSeat(
+            @PathVariable("rid") String reservationId,
+            @PathVariable("sid") String reservationSegmentId,
+            @RequestBody SeatHoldRequest request
+    ) {
+        return ApiResponse.success(
+                seatService.holdSeat(reservationId, reservationSegmentId, request)
+        );
     }
 }
