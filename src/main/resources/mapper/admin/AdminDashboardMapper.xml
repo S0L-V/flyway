@@ -27,4 +27,34 @@
             AND status = 'COMPLETED'
     </select>
 
+    <!-- 일일 취소/환불 건수 -->
+    <select id="countDailyCancellations" resultType="long">
+        SELECT COUNT(*)
+        FROM reservation
+        WHERE DATE(updated_at) = CURDATE()
+            AND status = 'CANCELLED'
+    </select>
+
+    <!-- 일일 매출 -->
+    <select id="sumDailyRevenue" resultType="long">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payment
+        WHERE DATE(paid_at) = CURDATE()
+            AND status = 'COMPLETED'
+    </select>
+
+    <!-- 총 회원 수 -->
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM user
+        WHERE is_active = 'Y'
+    </select>
+
+    <!-- 운항 중 항공편 수 -->
+    <select id="countActiveFlights" resultType="long">
+        SELECT COUNT(*)
+        FROM flight
+
+    </select>
+
 </mapper>
