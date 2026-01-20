@@ -39,22 +39,18 @@
             <div id="sendStatus" class="status-text"></div>
         </div>
 
-        <!-- 인증 코드 입력 + 검증 -->
-        <div class="form-group" id="verifyBox" style="display:none;">
-            <label for="verifyCode">인증 코드</label>
+        <!-- 인증 확인 -->
+        <div class="form-group verify-box is-hidden" id="verifyBox">
+            <label>이메일 인증</label>
 
-            <div style="display:flex; gap:8px;">
-                <input type="text" id="verifyCode" name="verifyCode"
-                       placeholder="메일로 받은 인증 코드를 입력하세요"
-                       style="flex:1;">
-                <button type="button" id="verifyBtn" class="btn-submit" style="white-space:nowrap;">
+            <div class="verify-row">
+                <button type="button" id="verifyBtn" class="btn-submit btn-inline">
                     인증 확인
                 </button>
             </div>
 
-            <div id="verifyStatus" style="margin-top:8px; font-size: 0.9rem;"></div>
+            <div id="verifyStatus" class="verify-status"></div>
 
-            <!-- 서버에서 최종 가입 시 검증할 수 있도록 인증 상태를 함께 보낼 수도 있음(선택) -->
             <input type="hidden" id="emailVerified" name="emailVerified" value="false">
         </div>
 
@@ -74,6 +70,11 @@
     </form>
 </div>
 
+<script>
+    window.APP = {
+        contextPath: "${pageContext.request.contextPath}"
+    };
+</script>
 <script src="${pageContext.request.contextPath}/resources/auth/signup.js"></script>
 
 </body>
