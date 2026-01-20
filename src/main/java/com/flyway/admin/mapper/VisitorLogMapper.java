@@ -35,5 +35,5 @@ public interface VisitorLogMapper {
 	 * @param sessionId
 	 * @return 기록 존재 여부 (1: 존재, 0: 미존재)
 	 */
-	long existsTodayBySessionId(@Param("sessionId") String sessionId);
+	int existsTodayBySessionId(@Param("sessionId") String sessionId);
 }

@@ -23,7 +23,8 @@ public class VisitorLog {
 	private String sessionId; // JSESSIONID
 	private String userId;
 	private String ipAddress;
-	private String pageUrl; // 브라우저 User-Agent
-	private String referer;
+	private String userAgent; // 브라우저 User-Agent
+	private String pageUrl; // 방문 페이지 URL
+	private String referer; // Referer URL
 	private LocalDateTime visitedAt;
 }
