@@ -101,7 +101,7 @@ public interface AdminDashboardMapper {
 	 * @param notificationId 알림 ID
 	 * @param adminId 관리자 ID (권한 체크용)
 	 */
-	int markNotificationAsRead(@Param("notificationId") Long notificationId, @Param("adminId") String adminId);
+	int markNotificationAsRead(@Param("notificationId") String notificationId, @Param("adminId") String adminId);
 
 	/**
 	 * 모든 알림 읽음 처리
