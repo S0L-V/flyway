@@ -1,4 +1,4 @@
-package com.flyway.admin.mapper;
+package com.flyway.admin.repository;
 
 import java.util.List;
 
