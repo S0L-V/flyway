@@ -21,13 +21,15 @@ import lombok.Setter;
 @Builder
 public class AdminNotificationDto {
 
-	private long notificationId; // 알림 ID
+	private String notificationId; // 알림 ID
 	private String adminId;
-	private String type; // 알림 유형 (INFO, WARNING, ERROR, SUCCESS)
+	private String notificationType; // 알림 유형 (NEW_RESERVATION, PAYMENT_FAILED, SYSTEM_ALERT)
 	private String title;
 	private String message;
-	private String linkUrl; // 클릭 시 이동 URL (nullable)
-	private String isRead;
+	private String relatedResourceType; // 관련 리소스 타입 (RESERVATION, REFUND, PAYMENT)
+	private String relatedResourceId; // 관련 리소스 ID
+	private String priority; // 우선순위 (HIGH, NORMAL, LOW)
+	private String isRead; // 읽음 여부 (Y/N)
 	private LocalDateTime readAt;
 	private LocalDateTime createdAt;
 }
