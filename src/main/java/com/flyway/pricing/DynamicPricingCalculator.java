@@ -48,7 +48,7 @@ public class DynamicPricingCalculator {
 
         // 시간 정보 누락 방어
         if (req.getDepartureTime() == null || req.getNow() == null) {
-            return PricingResponse.skipped("INVALID_TIME");
+            return PricingResponse.skipped(PricingSkipReason.INVALID_TIME);
         }
 
         /* ==========================================================
