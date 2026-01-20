@@ -22,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminWebSocketInterceptor implements HandshakeInterceptor {
 
 	private static final String ADMIN_ID_ATTR = "adminId";
-	private static final String ADMIN_EMAIL_ATTR = "email";
-	private static final String ADMIN_ROLE_ATTR = "role";
+	private static final String ADMIN_NAME_ATTR = "adminName";
+	private static final String ADMIN_ROLE_ATTR = "adminRole";
 
 	/**
 	 * Handshake 전 인증 체크
@@ -41,17 +41,22 @@ public class AdminWebSocketInterceptor implements HandshakeInterceptor {
 
 			if (session != null) {
 				String adminId = (String)session.getAttribute(ADMIN_ID_ATTR);
-				String email = (String)session.getAttribute(ADMIN_EMAIL_ATTR);
-				String role = (String)session.getAttribute(ADMIN_ROLE_ATTR);
+				String adminName = (String)session.getAttribute(ADMIN_NAME_ATTR);
+				String adminRole = (String)session.getAttribute(ADMIN_ROLE_ATTR);
 
 				if (adminId != null) {
 					// WebSocket 세션 속성에 관리자 정보 저장
+					// ConcurrentHashMap은 null 값 허용 안 함 - null 체크 필수
 					attributes.put(ADMIN_ID_ATTR, adminId);
-					attributes.put(ADMIN_EMAIL_ATTR, email);
-					attributes.put(ADMIN_ROLE_ATTR, role);
+					if (adminName != null) {
+						attributes.put(ADMIN_NAME_ATTR, adminName);
+					}
+					if (adminRole != null) {
+						attributes.put(ADMIN_ROLE_ATTR, adminRole);
+					}
 
-					log.info("WebSocket handshake authorized: adminId={}, email={}",
-						adminId, email);
+					log.info("WebSocket handshake authorized: adminId={}, adminName={}",
+						adminId, adminName);
 					return true;
 				}
 			}
