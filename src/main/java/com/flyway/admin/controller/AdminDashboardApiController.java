@@ -127,6 +127,10 @@ public class AdminDashboardApiController {
 		}
 	}
 
+	/**
+	 * 전체 대시보드 데이터 조회 (한 번에 모든 데이터)
+	 * GET /admin/api/dashboard/all
+	 */
 	@GetMapping("/all")
 	public ApiResponse<Map<String, Object>> getAllDashboardData(
 		HttpSession session,
