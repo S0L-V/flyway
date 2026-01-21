@@ -3,7 +3,6 @@ package com.flyway.template.common;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * API 공통 응답 형식
