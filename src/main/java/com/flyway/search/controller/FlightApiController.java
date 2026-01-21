@@ -1,8 +1,8 @@
 package com.flyway.search.controller;
 
 import com.flyway.search.domain.*;
-import com.flyway.search.dto.FlightSearchRequestDTO;
-import com.flyway.search.dto.SearchResultDTO;
+import com.flyway.search.dto.FlightSearchRequest;
+import com.flyway.search.dto.SearchResultDto;
 import com.flyway.search.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,19 +19,19 @@ public class FlightApiController {
 
     // 항공편 리스트 테스트
     @GetMapping("/api/flights")
-    public List<FlightVO> list(FlightVO vo) {
+    public List<Flight> list(Flight vo) {
         return service.list(vo);
     }
 
     // 공항 api(검색 옵션)
     @GetMapping("/api/public/airports")
-    public List<AirportVO> airport(AirportVO vo) {
+    public List<Airport> airport(Airport vo) {
         return service.airport(vo);
     }
 
     // 검색
     @PostMapping("/api/public/flights/search")
-    public SearchResultDTO search(@RequestBody FlightSearchRequestDTO dto) {
+    public SearchResultDto search(@RequestBody FlightSearchRequest dto) {
         return service.search(dto);
     }
 

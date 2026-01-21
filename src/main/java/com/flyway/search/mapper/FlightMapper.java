@@ -1,16 +1,16 @@
 package com.flyway.search.mapper;
 
 import com.flyway.search.domain.*;
-import com.flyway.search.dto.FlightSearchRequestDTO;
-import com.flyway.search.dto.FlightSearchResponseDTO;
+import com.flyway.search.dto.FlightSearchRequest;
+import com.flyway.search.dto.FlightSearchResponse;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
 @Mapper
 public interface FlightMapper {
-    List<FlightVO> list(FlightVO vo);
-    List<AirportVO> airport(AirportVO vo);
-    List<FlightSearchResponseDTO> outbound(FlightSearchRequestDTO dto);
-    List<FlightSearchResponseDTO> inbound(FlightSearchRequestDTO dto);
+    List<Flight> list(Flight vo);
+    List<Airport> airport(Airport vo);
+    List<FlightSearchResponse> outbound(FlightSearchRequest dto);
+    List<FlightSearchResponse> inbound(FlightSearchRequest dto);
 }

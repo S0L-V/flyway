@@ -34,13 +34,13 @@ public class ReservationAgreementController {
 
         return "redirect:/reservations/" + reservationId + "/booking";
     }
-        @SuppressWarnings("unchecked")
-        private Set<String> getOrCreateAgreedSet(HttpSession session) {
-            Object obj = session.getAttribute(AGREED_RESERVATION_IDS);
-            if (obj instanceof Set) {
-                return (Set<String>) obj;
-            }
-            return new HashSet<>();
+    @SuppressWarnings("unchecked")
+    private Set<String> getOrCreateAgreedSet(HttpSession session) {
+        Object obj = session.getAttribute(AGREED_RESERVATION_IDS);
+        if (obj instanceof Set) {
+            return (Set<String>) obj;
         }
-
+        return new HashSet<>();
     }
+
+}

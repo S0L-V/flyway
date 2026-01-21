@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.reservation.mapper.ReservationBookingMapper">
+
+    <!-- booking 페이지 상단 헤더 -->
+    <select id="selectReservationHeader" parameterType="string"
+            resultType="com.flyway.reservation.dto.BookingViewModel">
+        SELECT
+            reservation_id AS reservationId,
+            passenger_count AS passengerCount,
+            status AS status,
+            trip_type AS tripType,
+            expired_at AS expiredAt
+        FROM reservation
+        WHERE reservation_id = #{reservationId}
+    </select>
+
+    <!-- 본인 예약만 조회 -->
+    <select id="selectReservationHeaderByUser"
+            resultType="com.flyway.reservation.dto.BookingViewModel">
+        SELECT
+            reservation_id AS reservationId,
+            passenger_count AS passengerCount,
+            status AS status,
+            trip_type AS tripType,
+            expired_at AS expiredAt
+        FROM reservation
+        WHERE reservation_id = #{reservationId}
+          AND user_id = #{userId}
+    </select>
+
+    <!-- 예약 구간 스냅샷 -->
+    <select id="selectReservationSegments" parameterType="string"
+            resultType="com.flyway.reservation.dto.ReservationSegmentView">
+        SELECT
+            reservation_segment_id AS reservationSegmentId,
+            segment_order AS segmentOrder,
+            snap_departure_airport AS snapDepartureAirport,
+            snap_arrival_airport AS snapArrivalAirport,
+            snap_departure_time AS snapDepartureTime,
+            snap_arrival_time AS snapArrivalTime,
+            snap_flight_number AS snapFlightNumber,
+            snap_cabin_class_code AS snapCabinClassCode
+        FROM reservation_segment
+        WHERE reservation_id = #{reservationId}
+        ORDER BY segment_order ASC
+    </select>
+
+    <!-- passenger 저장 완료 여부 -->
+    <select id="countPassengers" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM passenger
+        WHERE reservation_id = #{reservationId}
+    </select>
+
+    <!--  예약 row 잠금 -->
+    <select id="lockReservationForUpdate" parameterType="string"
+            resultType="com.flyway.reservation.dto.ReservationCoreView">
+        SELECT
+            reservation_id AS reservationId,
+            user_id AS userId,
+            passenger_count AS passengerCount,
+            status AS status,
+            expired_at AS expiredAt
+        FROM reservation
+        WHERE reservation_id = #{reservationId}
+            FOR UPDATE
+    </select>
+
+    <!-- 탑승자 조회 -->
+    <select id="selectPassengers" parameterType="string"
+            resultType="com.flyway.reservation.dto.PassengerView">
+        SELECT
+            passenger_id AS passengerId,
+            kr_first_name AS krFirstName,
+            kr_last_name AS krLastName,
+            first_name AS firstName,
+            last_name AS lastName,
+            birth AS birth,
+            gender AS gender,
+            email AS email,
+            phone_number AS phoneNumber,
+            passport_no AS passportNo,
+            country AS country,
+            passport_expiry_date AS passportExpiryDate,
+            passport_issue_country AS passportIssueCountry
+        FROM passenger
+        WHERE reservation_id = #{reservationId}
+        ORDER BY passenger_id ASC
+    </select>
+
+    <!-- insert -->
+    <insert id="insertPassenger" parameterType="com.flyway.reservation.dto.PassengerUpsertDTO">
+        INSERT INTO passenger (
+            passenger_id,
+            reservation_id,
+            kr_first_name,
+            kr_last_name,
+            first_name,
+            last_name,
+            passport_no,
+            birth,
+            country,
+            gender,
+            email,
+            phone_number,
+            passport_expiry_date,
+            passport_issue_country
+        ) VALUES (
+            #{passengerId},
+            #{reservationId},
+            #{krFirstName},
+            #{krLastName},
+            #{firstName},
+            #{lastName},
+            #{passportNo},
+            #{birth},
+            #{country},
+            #{gender},
+            #{email},
+            #{phoneNumber},
+            #{passportExpiryDate},
+            #{passportIssueCountry}
+                 )
+    </insert>
+
+    <!-- update -->
+    <update id="updatePassenger" parameterType="com.flyway.reservation.dto.PassengerUpsertDTO">
+        UPDATE passenger
+        SET
+            kr_first_name = #{krFirstName},
+            kr_last_name = #{krLastName},
+            first_name = #{firstName},
+            last_name = #{lastName},
+            passport_no = #{passportNo},
+            birth = #{birth},
+            country = #{country},
+            gender = #{gender},
+            email = #{email},
+            phone_number = #{phoneNumber},
+            passport_expiry_date = #{passportExpiryDate},
+            passport_issue_country = #{passportIssueCountry}
+        WHERE passenger_id = #{passengerId}
+          AND reservation_id = #{reservationId}
+    </update>
+
+</mapper>
