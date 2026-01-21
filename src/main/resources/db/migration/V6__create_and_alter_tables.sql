@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS visitor_log (
 
 -- ==============================================================
 -- flight 인덱스 생성 및 airport 칼럼 추가
---===============================================================
+-- ===============================================================
 
 CREATE INDEX idx_flight_search
     ON flight (
@@ -65,13 +65,3 @@ ALTER TABLE passenger_seat
     ADD CONSTRAINT uk_passenger_seat_flight_seat
         UNIQUE (flight_seat_id);
 
-/* =========================================================
-
-flight_seat
-하나의 항공편(flight)에서는
-동일한 항공기 좌석(aircraft_seat)이 한 번만 생성됨
-→ 좌석 맵 중복 생성 방지
-========================================================= */
-ALTER TABLE flight_seat
-    ADD UNIQUE KEY uk_flight_seat
-    (flight_id, aircraft_seat_id);
