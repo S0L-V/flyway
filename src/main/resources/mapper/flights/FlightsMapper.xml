@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.flyway.search.mapper.FlightMapper">
 
-    <select id="list" parameterType="com.flyway.search.domain.FlightVO" resultType="com.flyway.search.domain.FlightVO">
+    <select id="list" parameterType="com.flyway.search.domain.Flight" resultType="com.flyway.search.domain.Flight">
         select departure_airport AS departureAirport,
                arrival_airport AS arrivalAirport,
                departure_time AS departureTime,
@@ -12,14 +12,14 @@
         LIMIT 20;
     </select>
 
-    <select id="airport" parameterType="com.flyway.search.domain.AirportVO" resultType="com.flyway.search.domain.AirportVO">
+    <select id="airport" parameterType="com.flyway.search.domain.Airport" resultType="com.flyway.search.domain.Airport">
         select airport_id AS airportId,
                country,
                city
         from airport;
     </select>
 
-    <select id="outbound" parameterType="com.flyway.search.dto.FlightSearchRequestDTO" resultType="com.flyway.search.dto.FlightSearchResponseDTO">
+    <select id="outbound" parameterType="com.flyway.search.dto.FlightSearchRequest" resultType="com.flyway.search.dto.FlightSearchResponse">
         SELECT
         f.flight_id AS flightId,
         f.departure_airport AS departureAirport,
@@ -40,8 +40,8 @@
         JOIN airport aa      ON f.arrival_airport   = aa.airport_id
         JOIN flight_info fi  ON f.flight_id = fi.flight_id
         WHERE 1=1
-            AND f.departure_airport = #{to}
-            AND f.arrival_airport = #{from}
+            AND f.departure_airport = #{from}
+            AND f.arrival_airport = #{to}
 
             AND f.departure_time &gt;= #{dateStart}
             AND f.departure_time &lt;  DATE_ADD(#{dateStart}, INTERVAL 1 DAY)
@@ -59,7 +59,7 @@
         LIMIT 20;
     </select>
 
-    <select id="inbound" parameterType="com.flyway.search.dto.FlightSearchRequestDTO" resultType="com.flyway.search.dto.FlightSearchResponseDTO">
+    <select id="inbound" parameterType="com.flyway.search.dto.FlightSearchRequest" resultType="com.flyway.search.dto.FlightSearchResponse">
         SELECT
         f.flight_id AS flightId,
         f.departure_airport AS departureAirport,
@@ -80,8 +80,8 @@
         JOIN airport aa      ON f.arrival_airport   = aa.airport_id
         JOIN flight_info fi  ON f.flight_id = fi.flight_id
         WHERE 1=1
-        AND f.departure_airport = #{from}
-        AND f.arrival_airport = #{to}
+        AND f.departure_airport = #{to}
+        AND f.arrival_airport = #{from}
 
         AND f.departure_time &gt;= #{dateEnd}
         AND f.departure_time &lt;  DATE_ADD(#{dateEnd}, INTERVAL 1 DAY)

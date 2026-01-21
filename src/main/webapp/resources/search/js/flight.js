@@ -1,39 +1,39 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // loadFlights();
-});
-
-function loadFlights() {
-    const url = `${CONTEXT_PATH}/api/flights`;
-
-    fetch(url, { headers: { "Accept": "application/json" } })
-        .then(async (res) => {
-            const ct = res.headers.get("content-type");
-            const text = await res.text();
-
-            console.log("[flights fetch]", {
-                url,
-                status: res.status,
-                contentType: ct,
-                preview: text.slice(0, 200),
-            });
-
-            // JSON이 아닐 경우 여기서 바로 걸림
-            if (!ct || !ct.includes("application/json")) {
-                throw new Error("JSON이 아닌 응답이 내려옴 (HTML/리다이렉트/에러페이지 가능)");
-            }
-
-            return JSON.parse(text);
-        })
-        .then((list) => {
-            console.log("[flights data sample]", list?.[0]);
-            if (!Array.isArray(list)) {
-                console.error("응답이 배열이 아님:", list);
-                return;
-            }
-            renderFlights(list);
-        })
-        .catch((err) => console.error(err));
-}
+// document.addEventListener("DOMContentLoaded", () => {
+//     // loadFlights();
+// });
+//
+// function loadFlights() {
+//     const url = `${CONTEXT_PATH}/api/flights`;
+//
+//     fetch(url, { headers: { "Accept": "application/json" } })
+//         .then(async (res) => {
+//             const ct = res.headers.get("content-type");
+//             const text = await res.text();
+//
+//             console.log("[flights fetch]", {
+//                 url,
+//                 status: res.status,
+//                 contentType: ct,
+//                 preview: text.slice(0, 200),
+//             });
+//
+//             // JSON이 아닐 경우 여기서 바로 걸림
+//             if (!ct || !ct.includes("application/json")) {
+//                 throw new Error("JSON이 아닌 응답이 내려옴 (HTML/리다이렉트/에러페이지 가능)");
+//             }
+//
+//             return JSON.parse(text);
+//         })
+//         .then((list) => {
+//             console.log("[flights data sample]", list?.[0]);
+//             if (!Array.isArray(list)) {
+//                 console.error("응답이 배열이 아님:", list);
+//                 return;
+//             }
+//             renderFlights(list);
+//         })
+//         .catch((err) => console.error(err));
+// }
 
 function renderSegment(f) {
     const flightNumber = f.flightNumber ?? f.flight_number ?? "-";
@@ -43,11 +43,29 @@ function renderSegment(f) {
     const depTime = formatTimeArray(f.departureTime ?? f.departure_time);
     const arrTime = formatTimeArray(f.arrivalTime ?? f.arrival_time);
 
+    let airlineName = "항공사";
+    let airlineLogoHtml = "";
+
+    const prefix = flightNumber.substring(0, 2).toUpperCase();
+
+    if (prefix === 'OZ') {
+        airlineName = '아시아나항공';
+        airlineLogoHtml = '<img src="/resources/search/img/asiana-logo.svg" alt="Asiana" class="airline-logo">';
+    } else if (prefix === 'KE') {
+        airlineName = '대한항공';
+        airlineLogoHtml = '<img src="/resources/search/img/korean-logo.svg" alt="Korean" class="airline-logo">';
+    }
+
     return `
       <div class="flight-segment">
-        <div class="flight-info">
-          <span class="flight-number">${flightNumber}</span>
+        <div class="airline-info-group">
+          ${airlineLogoHtml}
+          <div class="airline-text">
+            <span class="flight-number">${airlineName}</span>
+            <span class="flight-number">${flightNumber}</span>
+          </div>
         </div>
+        
         <div class="flight-details">
           <div class="flight-time">
             <div class="time-info">
@@ -69,14 +87,15 @@ function renderSegment(f) {
     `;
 }
 function renderFooter(option) {
+    const seatCount = option.totalSeats ?? "-";
     return `
       <div class="flight-footer">
         <div class="flight-actions">
           <button class="action-button">가격 변동 그래프</button>
           <button class="action-button">여정 상세</button>
         </div>
-        <div class="seats-remaining">9석 남음</div>
-        <div class="flight-price">
+        <div class="seats-remaining">${seatCount}석 남음</div>
+        <div class="flight-price" tabindex="0">
           <span class="price">411,700원</span>
           <img src="${CONTEXT_PATH}/resources/search/img/arrow-right.svg" alt="" class="price-arrow" />
         </div>
@@ -110,13 +129,6 @@ function createRoundTripCard(option) {
     </article>
   `;
 }
-// 기본 리스트 search 화면 들어왔을 때 보여줄거면 넣으면 됨
-// function renderFlights(list) {
-//     const container = document.querySelector(".flights-list");
-//     if (!container) return;
-//
-//     container.innerHTML = list.map(createFlightCard).join("");
-// }
 
 function renderOneWay(options) {
     const el = document.getElementById("resultList");
@@ -147,8 +159,9 @@ function renderRoundTrip(options) {
 }
 
 
-function handleSearchResult(data) {
-    const options = data.options ?? [];
+function renderByTripType(data) {
+    // [수정] 들어온 data가 배열이면 그대로 쓰고, 객체면 .options를 꺼내 쓴다.
+    const options = Array.isArray(data) ? data : (data.options ?? []);
 
     if (state.tripType === "OW") {
         renderOneWay(options);
@@ -157,6 +170,73 @@ function handleSearchResult(data) {
     }
 }
 
+// document.addEventListener("click", (e) => {
+//     const priceBtn = e.target.closest(".flight-price");
+//     if (!priceBtn) return;
+//
+//     if (typeof isUserLoggedIn !== 'undefined' && !isUserLoggedIn) {
+//         if (confirm("로그인이 필요한 서비스입니다")) {
+//             location.href = `${CONTEXT_PATH}/login`;
+//         }
+//         return;
+//     }
+//
+//     void toReservation(priceBtn);
+// });
+//
+// async function toReservation(priceBtn) {
+//     // id 검증 필요
+//     const card = priceBtn.closest(".flight-card");
+//     if (!card) return;
+//
+//     const outId = card.dataset.outId;
+//     const inId  = card.dataset.inId || null;
+//
+//
+//     const payload = {
+//         tripType: state.tripType,
+//         outFlightId: outId,
+//         passengerCount: state.passengers,
+//         cabinClassCode: state.cabin
+//     };
+//     if (state.tripType === "RT") {
+//         payload.inFlightId = inId;
+//     }
+//     try {
+//         // 3) 검색 API 호출 (POST)
+//         const res = await fetch(`${CONTEXT_PATH}/api/public/reservation/prepare`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "Accept": "application/json"
+//             },
+//             body: JSON.stringify(payload)
+//         });
+//
+//         const json = await res.json();
+//         const rid = json.rid;
+//
+//         console.log(json);
+//
+//         //location.href = `${CONTEXT_PATH}/reservations/agreement/${rid}`;
+//
+//         const targetUrl = `${CONTEXT_PATH}/reservations/agreement/${rid}`;
+//
+//         const formParams = {
+//             rid: json.rid,
+//             outFlightId: json.outFlightId,
+//             inFlightId: json.inFlightId,       // 편도면 null일 수 있음 -> sendPost에서 처리됨
+//             passengerCount: json.passengerCount,
+//             cabinClassCode: json.cabinClassCode
+//         };
+//
+//         // POST 방식으로 페이지 이동
+//         sendPost(targetUrl, formParams);
+//     } catch (err) {
+//         console.error(err);
+//         alert("네트워크 오류가 발생했습니다.");
+//     }
+// }
 
 
 // departureTime: [2026,2,1,8,45] → "08:45"
@@ -166,3 +246,57 @@ function formatTimeArray(arr) {
     const mm = String(arr[4]).padStart(2, "0");
     return `${hh}:${mm}`;
 }
+
+
+document.getElementById("resultList").addEventListener("click", (e) => {
+    if (e.target.closest(".action-button") || e.target.closest("button")) {
+        return;
+    }
+
+    const card = e.target.closest(".flight-card");
+    if (!card) return;
+
+    // hidden 폼에 값 설정
+    document.getElementById("hiddenOutFlightId").value = card.dataset.outId;
+    document.getElementById("hiddenInFlightId").value = card.dataset.inId || "";
+    document.getElementById("hiddenPassengerCount").value = state.passengers;
+    document.getElementById("hiddenCabinClassCode").value = state.cabin;
+
+    // 폼 제출 → /reservations/draft → 동의 페이지로 redirect
+    document.getElementById("reservationForm").submit();
+});
+
+
+// document.addEventListener("click", (e) => {
+//     const card = e.target.closest(".flight-price");
+//     if (!card) return;
+//
+//     if (typeof isUserLoggedIn !== 'undefined' && !isUserLoggedIn) {
+//         if (confirm("로그인이 필요한 서비스입니다")) {
+//             location.href = `${CONTEXT_PATH}/login`;
+//         }
+//         return;
+//     }
+//
+//     // hidden 폼에 값 설정
+//     document.getElementById("hiddenOutFlightId").value = card.dataset.outId;
+//     document.getElementById("hiddenInFlightId").value = card.dataset.inId || "";
+//     document.getElementById("hiddenPassengerCount").value = state.passengers;
+//     document.getElementById("hiddenCabinClassCode").value = state.cabin;
+//
+//     // 폼 제출 → /reservations/draft → 동의 페이지로 redirect
+//     document.getElementById("reservationForm").submit();
+// });
+// document.addEventListener("click", (e) => {
+//     const priceBtn = e.target.closest(".flight-price");
+//     if (!priceBtn) return;
+//
+//     if (typeof isUserLoggedIn !== 'undefined' && !isUserLoggedIn) {
+//         if (confirm("로그인이 필요한 서비스입니다")) {
+//             location.href = `${CONTEXT_PATH}/login`;
+//         }
+//         return;
+//     }
+//
+//     void toReservation(priceBtn);
+// });
