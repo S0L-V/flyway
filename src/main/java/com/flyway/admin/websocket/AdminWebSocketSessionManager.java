@@ -80,7 +80,7 @@ public class AdminWebSocketSessionManager {
 					}
 					successCount++;
 				} catch (Exception e) {
-					log.warn("Failed to send message to session: {}", session.getId(), e);
+					log.warn("Failed to send message to session: {}", session.getId());
 					failCount++;
 				}
 			}
@@ -109,7 +109,7 @@ public class AdminWebSocketSessionManager {
 					}
 				} catch (Exception e) {
 					log.warn("Failed to send message to admin: {}, session: {}",
-						adminId, session.getId(), e);
+						adminId, session.getId());
 				}
 			});
 	}
@@ -126,7 +126,7 @@ public class AdminWebSocketSessionManager {
 					session.sendMessage(new TextMessage(message));
 				}
 			} catch (Exception e) {
-				log.warn("Failed to send message to session: {}", session.getId(), e);
+				log.warn("Failed to send message to session: {}", session.getId());
 			}
 		}
 	}

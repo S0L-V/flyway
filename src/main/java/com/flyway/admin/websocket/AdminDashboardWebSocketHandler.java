@@ -73,7 +73,7 @@ public class AdminDashboardWebSocketHandler extends TextWebSocketHandler {
 			} else if (payload.contains("\"type\":\"REQUEST_ACTIVITIES\"")) {
 				// 활동 요청 -> 즉시 응답
 				sendActivities(session);
-			} else if (payload.contains("\"type\":\"REQEUST_NOTIFICATIONS\"")) {
+			} else if (payload.contains("\"type\":\"REQUEST_NOTIFICATIONS\"")) {
 				// 알림 요청 -> 즉시 응답
 				sendNotifications(session, adminId);
 			}
