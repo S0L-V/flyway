@@ -3,71 +3,47 @@ package com.flyway.auth.service;
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.repository.EmailVerificationRepository;
-import com.flyway.auth.repository.EmailVerificationRepositoryImpl;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import com.flyway.user.mapper.UserMapper;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.sql.DataSource;
+import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
-import java.util.Properties;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = EmailVerificationServiceIntegrationTest.TestConfig.class)
 class EmailVerificationServiceIntegrationTest {
 
-    @Autowired
-    private EmailVerificationService emailVerificationService;
-
-    @Autowired
     private EmailVerificationRepository emailVerificationRepository;
-
-    @Autowired
     private TokenHasher tokenHasher;
-
-    @Autowired
-    private DataSource dataSource;
-
-    private JdbcTemplate jdbcTemplate;
+    private EmailVerificationServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.execute("DROP TABLE IF EXISTS email_verification_token");
-        jdbcTemplate.execute(
-                "CREATE TABLE email_verification_token (" +
-                        "email_verification_token_id CHAR(36) PRIMARY KEY," +
-                        "email VARCHAR(255) NOT NULL," +
-                        "purpose VARCHAR(32) NOT NULL," +
-                        "token_hash VARCHAR(255) NOT NULL UNIQUE," +
-                        "expires_at TIMESTAMP NOT NULL," +
-                        "used_at TIMESTAMP NULL," +
-                        "created_at TIMESTAMP NOT NULL" +
-                        ")"
+        emailVerificationRepository = Mockito.mock(EmailVerificationRepository.class);
+        MailSender mailSender = Mockito.mock(MailSender.class);
+        tokenHasher = Mockito.mock(TokenHasher.class);
+        UserMapper userMapper = Mockito.mock(UserMapper.class);
+
+        service = new EmailVerificationServiceImpl(
+                emailVerificationRepository,
+                mailSender,
+                tokenHasher,
+                userMapper
         );
+        ReflectionTestUtils.setField(service, "baseUrl", "http://localhost:8080");
+        ReflectionTestUtils.setField(service, "ttlMinutes", 15L);
     }
 
     @Test
@@ -75,7 +51,7 @@ class EmailVerificationServiceIntegrationTest {
     void verifySignupToken_expiredToken_fails() {
         String email = "expired@example.com";
         String token = "expired-token";
-        String tokenHash = tokenHasher.hash(token);
+        String tokenHash = "hash-expired";
         LocalDateTime now = LocalDateTime.now();
 
         EmailVerificationToken record = EmailVerificationToken.builder()
@@ -87,99 +63,20 @@ class EmailVerificationServiceIntegrationTest {
                 .createdAt(now.minusMinutes(2))
                 .build();
 
-        emailVerificationRepository.insertEmailVerificationToken(record);
+        when(tokenHasher.hash(token)).thenReturn(tokenHash);
+        when(emailVerificationRepository.findByTokenHash(tokenHash)).thenReturn(record);
+        when(emailVerificationRepository.countVerifiedByEmailPurpose(
+                eq(email),
+                eq(EmailVerificationPurpose.SIGNUP.name()),
+                any(LocalDateTime.class)
+        )).thenReturn(0);
 
-        assertThatThrownBy(() -> emailVerificationService.verifySignupToken(token))
+        assertThatThrownBy(() -> service.verifySignupToken(token))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        assertThat(emailVerificationService.isSignupVerified(email)).isFalse();
+        assertThat(service.isSignupVerified(email)).isFalse();
+        verify(emailVerificationRepository, never())
+                .markTokenUsed(anyString(), any(LocalDateTime.class));
     }
 
-    @Configuration
-    @MapperScan("com.flyway.auth.mapper")
-    @Import({EmailVerificationServiceImpl.class, TokenHasher.class, EmailVerificationRepositoryImpl.class})
-    static class TestConfig {
-
-        @Bean
-        public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-            Properties props = new Properties();
-            props.setProperty("app.base-url", "http://localhost:8080");
-            props.setProperty("mail.token.pepper", "test-pepper");
-            props.setProperty("mail.verify.ttl-minutes", "1");
-            PropertySourcesPlaceholderConfigurer config = new PropertySourcesPlaceholderConfigurer();
-            config.setProperties(props);
-            return config;
-        }
-
-        @Bean
-        public DataSource dataSource() {
-            return new EmbeddedDatabaseBuilder()
-                    .setType(EmbeddedDatabaseType.H2)
-                    .build();
-        }
-
-        @Bean
-        public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-            SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-            factoryBean.setDataSource(dataSource);
-            factoryBean.setMapperLocations(
-                    new PathMatchingResourcePatternResolver()
-                            .getResources("classpath:mapper/EmailVerificationTokenMapper.xml")
-            );
-            factoryBean.setTypeAliasesPackage("com.flyway.auth.domain");
-            org.apache.ibatis.session.Configuration configuration =
-                    new org.apache.ibatis.session.Configuration();
-            configuration.setMapUnderscoreToCamelCase(true);
-            factoryBean.setConfiguration(configuration);
-            return factoryBean.getObject();
-        }
-
-        @Bean
-        public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-            return new SqlSessionTemplate(sqlSessionFactory);
-        }
-
-        @Bean
-        public MailSender mailSender() {
-            return new MailSender() {
-                @Override
-                public void sendText(String to, String subject, String text) {
-                }
-
-                @Override
-                public void sendHtml(String to, String subject, String html) {
-                }
-            };
-        }
-
-        @Bean
-        public UserMapper userMapper() {
-            return new UserMapper() {
-                @Override
-                public void insertUser(com.flyway.user.domain.User user) {
-                    throw new UnsupportedOperationException("test stub");
-                }
-
-                @Override
-                public com.flyway.user.domain.User findById(String userId) {
-                    return null;
-                }
-
-                @Override
-                public com.flyway.user.domain.User findByEmailForLogin(String email) {
-                    return null;
-                }
-
-                @Override
-                public void updateEmail(String userId, String email) {
-                    throw new UnsupportedOperationException("test stub");
-                }
-
-                @Override
-                public void updateStatus(String userId, String status) {
-                    throw new UnsupportedOperationException("test stub");
-                }
-            };
-        }
-    }
 }

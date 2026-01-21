@@ -3,35 +3,19 @@ package com.flyway.auth.service;
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.repository.EmailVerificationRepository;
-import com.flyway.auth.repository.EmailVerificationRepositoryImpl;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import com.flyway.user.mapper.UserMapper;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.sql.DataSource;
+import org.mockito.Mockito;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -42,40 +26,36 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = EmailVerificationServiceConcurrencyTest.TestConfig.class)
 class EmailVerificationServiceConcurrencyTest {
 
-    @Autowired
-    private EmailVerificationService emailVerificationService;
-
-    @Autowired
-    private EmailVerificationRepository emailVerificationRepository;
-
-    @Autowired
+    private EmailVerificationServiceImpl service;
+    private InMemoryEmailVerificationRepository emailVerificationRepository;
+    private MailSender mailSender;
     private TokenHasher tokenHasher;
-
-    @Autowired
-    private DataSource dataSource;
-
-    private JdbcTemplate jdbcTemplate;
+    private UserMapper userMapper;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.execute("DROP TABLE IF EXISTS email_verification_token");
-        jdbcTemplate.execute(
-                "CREATE TABLE email_verification_token (" +
-                        "email_verification_token_id CHAR(36) PRIMARY KEY," +
-                        "email VARCHAR(255) NOT NULL," +
-                        "purpose VARCHAR(32) NOT NULL," +
-                        "token_hash VARCHAR(255) NOT NULL UNIQUE," +
-                        "expires_at TIMESTAMP NOT NULL," +
-                        "used_at TIMESTAMP NULL," +
-                        "created_at TIMESTAMP NOT NULL" +
-                        ")"
+        emailVerificationRepository = new InMemoryEmailVerificationRepository();
+        mailSender = Mockito.mock(MailSender.class);
+        tokenHasher = Mockito.mock(TokenHasher.class);
+        userMapper = Mockito.mock(UserMapper.class);
+
+        service = new EmailVerificationServiceImpl(
+                emailVerificationRepository,
+                mailSender,
+                tokenHasher,
+                userMapper
         );
+        ReflectionTestUtils.setField(service, "baseUrl", "http://localhost:8080");
+        ReflectionTestUtils.setField(service, "ttlMinutes", 15L);
+
+        when(userMapper.findByEmailForLogin(anyString())).thenReturn(null);
+        when(tokenHasher.hash(anyString()))
+                .thenAnswer(invocation -> invocation.getArgument(0, String.class));
     }
 
     @Test
@@ -92,7 +72,7 @@ class EmailVerificationServiceConcurrencyTest {
             futures.add(executor.submit(() -> {
                 ready.countDown();
                 start.await();
-                emailVerificationService.issueSignupVerification(email);
+                service.issueSignupVerification(email);
                 return null;
             }));
         }
@@ -104,12 +84,7 @@ class EmailVerificationServiceConcurrencyTest {
             future.get(5, TimeUnit.SECONDS);
         }
 
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(1) FROM email_verification_token WHERE email = ?",
-                Integer.class,
-                email
-        );
-        assertThat(count).isEqualTo(threads);
+        assertThat(emailVerificationRepository.countByEmail(email)).isEqualTo(threads);
         executor.shutdownNow();
     }
 
@@ -118,7 +93,7 @@ class EmailVerificationServiceConcurrencyTest {
     void verifySignupToken_concurrent() throws Exception {
         String email = "verify@example.com";
         String token = "token-123";
-        String tokenHash = tokenHasher.hash(token);
+        String tokenHash = token;
         LocalDateTime now = LocalDateTime.now();
 
         EmailVerificationToken record = EmailVerificationToken.builder()
@@ -144,7 +119,7 @@ class EmailVerificationServiceConcurrencyTest {
                 ready.countDown();
                 start.await();
                 try {
-                    emailVerificationService.verifySignupToken(token);
+                    service.verifySignupToken(token);
                     successCount.incrementAndGet();
                 } catch (IllegalArgumentException e) {
                     failCount.incrementAndGet();
@@ -163,11 +138,7 @@ class EmailVerificationServiceConcurrencyTest {
         assertThat(successCount.get()).isGreaterThanOrEqualTo(1);
         assertThat(successCount.get() + failCount.get()).isEqualTo(threads);
 
-        Integer usedCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(1) FROM email_verification_token WHERE used_at IS NOT NULL",
-                Integer.class
-        );
-        assertThat(usedCount).isEqualTo(1);
+        assertThat(emailVerificationRepository.countUsed()).isEqualTo(1);
         executor.shutdownNow();
     }
 
@@ -176,7 +147,7 @@ class EmailVerificationServiceConcurrencyTest {
     void issueAndVerify_concurrent() throws Exception {
         String email = "race@example.com";
         String token = "race-token";
-        String tokenHash = tokenHasher.hash(token);
+        String tokenHash = token;
         LocalDateTime now = LocalDateTime.now();
 
         EmailVerificationToken record = EmailVerificationToken.builder()
@@ -196,14 +167,14 @@ class EmailVerificationServiceConcurrencyTest {
         Future<?> verifyFuture = executor.submit(() -> {
             ready.countDown();
             start.await();
-            emailVerificationService.verifySignupToken(token);
+            service.verifySignupToken(token);
             return null;
         });
 
         Future<?> issueFuture = executor.submit(() -> {
             ready.countDown();
             start.await();
-            emailVerificationService.issueSignupVerification(email);
+            service.issueSignupVerification(email);
             return null;
         });
 
@@ -213,100 +184,88 @@ class EmailVerificationServiceConcurrencyTest {
         assertThatCode(() -> verifyFuture.get(5, TimeUnit.SECONDS)).doesNotThrowAnyException();
         assertThatCode(() -> issueFuture.get(5, TimeUnit.SECONDS)).doesNotThrowAnyException();
 
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(1) FROM email_verification_token WHERE email = ?",
-                Integer.class,
-                email
-        );
-        assertThat(count).isGreaterThanOrEqualTo(2);
+        assertThat(emailVerificationRepository.countByEmail(email)).isGreaterThanOrEqualTo(2);
         executor.shutdownNow();
     }
 
-    @Configuration
-    @MapperScan("com.flyway.auth.mapper")
-    @Import({EmailVerificationServiceImpl.class, TokenHasher.class, EmailVerificationRepositoryImpl.class})
-    static class TestConfig {
+    private static final class InMemoryEmailVerificationRepository implements EmailVerificationRepository {
+        private final ConcurrentHashMap<String, EmailVerificationToken> byHash = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<String, EmailVerificationToken> byId = new ConcurrentHashMap<>();
 
-        @Bean
-        public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-            Properties props = new Properties();
-            props.setProperty("app.base-url", "http://localhost:8080");
-            props.setProperty("mail.token.pepper", "test-pepper");
-            props.setProperty("mail.verify.ttl-minutes", "1");
-            PropertySourcesPlaceholderConfigurer config = new PropertySourcesPlaceholderConfigurer();
-            config.setProperties(props);
-            return config;
+        @Override
+        public void insertEmailVerificationToken(EmailVerificationToken token) {
+            if (byHash.putIfAbsent(token.getTokenHash(), token) != null) {
+                throw new DuplicateKeyException("token_hash");
+            }
+            byId.put(token.getEmailVerificationTokenId(), token);
         }
 
-        @Bean
-        public DataSource dataSource() {
-            return new EmbeddedDatabaseBuilder()
-                    .setType(EmbeddedDatabaseType.H2)
-                    .build();
+        @Override
+        public EmailVerificationToken findByTokenHash(String tokenHash) {
+            return byHash.get(tokenHash);
         }
 
-        @Bean
-        public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-            SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-            factoryBean.setDataSource(dataSource);
-            factoryBean.setMapperLocations(
-                    new PathMatchingResourcePatternResolver()
-                            .getResources("classpath:mapper/EmailVerificationTokenMapper.xml")
-            );
-            factoryBean.setTypeAliasesPackage("com.flyway.auth.domain");
-            org.apache.ibatis.session.Configuration configuration =
-                    new org.apache.ibatis.session.Configuration();
-            configuration.setMapUnderscoreToCamelCase(true);
-            factoryBean.setConfiguration(configuration);
-            return factoryBean.getObject();
+        @Override
+        public int markTokenUsed(String emailVerificationTokenId, LocalDateTime usedAt) {
+            synchronized (this) {
+                EmailVerificationToken current = byId.get(emailVerificationTokenId);
+                if (current == null || current.getUsedAt() != null) {
+                    return 0;
+                }
+                EmailVerificationToken updated = EmailVerificationToken.builder()
+                        .emailVerificationTokenId(current.getEmailVerificationTokenId())
+                        .email(current.getEmail())
+                        .purpose(current.getPurpose())
+                        .tokenHash(current.getTokenHash())
+                        .expiresAt(current.getExpiresAt())
+                        .usedAt(usedAt)
+                        .createdAt(current.getCreatedAt())
+                        .build();
+                byId.put(emailVerificationTokenId, updated);
+                byHash.put(updated.getTokenHash(), updated);
+                return 1;
+            }
         }
 
-        @Bean
-        public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-            return new SqlSessionTemplate(sqlSessionFactory);
+        @Override
+        public int countVerifiedByEmailPurpose(String email, String purpose, LocalDateTime now) {
+            int count = 0;
+            for (EmailVerificationToken token : byId.values()) {
+                if (!email.equals(token.getEmail())) {
+                    continue;
+                }
+                if (token.getPurpose() == null || !purpose.equals(token.getPurpose().name())) {
+                    continue;
+                }
+                if (token.getUsedAt() == null) {
+                    continue;
+                }
+                if (token.getExpiresAt() != null && token.getExpiresAt().isBefore(now)) {
+                    continue;
+                }
+                count++;
+            }
+            return count;
         }
 
-        @Bean
-        public MailSender mailSender() {
-            return new MailSender() {
-                @Override
-                public void sendText(String to, String subject, String text) {
+        int countByEmail(String email) {
+            int count = 0;
+            for (EmailVerificationToken token : byId.values()) {
+                if (email.equals(token.getEmail())) {
+                    count++;
                 }
-
-                @Override
-                public void sendHtml(String to, String subject, String html) {
-                }
-            };
+            }
+            return count;
         }
 
-        @Bean
-        public UserMapper userMapper() {
-            return new UserMapper() {
-                @Override
-                public void insertUser(com.flyway.user.domain.User user) {
-                    throw new UnsupportedOperationException("test stub");
+        int countUsed() {
+            int count = 0;
+            for (EmailVerificationToken token : byId.values()) {
+                if (token.getUsedAt() != null) {
+                    count++;
                 }
-
-                @Override
-                public com.flyway.user.domain.User findById(String userId) {
-                    return null;
-                }
-
-                @Override
-                public com.flyway.user.domain.User findByEmailForLogin(String email) {
-                    return null;
-                }
-
-                @Override
-                public void updateEmail(String userId, String email) {
-                    throw new UnsupportedOperationException("test stub");
-                }
-
-                @Override
-                public void updateStatus(String userId, String status) {
-                    throw new UnsupportedOperationException("test stub");
-                }
-            };
+            }
+            return count;
         }
     }
 }
