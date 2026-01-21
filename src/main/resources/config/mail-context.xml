@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${mail.smtp.host}"/>
+        <property name="port" value="${mail.smtp.port}"/>
+        <property name="username" value="${mail.smtp.username}"/>
+        <property name="password" value="${mail.smtp.password}"/>
+
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+                <prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
+
+                <!-- 디버그 필요하면 true로 -->
+                <prop key="mail.debug">${mail.debug}</prop>
+
+                <!-- 타임아웃 -->
+                <prop key="mail.smtp.connectiontimeout">5000</prop>
+                <prop key="mail.smtp.timeout">5000</prop>
+                <prop key="mail.smtp.writetimeout">5000</prop>
+            </props>
+        </property>
+    </bean>
+
+    <beans profile="default, dev">
+        <context:property-placeholder
+                location="classpath:config/application-dev.properties"
+                ignore-unresolvable="true"
+                ignore-resource-not-found="true"/>
+    </beans>
+
+    <beans profile="prod">
+        <context:property-placeholder
+                location="classpath:config/application-prod.properties"
+                ignore-unresolvable="true"
+                ignore-resource-not-found="true"/>
+    </beans>
+
+</beans>
