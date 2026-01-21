@@ -1,5 +1,6 @@
 let AIRPORTS = [];
 let allOptions = [];
+let displayedOptions = [];
 
 async function loadAirports() {
     const res = await fetch(`${CONTEXT_PATH}/api/public/airports`);
@@ -353,6 +354,8 @@ function initSearchButton() {
             resetFilters();
         }
 
+        currentSortType = null;
+
         // 2) DTO 1개로 보낼 payload 만들기 (POST)
         const payload = {
             tripType: state.tripType,
@@ -400,6 +403,7 @@ function initSearchButton() {
 
 function handleSearchResult(data){
     allOptions = data.options ?? [];
+    displayedOptions = allOptions;
 
     if(allOptions.length > 0) {
         const prices = allOptions.map(f => f.totalPrice).filter(p => p !== undefined && p !== null && !isNaN(p));

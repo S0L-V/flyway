@@ -24,9 +24,9 @@
             <img src="${pageContext.request.contextPath}/resources/search/img/logo.svg" alt="Flyway" />
         </div>
         <nav class="header__menu">
-            <a href="#" class="header__menu-item">로그인</a>
-            <a href="#" class="header__menu-item">회원가입</a>
-            <a href="#" class="header__menu-item">마이페이지</a>
+            <a href="/login" class="header__menu-item">로그인</a>
+            <a href="/signup" class="header__menu-item">회원가입</a>
+            <a href="/mypage" class="header__menu-item">마이페이지</a>
         </nav>
     </div>
 </header>
@@ -170,8 +170,8 @@
                         <input type="range" id="price-max-input" class="range-input max-range absolute top-1/2 transform -translate-y-1/2 w-full pointer-events-none appearance-none bg-transparent z-10" min="0" max="1000000" value="1000000" step="1000">
 
                         <div class="range-labels flex justify-between text-gray-500 text-sm mt-8">
-                            <span id="total-min-price">0</span>
-                            <span id="total-max-price">0</span>
+                            <span id="total-min-price" hidden>0</span>
+                            <span id="total-max-price" hidden>0</span>
                         </div>
                     </div>
                 </div>
@@ -292,6 +292,7 @@
 </script>
 <script src="${pageContext.request.contextPath}/resources/search/js/search.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/filtering.js?v=<%= System.currentTimeMillis() %>"></script>
+<script src="${pageContext.request.contextPath}/resources/search/js/sort.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/flight.js?v=<%= System.currentTimeMillis() %>"></script>
 
 <script>

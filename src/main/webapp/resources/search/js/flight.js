@@ -139,6 +139,8 @@ function renderOneWay(options) {
         return;
     }
 
+    displayedOptions = options;
+
     el.innerHTML = options
         .map(option => createOneWayCard(option))
         .join("");
@@ -152,6 +154,8 @@ function renderRoundTrip(options) {
         el.innerHTML = `<div class="empty">검색 결과가 없습니다.</div>`;
         return;
     }
+
+    displayedOptions = options;
 
     el.innerHTML = options
         .map(option => createRoundTripCard(option))
