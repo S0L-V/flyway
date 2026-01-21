@@ -13,11 +13,17 @@ const AdminDashboard = (function() {
     let currentActivities = [];
     let currentNotifications = [];
 
+    // 컨텍스트 경로 저장
+    let basePath = '';
+
     /**
      * 초기화
      */
     function init(contextPath) {
         console.log('[Dashboard] Initializing...');
+
+        // 컨텍스트 경로 저장
+        basePath = contextPath || '';
 
         // DOM 요소 캐시
         cacheElements();
@@ -26,7 +32,7 @@ const AdminDashboard = (function() {
         registerWebSocketHandlers();
 
         // WebSocket 연결
-        AdminWebSocket.connect(contextPath);
+        AdminWebSocket.connect(basePath);
 
         // 새로고침 버튼 이벤트
         bindRefreshButton();
@@ -179,8 +185,8 @@ const AdminDashboard = (function() {
             const timeAgo = formatTimeAgo(notification.createdAt);
 
             return `
-                <div class="p-4 ${isUnread ? 'bg-blue-50' : ''} hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
-                     onclick="AdminDashboard.markAsRead('${notification.notificationId}')">
+                <div class="notification-item p-4 ${isUnread ? 'bg-blue-50' : ''} hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
+                     data-notification-id="${escapeHtml(notification.notificationId)}">
                     <div class="flex items-start gap-3">
                         <div class="p-1.5 ${icon.bgColor} ${icon.textColor} rounded-full">
                             <i data-lucide="${icon.name}" class="w-4 h-4"></i>
@@ -197,6 +203,16 @@ const AdminDashboard = (function() {
         }).join('');
 
         elements.notificationList.innerHTML = html;
+
+        // 이벤트 위임으로 클릭 처리 (XSS 방지)
+        elements.notificationList.querySelectorAll('.notification-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                var id = this.getAttribute('data-notification-id');
+                if (id) {
+                    markAsRead(id);
+                }
+            });
+        });
 
         // Lucide 아이콘 재초기화
         if (typeof lucide !== 'undefined') {
@@ -222,7 +238,7 @@ const AdminDashboard = (function() {
      * 알림 읽음 처리
      */
     function markAsRead(notificationId) {
-        fetch('/admin/api/dashboard/notifications/' + notificationId + '/read', {
+        fetch(basePath + '/admin/api/dashboard/notifications/' + encodeURIComponent(notificationId) + '/read', {
             method: 'POST',
             credentials: 'same-origin'
         })
@@ -241,7 +257,7 @@ const AdminDashboard = (function() {
      * 모든 알림 읽음 처리
      */
     function markAllAsRead() {
-        fetch('/admin/api/dashboard/notifications/read-all', {
+        fetch(basePath + '/admin/api/dashboard/notifications/read-all', {
             method: 'POST',
             credentials: 'same-origin'
         })
