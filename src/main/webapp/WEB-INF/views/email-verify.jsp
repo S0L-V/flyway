@@ -52,7 +52,7 @@
 <div class="wrap">
     <div class="card">
         <h1><c:out value="${title}"/></h1>
-        <p class="status <c:out value='${success ? "ok" : "fail"}'/>">
+        <p class="status ${success ? 'ok' : 'fail'}">
             <c:out value="${statusMessage}"/>
         </p>
         <p class="hint"><c:out value="${hintMessage}"/></p>
