@@ -27,7 +27,7 @@ public interface AdminDashboardMapper {
 	 * 일일 예약 건수 조회
 	 * reservation 테이블에서 오늘 생성된 예약
 	 */
-	long countDailyReservation();
+	long countDailyReservations();
 
 	/**
 	 * 일일 결제 완료 건수 조회

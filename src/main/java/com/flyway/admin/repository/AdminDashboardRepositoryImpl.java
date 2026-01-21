@@ -25,7 +25,7 @@ public class AdminDashboardRepositoryImpl implements AdminDashboardRepository {
 
 	@Override
 	public long countDailyReservations() {
-		return dashboardMapper.countPendingReservations();
+		return dashboardMapper.countDailyReservations();
 	}
 
 	@Override
