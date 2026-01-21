@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,16 +34,13 @@ class EmailVerificationServiceConcurrencyTest {
 
     private EmailVerificationServiceImpl service;
     private InMemoryEmailVerificationRepository emailVerificationRepository;
-    private MailSender mailSender;
-    private TokenHasher tokenHasher;
-    private UserMapper userMapper;
 
     @BeforeEach
     void setUp() {
         emailVerificationRepository = new InMemoryEmailVerificationRepository();
-        mailSender = Mockito.mock(MailSender.class);
-        tokenHasher = Mockito.mock(TokenHasher.class);
-        userMapper = Mockito.mock(UserMapper.class);
+        MailSender mailSender = Mockito.mock(MailSender.class);
+        TokenHasher tokenHasher = Mockito.mock(TokenHasher.class);
+        UserMapper userMapper = Mockito.mock(UserMapper.class);
 
         service = new EmailVerificationServiceImpl(
                 emailVerificationRepository,
@@ -67,25 +65,28 @@ class EmailVerificationServiceConcurrencyTest {
         CountDownLatch ready = new CountDownLatch(threads);
         CountDownLatch start = new CountDownLatch(1);
 
-        List<Future<?>> futures = new ArrayList<>();
-        for (int i = 0; i < threads; i++) {
-            futures.add(executor.submit(() -> {
-                ready.countDown();
-                start.await();
-                service.issueSignupVerification(email);
-                return null;
-            }));
+        try {
+            List<Future<?>> futures = new ArrayList<>();
+            for (int i = 0; i < threads; i++) {
+                futures.add(executor.submit(() -> {
+                    ready.countDown();
+                    start.await();
+                    service.issueSignupVerification(email);
+                    return null;
+                }));
+            }
+
+            assertTrue(ready.await(3, TimeUnit.SECONDS));
+            start.countDown();
+
+            for (Future<?> future : futures) {
+                future.get(5, TimeUnit.SECONDS);
+            }
+
+            assertThat(emailVerificationRepository.countByEmail(email)).isEqualTo(threads);
+        } finally {
+            executor.shutdownNow();
         }
-
-        ready.await(3, TimeUnit.SECONDS);
-        start.countDown();
-
-        for (Future<?> future : futures) {
-            future.get(5, TimeUnit.SECONDS);
-        }
-
-        assertThat(emailVerificationRepository.countByEmail(email)).isEqualTo(threads);
-        executor.shutdownNow();
     }
 
     @Test
@@ -113,33 +114,36 @@ class EmailVerificationServiceConcurrencyTest {
         AtomicInteger successCount = new AtomicInteger();
         AtomicInteger failCount = new AtomicInteger();
 
-        List<Future<?>> futures = new ArrayList<>();
-        for (int i = 0; i < threads; i++) {
-            futures.add(executor.submit(() -> {
-                ready.countDown();
-                start.await();
-                try {
-                    service.verifySignupToken(token);
-                    successCount.incrementAndGet();
-                } catch (IllegalArgumentException e) {
-                    failCount.incrementAndGet();
-                }
-                return null;
-            }));
+        try {
+            List<Future<?>> futures = new ArrayList<>();
+            for (int i = 0; i < threads; i++) {
+                futures.add(executor.submit(() -> {
+                    ready.countDown();
+                    start.await();
+                    try {
+                        service.verifySignupToken(token);
+                        successCount.incrementAndGet();
+                    } catch (IllegalArgumentException e) {
+                        failCount.incrementAndGet();
+                    }
+                    return null;
+                }));
+            }
+
+            assertTrue(ready.await(3, TimeUnit.SECONDS));
+            start.countDown();
+
+            for (Future<?> future : futures) {
+                future.get(5, TimeUnit.SECONDS);
+            }
+
+            assertThat(successCount.get()).isGreaterThanOrEqualTo(1);
+            assertThat(successCount.get() + failCount.get()).isEqualTo(threads);
+
+            assertThat(emailVerificationRepository.countUsed()).isEqualTo(1);
+        } finally {
+            executor.shutdownNow();
         }
-
-        ready.await(3, TimeUnit.SECONDS);
-        start.countDown();
-
-        for (Future<?> future : futures) {
-            future.get(5, TimeUnit.SECONDS);
-        }
-
-        assertThat(successCount.get()).isGreaterThanOrEqualTo(1);
-        assertThat(successCount.get() + failCount.get()).isEqualTo(threads);
-
-        assertThat(emailVerificationRepository.countUsed()).isEqualTo(1);
-        executor.shutdownNow();
     }
 
     @Test
@@ -164,28 +168,31 @@ class EmailVerificationServiceConcurrencyTest {
         CountDownLatch ready = new CountDownLatch(2);
         CountDownLatch start = new CountDownLatch(1);
 
-        Future<?> verifyFuture = executor.submit(() -> {
-            ready.countDown();
-            start.await();
-            service.verifySignupToken(token);
-            return null;
-        });
+        try {
+            Future<?> verifyFuture = executor.submit(() -> {
+                ready.countDown();
+                start.await();
+                service.verifySignupToken(token);
+                return null;
+            });
 
-        Future<?> issueFuture = executor.submit(() -> {
-            ready.countDown();
-            start.await();
-            service.issueSignupVerification(email);
-            return null;
-        });
+            Future<?> issueFuture = executor.submit(() -> {
+                ready.countDown();
+                start.await();
+                service.issueSignupVerification(email);
+                return null;
+            });
 
-        ready.await(3, TimeUnit.SECONDS);
-        start.countDown();
+            assertTrue(ready.await(3, TimeUnit.SECONDS));
+            start.countDown();
 
-        assertThatCode(() -> verifyFuture.get(5, TimeUnit.SECONDS)).doesNotThrowAnyException();
-        assertThatCode(() -> issueFuture.get(5, TimeUnit.SECONDS)).doesNotThrowAnyException();
+            assertThatCode(() -> verifyFuture.get(5, TimeUnit.SECONDS)).doesNotThrowAnyException();
+            assertThatCode(() -> issueFuture.get(5, TimeUnit.SECONDS)).doesNotThrowAnyException();
 
-        assertThat(emailVerificationRepository.countByEmail(email)).isGreaterThanOrEqualTo(2);
-        executor.shutdownNow();
+            assertThat(emailVerificationRepository.countByEmail(email)).isGreaterThanOrEqualTo(2);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     private static final class InMemoryEmailVerificationRepository implements EmailVerificationRepository {

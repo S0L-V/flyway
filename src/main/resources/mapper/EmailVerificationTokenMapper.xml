@@ -43,6 +43,7 @@
         UPDATE email_verification_token
         SET used_at = #{usedAt}
         WHERE email_verification_token_id = #{emailVerificationTokenId}
+          AND used_at IS NULL
     </update>
 
     <select id="countVerifiedByEmailPurpose"

@@ -8,6 +8,7 @@ import com.flyway.template.common.mail.MailSender;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.template.exception.MailSendException;
+import com.flyway.template.util.MaskUtil;
 import com.flyway.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +72,11 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                 }
                 continue;
             } catch (Exception e) {
-                log.error("[AUTH] failed to save email verification token. email={}", email, e);
+                log.error(
+                        "[AUTH] failed to save email verification token. email={}",
+                        MaskUtil.maskEmail(email),
+                        e
+                );
                 throw e;
             }
 
@@ -100,7 +105,10 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             throw new IllegalArgumentException("만료된 인증 링크입니다.");
         }
 
-        emailVerificationRepository.markTokenUsed(stored.getEmailVerificationTokenId(), now);
+        int updated = emailVerificationRepository.markTokenUsed(stored.getEmailVerificationTokenId(), now);
+        if (updated == 0) {
+            throw new IllegalArgumentException("이미 사용된 인증 링크입니다.");
+        }
         return stored.getEmail();
     }
 
@@ -138,7 +146,11 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         try {
             mailSender.sendText(email, SUBJECT, body);
         } catch (Exception e) {
-            log.error("[AUTH] failed to send verification email. email={}", email, e);
+            log.error(
+                    "[AUTH] failed to send verification email. email={}",
+                    MaskUtil.maskEmail(email),
+                    e
+            );
             throw new MailSendException("메일 전송 실패", e);
         }
     }

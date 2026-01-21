@@ -6,8 +6,11 @@ public class MaskUtil {
             return "***";
         }
         int atIndex = email.indexOf('@');
+        if (atIndex == -1) {
+            return "***";
+        }
         if (atIndex <= 1) {
-            return "***" + email.substring(Math.max(atIndex, 0));
+            return "***" + email.substring(atIndex);
         }
         return email.charAt(0) + "***" + email.substring(atIndex);
     }
