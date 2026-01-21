@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4        # v3 → v4로 변경
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4       # v3 → v4로 변경
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -43,8 +43,50 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           
-          scp -i private_key.pem -o StrictHostKeyChecking=no *.war ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/opt/tomcat/webapps/ROOT.war
+          # ---------------------------------------------------------
+          # 1) setenv.sh를 먼저 '홈 디렉토리'에 생성합니다. (권한 문제 해결)
+          # ---------------------------------------------------------
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cat > ~/setenv.sh << 'ENVEOF'
+          #!/bin/bash
+          export DB_URL='${{ secrets.DB_URL }}'
+          export DB_USERNAME='${{ secrets.DB_USERNAME }}'
+          export DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+          export JWT_ADMIN_SECRET='${{ secrets.JWT_ADMIN_SECRET }}'
+          export JWT_ADMIN_EXPIRATION='${{ secrets.JWT_ADMIN_EXPIRATION }}'
+          export JWT_USER_SECRET='${{ secrets.JWT_USER_SECRET }}'
+          export JWT_USER_ACCESS_TTL='${{ secrets.JWT_USER_ACCESS_TTL }}'
+          export JWT_USER_REFRESH_TTL='${{ secrets.JWT_USER_REFRESH_TTL }}'
+          export JWT_USER_ISSUER='${{ secrets.JWT_USER_ISSUER }}'
+          export KAKAO_CLIENT_ID='${{ secrets.KAKAO_CLIENT_ID }}'
+          export KAKAO_REDIRECT_URI='${{ secrets.KAKAO_REDIRECT_URI }}'
+          export KAKAO_CLIENT_SECRET='${{ secrets.KAKAO_CLIENT_SECRET }}'
+          ENVEOF"
           
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo systemctl restart tomcat"
+          # ---------------------------------------------------------
+          # 2) WAR 파일도 '홈 디렉토리'로 전송 (작성하신 부분과 동일)
+          # ---------------------------------------------------------
+          scp -i private_key.pem -o StrictHostKeyChecking=no *.war ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app.war
+          
+          # ---------------------------------------------------------
+          # 3) 파일 이동 및 톰캣 재시작 (sudo 권한 사용)
+          # ---------------------------------------------------------
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
+            # setenv.sh 이동 및 권한 부여
+            sudo mv ~/setenv.sh /opt/tomcat/bin/setenv.sh
+            sudo chmod +x /opt/tomcat/bin/setenv.sh
+            # (선택) 톰캣 소유권 변경 (톰캣 유저가 tomcat인 경우)
+            sudo chown tomcat:tomcat /opt/tomcat/bin/setenv.sh
+          
+            # 기존 ROOT 폴더/파일 정리
+            sudo rm -rf /opt/tomcat/webapps/ROOT
+            sudo rm -f /opt/tomcat/webapps/ROOT.war
+          
+            # WAR 파일 이동
+            sudo mv ~/app.war /opt/tomcat/webapps/ROOT.war
+            sudo chown tomcat:tomcat /opt/tomcat/webapps/ROOT.war
+          
+            # 톰캣 재시작
+            sudo systemctl restart tomcat
+          "
           
           rm -f private_key.pem
