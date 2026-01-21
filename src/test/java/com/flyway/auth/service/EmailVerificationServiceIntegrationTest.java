@@ -2,7 +2,8 @@ package com.flyway.auth.service;
 
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
-import com.flyway.auth.repository.EmailVerificationTokenMapper;
+import com.flyway.auth.repository.EmailVerificationRepository;
+import com.flyway.auth.repository.EmailVerificationRepositoryImpl;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import com.flyway.user.mapper.UserMapper;
@@ -42,7 +43,7 @@ class EmailVerificationServiceIntegrationTest {
     private EmailVerificationService emailVerificationService;
 
     @Autowired
-    private EmailVerificationTokenMapper emailVerificationTokenMapper;
+    private EmailVerificationRepository emailVerificationRepository;
 
     @Autowired
     private TokenHasher tokenHasher;
@@ -86,7 +87,7 @@ class EmailVerificationServiceIntegrationTest {
                 .createdAt(now.minusMinutes(2))
                 .build();
 
-        emailVerificationTokenMapper.insertEmailVerificationToken(record);
+        emailVerificationRepository.insertEmailVerificationToken(record);
 
         assertThatThrownBy(() -> emailVerificationService.verifySignupToken(token))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -95,8 +96,8 @@ class EmailVerificationServiceIntegrationTest {
     }
 
     @Configuration
-    @MapperScan("com.flyway.auth.repository")
-    @Import({EmailVerificationServiceImpl.class, TokenHasher.class})
+    @MapperScan("com.flyway.auth.mapper")
+    @Import({EmailVerificationServiceImpl.class, TokenHasher.class, EmailVerificationRepositoryImpl.class})
     static class TestConfig {
 
         @Bean

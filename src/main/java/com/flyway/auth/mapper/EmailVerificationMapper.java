@@ -1,4 +1,4 @@
-package com.flyway.auth.repository;
+package com.flyway.auth.mapper;
 
 import com.flyway.auth.domain.EmailVerificationToken;
 import org.apache.ibatis.annotations.Mapper;
@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import java.time.LocalDateTime;
 
 @Mapper
-public interface EmailVerificationTokenMapper {
+public interface EmailVerificationMapper {
 
     void insertEmailVerificationToken(EmailVerificationToken token);
 

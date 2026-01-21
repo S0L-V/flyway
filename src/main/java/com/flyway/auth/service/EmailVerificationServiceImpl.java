@@ -2,7 +2,7 @@ package com.flyway.auth.service;
 
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
-import com.flyway.auth.repository.EmailVerificationTokenMapper;
+import com.flyway.auth.repository.EmailVerificationRepository;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import com.flyway.template.exception.BusinessException;
@@ -32,7 +32,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
-    private final EmailVerificationTokenMapper emailVerificationTokenMapper;
+    private final EmailVerificationRepository emailVerificationRepository;
     private final MailSender mailSender;
     private final TokenHasher tokenHasher;
     private final UserMapper userMapper;
@@ -63,7 +63,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                     .build();
 
             try {
-                emailVerificationTokenMapper.insertEmailVerificationToken(record);
+                emailVerificationRepository.insertEmailVerificationToken(record);
             } catch (DuplicateKeyException e) {
                 log.warn("[AUTH] duplicate token hash. retry={}", attempt);
                 if (attempt == MAX_RETRY) {
@@ -87,7 +87,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         }
 
         String tokenHash = tokenHasher.hash(token);
-        EmailVerificationToken stored = emailVerificationTokenMapper.findByTokenHash(tokenHash);
+        EmailVerificationToken stored = emailVerificationRepository.findByTokenHash(tokenHash);
         if (stored == null) {
             throw new IllegalArgumentException("유효하지 않은 인증 링크입니다.");
         }
@@ -100,14 +100,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             throw new IllegalArgumentException("만료된 인증 링크입니다.");
         }
 
-        emailVerificationTokenMapper.markTokenUsed(stored.getEmailVerificationTokenId(), now);
+        emailVerificationRepository.markTokenUsed(stored.getEmailVerificationTokenId(), now);
         return stored.getEmail();
     }
 
     @Override
     public boolean isSignupVerified(String email) {
         validateEmail(email);
-        int count = emailVerificationTokenMapper.countVerifiedByEmailPurpose(
+        int count = emailVerificationRepository.countVerifiedByEmailPurpose(
                 email,
                 EmailVerificationPurpose.SIGNUP.name(),
                 LocalDateTime.now()

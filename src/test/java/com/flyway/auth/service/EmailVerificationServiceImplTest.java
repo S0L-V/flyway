@@ -2,7 +2,7 @@ package com.flyway.auth.service;
 
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
-import com.flyway.auth.repository.EmailVerificationTokenMapper;
+import com.flyway.auth.repository.EmailVerificationRepository;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 class EmailVerificationServiceImplTest {
 
-    private EmailVerificationTokenMapper tokenMapper;
+    private EmailVerificationRepository tokenRepository;
     private MailSender mailSender;
     private TokenHasher tokenHasher;
     private com.flyway.user.mapper.UserMapper userMapper;
@@ -31,12 +31,12 @@ class EmailVerificationServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        tokenMapper = Mockito.mock(EmailVerificationTokenMapper.class);
+        tokenRepository = Mockito.mock(EmailVerificationRepository.class);
         mailSender = Mockito.mock(MailSender.class);
         tokenHasher = Mockito.mock(TokenHasher.class);
         userMapper = Mockito.mock(com.flyway.user.mapper.UserMapper.class);
 
-        service = new EmailVerificationServiceImpl(tokenMapper, mailSender, tokenHasher, userMapper);
+        service = new EmailVerificationServiceImpl(tokenRepository, mailSender, tokenHasher, userMapper);
         ReflectionTestUtils.setField(service, "baseUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(service, "ttlMinutes", 15L);
     }
@@ -51,7 +51,7 @@ class EmailVerificationServiceImplTest {
 
         ArgumentCaptor<EmailVerificationToken> captor =
                 ArgumentCaptor.forClass(EmailVerificationToken.class);
-        verify(tokenMapper).insertEmailVerificationToken(captor.capture());
+        verify(tokenRepository).insertEmailVerificationToken(captor.capture());
 
         EmailVerificationToken saved = captor.getValue();
         assertThat(saved.getEmail()).isEqualTo("test@example.com");
@@ -71,6 +71,6 @@ class EmailVerificationServiceImplTest {
         assertThatThrownBy(() -> service.issueSignupVerification("bad-email"))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        verifyNoInteractions(tokenMapper, mailSender);
+        verifyNoInteractions(tokenRepository, mailSender);
     }
 }

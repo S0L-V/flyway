@@ -2,7 +2,8 @@ package com.flyway.auth.service;
 
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
-import com.flyway.auth.repository.EmailVerificationTokenMapper;
+import com.flyway.auth.repository.EmailVerificationRepository;
+import com.flyway.auth.repository.EmailVerificationRepositoryImpl;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import com.flyway.user.mapper.UserMapper;
@@ -50,7 +51,7 @@ class EmailVerificationServiceConcurrencyTest {
     private EmailVerificationService emailVerificationService;
 
     @Autowired
-    private EmailVerificationTokenMapper emailVerificationTokenMapper;
+    private EmailVerificationRepository emailVerificationRepository;
 
     @Autowired
     private TokenHasher tokenHasher;
@@ -128,7 +129,7 @@ class EmailVerificationServiceConcurrencyTest {
                 .expiresAt(now.plusMinutes(10))
                 .createdAt(now)
                 .build();
-        emailVerificationTokenMapper.insertEmailVerificationToken(record);
+        emailVerificationRepository.insertEmailVerificationToken(record);
 
         int threads = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threads);
@@ -186,7 +187,7 @@ class EmailVerificationServiceConcurrencyTest {
                 .expiresAt(now.plusMinutes(10))
                 .createdAt(now)
                 .build();
-        emailVerificationTokenMapper.insertEmailVerificationToken(record);
+        emailVerificationRepository.insertEmailVerificationToken(record);
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
         CountDownLatch ready = new CountDownLatch(2);
@@ -222,8 +223,8 @@ class EmailVerificationServiceConcurrencyTest {
     }
 
     @Configuration
-    @MapperScan("com.flyway.auth.repository")
-    @Import({EmailVerificationServiceImpl.class, TokenHasher.class})
+    @MapperScan("com.flyway.auth.mapper")
+    @Import({EmailVerificationServiceImpl.class, TokenHasher.class, EmailVerificationRepositoryImpl.class})
     static class TestConfig {
 
         @Bean
