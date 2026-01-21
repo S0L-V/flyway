@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.flyway.template.util.MaskUtil.maskEmail;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class EmailVerificationApiController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(), e.getMessage()));
         } catch (MailSendException e) {
-            log.error("[AUTH] email verification send failed. email={}", email, e);
+            log.error("[AUTH] email verification send failed. email={}", maskEmail(email), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(
                             ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
@@ -44,7 +46,6 @@ public class EmailVerificationApiController {
                     ));
         }
     }
-
     @GetMapping("/api/auth/email/status")
     public ResponseEntity<ApiResponse<Boolean>> checkSignupVerification(@RequestParam String email) {
         try {
