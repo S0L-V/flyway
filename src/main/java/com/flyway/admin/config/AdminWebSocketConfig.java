@@ -37,8 +37,9 @@ public class AdminWebSocketConfig implements WebSocketConfigurer {
 			.setSessionCookieNeeded(true);
 
 		// 순수 WebSocket (SockJS 없이)
+		// 보안: same-origin만 허용 (세션 쿠키 사용 시 CSRF 방지)
 		registry.addHandler(dashboardHandler, "/admin/ws/dashboard/raw")
 			.addInterceptors(webSocketInterceptor)
-			.setAllowedOriginPatterns("*");
+			.setAllowedOriginPatterns(""); // same-origin 만 허용
 	}
 }
