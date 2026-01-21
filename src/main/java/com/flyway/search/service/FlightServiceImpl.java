@@ -3,35 +3,38 @@ package com.flyway.search.service;
 import com.flyway.search.domain.*;
 import com.flyway.search.dto.*;
 import com.flyway.search.mapper.FlightMapper;
+import com.flyway.search.repository.FlightRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Primary
+@RequiredArgsConstructor
 public class FlightServiceImpl implements FlightService{
 
-    @Autowired
-    FlightMapper mapper;
+    private final FlightRepository flightRepository;
 
     @Override
     public List<Flight> list(Flight vo) {
-        return mapper.list(vo);
+        return flightRepository.findAll(vo);
     }
 
     // 공항 토글
     @Override
     public List<Airport> airport(Airport vo) {
-        return mapper.airport(vo);
+        return flightRepository.findAirports(vo);
     }
 
     // 검색 결과
     @Override
     public SearchResultDto search(FlightSearchRequest dto) {
-        List<FlightSearchResponse> outbounds = mapper.outbound(dto);
+        List<FlightSearchResponse> outbounds = flightRepository.findOutboundFlights(dto);
 
         SearchResultDto result = new SearchResultDto();
         List<FlightOptionDto> options = new ArrayList<>();
@@ -51,14 +54,27 @@ public class FlightServiceImpl implements FlightService{
         }
 
         // 왕복
-        List<FlightSearchResponse> inbounds = mapper.inbound(dto);
+        List<FlightSearchResponse> inbounds = flightRepository.findInboundFlights(dto);
 
         int limit = 100;  // 폭발 방지(원하는 숫자로)
         for (FlightSearchResponse o : outbounds) {
             for (FlightSearchResponse i : inbounds) {
 
-                // (선택) 최소 필터: 시간/날짜 맞추기, 항공사 맞추기 등
-                // 예: return편 출발일이 dto.dateEnd인지 확인 같은 것들
+                // 가는날 오는날 같을 시 시간 겹침 방지
+                LocalDateTime outArrTime = (o.getArrivalTime()).plusHours(3);
+                LocalDateTime inDepTime = i.getDepartureTime();
+
+                if(inDepTime.isBefore(outArrTime)) {
+                    continue;
+                }
+
+                // 좌석이 null일 경우
+                Integer outSeatCount = o.getSeatCount();
+                Integer inSeatCount = i.getSeatCount();
+
+                if (outSeatCount == null || inSeatCount == null) {
+                    continue;
+                }
 
                 FlightOptionDto opt = new FlightOptionDto();
 
