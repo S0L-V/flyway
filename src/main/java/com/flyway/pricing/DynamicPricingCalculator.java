@@ -1,7 +1,7 @@
 package com.flyway.pricing;
 
-import com.flyway.pricing.dto.PricingRequest;
-import com.flyway.pricing.dto.PricingResponse;
+import com.flyway.pricing.dto.PricingInput;
+import com.flyway.pricing.dto.PricingResult;
 import com.flyway.pricing.policy.PricingPolicy;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class DynamicPricingCalculator {
     }
 
     /** 동적 가격 계산의 단일 진입점 */
-    public PricingResponse calculate(PricingRequest req) {
+    public PricingResult calculate(PricingInput req) {
 
         /* ==========================================================
          * 1. 입력값 기본 검증 (데이터 이상 방어)
@@ -36,19 +36,19 @@ public class DynamicPricingCalculator {
 
         // 기본가가 0 이하거나 현재가 음수인 경우 → 계산 불가
         if (req.getBasePrice() <= 0 || req.getCurrentPrice() < 0) {
-            return PricingResponse.skipped(PricingSkipReason.INVALID_PRICE);
+            return PricingResult.skipped(PricingSkipReason.INVALID_PRICE);
         }
 
         // 좌석 데이터 정합성 검증
         if (req.getTotalSeats() <= 0 ||
                 req.getRemainingSeats() < 0 ||
                 req.getRemainingSeats() > req.getTotalSeats()) {
-            return PricingResponse.skipped(PricingSkipReason.INVALID_SEATS);
+            return PricingResult.skipped(PricingSkipReason.INVALID_SEATS);
         }
 
         // 시간 정보 누락 방어
         if (req.getDepartureTime() == null || req.getNow() == null) {
-            return PricingResponse.skipped(PricingSkipReason.INVALID_TIME);
+            return PricingResult.skipped(PricingSkipReason.INVALID_TIME);
         }
 
         /* ==========================================================
@@ -61,7 +61,7 @@ public class DynamicPricingCalculator {
 
             // lastEventPricedAt이 미래인 이상치도 "쿨다운"으로 방어
             if (minutes < 0 || minutes < EVENT_COOLDOWN_MINUTES) {
-                return PricingResponse.skipped(PricingSkipReason.COOLDOWN);
+                return PricingResult.skipped(PricingSkipReason.COOLDOWN);
             }
         }
 
@@ -73,7 +73,7 @@ public class DynamicPricingCalculator {
         long daysToDeparture = Duration.between(req.getNow(), req.getDepartureTime()).toDays();
 
         if (hoursToDeparture < 0)
-            return PricingResponse.skipped(PricingSkipReason.DEPARTED);
+            return PricingResult.skipped(PricingSkipReason.DEPARTED);
 
         boolean hourMode = hoursToDeparture <= HOUR_MODE_THRESHOLD_HOURS;
 
@@ -131,10 +131,10 @@ public class DynamicPricingCalculator {
          * 10) 미세 변동 스킵 (100원 미만)
          * ========================================================== */
         if (newPrice == req.getCurrentPrice()) {
-            return PricingResponse.skipped(PricingSkipReason.SMALL_DIFF);
+            return PricingResult.skipped(PricingSkipReason.SMALL_DIFF);
         }
 
-        return PricingResponse.applied(targetPrice, newPrice, r, mLoad, mTime, alpha);
+        return PricingResult.applied(targetPrice, newPrice, r, mLoad, mTime, alpha);
     }
 
     // ------------------------------------------------------------
