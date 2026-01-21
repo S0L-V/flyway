@@ -15,7 +15,7 @@
             referer,
             visited_at
         ) VALUES (
-            #{session_id},
+            #{sessionId},
             #{userId},
             #{ipAddress},
             #{userAgent},
