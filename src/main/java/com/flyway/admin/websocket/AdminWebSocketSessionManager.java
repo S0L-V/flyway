@@ -64,7 +64,7 @@ public class AdminWebSocketSessionManager {
 	}
 
 	/**
-	 * 모든 세션에 미시지 브로드캐스트
+	 * 모든 세션에 메시지 브로드캐스트
 	 * @param message JSON 문자열 메시지
 	 */
 	public void broadcast(String message) {
@@ -80,7 +80,7 @@ public class AdminWebSocketSessionManager {
 					}
 					successCount++;
 				} catch (Exception e) {
-					log.error("Failed to send message to session: {}", session.getId(), e);
+					log.warn("Failed to send message to session: {}", session.getId(), e);
 					failCount++;
 				}
 			}
@@ -108,7 +108,7 @@ public class AdminWebSocketSessionManager {
 						session.sendMessage(textMessage);
 					}
 				} catch (Exception e) {
-					log.error("Failed to send message to admin: {}, session: {}",
+					log.warn("Failed to send message to admin: {}, session: {}",
 						adminId, session.getId(), e);
 				}
 			});
@@ -126,7 +126,7 @@ public class AdminWebSocketSessionManager {
 					session.sendMessage(new TextMessage(message));
 				}
 			} catch (Exception e) {
-				log.error("Failed to send message to session: {}", session.getId(), e);
+				log.warn("Failed to send message to session: {}", session.getId(), e);
 			}
 		}
 	}

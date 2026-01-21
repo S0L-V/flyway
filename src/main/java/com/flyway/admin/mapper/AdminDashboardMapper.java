@@ -77,7 +77,6 @@ public interface AdminDashboardMapper {
 	 * 최근 활동 목록 조회
 	 * 예약/결제/환불 내역을 UNION하여 최신순 정렬
 	 * @param limit 조회 건수 (기본 10)
-	 * @return
 	 */
 	List<RecentActivityDto> selectRecentActivities(@Param("limit") int limit);
 

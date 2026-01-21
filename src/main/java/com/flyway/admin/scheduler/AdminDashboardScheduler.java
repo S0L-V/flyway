@@ -28,6 +28,10 @@ public class AdminDashboardScheduler {
 	private final AdminDashboardService dashboardService;
 	private final ObjectMapper objectMapper;
 
+	/**
+	 * 통계 브로드캐스트 (5초마다)
+	 * 연결된 세션이 있을 때만 실행
+	 */
 	@Scheduled(fixedRate = 5000)
 	public void broadcastStats() {
 		if (!sessionManager.hasActiveSessions()) {

@@ -30,7 +30,10 @@ public class AdminWebSocketInterceptor implements HandshakeInterceptor {
 	 * HTTP 세션에서 adminId를 확인하여 인증된 관리자만 연결 허용
 	 */
 	@Override
-	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
+	public boolean beforeHandshake(
+		ServerHttpRequest request,
+		ServerHttpResponse response,
+		WebSocketHandler wsHandler,
 		Map<String, Object> attributes) throws Exception {
 
 		log.debug("WebSocket handshake attempt");
@@ -70,7 +73,10 @@ public class AdminWebSocketInterceptor implements HandshakeInterceptor {
 	 * Handshake 후 처리
 	 */
 	@Override
-	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
+	public void afterHandshake(
+		ServerHttpRequest request,
+		ServerHttpResponse response,
+		WebSocketHandler wsHandler,
 		Exception exception) {
 
 		if (exception != null) {

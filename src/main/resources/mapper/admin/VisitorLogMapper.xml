@@ -4,9 +4,9 @@
 
 <mapper namespace="com.flyway.admin.mapper.VisitorLogMapper">
 
-    <!-- 방문 로그 저장 -->
+    <!-- 방문 로그 저장 (중복 방지 - 동시 요청 시 race condition 방지 -->
     <insert id="insertVisitorLog" parameterType="com.flyway.admin.domain.VisitorLog">
-        INSERT INTO visitor_log(
+        INSERT IGNORE visitor_log(
             session_id,
             user_id,
             ip_address,
