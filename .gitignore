@@ -74,7 +74,6 @@ $RECYCLE.BIN/
 **/config/payment.properties
 
 # 기타 민감 정보
-**/application-prod.properties
 **/application-dev.properties
 **/application-secret.properties
 **/*-secret.properties
