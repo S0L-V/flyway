@@ -3,7 +3,7 @@ package com.flyway.pricing.dto;
 import lombok.Getter;
 
 @Getter
-public class PricingResponse {
+public class PricingResult {
 
     /* ===== 계산 결과 ===== */
     private final long targetPrice;   // P_target
@@ -17,7 +17,7 @@ public class PricingResponse {
     private final boolean applied;
     private final String skipReason;
 
-    private PricingResponse(
+    private PricingResult(
             long targetPrice,
             long newPrice,
             double r,
@@ -38,7 +38,7 @@ public class PricingResponse {
     }
 
     /* ===== 성공 ===== */
-    public static PricingResponse applied(
+    public static PricingResult applied(
             long targetPrice,
             long newPrice,
             double r,
@@ -46,7 +46,7 @@ public class PricingResponse {
             double mTime,
             double alpha
     ) {
-        return new PricingResponse(
+        return new PricingResult(
                 targetPrice,
                 newPrice,
                 r,
@@ -59,8 +59,8 @@ public class PricingResponse {
     }
 
     /* ===== 스킵 ===== */
-    public static PricingResponse skipped(String reason) {
-        return new PricingResponse(
+    public static PricingResult skipped(String reason) {
+        return new PricingResult(
                 0L,
                 0L,
                 0.0,

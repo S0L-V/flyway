@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class PricingRequest {
+public class PricingInput {
 
     /* ===== 식별자 (계산 로직에서 사용x) ===== */
     private String flightId;

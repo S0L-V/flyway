@@ -1,7 +1,7 @@
 package com.flyway.pricing;
 
-import com.flyway.pricing.dto.PricingRequest;
-import com.flyway.pricing.dto.PricingResponse;
+import com.flyway.pricing.dto.PricingInput;
+import com.flyway.pricing.dto.PricingResult;
 import com.flyway.pricing.policy.PricingPolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,8 +81,8 @@ class DynamicPricingCalculatorTest {
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 1, 19, 12, 0);
 
     // 기본 요청 생성기 (테스트에서 필요한 값만 덮어쓰기)
-    private PricingRequest.PricingRequestBuilder baseReq() {
-        return PricingRequest.builder()
+    private PricingInput.PricingInputBuilder baseReq() {
+        return PricingInput.builder()
                 .flightId("FL-1")
                 .cabinClassCode("ECO")
                 .basePrice(100_000L)
@@ -102,11 +102,11 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("basePrice <= 0 이면 INVALID_PRICE 스킵")
     void invalidPrice_basePriceZero() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .basePrice(0)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.INVALID_PRICE, res.getSkipReason());
@@ -115,11 +115,11 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("currentPrice < 0 이면 INVALID_PRICE 스킵")
     void invalidPrice_currentPriceNegative() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .currentPrice(-1)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.INVALID_PRICE, res.getSkipReason());
@@ -128,11 +128,11 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("totalSeats <= 0 이면 INVALID_SEATS 스킵")
     void invalidSeats_totalZero() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .totalSeats(0)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.INVALID_SEATS, res.getSkipReason());
@@ -141,12 +141,12 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("remainingSeats > totalSeats 이면 INVALID_SEATS 스킵")
     void invalidSeats_remainingGreaterThanTotal() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .remainingSeats(101)
                 .totalSeats(100)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.INVALID_SEATS, res.getSkipReason());
@@ -155,11 +155,11 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("departureTime/now 누락이면 INVALID_TIME 스킵")
     void invalidTime_null() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .departureTime(null)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.INVALID_TIME, res.getSkipReason());
@@ -172,12 +172,12 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("이벤트 기반: last_event_priced_at이 10분 이내면 COOLDOWN 스킵")
     void cooldown_eventOnly_shouldSkip() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(true)
                 .lastEventPricedAt(NOW.minusMinutes(9)) // 10분 이내
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.COOLDOWN, res.getSkipReason());
@@ -186,7 +186,7 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("배치 기반: last_event_priced_at이 있어도 쿨다운 미적용")
     void cooldown_batchShouldNotApply() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(false)
                 .lastEventPricedAt(NOW.minusMinutes(1)) // 있어도 무시
                 // 가격 변화를 강제로 만들기 위해 r을 높여 target을 올림
@@ -194,7 +194,7 @@ class DynamicPricingCalculatorTest {
                 .currentPrice(100_000L)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         // 배치에서는 쿨다운 스킵이 아니라, 적용 또는 SMALL_DIFF여야 함.
         // (정책 v1.0) D=30이면 mTimeDay=0.95
@@ -230,7 +230,7 @@ class DynamicPricingCalculatorTest {
         int sold = (int) Math.round(r * total);
         int remaining = total - sold;
 
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .basePrice(100_000L)
                 // 경계점에서도 SMALL_DIFF로 스킵되지 않도록 현재가를 충분히 낮게 설정
                 .currentPrice(10_000L)
@@ -240,7 +240,7 @@ class DynamicPricingCalculatorTest {
                 .departureTime(NOW.plusDays(30))
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         // 현재가를 낮게 설정했으므로 변화가 발생하여 applied 기대
         assertTrue(res.isApplied());
@@ -254,14 +254,14 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("배치 + Day 기반: D=30 -> alpha=0.15")
     void alpha_batch_day_30() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusDays(30)) // hours>48 -> day
                 // 변화 유도: r=1.0
                 .remainingSeats(0)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         assertEquals(0.15, res.getAlpha(), 1e-9);
@@ -270,13 +270,13 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("배치 + Hour 기반: 24<h<=48 구간이면 alpha=0.50")
     void alpha_batch_hour_48_to_24() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusHours(30)) // hour 기반
                 .remainingSeats(0)                // r=1.0
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         assertEquals(0.50, res.getAlpha(), 1e-9);
@@ -286,14 +286,14 @@ class DynamicPricingCalculatorTest {
     @DisplayName("이벤트 + D>2: alpha = min(0.5, baseAlpha)")
     void alpha_event_d_gt_2_min_05() {
         // D=30이면 baseAlpha=0.15 -> min(0.5,0.15)=0.15
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(true)
                 .lastEventPricedAt(NOW.minusMinutes(20)) // 쿨다운 통과
                 .departureTime(NOW.plusDays(30))
                 .remainingSeats(0) // r=1.0
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         assertEquals(0.15, res.getAlpha(), 1e-9);
@@ -302,7 +302,7 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("이벤트 + D<=2: alpha=1.0 (즉시 반영)")
     void alpha_event_d_le_2_immediate() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(true)
                 .lastEventPricedAt(NOW.minusMinutes(20))
                 .departureTime(NOW.plusHours(30)) // 대략 D<=2
@@ -311,7 +311,7 @@ class DynamicPricingCalculatorTest {
                 .currentPrice(100_000L)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         assertEquals(1.0, res.getAlpha(), 1e-9);
@@ -330,7 +330,7 @@ class DynamicPricingCalculatorTest {
         // (정책 v1.0) D=30이면 mTimeDay=0.95
         // r=0.0이면 mLoad=0.95 -> targetRaw=100,000*0.95*0.95=90,250
         // currentPrice=90,300이면 newRaw=90,300 + 0.15*(90,250-90,300)=90,292.5 -> 90,300
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .basePrice(100_000L)
                 .currentPrice(90_300L)
                 // r=0.0 만들기: sold=0 => remaining=total
@@ -338,7 +338,7 @@ class DynamicPricingCalculatorTest {
                 .remainingSeats(100)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.SMALL_DIFF, res.getSkipReason());
@@ -355,7 +355,7 @@ class DynamicPricingCalculatorTest {
         // r=1.0 => mLoad=1.45, D=30 => mTimeDay=0.95 => targetRaw=137,750 -> 137,800
         // alphaDay(D=30)=0.15
         // newRaw = 100,000 + 0.15*(137,750-100,000)=105,662.5 -> 105,700
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(false)
                 .basePrice(100_000L)
                 .currentPrice(100_000L)
@@ -364,7 +364,7 @@ class DynamicPricingCalculatorTest {
                 .departureTime(NOW.plusDays(30))
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         assertEquals(137_800L, res.getTargetPrice());
@@ -381,14 +381,14 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("경계값(잔여 0): remainingSeats=0이면 r=1.0, M_load=1.45")
     void boundary_remainingZero_rIsOne() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(false)
                 .totalSeats(100)
                 .remainingSeats(0)              // sold=100 => r=1.0
                 .departureTime(NOW.plusDays(30)) // day 기반
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         assertEquals(1.0, res.getR(), 1e-12);
@@ -398,7 +398,7 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("경계값(출발 임박): 이벤트 + H<=6이면 alpha=1.0, newPrice==targetPrice")
     void boundary_departureImminent_event_alphaImmediate() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(true)
                 .lastEventPricedAt(NOW.minusMinutes(20)) // 쿨다운 통과
                 .departureTime(NOW.plusHours(6))         // H=6 경계 (<=6 -> 1.0)
@@ -407,7 +407,7 @@ class DynamicPricingCalculatorTest {
                 .currentPrice(100_000L)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         assertEquals(1.0, res.getAlpha(), 1e-12);
@@ -418,24 +418,24 @@ class DynamicPricingCalculatorTest {
     @DisplayName("alphaHour 경계: H=7이면 0.70, H=6이면 1.00")
     void boundary_alphaHour_7_vs_6() {
         // H=7 -> alpha=0.70
-        PricingRequest req7 = baseReq()
+        PricingInput req7 = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusHours(7))
                 .totalSeats(100)
                 .remainingSeats(0) // r=1.0 -> 변화 유도
                 .build();
-        PricingResponse res7 = calculator.calculate(req7);
+        PricingResult res7 = calculator.calculate(req7);
         assertTrue(res7.isApplied());
         assertEquals(0.70, res7.getAlpha(), 1e-12);
 
         // H=6 -> alpha=1.00
-        PricingRequest req6 = baseReq()
+        PricingInput req6 = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusHours(6))
                 .totalSeats(100)
                 .remainingSeats(0)
                 .build();
-        PricingResponse res6 = calculator.calculate(req6);
+        PricingResult res6 = calculator.calculate(req6);
         assertTrue(res6.isApplied());
         assertEquals(1.00, res6.getAlpha(), 1e-12);
     }
@@ -443,23 +443,23 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("alphaHour 경계: H=25이면 0.50, H=24이면 0.70")
     void boundary_alphaHour_25_vs_24() {
-        PricingRequest req25 = baseReq()
+        PricingInput req25 = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusHours(25)) // >24 => 0.50
                 .totalSeats(100)
                 .remainingSeats(0)
                 .build();
-        PricingResponse res25 = calculator.calculate(req25);
+        PricingResult res25 = calculator.calculate(req25);
         assertTrue(res25.isApplied());
         assertEquals(0.50, res25.getAlpha(), 1e-12);
 
-        PricingRequest req24 = baseReq()
+        PricingInput req24 = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusHours(24)) // <=24 && >6 => 0.70
                 .totalSeats(100)
                 .remainingSeats(0)
                 .build();
-        PricingResponse res24 = calculator.calculate(req24);
+        PricingResult res24 = calculator.calculate(req24);
         assertTrue(res24.isApplied());
         assertEquals(0.70, res24.getAlpha(), 1e-12);
     }
@@ -468,24 +468,24 @@ class DynamicPricingCalculatorTest {
     @DisplayName("Day/Hour 전환 경계: H=48은 Hour(0.50), H=49는 Day(D=2~)로 계산")
     void boundary_dayHourSwitch_48_vs_49() {
         // H=48 => hour 기반 => alphaHour(48)=0.50
-        PricingRequest req48 = baseReq()
+        PricingInput req48 = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusHours(48))
                 .totalSeats(100)
                 .remainingSeats(0)
                 .build();
-        PricingResponse res48 = calculator.calculate(req48);
+        PricingResult res48 = calculator.calculate(req48);
         assertTrue(res48.isApplied());
         assertEquals(0.50, res48.getAlpha(), 1e-12);
 
         // H=49 => day 기반으로 전환 (Duration.toDays()는 49h -> 2days)
-        PricingRequest req49 = baseReq()
+        PricingInput req49 = baseReq()
                 .eventBased(false)
                 .departureTime(NOW.plusHours(49))
                 .totalSeats(100)
                 .remainingSeats(0)
                 .build();
-        PricingResponse res49 = calculator.calculate(req49);
+        PricingResult res49 = calculator.calculate(req49);
         assertTrue(res49.isApplied());
         // 49h => daysToDeparture=2 -> alphaDay(2)=0.40
         assertEquals(0.40, res49.getAlpha(), 1e-12);
@@ -498,21 +498,21 @@ class DynamicPricingCalculatorTest {
         int total = 1000;
 
         // r=0.399 -> sold=399 -> remaining=601
-        PricingRequest reqLow = baseReq()
+        PricingInput reqLow = baseReq()
                 .totalSeats(total)
                 .remainingSeats(601)
                 .departureTime(NOW.plusDays(30))
                 .build();
-        PricingResponse low = calculator.calculate(reqLow);
+        PricingResult low = calculator.calculate(reqLow);
         assertTrue(low.isApplied());
 
         // r=0.401 -> sold=401 -> remaining=599
-        PricingRequest reqHigh = baseReq()
+        PricingInput reqHigh = baseReq()
                 .totalSeats(total)
                 .remainingSeats(599)
                 .departureTime(NOW.plusDays(30))
                 .build();
-        PricingResponse high = calculator.calculate(reqHigh);
+        PricingResult high = calculator.calculate(reqHigh);
         assertTrue(high.isApplied());
 
         assertTrue(high.getMLoad() > low.getMLoad(), "r 증가 시 M_load도 증가해야 함");
@@ -527,14 +527,14 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("이벤트 쿨다운 경계: 정확히 10분이면 COOLDOWN이 아니다(통과)")
     void anomaly_cooldown_exactly10min_shouldPass() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(true)
                 .lastEventPricedAt(NOW.minusMinutes(10)) // 경계: 10분
                 .totalSeats(100)
                 .remainingSeats(0) // 변화 유도
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         // 통과하면 applied 또는 SMALL_DIFF 여야 하는데, 여기선 변화가 커서 applied 기대
         assertTrue(res.isApplied());
@@ -544,14 +544,14 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("이벤트 쿨다운 이상치: lastEventPricedAt이 미래면 COOLDOWN 스킵(데이터 이상 방어)")
     void anomaly_lastEventInFuture_shouldCooldownSkip() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(true)
                 .lastEventPricedAt(NOW.plusMinutes(1)) // 미래 시각
                 .totalSeats(100)
                 .remainingSeats(0)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.COOLDOWN, res.getSkipReason());
@@ -560,12 +560,12 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("r clamp 이상치: remainingSeats가 0 미만이면 INVALID_SEATS로 스킵 (clamp로 숨기지 않음)")
     void anomaly_remainingNegative_shouldInvalidSeats() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .totalSeats(100)
                 .remainingSeats(-1)
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertFalse(res.isApplied());
         assertEquals(PricingSkipReason.INVALID_SEATS, res.getSkipReason());
@@ -575,7 +575,7 @@ class DynamicPricingCalculatorTest {
     @DisplayName("극단값: 매우 큰 basePrice에서도 오버플로 없이 100원 반올림 결과가 정상")
     void anomaly_largeBasePrice_roundingStable() {
         // long 범위 내 큰 값 (곱셈은 double로 가므로 overflow는 double 정밀도 이슈만 주의)
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .basePrice(9_000_000_000_000L) // 9조
                 .currentPrice(9_000_000_000_000L)
                 .totalSeats(100)
@@ -583,7 +583,7 @@ class DynamicPricingCalculatorTest {
                 .departureTime(NOW.plusDays(45)) // alphaDay=0.10
                 .build();
 
-        PricingResponse res = calculator.calculate(req);
+        PricingResult res = calculator.calculate(req);
 
         assertTrue(res.isApplied());
         // 최소한 100원 단위로 끝나는지(반올림 적용) 확인
@@ -598,7 +598,7 @@ class DynamicPricingCalculatorTest {
     @Test
     @DisplayName("동일 입력 2회 호출 시 결과가 동일해야 한다 (idempotent)")
     void idempotent_sameInput_sameOutput() {
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .eventBased(true)
                 .lastEventPricedAt(NOW.minusMinutes(20))
                 .departureTime(NOW.plusDays(30))
@@ -608,8 +608,8 @@ class DynamicPricingCalculatorTest {
                 .currentPrice(100_000L)
                 .build();
 
-        PricingResponse r1 = calculator.calculate(req);
-        PricingResponse r2 = calculator.calculate(req);
+        PricingResult r1 = calculator.calculate(req);
+        PricingResult r2 = calculator.calculate(req);
 
         // PricingResult가 equals를 구현하지 않아도 필드 비교로 결정성 검증 가능
         assertEquals(r1.isApplied(), r2.isApplied());
@@ -629,7 +629,7 @@ class DynamicPricingCalculatorTest {
         // r=0.4 -> mLoad=1.0
         // D=25 -> mTimeDay=1.0(21<=D<30)
         // base=current -> target==current -> new==current -> SMALL_DIFF
-        PricingRequest req = baseReq()
+        PricingInput req = baseReq()
                 .basePrice(100_000L)
                 .currentPrice(100_000L)
                 .totalSeats(100)
@@ -638,8 +638,8 @@ class DynamicPricingCalculatorTest {
                 .departureTime(NOW.plusDays(25)) // mTimeDay=1.0 구간으로 이동
                 .build();
 
-        PricingResponse r1 = calculator.calculate(req);
-        PricingResponse r2 = calculator.calculate(req);
+        PricingResult r1 = calculator.calculate(req);
+        PricingResult r2 = calculator.calculate(req);
 
         assertFalse(r1.isApplied());
         assertFalse(r2.isApplied());
