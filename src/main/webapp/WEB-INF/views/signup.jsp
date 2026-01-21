@@ -21,16 +21,37 @@
         </div>
     </c:if>
 
-    <form action="${pageContext.request.contextPath}/auth/signup" method="post">
+    <form id="signupForm" action="${pageContext.request.contextPath}/auth/signup" method="post">
         <div class="form-group">
             <label for="name">이름</label>
             <input type="text" id="name" name="name" placeholder="이름을 입력하세요" required>
         </div>
 
+        <!-- 이메일 + 인증메일 발송 -->
         <div class="form-group">
             <label for="email">이메일</label>
-            <input type="email" id="email" name="email" placeholder="example@mail.com"
-                   value="${signupEmail}" required>
+
+            <div class="email-row">
+                <input type="email" id="email" name="email" placeholder="example@mail.com" required>
+                <button type="button" id="sendVerifyBtn">인증메일</button>
+            </div>
+
+            <div id="sendStatus" class="status-text"></div>
+        </div>
+
+        <!-- 인증 확인 -->
+        <div class="form-group verify-box is-hidden" id="verifyBox">
+            <label>이메일 인증</label>
+
+            <div class="verify-row">
+                <button type="button" id="verifyBtn" class="btn-submit btn-inline">
+                    인증 확인
+                </button>
+            </div>
+
+            <div id="verifyStatus" class="verify-status"></div>
+
+            <input type="hidden" id="emailVerified" name="emailVerified" value="false">
         </div>
 
         <c:if test="${oauthSignUp}">
@@ -48,6 +69,13 @@
         <button type="submit" class="btn-submit">가입하기</button>
     </form>
 </div>
+
+<script>
+    window.APP = {
+        contextPath: "${pageContext.request.contextPath}"
+    };
+</script>
+<script src="${pageContext.request.contextPath}/resources/auth/signup.js"></script>
 
 </body>
 </html>

@@ -11,14 +11,8 @@
       http://mybatis.org/schema/mybatis-spring
       http://mybatis.org/schema/mybatis-spring.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <!-- Properties 파일 로드 -->
-    <context:property-placeholder
-            location="
-            classpath:config/application-dev.properties,
-            classpath:config/application-prod.properties"
-            ignore-unresolvable="true"
-            ignore-resource-not-found="true"/>
-
+    <!-- 메일(SMTP) 발송 관련 Bean 설정 로드 -->
+    <import resource="classpath:/config/mail-context.xml"/>
 
     <context:component-scan base-package="com.flyway">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
@@ -69,4 +63,18 @@
 
     <!-- Transaction Annotation 활성화 -->
     <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <beans profile="default, dev">
+        <context:property-placeholder
+                location="classpath:config/application-dev.properties"
+                ignore-unresolvable="true"
+                ignore-resource-not-found="true"/>
+    </beans>
+
+    <beans profile="prod">
+        <context:property-placeholder
+                location="classpath:config/application-prod.properties"
+                ignore-unresolvable="true"
+                ignore-resource-not-found="true"/>
+    </beans>
 </beans>
