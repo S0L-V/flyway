@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -44,7 +43,8 @@ class EmailVerificationViewControllerTest {
                 .thenReturn("test@example.com");
 
         mockMvc.perform(get("/auth/email/verify")
-                        .param("token", "valid-token"))
+                        .param("token", "valid-token")
+                        .param("attempt", "attempt-123"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("email-verify"))
                 .andExpect(model().attribute("success", true))
@@ -61,7 +61,8 @@ class EmailVerificationViewControllerTest {
                 .verifySignupToken(anyString(), anyString());
 
         mockMvc.perform(get("/auth/email/verify")
-                        .param("token", "invalid-token"))
+                        .param("token", "invalid-token")
+                        .param("attempt", "attempt-456"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("email-verify"))
                 .andExpect(model().attribute("success", false))
