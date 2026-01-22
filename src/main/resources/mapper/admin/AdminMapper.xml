@@ -11,7 +11,7 @@
         <result property="email" column="email"/>
         <result property="adminName" column="admin_name"/>
         <result property="phone" column="phone"/>
-        <result property="role" column="role" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="role" column="role" javaType="com.flyway.admin.domain.Role"/>
         <result property="isActive" column="is_active"/>
         <result property="lastLoginAt" column="last_login_at"/>
         <result property="lastLoginIp" column="last_login_ip"/>

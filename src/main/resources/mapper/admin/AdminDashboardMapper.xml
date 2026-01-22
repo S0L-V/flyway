@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.admin.mapper.AdminDashboardMapper">
+
+    <!-- ============================================ -->
+    <!-- 통계 조회 쿼리 -->
+    <!-- ============================================ -->
+
+    <!-- 일일 방문자 수 (visitor_log 테이블에서 유니크 세션 기준) -->
+    <select id="countDailyVisitors" resultType="long">
+        SELECT COUNT(DISTINCT session_id)
+        FROM visitor_log
+        WHERE DATE(visited_at) = CURDATE()
+    </select>
+
+    <!-- 일일 예약 건수 (reservation.reserved_at 기준) -->
+    <select id="countDailyReservations" resultType="long">
+        SELECT COUNT(*)
+        FROM reservation
+        WHERE DATE(reserved_at) = CURDATE()
+    </select>
+
+    <!-- 일일 결제 완료 건수 (payment.status = 'PAID') -->
+    <select id="countDailyPayments" resultType="long">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE DATE(paid_at) = CURDATE()
+          AND status = 'PAID'
+    </select>
+
+    <!-- 일일 취소/환불 건수 (payment.status = 'CANCELLED' or 'REFUNDED') -->
+    <select id="countDailyCancellations" resultType="long">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE DATE(paid_at) = CURDATE()
+          AND status IN ('CANCELLED', 'REFUNDED')
+    </select>
+
+    <!-- 일일 매출 (payment.status = 'PAID') -->
+    <select id="sumDailyRevenue" resultType="long">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payment
+        WHERE DATE(paid_at) = CURDATE()
+          AND status = 'PAID'
+    </select>
+
+    <!-- 총 회원 수 (users.status = 'ACTIVE') -->
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE status = 'ACTIVE'
+    </select>
+
+    <!-- 예정된 항공편 수 (출발 시간이 현재 이후) -->
+    <select id="countActiveFlights" resultType="long">
+        SELECT COUNT(*)
+        FROM flight
+        WHERE departure_time > NOW()
+    </select>
+
+    <!-- 대기 중 예약 수 (HELD) -->
+    <select id="countPendingReservations" resultType="long">
+        SELECT COUNT(*)
+        FROM reservation
+        WHERE status = 'HELD'
+    </select>
+
+    <!-- 대기 중 결제 수 (PENDING) -->
+    <select id="countPendingPayments" resultType="long">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE status = 'PENDING'
+    </select>
+
+    <!-- ============================================ -->
+    <!-- 최근 활동 조회 -->
+    <!-- ============================================ -->
+
+    <!-- 최근 활동 ResultMap -->
+    <resultMap id="recentActivityResultMap" type="com.flyway.admin.dto.RecentActivityDto">
+        <result property="activityId" column="activity_id"/>
+        <result property="activityType" column="activity_type"/>
+        <result property="description" column="description"/>
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="amount" column="amount"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="reservationId" column="reservation_id"/>
+        <result property="flightNumber" column="flight_number"/>
+    </resultMap>
+
+    <!-- 최근 활동 목록 (예약/결제/환불 UNION) -->
+    <select id="selectRecentActivities" resultMap="recentActivityResultMap">
+        (
+            SELECT
+                CONCAT('RES_', r.reservation_id) AS activity_id,
+                'RESERVATION' AS activity_type,
+                CONCAT(dep.airport_id, ' → ', arr.airport_id, ' 예약') AS description,
+                CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, '')) AS user_name,
+                u.email AS user_email,
+                NULL AS amount,
+                r.status AS status,
+                r.reserved_at AS created_at,
+                r.reservation_id AS reservation_id,
+                f.flight_number AS flight_number
+            FROM reservation r
+                     JOIN users u ON r.user_id = u.user_id
+                     LEFT JOIN user_profile up ON u.user_id = up.user_id
+                     JOIN reservation_segment rs ON r.reservation_id = rs.reservation_id AND rs.segment_order = 1
+                     JOIN flight f ON rs.flight_id = f.flight_id
+                     JOIN airport dep ON f.departure_airport = dep.airport_id
+                     JOIN airport arr ON f.arrival_airport = arr.airport_id
+            WHERE r.reserved_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        )
+        UNION ALL
+        (
+            SELECT
+                CONCAT('PAY_', p.payment_id) AS activity_id,
+                'PAYMENT' AS activity_type,
+                CONCAT('결제 완료 ₩', FORMAT(p.amount, 0)) AS description,
+                CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, '')) AS user_name,
+                u.email AS user_email,
+                p.amount AS amount,
+                p.status AS status,
+                p.paid_at AS created_at,
+                p.reservation_id AS reservation_id,
+                NULL AS flight_number
+            FROM payment p
+                     JOIN reservation r ON p.reservation_id = r.reservation_id
+                     JOIN users u ON r.user_id = u.user_id
+                     LEFT JOIN user_profile up ON u.user_id = up.user_id
+            WHERE p.paid_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+              AND p.status = 'PAID'
+        )
+        UNION ALL
+        (
+            SELECT
+                CONCAT('REF_', rf.refund_id) AS activity_id,
+                'REFUND' AS activity_type,
+                CONCAT('환불 처리 ₩', FORMAT(rf.refund_amount, 0)) AS description,
+                CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, '')) AS user_name,
+                u.email AS user_email,
+                rf.refund_amount AS amount,
+                rf.refund_status AS status,
+                rf.requested_at AS created_at,
+                rf.reservation_id AS reservation_id,
+                NULL AS flight_number
+            FROM refund rf
+                     JOIN reservation r ON rf.reservation_id = r.reservation_id
+                     JOIN users u ON r.user_id = u.user_id
+                     LEFT JOIN user_profile up ON u.user_id = up.user_id
+            WHERE rf.requested_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        )
+        ORDER BY created_at DESC
+            LIMIT #{limit}
+    </select>
+
+    <!-- ============================================ -->
+    <!-- 알림 조회 -->
+    <!-- ============================================ -->
+
+    <!-- 알림 ResultMap -->
+    <resultMap id="notificationResultMap" type="com.flyway.admin.dto.AdminNotificationDto">
+        <result property="notificationId" column="notification_id"/>
+        <result property="adminId" column="admin_id"/>
+        <result property="notificationType" column="notification_type"/>
+        <result property="title" column="title"/>
+        <result property="message" column="message"/>
+        <result property="relatedResourceType" column="related_resource_type"/>
+        <result property="relatedResourceId" column="related_reource_id"/>
+        <result property="priority" column="priority"/>
+        <result property="isRead" column="is_read"/>
+        <result property="readAt" column="read_at"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 읽지 않은 알림 수 -->
+    <select id="countUnreadNotifications" resultType="long">
+        SELECT COUNT(*)
+        FROM admin_notification
+        WHERE is_read = 'N'
+          AND (admin_id IS NULL OR admin_id = #{adminId})
+    </select>
+
+    <!-- 알림 목록 조회 -->
+    <select id="selectNotifications" resultMap="notificationResultMap">
+        SELECT
+            notification_id,
+            admin_id,
+            notification_type,
+            title,
+            message,
+            related_resource_type,
+            related_reource_id,
+            priority,
+            is_read,
+            read_at,
+            created_at
+        FROM admin_notification
+        WHERE (admin_id IS NULL OR admin_id = #{adminId})
+        ORDER BY created_at DESC
+            LIMIT #{limit}
+    </select>
+
+    <!-- 알림 읽음 처리 -->
+    <update id="markNotificationAsRead">
+        UPDATE admin_notification
+        SET is_read = 'Y',
+            read_at = NOW()
+        WHERE notification_id = #{notificationId}
+          AND (admin_id IS NULL OR admin_id = #{adminId})
+          AND is_read = 'N'
+    </update>
+
+    <!-- 모든 알림 읽음 처리 -->
+    <update id="markAllNotificationsAsRead">
+        UPDATE admin_notification
+        SET is_read = 'Y',
+            read_at = NOW()
+        WHERE (admin_id IS NULL OR admin_id = #{adminId})
+          AND is_read = 'N'
+    </update>
+
+</mapper>
