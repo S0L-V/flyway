@@ -48,6 +48,7 @@ class EmailVerificationServiceIntegrationTest {
         );
         ReflectionTestUtils.setField(service, "baseUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(service, "ttlMinutes", 15L);
+        ReflectionTestUtils.setField(service, "attemptTtlMinutes", 10L);
     }
 
     @Test
@@ -81,7 +82,7 @@ class EmailVerificationServiceIntegrationTest {
         assertThatThrownBy(() -> service.verifySignupToken(token, attemptId))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        assertThat(service.isSignupVerified(email, anyString())).isFalse();
+        assertThat(service.isSignupVerified(email, attemptId)).isFalse();
         verify(emailVerificationRepository, never())
                 .markTokenUsed(anyString(), any(LocalDateTime.class));
     }
