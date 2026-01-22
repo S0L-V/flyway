@@ -3,6 +3,7 @@ package com.flyway.auth.service;
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.repository.EmailVerificationRepository;
+import com.flyway.auth.repository.SignUpAttemptRepository;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 class EmailVerificationServiceImplTest {
 
     private EmailVerificationRepository tokenRepository;
+    private SignUpAttemptRepository signUpAttemptRepository;
     private MailSender mailSender;
     private TokenHasher tokenHasher;
     private com.flyway.user.mapper.UserMapper userMapper;
@@ -32,11 +34,18 @@ class EmailVerificationServiceImplTest {
     @BeforeEach
     void setUp() {
         tokenRepository = Mockito.mock(EmailVerificationRepository.class);
+        signUpAttemptRepository = Mockito.mock(SignUpAttemptRepository.class);
         mailSender = Mockito.mock(MailSender.class);
         tokenHasher = Mockito.mock(TokenHasher.class);
         userMapper = Mockito.mock(com.flyway.user.mapper.UserMapper.class);
 
-        service = new EmailVerificationServiceImpl(tokenRepository, mailSender, tokenHasher, userMapper);
+        service = new EmailVerificationServiceImpl(
+                tokenRepository,
+                signUpAttemptRepository,
+                mailSender,
+                tokenHasher,
+                userMapper
+        );
         ReflectionTestUtils.setField(service, "baseUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(service, "ttlMinutes", 15L);
     }
