@@ -1,6 +1,10 @@
 package com.flyway.auth.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -11,4 +15,5 @@ public class EmailSignUpRequest {
     private String name;
     private String email;
     private String rawPassword;
+    private String attemptId;
 }

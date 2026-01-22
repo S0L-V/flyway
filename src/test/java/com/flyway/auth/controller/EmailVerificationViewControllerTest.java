@@ -40,7 +40,7 @@ class EmailVerificationViewControllerTest {
     @Test
     @DisplayName("인증 링크 검증 성공 - 성공 메시지 출력")
     void verifySignupToken_success() throws Exception {
-        Mockito.when(emailVerificationService.verifySignupToken(anyString()))
+        Mockito.when(emailVerificationService.verifySignupToken(anyString(), anyString()))
                 .thenReturn("test@example.com");
 
         mockMvc.perform(get("/auth/email/verify")
@@ -58,7 +58,7 @@ class EmailVerificationViewControllerTest {
     void verifySignupToken_fail() throws Exception {
         doThrow(new IllegalArgumentException("유효하지 않은 인증 링크입니다."))
                 .when(emailVerificationService)
-                .verifySignupToken(anyString());
+                .verifySignupToken(anyString(), anyString());
 
         mockMvc.perform(get("/auth/email/verify")
                         .param("token", "invalid-token"))
