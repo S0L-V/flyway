@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.admin.mapper.AdminMapper">
+
+    <!-- ResultMap -->
+    <resultMap id="adminResultMap" type="com.flyway.admin.domain.Admin">
+        <id property="adminId" column="admin_id"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="email" column="email"/>
+        <result property="adminName" column="admin_name"/>
+        <result property="phone" column="phone"/>
+        <result property="role" column="role" javaType="com.flyway.admin.domain.Role"/>
+        <result property="isActive" column="is_active"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="lastLoginIp" column="last_login_ip"/>
+        <result property="passwordChangedAt" column="password_changed_at"/>
+        <result property="failedLoginCount" column="failed_login_count"/>
+        <result property="lockedUntil" column="locked_until"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <!-- 이메일로 관리자 조회 -->
+    <select id="findByEmail" resultMap="adminResultMap">
+        SELECT *
+        FROM admin
+        WHERE email = #{email}
+    </select>
+
+    <!-- Id로 관리자 조회 -->
+    <select id="findById" resultMap="adminResultMap">
+        SELECT *
+        FROM admin
+        WHERE admin_id = #{adminId}
+    </select>
+
+    <!-- 로그인 정보 업데이트 -->
+    <update id="updateLoginInfo">
+        UPDATE admin
+        SET last_login_at = #{loginAt},
+            last_login_ip = #{ipAddress},
+            updated_at = NOW()
+        WHERE admin_id = #{adminId}
+    </update>
+
+    <!-- 계정 잠금 -->
+    <update id="lockAccount">
+        UPDATE admin
+        SET locked_until = #{lockedUntil},
+            updated_at = NOW()
+        WHERE admin_id = #{adminId}
+    </update>
+
+    <!-- 로그인 실패 횟수 초기화 및 잠금 해제 -->
+    <update id="resetFailedCount">
+        UPDATE admin
+        SET failed_login_count = 0,
+            locked_until = NULL,
+            updated_at = NOW()
+        WHERE admin_id = #{adminId}
+    </update>
+
+
+    <!-- 관리자 생성 -->
+    <insert id="insert">
+        INSERT INTO admin(
+            admin_id,
+            email,
+            password_hash,
+            admin_name,
+            phone,
+            role,
+            is_active,
+            created_by,
+            created_at
+        ) VALUES (
+            #{adminId},
+            #{email},
+            #{passwordHash},
+            #{adminName},
+            #{phone},
+            #{role},
+            #{isActive},
+            #{createdBy},
+            NOW()
+        )
+    </insert>
+
+    <!-- 관리자 정보 수정 -->
+    <update id="update">
+        UPDATE admin
+        SET admin_name = #{adminName},
+            phone = #{phone},
+            role = #{role},
+            is_active = #{isActive},
+            updated_by = #{updatedBy},
+            updated_at = NOW()
+        WHERE admin_id = #{adminId}
+    </update>
+
+    <!-- Atomic 로그인 실패 처리 -->
+    <update id="handleLoginFailureAtomic">
+        UPDATE admin
+        SET failed_login_count = COALESCE(failed_login_count, 0) + 1,
+            locked_until = CASE
+                WHEN COALESCE(failed_login_count, 0) + 1 >= 5
+                THEN #{lockedUntil}
+                ELSE locked_until
+            END,
+            updated_at = NOW()
+        WHERE admin_id = #{adminId}
+    </update>
+
+</mapper>

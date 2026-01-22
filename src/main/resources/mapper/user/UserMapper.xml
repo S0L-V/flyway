@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.user.mapper.UserMapper">
+
+    <!-- 회원 생성 -->
+    <insert id="insertUser" parameterType="com.flyway.user.domain.User">
+        INSERT INTO users (user_id,
+                           email,
+                           password_hash,
+                           status,
+                           created_at)
+        VALUES (#{userId},
+                #{email},
+                #{passwordHash},
+                #{status},
+                #{createdAt})
+    </insert>
+
+    <!-- user_id로 회원 조회 -->
+    <select id="findById" parameterType="string" resultType="com.flyway.user.domain.User">
+        SELECT user_id,
+               email,
+               password_hash,
+               status,
+               created_at
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 이메일 로그인 회원 중에서 email로 회원 조회 -->
+    <select id="findByEmailForLogin"
+            parameterType="string"
+            resultType="com.flyway.user.domain.User">
+
+        SELECT u.user_id,
+               u.email,
+               u.password_hash,
+               u.status,
+               u.created_at
+        FROM users u
+                 INNER JOIN user_identity ui
+                            ON ui.user_id = u.user_id
+        WHERE u.email = #{email}
+          AND ui.provider = 'EMAIL'
+    </select>
+
+
+    <!-- 이메일 업데이트 (OAuth 온보딩에서 이메일 입력 완료 시) -->
+    <update id="updateEmail" parameterType="map">
+        UPDATE users
+        SET email = #{email}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 상태 변경 -->
+    <update id="updateStatus" parameterType="map">
+        UPDATE users
+        SET status = #{status}
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>

@@ -1,0 +1,27 @@
+body { font-family: 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
+.login-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
+.login-container h2 { text-align: center; color: #333; margin-bottom: 30px; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; color: #666; font-size: 14px; }
+.form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+
+/* 기본 로그인 버튼 */
+.btn-login { width: 100%; padding: 12px; background-color: #007bff; border: none; color: white; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+.btn-login:hover { background-color: #0056b3; }
+
+/* 구분선 */
+.divider { margin: 20px 0; border-bottom: 1px solid #ddd; position: relative; text-align: center; }
+.divider span { background: white; padding: 0 10px; position: relative; top: 10px; color: #999; font-size: 12px; }
+
+/* 카카오 로그인 버튼 */
+.btn-kakao {
+    width: 100%; background-color: #FEE500; border: none; color: #3c1e1e;
+    border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center; text-decoration: none;
+}
+
+/* 회원가입 링크 */
+.footer-links { margin-top: 20px; text-align: center; font-size: 14px; color: #666; }
+.footer-links a { color: #007bff; text-decoration: none; }
+.footer-links a:hover { text-decoration: underline; }
