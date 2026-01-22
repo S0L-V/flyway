@@ -83,6 +83,27 @@
 .search-filters {
   display: flex;
   gap: var(--spacing-lg);
+  position: relative;
+}
+
+.filter {
+  position: relative;
+}
+
+.filter-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 9999;
+
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.12);
+  padding: 12px;
+
+  min-width: 320px;
+  max-width: 420px;
 }
 
 .filter-button {
@@ -152,8 +173,68 @@
 
 .dropdown-list li:hover { background: rgba(0,0,0,.06); }
 
-.date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.date-row input { width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,.12); }
+/*.date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }*/
+/*.date-row input { width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,.12); }*/
+
+/* 1. 드롭다운 패널: 내용물 크기에 딱 맞게 조절 */
+.dropdown[data-field="dates"] .dropdown-panel {
+  /* 핵심: width를 fit-content로 주면 내용물(인풋) 개수에 따라 알아서 늘었다 줄었다 합니다 */
+  width: fit-content;
+  min-width: auto; /* 기존에 설정한 최소 너비 제거 */
+  padding: 20px;
+  white-space: nowrap; /* 내용물이 줄바꿈되지 않도록 방지 */
+}
+
+/* 2. 날짜 배치: Grid 대신 Flex 사용 */
+.dropdown[data-field="dates"] .date-row {
+  display: flex;       /* Flex를 써야 숨겨진 요소 공간이 완전히 사라짐 */
+  flex-direction: row; /* 가로 배치 */
+  gap: 15px;           /* 인풋 사이 간격 */
+  margin-bottom: 15px;
+}
+
+/* 3. 인풋창 크기 고정 (달력 크기는 건드리지 않음) */
+.dropdown[data-field="dates"] input[type="date"] {
+  width: 160px; /* 인풋 하나당 고정 너비 (적절히 조절하세요) */
+  height: 40px; /* 기본 높이 */
+  padding: 5px 10px;
+  font-size: 14px; /* 기본 폰트 사이즈 */
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+}
+
+/* 4. 라벨 스타일 */
+.dropdown[data-field="dates"] label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 0;
+}
+
+/* 5. 숨김 처리 (편도일 때 확실히 공간 차지 안 하게) */
+.dropdown[data-field="dates"] [hidden] {
+  display: none !important;
+}
+
+/* 6. 하단 버튼 오른쪽 정렬 */
+.dropdown[data-field="dates"] .panel-actions {
+  text-align: right;
+  margin-top: 10px;
+}
+.dropdown[data-field="dates"] .btn {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
 
 .date-help { margin: 10px 0 0; color: #b00020; font-size: 12px; }
 
@@ -243,3 +324,140 @@
 .airport-item:hover {
   background: rgba(0,0,0,.06);
 }
+
+
+.time-filter-panel {
+  position: absolute;
+  margin-top: 8px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.12);
+  width: 320px;
+  z-index: 50;
+}
+
+.time-filter-header {
+  margin-bottom: 10px;
+}
+
+.time-filter-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.time-label {
+  width: 48px;
+  font-size: 13px;
+  color: #666;
+}
+
+.time-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.time-chip.active{
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.time-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #e0e0e0;
+  background: #f5f5f5;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.time-chip.active {
+  background: #2d7df6;
+  color: #fff;
+  border-color: #2d7df6;
+}
+
+.time-chip::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.25);
+}
+
+.time-chip.active::before {
+  background: #fff;
+}
+
+
+/* --- 가격 이중 슬라이더 스타일 시작 --- */
+
+/* 슬라이더 컨테이너 */
+.range-slider-container {
+  position: relative;
+  width: 100%;
+  height: 40px; /* 터치 영역 확보 */
+  display: flex;
+  align-items: center;
+}
+
+/* 1. 배경 트랙 (회색 선) */
+.slider-track {
+  position: absolute;
+  width: 100%;
+  height: 4px; /* 얇은 선 */
+  background-color: #e5e7eb; /* 연한 회색 */
+  border-radius: 2px;
+  z-index: 1;
+}
+
+/* 2. 선택된 범위 (파란색 선) */
+.slider-range {
+  position: absolute;
+  height: 4px;
+  background-color: #1a73e8; /* 구글 파란색 */
+  border-radius: 2px;
+  z-index: 2;
+}
+
+/* 3. 실제 Input Range (투명하게 만들고 핸들만 보이게 함) */
+.range-input {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none; /* 브라우저 기본 스타일 제거 */
+  background: none; /* 배경 투명 */
+  pointer-events: none; /* 중요: 트랙 클릭 무시하고 핸들만 클릭되게 함 */
+  z-index: 3;
+  margin: 0;
+}
+
+/* 슬라이더 핸들(동그라미) 디자인 - Chrome, Safari, Edge */
+.range-input::-webkit-slider-thumb {
+  pointer-events: auto; /* 핸들만 클릭 이벤트 받음 */
+  -webkit-appearance: none; /* 기본 스타일 제거 */
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 2px solid #2563eb; /* Tailwind blue-600 */
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2); /* 그림자 효과 */
+  margin-top: -12px; /* 트랙 중앙에 맞춤 (높이차 보정) */
+}
+
+/* 슬라이더 트랙 기본 스타일 제거 (브라우저 공통) */
+.range-input::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  height: 100%;
+}
+.range-input::-moz-range-track {
+  height: 100%;
+}
+
+/* --- 이중 슬라이더 스타일 끝 --- */

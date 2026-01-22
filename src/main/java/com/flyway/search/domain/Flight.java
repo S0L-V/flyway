@@ -1,18 +1,15 @@
-package com.flyway.search.dto;
+package com.flyway.search.domain;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class FlightSearchResponseDTO {
+public class Flight {
     private String flightId;
     private String departureAirport;
     private String arrivalAirport;
-    private String departureCity;
-    private String arrivalCity;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
     private String flightNumber;
-    private int seatCount;
 }

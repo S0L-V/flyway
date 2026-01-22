@@ -5,6 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SearchResultDTO {
-    private List<FlightOptionDTO> options;
+public class SearchResultDto {
+    private List<FlightOptionDto> options;
 }
