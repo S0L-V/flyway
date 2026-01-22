@@ -110,27 +110,29 @@ public class SeatServiceImpl implements SeatService {
             if (row == null) {
                 throw new IllegalStateException("좌석 HOLD 처리 중 오류가 발생했습니다.");
             }
-        } else {
-            // 상태 판단
-            if ("BOOKED".equalsIgnoreCase(row.getSeatStatus())) {
-                throw new IllegalStateException("이미 예약된 좌석입니다.");
-            }
+        }
 
-            if ("HOLD".equalsIgnoreCase(row.getSeatStatus())) {
-                // 아직 유효한 HOLD면 다른 사람이 점유 중
-                if (row.getHoldExpiresAt() != null && row.getHoldExpiresAt().isAfter(now)) {
-                    if (row.getHoldReservationSegmentId() == null
-                            || !reservationSegmentId.equals(row.getHoldReservationSegmentId())) {
-                        throw new IllegalStateException("다른 사용자가 임시 점유 중인 좌석입니다.");
-                    }
-                    // 같은 segment가 HOLD한 좌석이면 통과(갱신만)
+        // 상태 판단 (row 존재 시 항상 검사)
+        if ("BOOKED".equalsIgnoreCase(row.getSeatStatus())) {
+            throw new IllegalStateException("이미 예약된 좌석입니다.");
+        }
+        if ("HOLD".equalsIgnoreCase(row.getSeatStatus())) {
+            // 아직 유효한 HOLD면 다른 사람이 점유 중
+            if (row.getHoldExpiresAt() != null && row.getHoldExpiresAt().isAfter(now)) {
+                if (row.getHoldReservationSegmentId() == null
+                        || !reservationSegmentId.equals(row.getHoldReservationSegmentId())) {
+                    throw new IllegalStateException("다른 사용자가 임시 점유 중인 좌석입니다.");
                 }
-                // 만료된 HOLD면 선점 가능 (아래 update로 HOLD 갱신됨)
+                // 같은 segment가 HOLD한 좌석이면 통과(갱신만)
             }
+            // 만료된 HOLD면 선점 가능 (아래 update로 HOLD 갱신됨)
         }
 
         // HOLD 업데이트
-        seatMapper.updateFlightSeatHold(row.getFlightSeatId(), reservationSegmentId, holdExpiresAt);
+        int updated = seatMapper.updateFlightSeatHold(row.getFlightSeatId(), reservationSegmentId, holdExpiresAt);
+        if (updated == 0) {
+            throw new IllegalStateException("좌석 HOLD 처리 중 동시성 충돌이 발생했습니다.");
+        }
 
         // 9) passenger_seat upsert (UK(reservation_segment_id, passenger_id) 필요)
         seatMapper.upsertPassengerSeat(reservationSegmentId, request.getPassengerId(), row.getFlightSeatId());
