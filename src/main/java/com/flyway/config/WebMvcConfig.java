@@ -5,6 +5,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.flyway.admin.interceptor.AdminAuthInterceptor;
+import com.flyway.admin.interceptor.VisitorTrackingInterceptor;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class WebMvcConfig implements WebMvcConfigurer {
 
 	private final AdminAuthInterceptor adminAuthInterceptor;
+	private final VisitorTrackingInterceptor visitorTrackingInterceptor;
 
 	/**
 	 * Interceptor 등록
@@ -31,6 +33,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				"/admin/api/auth/login",
 				"/admin/api/auth/validate",
 				"/admin/resources/**",
+				"/resources/**"
+			);
+
+		// 방문자 추적 Interceptor (일반 사용자 페이지)
+		registry.addInterceptor(visitorTrackingInterceptor)
+			.addPathPatterns(
+				"/",
+				"/flight/**",
+				"/reservation/**",
+				"/mypage/**"
+			)
+			.excludePathPatterns(
+				"/admin/**",
+				"/api/**",
 				"/resources/**"
 			);
 	}
