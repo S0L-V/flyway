@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.auth.mapper.EmailVerificationMapper">
+
+    <insert id="insertEmailVerificationToken"
+            parameterType="com.flyway.auth.domain.EmailVerificationToken">
+        INSERT INTO email_verification_token (
+            email_verification_token_id,
+            email,
+            purpose,
+            token_hash,
+            expires_at,
+            created_at
+        )
+        VALUES (
+            #{emailVerificationTokenId},
+            #{email},
+            #{purpose},
+            #{tokenHash},
+            #{expiresAt},
+            #{createdAt}
+        )
+    </insert>
+
+    <select id="findByTokenHash"
+            parameterType="string"
+            resultType="com.flyway.auth.domain.EmailVerificationToken">
+        SELECT email_verification_token_id,
+               email,
+               purpose,
+               token_hash,
+               expires_at,
+               used_at,
+               created_at
+        FROM email_verification_token
+        WHERE token_hash = #{tokenHash}
+    </select>
+
+    <update id="markTokenUsed" parameterType="map">
+        UPDATE email_verification_token
+        SET used_at = #{usedAt}
+        WHERE email_verification_token_id = #{emailVerificationTokenId}
+          AND used_at IS NULL
+    </update>
+
+    <select id="countVerifiedByEmailPurpose"
+            parameterType="map"
+            resultType="int">
+        SELECT COUNT(1)
+        FROM email_verification_token
+        WHERE email = #{email}
+          AND purpose = #{purpose}
+          AND used_at IS NOT NULL
+          AND expires_at > #{now}
+    </select>
+
+</mapper>
