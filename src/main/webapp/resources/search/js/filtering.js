@@ -1,16 +1,28 @@
+let AIRLINES = [];
+
 const filterState = {
-    airline: new Set(["OZ", "KE"]),
+    airline: new Set(),
     price: null,
     outTime: null,
     inTime: null
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     initFilters();
     initTimeChips();
+    await loadAirlines();
     initAirlineFilters();
 });
 
+async function loadAirlines() {
+    const res = await fetch(`${CONTEXT_PATH}/api/public/airlines`);
+    const data = await res.json();
+
+    AIRLINES = data.map(a => ({
+        code: a.airlineId,
+        name: a.airlineName
+    }));
+}
 
 function initFilters() {
     // ✅ 버튼 클릭: 열기만 (이미 열려있으면 유지)
@@ -191,24 +203,60 @@ function initPriceSlider(minPrice, maxPrice) {
 }
 
 // 항공사 필터
-function initAirlineFilters() {
-    // 항공사 체크박스(input[type=checkbox])들에 이벤트 걸기
-    const airlineCheckboxes = document.querySelectorAll('input[name="airline"]');
+// function initAirlineFilters() {
+//     // 항공사 체크박스(input[type=checkbox])들에 이벤트 걸기
+//     const airlineCheckboxes = document.querySelectorAll('input[name="airline"]');
+//
+//     airlineCheckboxes.forEach(box => {
+//         box.addEventListener('change', () => {
+//             // 체크박스 상태가 변하면 즉시 필터 적용
+//             updateFilterStateAndRender();
+//         });
+//     });
+// }
 
-    airlineCheckboxes.forEach(box => {
-        box.addEventListener('change', () => {
-            // 체크박스 상태가 변하면 즉시 필터 적용
+function initAirlineFilters() {
+    const container = document.getElementById("airlineFilterList"); // HTML에 <ul id="airlineFilterList"></ul> 가 있어야 함
+    if (!container) return;
+
+    // 1. 렌더링: AIRLINES 배열을 순회하며 HTML 생성
+    // (기본값으로 모두 checked 상태로 둡니다)
+    container.innerHTML = AIRLINES.map(airline => `
+        <li class="airline-item">
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors">
+                <input type="checkbox" 
+                       name="airline" 
+                       value="${airline.code}" 
+                       class="airline-checkbox accent-blue-600 w-4 h-4" 
+                       checked> 
+                <span class="text-sm text-slate-700">${airline.name}</span>
+            </label>
+        </li>
+    `).join("");
+
+    filterState.airline.clear();
+    AIRLINES.forEach(a => filterState.airline.add(a.code));
+
+    // 3. 이벤트 리스너 (이벤트 위임 사용)
+    container.addEventListener("change", (e) => {
+        if (e.target.classList.contains("airline-checkbox")) {
             updateFilterStateAndRender();
-        });
+        }
     });
 }
 
-// 선택된 항공사 배열로
 function getSelectedAirlines() {
     return Array.from(
         document.querySelectorAll('input[name="airline"]:checked')
     ).map(el => el.value);
 }
+
+// 선택된 항공사 배열로
+// function getSelectedAirlines() {
+//     return Array.from(
+//         document.querySelectorAll('input[name="airline"]:checked')
+//     ).map(el => el.value);
+// }
 
 // 시간대 필터링 값 가져오기
 function getSelectedTimeRanges(type) {
@@ -346,8 +394,8 @@ function isHourInRange(hour, ranges) {
 
 // 검색 업데이트 시 필터 초기화
 function resetFilters() {
-    // state 초기화
-    filterState.airline = new Set(["OZ", "KE"]);
+    filterState.airline.clear();
+    AIRLINES.forEach(a => filterState.airline.add(a.code));
     filterState.outTime = null;
     filterState.inTime = null;
     filterState.price = null;

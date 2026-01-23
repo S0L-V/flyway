@@ -9,5 +9,6 @@ import java.util.List;
 public interface FlightService {
     List<Flight> list(Flight vo);
     List<Airport> airport(Airport vo);
+    List<Airline> airline(Airline vo);
     SearchResultDto search(FlightSearchRequest dto);
 }

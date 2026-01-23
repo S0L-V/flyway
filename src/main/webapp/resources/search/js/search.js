@@ -53,12 +53,40 @@ function initTripTabs() {
         if (state.tripType !== trip) {
             state.tripType = trip;
 
-            // 편도로 바꾸면 오는날 값/표시 초기화
             if (trip === "OW") {
-                state.dateEnd = null;
-                // 왕복용 인풋이 있다면 값도 같이 비움
-                const inInput = document.querySelector('[data-in-date-input]');
-                if (inInput) inInput.value = "";
+                // 편도로 갈 때는 UI만 갱신 (데이터는 살려둠)
+                // 단, 텍스트 표시할 때는 start만 보여주도록 처리 필요
+                if (state.dateStart) {
+                    setFieldText("dates", `${state.dateStart}`);
+                } else {
+                    setFieldText("dates", "날짜 선택");
+                }
+
+                // 중요: 편도일 때 도착일 인풋 값은 비워두는 게 UI상 깔끔함 (내부 값인 state.dateEnd는 유지하더라도)
+                const endInput = document.getElementById("dateEnd");
+                if(endInput) endInput.value = "";
+
+            } else { // "RT" (왕복)으로 돌아올 때
+
+                // 🚨 핵심: 숨겨져 있던 dateEnd가 현재 dateStart보다 과거라면, 유효하지 않으므로 초기화!
+                if (state.dateStart && state.dateEnd && state.dateStart > state.dateEnd) {
+                    state.dateEnd = null; // 날짜가 꼬였으므로 이때는 초기화
+                }
+
+                // 텍스트 복구 로직
+                const s = state.dateStart;
+                const e = state.dateEnd;
+
+                if (s && e) {
+                    setFieldText("dates", `${s} ~ ${e}`);
+                    // 인풋에도 다시 값 채워주기
+                    const endInput = document.getElementById("dateEnd");
+                    if(endInput) endInput.value = e;
+                } else if (s) {
+                    setFieldText("dates", `${s} ~ 날짜 선택`);
+                } else {
+                    setFieldText("dates", "날짜 선택");
+                }
             }
 
             document.dispatchEvent(new CustomEvent("tripTypeChanged"));
@@ -227,7 +255,7 @@ function initDates() {
 
         if (!isRT) {
             end.value = "";
-            state.dateEnd = null;
+            //state.dateEnd = null;
             err.hidden = true;
         }
     }

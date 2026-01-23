@@ -36,13 +36,26 @@
 // }
 
 function renderSegment(f) {
-    const flightNumber = f.flightNumber ?? f.flight_number ?? "-";
-    const depAirport = f.departureAirport ?? f.departure_airport ?? "-";
-    const arrAirport = f.arrivalAirport ?? f.arrival_airport ?? "-";
+    const flightNumber = f.flightNumber ?? "-";
+    const depAirport = f.departureAirport ?? "-";
+    const arrAirport = f.arrivalAirport ?? "-";
     const seatCount = f.seatCount ?? "-";
-    const depTime = formatTimeArray(f.departureTime ?? f.departure_time);
-    const arrTime = formatTimeArray(f.arrivalTime ?? f.arrival_time);
+    const depTime = formatDepTimeArray(f.departureTime);
+    const arrTime = formatArrTimeArray(f.departureTime, f.arrivalTime);
+    const durationMinutes = f.durationMinutes ?? "-";
 
+    // 시간 표시
+    let hours = Math.floor(durationMinutes / 60);
+    let minutes = durationMinutes % 60;
+    let time;
+
+    if (hours === 0) {
+        time = minutes + "분";
+    } else {
+        time = hours + "시간 " + minutes + "분";
+    }
+
+    // 항공사, 아이콘 표시
     let airlineName = "항공사";
     let airlineLogoHtml = "";
 
@@ -74,7 +87,7 @@ function renderSegment(f) {
             </div>
             <div class="duration-info">
               <span class="duration-badge">직항</span>
-              <div class="duration-time">2시간 40분</div>
+              <div class="duration-time">${time}</div>
             </div>
             <div class="time-info">
               <div class="time">${arrTime}</div>
@@ -164,7 +177,6 @@ function renderRoundTrip(options) {
 
 
 function renderByTripType(data) {
-    // [수정] 들어온 data가 배열이면 그대로 쓰고, 객체면 .options를 꺼내 쓴다.
     const options = Array.isArray(data) ? data : (data.options ?? []);
 
     if (state.tripType === "OW") {
@@ -244,13 +256,37 @@ function renderByTripType(data) {
 
 
 // departureTime: [2026,2,1,8,45] → "08:45"
-function formatTimeArray(arr) {
+function formatDepTimeArray(arr) {
     if (!Array.isArray(arr) || arr.length < 5) return "-";
     const hh = String(arr[3]).padStart(2, "0");
     const mm = String(arr[4]).padStart(2, "0");
     return `${hh}:${mm}`;
 }
 
+function formatArrTimeArray(depArr, arrArr) {
+    if (!Array.isArray(arrArr) || arrArr.length < 5) return "-";
+    const hh = String(arrArr[3]).padStart(2, "0");
+    const mm = String(arrArr[4]).padStart(2, "0");
+    const day = isNextDay(depArr, arrArr);
+
+    if(day > 0) {
+        return `${hh}:${mm} +${day}일`;
+    } else if(day < 0) {
+        return `${hh}:${mm} ${day}일`;
+    } else {
+        return `${hh}:${mm}`;
+    }
+}
+
+function isNextDay(depArr, arrArr) {
+    const depDate = new Date(depArr[0], depArr[1] - 1, depArr[2]);
+    const arrDate = new Date(arrArr[0], arrArr[1] - 1, arrArr[2]);
+
+    const diffMs = arrDate - depDate;
+    const oneDayMs = 24 * 60 * 60 * 1000;
+
+    return Math.round(diffMs / oneDayMs);
+}
 
 document.getElementById("resultList").addEventListener("click", (e) => {
     if (e.target.closest(".action-button") || e.target.closest("button")) {

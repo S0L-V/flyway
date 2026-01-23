@@ -140,8 +140,11 @@
                 </button>
 
                 <div class="filter-panel airline-options" data-filter-panel="airline" hidden>
-                    <label class="chip"><input type="checkbox" name="airline" value="OZ" checked> 아시아나</label>
-                    <label class="chip"><input type="checkbox" name="airline" value="KE" checked> 대한항공</label>
+<%--                    <label class="chip"><input type="checkbox" name="airline" value="OZ" checked> 아시아나</label>--%>
+<%--                    <label class="chip"><input type="checkbox" name="airline" value="KE" checked> 대한항공</label>--%>
+                    <ul id="airlineFilterList" class="airline-list">
+                        <li class="text-xs text-gray-400">항공사 목록 불러오는 중...</li>
+                    </ul>
                 </div>
             </div>
 
