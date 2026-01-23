@@ -425,7 +425,7 @@ function initSearchButton() {
 
 function handleSearchResult(data){
     allOptions = data.options ?? [];
-    displayedOptions = allOptions;
+    displayedOptions = [...allOptions];
 
     if(allOptions.length > 0) {
         const prices = allOptions.map(f => f.totalPrice).filter(p => p !== undefined && p !== null && !isNaN(p));
