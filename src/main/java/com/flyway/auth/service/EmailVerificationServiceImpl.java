@@ -114,12 +114,18 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     @Override
     public boolean isSignupVerified(String email, String attemptId) {
         validateEmail(email);
+
+        if (!StringUtils.hasText(attemptId)) {
+            throw new IllegalArgumentException(INVALID_LINK_MESSAGE);
+        }
+
         int count = emailVerificationRepository.existsUsedTokenByEmailAttempt(
                 email,
                 attemptId,
                 EmailVerificationPurpose.SIGNUP.name(),
                 LocalDateTime.now()
         );
+
         return count > 0;
     }
 

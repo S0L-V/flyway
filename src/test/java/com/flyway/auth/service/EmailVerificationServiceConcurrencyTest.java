@@ -253,6 +253,9 @@ class EmailVerificationServiceConcurrencyTest {
                 if (token.getPurpose() == null || !purpose.equals(token.getPurpose().name())) {
                     continue;
                 }
+                if (attemptId != null && !attemptId.equals(token.getAttemptId())) {
+                    continue;
+                }
                 if (token.getUsedAt() == null) {
                     continue;
                 }
