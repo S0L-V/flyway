@@ -25,7 +25,7 @@ public class StatisticsScheduler {
 	 * 매일 자정 00:05 - 전일 일일 통계 계산
 	 */
 	@Scheduled(cron = "0 5 0 * * *")
-	public void calculatedDailyStatistics() {
+	public void calculateDailyStatistics() {
 		LocalDate yesterday = LocalDate.now().minusDays(1);
 		log.info("[Statistics] 일일 통계 계산 시작: {}", yesterday);
 
@@ -39,6 +39,9 @@ public class StatisticsScheduler {
 		}
 	}
 
+	/**
+	 * 매주 월요일 00:10 - 전주 주간 통계 계산
+	 */
 	@Scheduled(cron = "0 10 0 * * MON")
 	public void calculateWeeklyStatistics() {
 		// 전주 월요일 ~ 월요일
@@ -60,16 +63,39 @@ public class StatisticsScheduler {
 	}
 
 	/**
+	 * 매월 1월 00:15 - 전월 월간 통계 계산
+	 */
+	@Scheduled(cron = "0 15 0 1 * *")
+	public void calculateMonthlyStatistics() {
+		// 전월 1월 ~ 말일
+		LocalDate firstDayOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+		LocalDate lastDayOfLastMonth = firstDayOfLastMonth.with(TemporalAdjusters.lastDayOfMonth());
+
+		log.info("[Statistics] 월간 통계 계산 시작: {} ~ {}", firstDayOfLastMonth, lastDayOfLastMonth);
+
+		try {
+			StatisticsDto stats = calculateStatistics("MONTHLY", firstDayOfLastMonth, lastDayOfLastMonth);
+			// 월간 통계는 해당 월의 1일 날짜로 저장
+			stats.setStatDate(firstDayOfLastMonth);
+			statisticsMapper.upsertStatistics(stats);
+			log.info("[Statistics] 월간 통계 저장 완료: month={}, reservations={}, refund={}",
+				firstDayOfLastMonth, stats.getTotalReservations(), stats.getTotalRevenue());
+		} catch (Exception e) {
+			log.error("[Statistics] 월간 통계 계산 실패: {}", e.getMessage(), e);
+		}
+	}
+
+	/**
 	 * 통계 계산 공통 메서드
 	 */
 	private StatisticsDto calculateStatistics(String statType, LocalDate startDate, LocalDate endDate) {
-		int totalReservations = statisticsMapper.countRefundsByPeriod(startDate, endDate);
+		int totalReservations = statisticsMapper.countReservationsByPeriod(startDate, endDate);
 		int confirmedReservations = statisticsMapper.countConfirmedReservationsByPeriod(startDate, endDate);
 		int cancelledReservation = statisticsMapper.countCancelledReservationsByPeriod(startDate, endDate);
 		long totalRevenue = statisticsMapper.sumRevenueByPeriod(startDate, endDate);
 		long avgTicketPrice = statisticsMapper.avgTicketPriceByPeriod(startDate, endDate);
 		int refundCount = statisticsMapper.countRefundsByPeriod(startDate, endDate);
-		long totalRefunds = statisticsMapper.sumRefundByPeriod(startDate, endDate);
+		long totalRefunds = statisticsMapper.sumRefundsByPeriod(startDate, endDate);
 		int newUsers = statisticsMapper.countNewUsersByPeriod(startDate, endDate);
 		int activeUsers = statisticsMapper.countActiveUsersByPeriod(startDate, endDate);
 

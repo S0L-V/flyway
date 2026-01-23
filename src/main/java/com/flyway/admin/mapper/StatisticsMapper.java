@@ -93,7 +93,7 @@ public interface StatisticsMapper {
 	/**
 	 * 특정 기간의 총 환불 금액
 	 */
-	long sumRefundByPeriod(
+	long sumRefundsByPeriod(
 		@Param("startDate") LocalDate startDate,
 		@Param("endDate") LocalDate endDate
 	);
