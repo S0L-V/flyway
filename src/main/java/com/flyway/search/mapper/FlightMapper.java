@@ -11,6 +11,7 @@ import java.util.List;
 public interface FlightMapper {
     List<Flight> list(Flight vo);
     List<Airport> airport(Airport vo);
+    List<Airline> airline(Airline vo);
     List<FlightSearchResponse> outbound(FlightSearchRequest dto);
     List<FlightSearchResponse> inbound(FlightSearchRequest dto);
 }

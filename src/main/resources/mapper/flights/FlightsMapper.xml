@@ -19,6 +19,12 @@
         from airport;
     </select>
 
+    <select id="airline" parameterType="com.flyway.search.domain.Airline" resultType="com.flyway.search.domain.Airline">
+        select airline_id AS airlineId,
+               airline_name AS airlineName
+        from airline;
+    </select>
+
     <select id="outbound" parameterType="com.flyway.search.dto.FlightSearchRequest" resultType="com.flyway.search.dto.FlightSearchResponse">
         SELECT
         f.flight_id AS flightId,
@@ -27,6 +33,7 @@
         f.departure_time    AS departureTime,
         f.arrival_time      AS arrivalTime,
         f.flight_number     AS flightNumber,
+        f.duration_minutes  AS durationMinutes,
         da.city             AS departureCity,
         aa.city             AS arrivalCity,
         <choose>
@@ -67,6 +74,7 @@
         f.departure_time    AS departureTime,
         f.arrival_time      AS arrivalTime,
         f.flight_number     AS flightNumber,
+        f.duration_minutes  AS durationMinutes,
         da.city             AS departureCity,
         aa.city             AS arrivalCity,
         <choose>
