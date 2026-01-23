@@ -1,7 +1,6 @@
 package com.flyway.admin.mapper;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -22,7 +21,7 @@ public interface StatisticsMapper {
 	 */
 	StatisticsDto selectStatistics(
 		@Param("statType") String statType,
-		@Param("statDate")LocalDateTime statDate
+		@Param("statDate") LocalDate statDate
 	);
 
 	/**
@@ -60,6 +59,14 @@ public interface StatisticsMapper {
 	);
 
 	/**
+	 * 특정 기간의 취소 예약 건수
+	 */
+	int countCancelledReservationsByPeriod(
+		@Param("startDate") LocalDate startDate,
+		@Param("endDate") LocalDate endDate
+	);
+
+	/**
 	 * 특정 기간의 총 매출
 	 */
 	long sumRevenueByPeriod(
@@ -79,6 +86,14 @@ public interface StatisticsMapper {
 	 * 특정 기간의 환불 건수
 	 */
 	int countRefundsByPeriod(
+		@Param("startDate") LocalDate startDate,
+		@Param("endDate") LocalDate endDate
+	);
+
+	/**
+	 * 특정 기간의 총 환불 금액
+	 */
+	long sumRefundByPeriod(
 		@Param("startDate") LocalDate startDate,
 		@Param("endDate") LocalDate endDate
 	);
