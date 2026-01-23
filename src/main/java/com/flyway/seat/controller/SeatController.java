@@ -1,8 +1,6 @@
 package com.flyway.seat.controller;
 
-import com.flyway.seat.dto.SeatDTO;
-import com.flyway.seat.dto.SeatHoldRequest;
-import com.flyway.seat.dto.SeatHoldResponse;
+import com.flyway.seat.dto.*;
 import com.flyway.seat.service.SeatService;
 import com.flyway.template.common.ApiResponse;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +29,10 @@ public class SeatController {
             @PathVariable("sid") String reservationSegmentId
     ) {
         return ApiResponse.success(
-                seatService.getSeatMapByReservationSegment(reservationId, reservationSegmentId)
+                seatService.getSeatMapByReservationSegment(
+                        reservationId,
+                        reservationSegmentId
+                )
         );
     }
 
@@ -43,7 +44,26 @@ public class SeatController {
             @RequestBody SeatHoldRequest request
     ) {
         return ApiResponse.success(
-                seatService.holdSeat(reservationId, reservationSegmentId, request)
+                seatService.holdSeat(
+                        reservationId,
+                        reservationSegmentId,
+                        request
+                )
+        );
+    }
+
+    @DeleteMapping("/api/public/reservations/{rid}/segments/{sid}/seats/hold/{passengerId}")
+    public ApiResponse<SeatReleaseResponse> releaseSeat(
+            @PathVariable("rid") String reservationId,
+            @PathVariable("sid") String reservationSegmentId,
+            @PathVariable("passengerId") String passengerId
+    ) {
+        return ApiResponse.success(
+                seatService.releaseSeat(
+                        reservationId,
+                        reservationSegmentId,
+                        passengerId
+                )
         );
     }
 }

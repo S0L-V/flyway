@@ -96,19 +96,20 @@
           AND passenger_id = #{passengerId}
     </select>
 
-    <!-- flight_id + seatNo로 aircraft_seat_id 조회 (좌석번호 유효성 체크용) + FOR UPDATE -->
+    <!-- aircraft_seat 행만 FOR UPDATE로 잠그기 -->
     <select id="selectAircraftSeatIdByFlightAndSeatNoForUpdate" resultType="string">
         SELECT aseat.airplane_seat_id
-        FROM flight_info fi
-                 JOIN aircraft_seat aseat
-                      ON aseat.aircraft_id = fi.aircraft_id
+        FROM aircraft_seat aseat
+                 JOIN flight_info fi
+                      ON fi.aircraft_id = aseat.aircraft_id
         WHERE fi.flight_id = #{flightId}
           AND aseat.seat_no = #{seatNo}
             FOR UPDATE
     </select>
 
+
     <!-- 승객이 이미 구간에서 잡고 있는 좌석이 있으면 그 flight_seat_id 반환 (행 락) -->
-    <select id="selectPassengerHeldFlightSeatIdForUpdate" resultType="string">
+    <select id="selectPassengerHoldFlightSeatIdForUpdate" resultType="string">
         SELECT ps.flight_seat_id
         FROM passenger_seat ps
         WHERE ps.reservation_segment_id = #{reservationSegmentId}

@@ -26,7 +26,7 @@ public interface SeatMapper {
             @Param("reservationSegmentId") String reservationSegmentId
     );
 
-    // reservation 상태 조회 (HELD/CONFIRMED/EXPIRED)
+    // reservation 상태 조회 (HOLD/CONFIRMED/EXPIRED)
     String selectReservationStatus(@Param("reservationId") String reservationId);
 
     // reservation 만료 시각 조회 (expired_at)
@@ -45,7 +45,7 @@ public interface SeatMapper {
     );
 
     // 승객이 이미 구간에서 잡고 있는 좌석이 있으면 그 flight_seat_id 반환 (행 락)
-    String selectPassengerHeldFlightSeatIdForUpdate(
+    String selectPassengerHoldFlightSeatIdForUpdate(
             @Param("reservationSegmentId") String reservationSegmentId,
             @Param("passengerId") String passengerId
     );
