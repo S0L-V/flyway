@@ -24,9 +24,9 @@
             <img src="${pageContext.request.contextPath}/resources/search/img/logo.svg" alt="Flyway" />
         </div>
         <nav class="header__menu">
-            <a href="/login" class="header__menu-item">로그인</a>
-            <a href="/signup" class="header__menu-item">회원가입</a>
-            <a href="/mypage" class="header__menu-item">마이페이지</a>
+            <a href="${pageContext.request.contextPath}/login" class="header__menu-item">로그인</a>
+            <a href="${pageContext.request.contextPath}/signup" class="header__menu-item">회원가입</a>
+            <a href="${pageContext.request.contextPath}/mypage" class="header__menu-item">마이페이지</a>
         </nav>
     </div>
 </header>

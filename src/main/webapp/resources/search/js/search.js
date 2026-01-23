@@ -382,7 +382,9 @@ function initSearchButton() {
             resetFilters();
         }
 
-        currentSortType = null;
+        if (typeof currentSortType !== "undefined") {
+            currentSortType = null;
+        }
 
         // 2) DTO 1개로 보낼 payload 만들기 (POST)
         const payload = {

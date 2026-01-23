@@ -1,11 +1,11 @@
-let currentSortType;
+let currentSortType = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     initSortButton();
 });
 
 function sorting(options) {
-    if(currentSortType === null || currentSortType === 'price_asc') {
+    if(currentSortType === null || currentSortType === 'price-asc') {
         currentSortType = 'price-desc';
         options.sort((a, b) => a.totalSeats - b.totalSeats);
     } else if(currentSortType === 'price-desc') {

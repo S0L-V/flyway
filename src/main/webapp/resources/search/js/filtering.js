@@ -219,17 +219,20 @@ function initAirlineFilters() {
     const container = document.getElementById("airlineFilterList"); // HTML에 <ul id="airlineFilterList"></ul> 가 있어야 함
     if (!container) return;
 
-    // 1. 렌더링: AIRLINES 배열을 순회하며 HTML 생성
-    // (기본값으로 모두 checked 상태로 둡니다)
+    const escapeHtml = (v) =>
+        String(v).replace(/[&<>"']/g, (c) => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+        })[c]);
+
     container.innerHTML = AIRLINES.map(airline => `
         <li class="airline-item">
             <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors">
                 <input type="checkbox" 
                        name="airline" 
-                       value="${airline.code}" 
+                       value="${escapeHtml(airline.code)}" 
                        class="airline-checkbox accent-blue-600 w-4 h-4" 
                        checked> 
-                <span class="text-sm text-slate-700">${airline.name}</span>
+                <span class="text-sm text-slate-700">${escapeHtml(airline.name)}</span>
             </label>
         </li>
     `).join("");
