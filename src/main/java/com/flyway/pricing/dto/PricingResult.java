@@ -1,8 +1,10 @@
 package com.flyway.pricing.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class PricingResult {
 
     /* ===== 계산 결과 ===== */
