@@ -29,7 +29,7 @@ public class EmailVerificationRepositoryImpl implements EmailVerificationReposit
     }
 
     @Override
-    public int countVerifiedByEmailPurpose(String email, String purpose, LocalDateTime now) {
-        return emailVerificationMapper.countVerifiedByEmailPurpose(email, purpose, now);
+    public int existsUsedTokenByEmailAttempt(String email, String attemptId, String purpose, LocalDateTime now) {
+        return emailVerificationMapper.existsUsedTokenByEmailAttempt(email, attemptId, purpose, now);
     }
 }

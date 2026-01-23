@@ -1,0 +1,3 @@
+-- No-op migration.
+-- Reason: Triggers cannot be created on current RDS settings (SUPER privilege / log_bin restrictions).
+-- The last_priced_at update logic is handled at application/query level instead.

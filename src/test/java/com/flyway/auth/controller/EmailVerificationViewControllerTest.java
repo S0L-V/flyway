@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -40,11 +39,12 @@ class EmailVerificationViewControllerTest {
     @Test
     @DisplayName("인증 링크 검증 성공 - 성공 메시지 출력")
     void verifySignupToken_success() throws Exception {
-        Mockito.when(emailVerificationService.verifySignupToken(anyString()))
+        Mockito.when(emailVerificationService.verifySignupToken(anyString(), anyString()))
                 .thenReturn("test@example.com");
 
         mockMvc.perform(get("/auth/email/verify")
-                        .param("token", "valid-token"))
+                        .param("token", "valid-token")
+                        .param("attempt", "attempt-123"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("email-verify"))
                 .andExpect(model().attribute("success", true))
@@ -58,10 +58,11 @@ class EmailVerificationViewControllerTest {
     void verifySignupToken_fail() throws Exception {
         doThrow(new IllegalArgumentException("유효하지 않은 인증 링크입니다."))
                 .when(emailVerificationService)
-                .verifySignupToken(anyString());
+                .verifySignupToken(anyString(), anyString());
 
         mockMvc.perform(get("/auth/email/verify")
-                        .param("token", "invalid-token"))
+                        .param("token", "invalid-token")
+                        .param("attempt", "attempt-456"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("email-verify"))
                 .andExpect(model().attribute("success", false))

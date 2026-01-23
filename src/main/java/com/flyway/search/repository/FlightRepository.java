@@ -1,5 +1,6 @@
 package com.flyway.search.repository;
 
+import com.flyway.search.domain.Airline;
 import com.flyway.search.domain.Airport;
 import com.flyway.search.domain.Flight;
 import com.flyway.search.dto.FlightSearchRequest;
@@ -12,6 +13,8 @@ public interface FlightRepository {
     List<Flight> findAll(Flight vo);
 
     List<Airport> findAirports(Airport vo);
+
+    List<Airline> findAirlines(Airline vo);
 
     List<FlightSearchResponse> findOutboundFlights(FlightSearchRequest dto);
 
