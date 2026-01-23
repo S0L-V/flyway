@@ -18,8 +18,9 @@ public interface EmailVerificationMapper {
             @Param("usedAt") LocalDateTime usedAt
     );
 
-    int countVerifiedByEmailPurpose(
+    int existsUsedTokenByEmailAttempt(
             @Param("email") String email,
+            @Param("attemptId") String attemptId,
             @Param("purpose") String purpose,
             @Param("now") LocalDateTime now
     );

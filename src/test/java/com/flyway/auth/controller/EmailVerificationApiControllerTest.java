@@ -11,9 +11,8 @@ import org.mockito.Mockito;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,13 +36,14 @@ class EmailVerificationApiControllerTest {
     @Test
     @DisplayName("이메일 인증 발급 성공")
     void issueSignupVerification_success() throws Exception {
-        doNothing().when(emailVerificationService).issueSignupVerification(anyString());
+        when(emailVerificationService.issueSignupVerification(anyString()))
+                .thenReturn("attempt-123");
 
         mockMvc.perform(post("/api/auth/email/issue")
                         .param("email", "test@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data").value(nullValue()))
+                .andExpect(jsonPath("$.data.attemptId").value("attempt-123"))
                 .andExpect(jsonPath("$.message").value("이메일 인증 메일을 전송했습니다."));
     }
 
@@ -95,10 +95,12 @@ class EmailVerificationApiControllerTest {
     @Test
     @DisplayName("이메일 인증 상태 조회 - true")
     void checkSignupVerification_true() throws Exception {
-        when(emailVerificationService.isSignupVerified("test@example.com")).thenReturn(true);
+        when(emailVerificationService.isSignupVerified(eq("test@example.com"), anyString()))
+                .thenReturn(true);
 
         mockMvc.perform(get("/api/auth/email/status")
-                        .param("email", "test@example.com"))
+                        .param("email", "test@example.com")
+                        .param("attemptId", "attempt-123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").value(true));
@@ -107,10 +109,12 @@ class EmailVerificationApiControllerTest {
     @Test
     @DisplayName("이메일 인증 상태 조회 - false")
     void checkSignupVerification_false() throws Exception {
-        when(emailVerificationService.isSignupVerified("test@example.com")).thenReturn(false);
+        when(emailVerificationService.isSignupVerified(eq("test@example.com"), anyString()))
+                .thenReturn(false);
 
         mockMvc.perform(get("/api/auth/email/status")
-                        .param("email", "test@example.com"))
+                        .param("email", "test@example.com")
+                        .param("attemptId", "attempt-456"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").value(false));
@@ -121,10 +125,11 @@ class EmailVerificationApiControllerTest {
     void checkSignupVerification_invalidInput() throws Exception {
         doThrow(new IllegalArgumentException("이메일 형식이 올바르지 않습니다."))
                 .when(emailVerificationService)
-                .isSignupVerified(anyString());
+                .isSignupVerified(anyString(), anyString());
 
         mockMvc.perform(get("/api/auth/email/status")
-                        .param("email", "bad-email"))
+                        .param("email", "bad-email")
+                        .param("attemptId", "attempt-789"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errorCode").value(ErrorCode.INVALID_INPUT_VALUE.getCode()))

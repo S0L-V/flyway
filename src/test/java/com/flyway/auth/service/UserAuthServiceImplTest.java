@@ -3,6 +3,8 @@ package com.flyway.auth.service;
 import com.flyway.auth.domain.AuthProvider;
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.repository.EmailVerificationRepository;
+import com.flyway.auth.repository.SignUpAttemptRepository;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -29,6 +31,8 @@ class UserAuthServiceImplTest {
     private UserIdentityRepository userIdentityRepository;
     private UserProfileRepository userProfileRepository;
     private PasswordEncoder passwordEncoder;
+    private SignUpAttemptRepository signUpAttemptRepository;
+    private EmailVerificationRepository emailVerificationRepository;
 
     private SignUpServiceImpl signUpService;
 
@@ -37,12 +41,14 @@ class UserAuthServiceImplTest {
         userRepository = Mockito.mock(UserRepository.class);
         userIdentityRepository = Mockito.mock(UserIdentityRepository.class);
         userProfileRepository = Mockito.mock(UserProfileRepository.class);
+        signUpAttemptRepository = Mockito.mock(SignUpAttemptRepository.class);
         passwordEncoder = Mockito.mock(PasswordEncoder.class);
 
         signUpService = new SignUpServiceImpl(
                 userRepository,
                 userIdentityRepository,
                 userProfileRepository,
+                signUpAttemptRepository,
                 passwordEncoder
         );
     }
@@ -55,9 +61,16 @@ class UserAuthServiceImplTest {
         req.setName("홍길동");
         req.setEmail("dup@example.com");
         req.setRawPassword("password1234");
+        req.setAttemptId("AttemptId");
 
         when(userIdentityRepository.existsEmailIdentity("dup@example.com"))
                 .thenReturn(true);
+
+        when(signUpAttemptRepository.consumeIfVerified(
+                eq("AttemptId"),
+                eq("dup@example.com"),
+                any()
+        )).thenReturn(1);
 
         // when
         BusinessException ex = assertThrows(BusinessException.class,
@@ -82,9 +95,16 @@ class UserAuthServiceImplTest {
         req.setName("홍길동");
         req.setEmail("test@example.com");
         req.setRawPassword("password1234");
+        req.setAttemptId("AttemptId");
 
         when(userIdentityRepository.existsEmailIdentity("test@example.com"))
                 .thenReturn(false);
+
+        when(signUpAttemptRepository.consumeIfVerified(
+                eq("AttemptId"),
+                eq("test@example.com"),
+                any()
+        )).thenReturn(1);
 
         when(passwordEncoder.encode("password1234"))
                 .thenReturn("ENCODED_PW");
@@ -140,6 +160,13 @@ class UserAuthServiceImplTest {
         req.setName("홍길동");
         req.setEmail("test@example.com");
         req.setRawPassword("password1234");
+        req.setAttemptId("AttemptId");
+
+        when(signUpAttemptRepository.consumeIfVerified(
+                eq("AttemptId"),
+                eq("test@example.com"),
+                any()
+        )).thenReturn(1);
 
         when(userIdentityRepository.existsEmailIdentity("test@example.com"))
                 .thenReturn(false);
@@ -232,11 +259,18 @@ class UserAuthServiceImplTest {
         req.setName("홍길동");
         req.setEmail("test@example.com");
         req.setRawPassword("password1234");
+        req.setAttemptId("AttemptId");
 
         when(userIdentityRepository.existsEmailIdentity(anyString()))
                 .thenReturn(false);
         when(passwordEncoder.encode(anyString()))
                 .thenReturn("ENCODED_PW");
+
+        when(signUpAttemptRepository.consumeIfVerified(
+                eq("AttemptId"),
+                eq("test@example.com"),
+                any()
+        )).thenReturn(1);
 
         // when
         signUpService.signUp(req);

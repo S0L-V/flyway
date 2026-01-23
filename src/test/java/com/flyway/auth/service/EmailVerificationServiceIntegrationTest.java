@@ -3,6 +3,7 @@ package com.flyway.auth.service;
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.repository.EmailVerificationRepository;
+import com.flyway.auth.repository.SignUpAttemptRepository;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import com.flyway.user.mapper.UserMapper;
@@ -27,6 +28,7 @@ class EmailVerificationServiceIntegrationTest {
 
     private EmailVerificationRepository emailVerificationRepository;
     private TokenHasher tokenHasher;
+    private SignUpAttemptRepository signUpAttemptRepository;
     private EmailVerificationServiceImpl service;
 
     @BeforeEach
@@ -35,15 +37,18 @@ class EmailVerificationServiceIntegrationTest {
         MailSender mailSender = Mockito.mock(MailSender.class);
         tokenHasher = Mockito.mock(TokenHasher.class);
         UserMapper userMapper = Mockito.mock(UserMapper.class);
+        signUpAttemptRepository = Mockito.mock(SignUpAttemptRepository.class);
 
         service = new EmailVerificationServiceImpl(
                 emailVerificationRepository,
+                signUpAttemptRepository,
                 mailSender,
                 tokenHasher,
                 userMapper
         );
         ReflectionTestUtils.setField(service, "baseUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(service, "ttlMinutes", 15L);
+        ReflectionTestUtils.setField(service, "attemptTtlMinutes", 10L);
     }
 
     @Test
@@ -52,6 +57,7 @@ class EmailVerificationServiceIntegrationTest {
         String email = "expired@example.com";
         String token = "expired-token";
         String tokenHash = "hash-expired";
+        String attemptId = "attempt-123";
         LocalDateTime now = LocalDateTime.now();
 
         EmailVerificationToken record = EmailVerificationToken.builder()
@@ -61,20 +67,22 @@ class EmailVerificationServiceIntegrationTest {
                 .tokenHash(tokenHash)
                 .expiresAt(now.minusMinutes(1))
                 .createdAt(now.minusMinutes(2))
+                .attemptId(attemptId)
                 .build();
 
         when(tokenHasher.hash(token)).thenReturn(tokenHash);
         when(emailVerificationRepository.findByTokenHash(tokenHash)).thenReturn(record);
-        when(emailVerificationRepository.countVerifiedByEmailPurpose(
+        when(emailVerificationRepository.existsUsedTokenByEmailAttempt(
                 eq(email),
+                eq(attemptId),
                 eq(EmailVerificationPurpose.SIGNUP.name()),
                 any(LocalDateTime.class)
         )).thenReturn(0);
 
-        assertThatThrownBy(() -> service.verifySignupToken(token))
+        assertThatThrownBy(() -> service.verifySignupToken(token, attemptId))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        assertThat(service.isSignupVerified(email)).isFalse();
+        assertThat(service.isSignupVerified(email, attemptId)).isFalse();
         verify(emailVerificationRepository, never())
                 .markTokenUsed(anyString(), any(LocalDateTime.class));
     }
