@@ -42,17 +42,14 @@ function renderSegment(f) {
     const seatCount = f.seatCount ?? "-";
     const depTime = formatDepTimeArray(f.departureTime);
     const arrTime = formatArrTimeArray(f.departureTime, f.arrivalTime);
-    const durationMinutes = f.durationMinutes ?? "-";
+    const durationMinutes = Number.isFinite(f.durationMinutes) ? f.durationMinutes : null;
 
     // 시간 표시
-    let hours = Math.floor(durationMinutes / 60);
-    let minutes = durationMinutes % 60;
-    let time;
-
-    if (hours === 0) {
-        time = minutes + "분";
-    } else {
-        time = hours + "시간 " + minutes + "분";
+    let time = "-";
+    if (durationMinutes !== null) {
+        const hours = Math.floor(durationMinutes / 60);
+        const minutes = durationMinutes % 60;
+        time = hours === 0 ? `${minutes}분` : `${hours}시간 ${minutes}분`;
     }
 
     // 항공사, 아이콘 표시

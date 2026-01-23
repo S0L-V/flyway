@@ -25,7 +25,6 @@ async function loadAirlines() {
 }
 
 function initFilters() {
-    // ✅ 버튼 클릭: 열기만 (이미 열려있으면 유지)
     document.querySelectorAll(".filter-button[data-filter]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -53,7 +52,6 @@ function initFilters() {
         });
     });
 
-    // ✅ 진짜 "바깥 클릭"일 때만 닫기
     document.addEventListener("click", (e) => {
         // filter 영역 내부(버튼/패널 포함)이면 닫지 않음
         const inside = e.target.closest(".search-filters");
@@ -87,7 +85,6 @@ function initTimeChips() {
                 const chip = e.target.closest(".time-chip");
                 if (!chip) return;
 
-                // "전체" 칩이면 나머지 해제하고 본인만 active
                 const isAll = chip.textContent.trim().includes("전체");
                 if (isAll) {
                     panel.querySelectorAll(".time-chip").forEach(c => c.classList.remove("active"));
@@ -150,8 +147,6 @@ function initPriceSlider(minPrice, maxPrice) {
     // 4. 초기 UI 그리기 (텍스트, 파란색 바 위치)
     updateSliderUI();
 
-    // --- 이벤트 리스너 연결 ---
-
     // 'input' 이벤트: 드래그하는 동안 실시간으로 UI만 업데이트 (필터링 X)
     minInput.addEventListener('input', handleMinInput);
     maxInput.addEventListener('input', handleMaxInput);
@@ -159,8 +154,6 @@ function initPriceSlider(minPrice, maxPrice) {
     // 'change' 이벤트: 드래그를 놓았을 때 필터 적용 (렌더링 O)
     minInput.addEventListener('change', updateFilterStateAndRender);
     maxInput.addEventListener('change', updateFilterStateAndRender);
-
-    // --- 내부 헬퍼 함수들 ---
 
     // 최소 핸들 움직일 때 방어 로직
     function handleMinInput() {
@@ -192,7 +185,7 @@ function initPriceSlider(minPrice, maxPrice) {
         minDisplay.textContent = formatPrice(minVal);
         maxDisplay.textContent = formatPrice(maxVal);
 
-        // 파란색 바의 위치(left)와 너비(width)를 백분율(%)로 계산
+        // 파란색 바의 위치와 너비를 백분율로 계산
         const range = totalMax - totalMin || 1; // 0 나누기 방지
         const leftPercent = ((minVal - totalMin) / range) * 100;
         const widthPercent = ((maxVal - minVal) / range) * 100;
@@ -201,19 +194,6 @@ function initPriceSlider(minPrice, maxPrice) {
         rangeBar.style.width = widthPercent + "%";
     }
 }
-
-// 항공사 필터
-// function initAirlineFilters() {
-//     // 항공사 체크박스(input[type=checkbox])들에 이벤트 걸기
-//     const airlineCheckboxes = document.querySelectorAll('input[name="airline"]');
-//
-//     airlineCheckboxes.forEach(box => {
-//         box.addEventListener('change', () => {
-//             // 체크박스 상태가 변하면 즉시 필터 적용
-//             updateFilterStateAndRender();
-//         });
-//     });
-// }
 
 function initAirlineFilters() {
     const container = document.getElementById("airlineFilterList"); // HTML에 <ul id="airlineFilterList"></ul> 가 있어야 함
@@ -253,13 +233,6 @@ function getSelectedAirlines() {
         document.querySelectorAll('input[name="airline"]:checked')
     ).map(el => el.value);
 }
-
-// 선택된 항공사 배열로
-// function getSelectedAirlines() {
-//     return Array.from(
-//         document.querySelectorAll('input[name="airline"]:checked')
-//     ).map(el => el.value);
-// }
 
 // 시간대 필터링 값 가져오기
 function getSelectedTimeRanges(type) {

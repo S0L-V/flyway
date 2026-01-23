@@ -54,21 +54,18 @@ function initTripTabs() {
             state.tripType = trip;
 
             if (trip === "OW") {
-                // 편도로 갈 때는 UI만 갱신 (데이터는 살려둠)
-                // 단, 텍스트 표시할 때는 start만 보여주도록 처리 필요
+
                 if (state.dateStart) {
                     setFieldText("dates", `${state.dateStart}`);
                 } else {
                     setFieldText("dates", "날짜 선택");
                 }
 
-                // 중요: 편도일 때 도착일 인풋 값은 비워두는 게 UI상 깔끔함 (내부 값인 state.dateEnd는 유지하더라도)
                 const endInput = document.getElementById("dateEnd");
                 if(endInput) endInput.value = "";
 
-            } else { // "RT" (왕복)으로 돌아올 때
+            } else {
 
-                // 🚨 핵심: 숨겨져 있던 dateEnd가 현재 dateStart보다 과거라면, 유효하지 않으므로 초기화!
                 if (state.dateStart && state.dateEnd && state.dateStart > state.dateEnd) {
                     state.dateEnd = null; // 날짜가 꼬였으므로 이때는 초기화
                 }
@@ -149,7 +146,6 @@ function initDropdowns() {
         });
     });
 
-    // ✅ 진짜 "바깥 클릭"일 때만 닫기
     document.addEventListener("click", (e) => {
         const clickedInsideAnyDropdown = !!e.target.closest(".dropdown");
         if (!clickedInsideAnyDropdown) closeAllDropdowns();
@@ -245,7 +241,6 @@ function initDates() {
     const end   = document.getElementById("dateEnd");
     const err   = document.getElementById("dateError");
 
-    // ✅ 편도일 때 end input을 숨기고 값 초기화하는 헬퍼
     function syncDateUIByTripType() {
         const isRT = state.tripType === "RT";
 
@@ -260,11 +255,8 @@ function initDates() {
         }
     }
 
-    // ✅ 초기 1회 반영
     syncDateUIByTripType();
 
-    // ✅ 탭 전환 시에도 반영하려면 (initTripTabs에서 커스텀 이벤트를 쏘는 방식)
-    // initTripTabs에서 document.dispatchEvent(new CustomEvent("tripTypeChanged"));
     document.addEventListener("tripTypeChanged", syncDateUIByTripType);
 
     // 시작일 변경 시: 종료일 min을 시작일로 맞춤 (왕복일 때만 의미 있음)
@@ -278,14 +270,14 @@ function initDates() {
         const e = end.value;
         const isRT = state.tripType === "RT";
 
-        // ✅ 공통: 출발일은 항상 필수
+        // 공통: 출발일은 항상 필수
         if (!s) {
             err.textContent = "출발일을 선택해 주세요.";
             err.hidden = false;
             return;
         }
 
-        // ✅ 왕복: 도착일도 필수 + 검증
+        // 왕복: 도착일도 필수 + 검증
         if (isRT) {
             if (!e) {
                 err.textContent = "도착일을 선택해 주세요.";
@@ -307,7 +299,7 @@ function initDates() {
             return;
         }
 
-        // ✅ 편도: end는 null로 고정
+        // 편도: end는 null로 고정
         err.hidden = true;
         state.dateStart = s;
         state.dateEnd = null;
