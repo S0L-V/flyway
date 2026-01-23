@@ -28,10 +28,11 @@ public class SeatHoldScheduler {
     - 다음 배치가 10:11:00에 돌면 그때 AVAILABLE로 복구됨 */
     @Scheduled(fixedDelay = 60_000)
     public void releaseExpiredHoldsJob() {
-        int updated = seatService.releaseExpiredHolds();
+        // 만료 HOLD에 매달린 passenger_seat 삭제
+        int releasedSeats = seatService.releaseExpiredHolds();
 
-        if (updated > 0) {
-            log.info("released expired HOLD seats: {}", updated);
+        if (releasedSeats > 0) {
+            log.info("[SeatHoldBatch] released expired HOLD seats: {}", releasedSeats);
         }
     }
 }

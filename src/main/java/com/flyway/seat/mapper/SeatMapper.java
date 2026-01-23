@@ -14,6 +14,9 @@ public interface SeatMapper {
     // 배치 - 만료된 HOLD 복구
     int releaseExpiredHolds();
 
+    // 배치 - 만료된 HOLD에 연결된 passenger_seat 정리
+    int deletePassengerSeatForExpiredHolds();
+
     // 좌석맵 조회
     List<SeatDTO> selectSeatMapByFlightId(@Param("flightId") String flightId);
 
@@ -22,8 +25,6 @@ public interface SeatMapper {
             @Param("reservationId") String reservationId,
             @Param("reservationSegmentId") String reservationSegmentId
     );
-
-    // HOLD 구현에 필요한 조회/검증
 
     // reservation 상태 조회 (HELD/CONFIRMED/EXPIRED)
     String selectReservationStatus(@Param("reservationId") String reservationId);
@@ -37,7 +38,7 @@ public interface SeatMapper {
             @Param("passengerId") String passengerId
     );
 
-    // flight_id + seatNo로 aircraft_seat_id 조회 (좌석번호 유효성 체크용)
+    // flight_id + seatNo로 aircraft_seat_id 조회 (좌석번호 유효성 체크용) + FOR UPDATE (xml에서 FOR UPDATE)
     String selectAircraftSeatIdByFlightAndSeatNoForUpdate(
             @Param("flightId") String flightId,
             @Param("seatNo") String seatNo
@@ -48,8 +49,6 @@ public interface SeatMapper {
             @Param("reservationSegmentId") String reservationSegmentId,
             @Param("passengerId") String passengerId
     );
-
-    // flight_seat 락/생성/업데이트
 
     // flight_seat 행을 락 걸고 조회 (없으면 null)
     SeatLockRow selectFlightSeatForUpdate(
@@ -73,12 +72,21 @@ public interface SeatMapper {
     );
 
     // 기존 HOLD 좌석 해제 (HOLD인 경우만 AVAILABLE로)
-    int releaseHoldByFlightSeatId(@Param("flightSeatId") String flightSeatId);
+    int releaseHoldByFlightSeatId(
+            @Param("flightSeatId") String flightSeatId,
+            @Param("reservationSegmentId") String reservationSegmentId
+    );
 
     // passenger_seat upsert
     int upsertPassengerSeat(
             @Param("reservationSegmentId") String reservationSegmentId,
             @Param("passengerId") String passengerId,
             @Param("flightSeatId") String flightSeatId
+    );
+
+    // 좌석 HOLD 해제용: passenger_seat 삭제
+    int deletePassengerSeatBySegmentAndPassenger(
+            @Param("reservationSegmentId") String reservationSegmentId,
+            @Param("passengerId") String passengerId
     );
 }

@@ -29,6 +29,10 @@ public class SeatServiceImpl implements SeatService {
     @Override
     @Transactional
     public int releaseExpiredHolds() {
+        // 먼저 passenger_seat 정리 (만료 HOLD에 달린 참조 제거)
+        seatMapper.deletePassengerSeatForExpiredHolds();
+
+        // 그 다음 flight_seat을 AVAILABLE로 복구
         return seatMapper.releaseExpiredHolds();
     }
 
@@ -93,9 +97,6 @@ public class SeatServiceImpl implements SeatService {
 
         // 승객이 이미 잡고 있던 좌석 있으면(같은 sid에서) HOLD 해제 후 변경
         String oldFlightSeatId = seatMapper.selectPassengerHeldFlightSeatIdForUpdate(reservationSegmentId, request.getPassengerId());
-        if (oldFlightSeatId != null && !oldFlightSeatId.isBlank()) {
-            seatMapper.releaseHoldByFlightSeatId(oldFlightSeatId);
-        }
 
         // flight_seat 락 조회 (없으면 insert)
         SeatLockRow row = seatMapper.selectFlightSeatForUpdate(flightId, aircraftSeatId);
@@ -106,9 +107,11 @@ public class SeatServiceImpl implements SeatService {
             } catch (Exception ignore) {
                 // 동시 INSERT 경쟁이면 무시하고 아래에서 다시 락 조회
             }
+
             row = seatMapper.selectFlightSeatForUpdate(flightId, aircraftSeatId);
-            if (row == null) {
-                throw new IllegalStateException("좌석 HOLD 처리 중 오류가 발생했습니다.");
+
+            if (row == null || row.getFlightSeatId() == null || row.getFlightSeatId().isBlank()) {
+                throw new IllegalStateException("좌석을 선택하는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
             }
         }
 
@@ -134,9 +137,14 @@ public class SeatServiceImpl implements SeatService {
             throw new IllegalStateException("좌석 HOLD 처리 중 동시성 충돌이 발생했습니다.");
         }
 
-        // 9) passenger_seat upsert (UK(reservation_segment_id, passenger_id) 필요)
+        // passenger_seat upsert (UK(reservation_segment_id, passenger_id) 필요)
         seatMapper.upsertPassengerSeat(reservationSegmentId, request.getPassengerId(), row.getFlightSeatId());
 
+        // 새 좌석 upsert가 끝난 뒤에 기존 좌석이 다른 좌석이면 해제
+        if (oldFlightSeatId != null && !oldFlightSeatId.isBlank()
+                && !oldFlightSeatId.equals(row.getFlightSeatId())) {
+            seatMapper.releaseHoldByFlightSeatId(oldFlightSeatId, reservationSegmentId);
+        }
         return SeatHoldResponse.builder()
                 .reservationId(reservationId)
                 .reservationSegmentId(reservationSegmentId)
