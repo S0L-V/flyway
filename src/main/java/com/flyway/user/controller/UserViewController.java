@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class UserViewController {
 
     @GetMapping("/mypage")
-    public String loginView() {
+    public String myPageView() {
         return "mypage";
     }
 

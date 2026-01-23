@@ -64,7 +64,7 @@ public class AuthController {
             model.addAttribute("error", e.getMessage());
             return "signup";
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("[AUTH] signup failed", e);
             model.addAttribute("error", "회원가입 처리 중 오류가 발생했습니다.");
             return "signup";
         }
@@ -108,6 +108,22 @@ public class AuthController {
             return ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
         }
         throw new BusinessException(ErrorCode.UNAUTHORIZED);
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<ApiResponse<String>> refresh(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        try {
+            authTokenService.refresh(request, response);
+            return ResponseEntity.noContent().build();
+        } catch (BusinessException e) {
+            return ResponseEntity.status(e.getErrorCode().getStatus()).build();
+        } catch (Exception e) {
+            log.error("[AUTH] refresh failed", e);
+            return ResponseEntity.status(500).build();
+        }
     }
 
     private void autoLoginByEmail(String email, HttpServletRequest req, HttpServletResponse res) {
