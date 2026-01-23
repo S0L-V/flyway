@@ -13,7 +13,8 @@
             purpose,
             token_hash,
             expires_at,
-            created_at
+            created_at,
+            attempt_id
         )
         VALUES (
             #{emailVerificationTokenId},
@@ -21,7 +22,8 @@
             #{purpose},
             #{tokenHash},
             #{expiresAt},
-            #{createdAt}
+            #{createdAt},
+            #{attemptId}
         )
     </insert>
 
@@ -34,7 +36,8 @@
                token_hash,
                expires_at,
                used_at,
-               created_at
+               created_at,
+               attempt_id
         FROM email_verification_token
         WHERE token_hash = #{tokenHash}
     </select>
@@ -46,12 +49,13 @@
           AND used_at IS NULL
     </update>
 
-    <select id="countVerifiedByEmailPurpose"
+    <select id="existsUsedTokenByEmailAttempt"
             parameterType="map"
             resultType="int">
         SELECT COUNT(1)
         FROM email_verification_token
         WHERE email = #{email}
+          AND attempt_id = #{attemptId}
           AND purpose = #{purpose}
           AND used_at IS NOT NULL
           AND expires_at > #{now}

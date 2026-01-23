@@ -28,6 +28,7 @@ public enum ErrorCode {
 	USER_BLOCKED(403, "U005", "차단된 계정입니다."),
 	USER_PASSWORD_ENCODE_ERROR(500, "U006", "비밀번호 처리 중 오류가 발생했습니다."),
 	USER_DB_ERROR(500, "U007", "회원 정보 저장 중 오류가 발생했습니다."),
+	USER_INVALID_SIGN_UP_ATTEMPT(400, "U008", "유효하지 않은 회원가입 요청입니다."),
 	USER_INTERNAL_ERROR(500, "U999", "회원 처리 중 알 수 없는 오류가 발생했습니다."),
 
 	// ==================== 관리자 (A) ====================

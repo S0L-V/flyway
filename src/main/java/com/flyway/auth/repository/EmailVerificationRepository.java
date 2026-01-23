@@ -12,5 +12,5 @@ public interface EmailVerificationRepository {
 
     int markTokenUsed(String emailVerificationTokenId, LocalDateTime usedAt);
 
-    int countVerifiedByEmailPurpose(String email, String purpose, LocalDateTime now);
+    int existsUsedTokenByEmailAttempt(String email, String attemptId, String purpose, LocalDateTime now);
 }

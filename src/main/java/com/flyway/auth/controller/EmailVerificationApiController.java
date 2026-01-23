@@ -1,5 +1,6 @@
 package com.flyway.auth.controller;
 
+import com.flyway.auth.dto.SignupVerificationIssueResponse;
 import com.flyway.auth.service.EmailVerificationService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.BusinessException;
@@ -24,10 +25,11 @@ public class EmailVerificationApiController {
     private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/api/auth/email/issue")
-    public ResponseEntity<ApiResponse<Void>> issueSignupVerification(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<SignupVerificationIssueResponse>> issueSignupVerification(@RequestParam String email) {
         try {
-            emailVerificationService.issueSignupVerification(email);
-            return ResponseEntity.ok(ApiResponse.success(null, "이메일 인증 메일을 전송했습니다."));
+            String attemptId = emailVerificationService.issueSignupVerification(email);
+            SignupVerificationIssueResponse response = SignupVerificationIssueResponse.builder().attemptId(attemptId).build();
+            return ResponseEntity.ok(ApiResponse.success(response, "이메일 인증 메일을 전송했습니다."));
         } catch (BusinessException e) {
             return ResponseEntity.status(e.getErrorCode().getStatus())
                     .body(ApiResponse.error(
@@ -46,10 +48,11 @@ public class EmailVerificationApiController {
                     ));
         }
     }
+
     @GetMapping("/api/auth/email/status")
-    public ResponseEntity<ApiResponse<Boolean>> checkSignupVerification(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<Boolean>> checkSignupVerification(@RequestParam String email, @RequestParam String attemptId) {
         try {
-            boolean verified = emailVerificationService.isSignupVerified(email);
+            boolean verified = emailVerificationService.isSignupVerified(email, attemptId);
             return ResponseEntity.ok(ApiResponse.success(verified));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
