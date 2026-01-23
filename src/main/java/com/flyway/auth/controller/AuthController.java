@@ -1,9 +1,9 @@
 package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.service.AuthTokenService;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
-import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;
@@ -37,7 +37,7 @@ public class AuthController {
     private final KakaoLoginService kakaoLoginService;
     private final EmailUserDetailsService emailUserDetailsService;
     private final UserIdUserDetailsService userIdUserDetailsService;
-    private final LoginSuccessHandler loginSuccessHandler;
+    private final AuthTokenService authTokenService;
 
     @PostMapping("/auth/signup")
     public String postSignUp(
@@ -102,7 +102,7 @@ public class AuthController {
     private void autoLoginByEmail(String email, HttpServletRequest req, HttpServletResponse res) {
         UserDetails userDetails = emailUserDetailsService.loadUserByUsername(email);
         authenticateAndSave(userDetails, req, res);
-        loginSuccessHandler.issueAccessTokenCookie(res, userDetails.getUsername());
+        authTokenService.issueLoginCookies(req, res, userDetails.getUsername());
     }
 
     private void refreshAuthentication(String userId, HttpServletRequest req, HttpServletResponse res) {
