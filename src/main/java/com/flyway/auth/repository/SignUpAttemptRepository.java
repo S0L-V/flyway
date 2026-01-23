@@ -9,8 +9,6 @@ public interface SignUpAttemptRepository {
 
     void insert(SignUpAttempt attempt);
 
-    int expirePendingAttemptsByEmail(String email, LocalDateTime now);
-
     int markVerifiedIfPending(String attemptId, LocalDateTime verifiedAt);
 
     int consumeIfVerified(String attemptId, String email, LocalDateTime consumedAt);

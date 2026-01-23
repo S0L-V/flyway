@@ -98,14 +98,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             throw new IllegalArgumentException(EXPIRED_LINK_MESSAGE);
         }
 
-        int tokenUpdated = emailVerificationRepository.markTokenUsed(stored.getEmailVerificationTokenId(), now);
-        if (tokenUpdated == 0) {
-            throw new IllegalArgumentException(USED_LINK_MESSAGE);
-        }
-
         int attemptUpdated = signUpAttemptRepository.markVerifiedIfPending(attemptId, now);
         if (attemptUpdated == 0) {
             throw new IllegalArgumentException("이미 처리된 인증 요청입니다.");
+        }
+
+        int tokenUpdated = emailVerificationRepository.markTokenUsed(stored.getEmailVerificationTokenId(), now);
+        if (tokenUpdated == 0) {
+            throw new IllegalArgumentException(USED_LINK_MESSAGE);
         }
 
         return stored.getEmail();

@@ -11,11 +11,6 @@ public interface SignUpAttemptMapper {
 
     int insert(SignUpAttempt attempt);
 
-    int expirePendingAttemptsByEmail(
-            @Param("email") String email,
-            @Param("now") LocalDateTime now
-    );
-
     int markVerifiedIfPending(
             @Param("attemptId") String attemptId,
             @Param("verifiedAt") LocalDateTime verifiedAt

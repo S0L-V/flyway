@@ -20,11 +20,6 @@ public class SignUpAttemptRepositoryImpl implements SignUpAttemptRepository {
     }
 
     @Override
-    public int expirePendingAttemptsByEmail(String email, LocalDateTime now) {
-        return signUpAttemptMapper.expirePendingAttemptsByEmail(email, now);
-    }
-
-    @Override
     public int markVerifiedIfPending(String attemptId, LocalDateTime verifiedAt) {
         return signUpAttemptMapper.markVerifiedIfPending(attemptId, verifiedAt);
     }

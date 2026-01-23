@@ -22,14 +22,6 @@
                 #{consumedAt})
     </insert>
 
-    <update id="expirePendingAttemptsByEmail">
-        UPDATE signup_attempt
-        SET status = 'EXPIRED'
-        WHERE email = #{email}
-          AND status = 'PENDING'
-          AND expires_at &gt; #{now}
-    </update>
-
     <update id="markVerifiedIfPending">
         UPDATE signup_attempt
         SET status      = 'VERIFIED',
