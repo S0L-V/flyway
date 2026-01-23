@@ -1,8 +1,9 @@
 package com.flyway.security.config;
 
+import com.flyway.auth.service.AuthTokenService;
+import com.flyway.security.filter.OnboardingAccessFilter;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.handler.LoginSuccessHandler;
-import com.flyway.security.filter.OnboardingAccessFilter;
 import com.flyway.security.jwt.JwtProvider;
 import com.flyway.security.jwt.JwtWebAuthFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Slf4j
 @Configuration
@@ -38,12 +40,14 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     private final LoginSuccessHandler loginSuccessHandler;
     private final UserDetailsService userIdUserDetailsService;
     private final UserDetailsService emailUserDetailsService;
+    private final AuthTokenService authTokenService;
 
     public SecurityConfigWeb(
             JwtProvider jwtProvider,
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
             PasswordEncoder passwordEncoder,
             LoginSuccessHandler loginSuccessHandler,
+            AuthTokenService authTokenService,
             @Qualifier("userIdUserDetailsService") UserDetailsService userIdUserDetailsService,
             @Qualifier("emailUserDetailsService") UserDetailsService emailUserDetailsService
     ) {
@@ -51,6 +55,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.passwordEncoder = passwordEncoder;
         this.loginSuccessHandler = loginSuccessHandler;
+        this.authTokenService = authTokenService;
         this.userIdUserDetailsService = userIdUserDetailsService;
         this.emailUserDetailsService = emailUserDetailsService;
     }
@@ -104,13 +109,20 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 .and()
 
                 .logout()
-                .logoutUrl("/logout")
+                .logoutUrl("/auth/logout")
+                .addLogoutHandler(jwtCookieLogoutHandler())
                 .logoutSuccessUrl("/login")
-                .deleteCookies("JSESSIONID", "accessToken")
                 .permitAll()
                 .and()
 
                 .addFilterBefore(jwtWebAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(new OnboardingAccessFilter(), JwtWebAuthFilter.class);
     }
+
+    @Bean
+    public LogoutHandler jwtCookieLogoutHandler() {
+        return (request, response, authentication) -> authTokenService.logout(request, response);
+    }
 }
+
+

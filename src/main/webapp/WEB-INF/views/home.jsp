@@ -26,7 +26,7 @@
             <a href="${pageContext.request.contextPath}/mypage">
                 <button class="btn btn-mypage">마이페이지</button>
             </a>
-            <form class="btn btn-logout" action="${pageContext.request.contextPath}/logout" method="post">
+            <form class="btn btn-logout" action="${pageContext.request.contextPath}/auth/logout" method="post">
                 <button type="submit">로그아웃</button>
             </form>
         </sec:authorize>

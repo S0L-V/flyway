@@ -7,10 +7,12 @@ import com.flyway.auth.service.SignUpService;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;
+import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -81,6 +83,15 @@ public class AuthController {
             HttpServletResponse res
     ) throws IOException {
         kakaoLoginService.handleCallback(code, state, req, res);
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<ApiResponse<String>> logout(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        authTokenService.logout(request, response);
+        return ResponseEntity.ok(ApiResponse.success("Logout success"));
     }
 
     private String extractAuthenticatedUserId() {

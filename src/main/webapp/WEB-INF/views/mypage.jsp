@@ -36,7 +36,7 @@
 
     <div class="button-group">
         <a href="#" class="btn btn-edit">정보 수정</a>
-        <form class="btn btn-logout" action="${pageContext.request.contextPath}/logout" method="post">
+        <form class="btn btn-logout" action="${pageContext.request.contextPath}/auth/logout" method="post">
             <button type="submit">로그아웃</button>
         </form>
     </div>

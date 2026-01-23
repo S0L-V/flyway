@@ -30,7 +30,6 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     ) throws IOException {
 
         String userId = extractUserId(authentication);
-
         authTokenService.issueLoginCookies(request, response, userId);
 
         log.debug("[AUTH] login success. userId={}", userId);

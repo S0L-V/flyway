@@ -1,6 +1,5 @@
 package com.flyway.auth.mapper;
 
-import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.domain.RefreshToken;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -13,7 +12,7 @@ public interface RefreshTokenMapper {
     /**
      * Refresh Token 저장
      */
-    int insert(@Param("token") RefreshToken token);
+    int insert(RefreshToken token);
 
     /**
      * token_hash로 Refresh Token 조회 (쿠키 원문 -> hash 후 조회)

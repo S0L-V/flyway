@@ -160,7 +160,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         }
 
         deleteCookie(response, ACCESS_COOKIE, "/");
-        deleteCookie(response, REFRESH_COOKIE, "/api/auth/refresh");
+        deleteCookie(response, REFRESH_COOKIE, "/auth");
     }
 
 
@@ -188,7 +188,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
                 .httpOnly(true)
                 .secure(false) // https면 true
                 .sameSite("Lax")
-                .path("/api/auth/refresh")
+                .path("/auth")
                 .maxAge(ttl)
                 .build();
 
