@@ -1,8 +1,6 @@
 package com.flyway.admin.scheduler;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
@@ -21,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.flyway.admin.dto.StatisticsDto;
-import com.flyway.admin.mapper.StatisticsMapper;
+import com.flyway.admin.repository.StatisticsRepository;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -29,7 +27,7 @@ import com.flyway.admin.mapper.StatisticsMapper;
 class StatisticsSchedulerTest {
 
 	@Mock
-	private StatisticsMapper statisticsMapper;
+	private StatisticsRepository statisticsRepository;
 
 	@InjectMocks
 	private StatisticsScheduler scheduler;
@@ -40,16 +38,16 @@ class StatisticsSchedulerTest {
 	@BeforeEach
 	void setUp() {
 		// 공통 Mock 설정
-		given(statisticsMapper.countReservationsByPeriod(any(), any())).willReturn(100);
-		given(statisticsMapper.countConfirmedReservationsByPeriod(any(), any())).willReturn(80);
-		given(statisticsMapper.countCancelledReservationsByPeriod(any(), any())).willReturn(5);
-		given(statisticsMapper.sumRevenueByPeriod(any(), any())).willReturn(5000000L);
-		given(statisticsMapper.avgTicketPriceByPeriod(any(), any())).willReturn(50000L);
-		given(statisticsMapper.countRefundsByPeriod(any(), any())).willReturn(3);
-		given(statisticsMapper.sumRefundsByPeriod(any(), any())).willReturn(150000L);
-		given(statisticsMapper.countNewUsersByPeriod(any(), any())).willReturn(20);
-		given(statisticsMapper.countActiveUsersByPeriod(any(), any())).willReturn(500);
-		given(statisticsMapper.upsertStatistics(any())).willReturn(1);
+		given(statisticsRepository.countReservationsByPeriod(any(), any())).willReturn(100);
+		given(statisticsRepository.countConfirmedReservationsByPeriod(any(), any())).willReturn(80);
+		given(statisticsRepository.countCancelledReservationsByPeriod(any(), any())).willReturn(5);
+		given(statisticsRepository.sumRevenueByPeriod(any(), any())).willReturn(5000000L);
+		given(statisticsRepository.avgTicketPriceByPeriod(any(), any())).willReturn(50000L);
+		given(statisticsRepository.countRefundsByPeriod(any(), any())).willReturn(3);
+		given(statisticsRepository.sumRefundsByPeriod(any(), any())).willReturn(150000L);
+		given(statisticsRepository.countNewUsersByPeriod(any(), any())).willReturn(20);
+		given(statisticsRepository.countActiveUsersByPeriod(any(), any())).willReturn(500);
+		given(statisticsRepository.saveStatistics(any())).willReturn(1);
 	}
 
 	@Nested
@@ -63,7 +61,7 @@ class StatisticsSchedulerTest {
 			scheduler.calculateDailyStatistics();
 
 			// then
-			then(statisticsMapper).should().upsertStatistics(statsCaptor.capture());
+			then(statisticsRepository).should().saveStatistics(statsCaptor.capture());
 			StatisticsDto saved = statsCaptor.getValue();
 
 			assertThat(saved.getStatType()).isEqualTo("DAILY");
@@ -88,14 +86,14 @@ class StatisticsSchedulerTest {
 			scheduler.calculateDailyStatistics();
 
 			// then
-			then(statisticsMapper).should().countReservationsByPeriod(yesterday, yesterday);
+			then(statisticsRepository).should().countReservationsByPeriod(yesterday, yesterday);
 		}
 
 		@Test
 		@DisplayName("일일 통계 계산 실패 시 예외 처리")
 		void calculateDailyStatistics_Error() {
 			// given
-			given(statisticsMapper.countReservationsByPeriod(any(), any()))
+			given(statisticsRepository.countReservationsByPeriod(any(), any()))
 				.willThrow(new RuntimeException("DB Error"));
 
 			// when & then (예외가 발생해도 스케줄러는 중단되지 않음)
@@ -115,7 +113,7 @@ class StatisticsSchedulerTest {
 			scheduler.calculateWeeklyStatistics();
 
 			// then
-			then(statisticsMapper).should().upsertStatistics(statsCaptor.capture());
+			then(statisticsRepository).should().saveStatistics(statsCaptor.capture());
 			StatisticsDto saved = statsCaptor.getValue();
 
 			assertThat(saved.getStatType()).isEqualTo("WEEKLY");
@@ -126,7 +124,7 @@ class StatisticsSchedulerTest {
 		@DisplayName("주간 통계 계산 실패 시 예외 처리")
 		void calculateWeeklyStatistics_Error() {
 			// given
-			given(statisticsMapper.countReservationsByPeriod(any(), any()))
+			given(statisticsRepository.countReservationsByPeriod(any(), any()))
 				.willThrow(new RuntimeException("DB Error"));
 
 			// when & then
@@ -146,7 +144,7 @@ class StatisticsSchedulerTest {
 			scheduler.calculateMonthlyStatistics();
 
 			// then
-			then(statisticsMapper).should().upsertStatistics(statsCaptor.capture());
+			then(statisticsRepository).should().saveStatistics(statsCaptor.capture());
 			StatisticsDto saved = statsCaptor.getValue();
 
 			assertThat(saved.getStatType()).isEqualTo("MONTHLY");
@@ -157,7 +155,7 @@ class StatisticsSchedulerTest {
 		@DisplayName("월간 통계 계산 실패 시 예외 처리")
 		void calculateMonthlyStatistics_Error() {
 			// given
-			given(statisticsMapper.countReservationsByPeriod(any(), any()))
+			given(statisticsRepository.countReservationsByPeriod(any(), any()))
 				.willThrow(new RuntimeException("DB Error"));
 
 			// when & then
@@ -177,7 +175,7 @@ class StatisticsSchedulerTest {
 			scheduler.calculateDailyStatistics();
 
 			// then
-			then(statisticsMapper).should().upsertStatistics(statsCaptor.capture());
+			then(statisticsRepository).should().saveStatistics(statsCaptor.capture());
 			String statId = statsCaptor.getValue().getStatId();
 
 			assertThat(statId).matches("[a-f0-9\\-]{36}");
@@ -190,15 +188,15 @@ class StatisticsSchedulerTest {
 			scheduler.calculateDailyStatistics();
 
 			// then
-			then(statisticsMapper).should().countReservationsByPeriod(any(), any());
-			then(statisticsMapper).should().countConfirmedReservationsByPeriod(any(), any());
-			then(statisticsMapper).should().countCancelledReservationsByPeriod(any(), any());
-			then(statisticsMapper).should().sumRevenueByPeriod(any(), any());
-			then(statisticsMapper).should().avgTicketPriceByPeriod(any(), any());
-			then(statisticsMapper).should().countRefundsByPeriod(any(), any());
-			then(statisticsMapper).should().sumRefundsByPeriod(any(), any());
-			then(statisticsMapper).should().countNewUsersByPeriod(any(), any());
-			then(statisticsMapper).should().countActiveUsersByPeriod(any(), any());
+			then(statisticsRepository).should().countReservationsByPeriod(any(), any());
+			then(statisticsRepository).should().countConfirmedReservationsByPeriod(any(), any());
+			then(statisticsRepository).should().countCancelledReservationsByPeriod(any(), any());
+			then(statisticsRepository).should().sumRevenueByPeriod(any(), any());
+			then(statisticsRepository).should().avgTicketPriceByPeriod(any(), any());
+			then(statisticsRepository).should().countRefundsByPeriod(any(), any());
+			then(statisticsRepository).should().sumRefundsByPeriod(any(), any());
+			then(statisticsRepository).should().countNewUsersByPeriod(any(), any());
+			then(statisticsRepository).should().countActiveUsersByPeriod(any(), any());
 		}
 	}
 }
