@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.flyway.admin.dto.StatisticsDto;
-import com.flyway.admin.mapper.StatisticsMapper;
+import com.flyway.admin.repository.StatisticsRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class StatisticsScheduler {
 
-	private final StatisticsMapper statisticsMapper;
+	private final StatisticsRepository statisticsRepository;
 
 	/**
 	 * 매일 자정 00:05 - 전일 일일 통계 계산
@@ -31,7 +31,7 @@ public class StatisticsScheduler {
 
 		try {
 			StatisticsDto stats = calculateStatistics("DAILY", yesterday, yesterday);
-			statisticsMapper.upsertStatistics(stats);
+			statisticsRepository.saveStatistics(stats);
 			log.info("[Statistics] 일일 통계 저장 완료: date={}, reservations={}, revenue={}",
 				yesterday, stats.getTotalReservations(), stats.getTotalRevenue());
 		} catch (Exception e) {
@@ -54,7 +54,7 @@ public class StatisticsScheduler {
 			StatisticsDto stats = calculateStatistics("WEEKLY", lastMonday, lastSunday);
 			// 주간 통계는 해당 주의 월요일 날짜로 지정
 			stats.setStatDate(lastMonday);
-			statisticsMapper.upsertStatistics(stats);
+			statisticsRepository.saveStatistics(stats);
 			log.info("[Statistics] 주간 통계 저장 완료: week={}, reservations={}, revenue={}",
 				lastMonday, stats.getTotalReservations(), stats.getTotalRevenue());
 		} catch (Exception e) {
@@ -77,7 +77,7 @@ public class StatisticsScheduler {
 			StatisticsDto stats = calculateStatistics("MONTHLY", firstDayOfLastMonth, lastDayOfLastMonth);
 			// 월간 통계는 해당 월의 1일 날짜로 저장
 			stats.setStatDate(firstDayOfLastMonth);
-			statisticsMapper.upsertStatistics(stats);
+			statisticsRepository.saveStatistics(stats);
 			log.info("[Statistics] 월간 통계 저장 완료: month={}, reservations={}, revenue={}",
 				firstDayOfLastMonth, stats.getTotalReservations(), stats.getTotalRevenue());
 		} catch (Exception e) {
@@ -89,15 +89,15 @@ public class StatisticsScheduler {
 	 * 통계 계산 공통 메서드
 	 */
 	private StatisticsDto calculateStatistics(String statType, LocalDate startDate, LocalDate endDate) {
-		int totalReservations = statisticsMapper.countReservationsByPeriod(startDate, endDate);
-		int confirmedReservations = statisticsMapper.countConfirmedReservationsByPeriod(startDate, endDate);
-		int cancelledReservation = statisticsMapper.countCancelledReservationsByPeriod(startDate, endDate);
-		long totalRevenue = statisticsMapper.sumRevenueByPeriod(startDate, endDate);
-		long avgTicketPrice = statisticsMapper.avgTicketPriceByPeriod(startDate, endDate);
-		int refundCount = statisticsMapper.countRefundsByPeriod(startDate, endDate);
-		long totalRefunds = statisticsMapper.sumRefundsByPeriod(startDate, endDate);
-		int newUsers = statisticsMapper.countNewUsersByPeriod(startDate, endDate);
-		int activeUsers = statisticsMapper.countActiveUsersByPeriod(startDate, endDate);
+		int totalReservations = statisticsRepository.countReservationsByPeriod(startDate, endDate);
+		int confirmedReservations = statisticsRepository.countConfirmedReservationsByPeriod(startDate, endDate);
+		int cancelledReservation = statisticsRepository.countCancelledReservationsByPeriod(startDate, endDate);
+		long totalRevenue = statisticsRepository.sumRevenueByPeriod(startDate, endDate);
+		long avgTicketPrice = statisticsRepository.avgTicketPriceByPeriod(startDate, endDate);
+		int refundCount = statisticsRepository.countRefundsByPeriod(startDate, endDate);
+		long totalRefunds = statisticsRepository.sumRefundsByPeriod(startDate, endDate);
+		int newUsers = statisticsRepository.countNewUsersByPeriod(startDate, endDate);
+		int activeUsers = statisticsRepository.countActiveUsersByPeriod(startDate, endDate);
 
 		return StatisticsDto.builder()
 			.statId(UUID.randomUUID().toString())
