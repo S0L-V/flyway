@@ -88,7 +88,7 @@
         SELECT *
         FROM statistics
         WHERE stat_type = 'DAILY'
-            AND stat_date >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            AND stat_date >= DATE_SUB(CURDATE(), INTERVAL (#{days} - 1) DAY)
         ORDER BY stat_date DESC
     </select>
 

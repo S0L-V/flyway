@@ -185,6 +185,10 @@ public class AdminDashboardApiController {
 	 */
 	@GetMapping("/stats/daily/recent")
 	public ApiResponse<List<StatisticsDto>> getRecentDailyStats(@RequestParam(defaultValue = "7") int days) {
+		if (days <= 0 || days > 365) {
+			return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(), "조회 기간은 1일 이상 365일 이하이어야 합니다.");
+		}
+
 		try {
 			List<StatisticsDto> stats = dashboardService.getRecentDailyStats(days);
 			return ApiResponse.success(stats);
