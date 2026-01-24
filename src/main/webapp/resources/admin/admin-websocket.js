@@ -198,7 +198,10 @@ const AdminWebSocket = (function() {
                 // PONG 대기 타이머
                 pongTimer = setTimeout(function() {
                     console.warn('[WebSocket] PONG timeout, reconnecting...');
-                    disconnect();
+
+                    if (socket) {
+                        socket.close();
+                    }
                 }, CONFIG.pongTimeout);
             }
         }, CONFIG.pingInterval);

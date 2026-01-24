@@ -29,12 +29,12 @@ public interface StatisticsMapper {
 	 */
 	List<StatisticsDto> selectStatisticsByPeriod(
 		@Param("statType") String statType,
-		@Param("StartDate")LocalDate startDate,
+		@Param("startDate")LocalDate startDate,
 		@Param("endDate") LocalDate endDate
 	);
 
 	/**
-	 * 최근 N일간 일일 통걔 조회
+	 * 최근 N일간 일일 통계 조회
 	 */
 	List<StatisticsDto> selectRecentDailyStatistics(@Param("days") int days);
 

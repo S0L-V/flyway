@@ -163,7 +163,7 @@ public class AdminDashboardApiController {
 		try {
 			String normalizedPeriod = period.toUpperCase();
 			if (!"WEEKLY".equals(normalizedPeriod) && !"MONTHLY".equals(normalizedPeriod)) {
-				return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
+				return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(),
 					"period는 WEEKLY 또는 MONTHLY만 가능합니다.");
 			}
 

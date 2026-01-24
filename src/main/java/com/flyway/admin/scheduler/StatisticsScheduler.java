@@ -32,7 +32,7 @@ public class StatisticsScheduler {
 		try {
 			StatisticsDto stats = calculateStatistics("DAILY", yesterday, yesterday);
 			statisticsMapper.upsertStatistics(stats);
-			log.info("[Statistics] 일일 통계 저장 완료: date={}, resrevations={}, revenue={}",
+			log.info("[Statistics] 일일 통계 저장 완료: date={}, reservations={}, revenue={}",
 				yesterday, stats.getTotalReservations(), stats.getTotalRevenue());
 		} catch (Exception e) {
 			log.error("[Statistics] 일일 통계 계산 실패: {}", e.getMessage(), e);
@@ -44,7 +44,7 @@ public class StatisticsScheduler {
 	 */
 	@Scheduled(cron = "0 10 0 * * MON")
 	public void calculateWeeklyStatistics() {
-		// 전주 월요일 ~ 월요일
+		// 전주 월요일 ~ 일요일
 		LocalDate lastMonday = LocalDate.now().minusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 		LocalDate lastSunday = lastMonday.plusDays(6);
 
@@ -63,11 +63,11 @@ public class StatisticsScheduler {
 	}
 
 	/**
-	 * 매월 1월 00:15 - 전월 월간 통계 계산
+	 * 매일 1월 00:15 - 전월 월간 통계 계산
 	 */
 	@Scheduled(cron = "0 15 0 1 * *")
 	public void calculateMonthlyStatistics() {
-		// 전월 1월 ~ 말일
+		// 전월 1일 ~ 말일
 		LocalDate firstDayOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1);
 		LocalDate lastDayOfLastMonth = firstDayOfLastMonth.with(TemporalAdjusters.lastDayOfMonth());
 
@@ -78,7 +78,7 @@ public class StatisticsScheduler {
 			// 월간 통계는 해당 월의 1일 날짜로 저장
 			stats.setStatDate(firstDayOfLastMonth);
 			statisticsMapper.upsertStatistics(stats);
-			log.info("[Statistics] 월간 통계 저장 완료: month={}, reservations={}, refund={}",
+			log.info("[Statistics] 월간 통계 저장 완료: month={}, reservations={}, revenue={}",
 				firstDayOfLastMonth, stats.getTotalReservations(), stats.getTotalRevenue());
 		} catch (Exception e) {
 			log.error("[Statistics] 월간 통계 계산 실패: {}", e.getMessage(), e);

@@ -44,15 +44,15 @@
             #{totalReservations},
             #{confirmedReservations},
             #{cancelledReservations},
-            #{tatlRevenue},
-            #{averagTicketPrice},
+            #{totalRevenue},
+            #{averageTicketPrice},
             #{totalRefunds},
             #{refundCount},
             #{newUsers},
             #{activeUsers},
             NOW()
         )
-        ON DUPLICATE KEY_UPDATE
+        ON DUPLICATE KEY UPDATE
             total_reservations = VALUES(total_reservations),
             confirmed_reservations = VALUES(confirmed_reservations),
             cancelled_reservations = VALUES(cancelled_reservations),
@@ -128,7 +128,7 @@
             AND status = 'PAID'
     </select>
 
-    <!-- 평균 티켓 가겨 -->
+    <!-- 평균 티켓 가격 -->
     <select id="avgTicketPriceByPeriod" resultType="long">
         SELECT COALESCE(AVG(amount), 0)
         FROM payment
