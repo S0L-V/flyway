@@ -2,6 +2,7 @@ package com.flyway.admin.controller;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
@@ -161,7 +162,7 @@ public class AdminDashboardApiController {
 	@GetMapping("/stats/{period}")
 	public ApiResponse<StatisticsDto> getPeriodStats(@PathVariable("period") String period) {
 		try {
-			String normalizedPeriod = period.toUpperCase();
+			String normalizedPeriod = period.toUpperCase(Locale.ROOT);
 			if (!"WEEKLY".equals(normalizedPeriod) && !"MONTHLY".equals(normalizedPeriod)) {
 				return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(),
 					"period는 WEEKLY 또는 MONTHLY만 가능합니다.");
