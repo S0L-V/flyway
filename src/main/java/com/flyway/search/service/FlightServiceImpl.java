@@ -36,6 +36,11 @@ public class FlightServiceImpl implements FlightService{
         return flightRepository.findAirlines(vo);
     }
 
+    @Override
+    public FlightDetailDto details(String cabinClass, String routeType) {
+        return flightRepository.findDetails(cabinClass, routeType);
+    }
+
     // 검색 결과
     @Override
     public SearchResultDto search(FlightSearchRequest dto) {
@@ -54,7 +59,7 @@ public class FlightServiceImpl implements FlightService{
 //                opt.setTotalPrice(o.getCurrentPrice);                // 아직 운임 없으면 null
                 options.add(opt);
             }
-            result. setOptions(options);
+            result.setOptions(options);
             return result;
         }
 
