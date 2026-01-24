@@ -20,6 +20,8 @@ public class EmailVerificationToken {
     private LocalDateTime usedAt;
     private LocalDateTime createdAt;
 
+    private String attemptId;
+
     @Builder
     private EmailVerificationToken(
             String emailVerificationTokenId,
@@ -28,7 +30,8 @@ public class EmailVerificationToken {
             String tokenHash,
             LocalDateTime expiresAt,
             LocalDateTime usedAt,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            String attemptId
     ) {
         this.emailVerificationTokenId = emailVerificationTokenId;
         this.email = email;
@@ -37,5 +40,6 @@ public class EmailVerificationToken {
         this.expiresAt = expiresAt;
         this.usedAt = usedAt;
         this.createdAt = createdAt;
+        this.attemptId = attemptId;
     }
 }

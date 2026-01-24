@@ -3,6 +3,7 @@ package com.flyway.auth.service;
 import com.flyway.auth.domain.EmailVerificationPurpose;
 import com.flyway.auth.domain.EmailVerificationToken;
 import com.flyway.auth.repository.EmailVerificationRepository;
+import com.flyway.auth.repository.SignUpAttemptRepository;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.template.common.mail.MailSender;
 import com.flyway.user.mapper.UserMapper;
@@ -12,21 +13,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -34,16 +32,20 @@ class EmailVerificationServiceConcurrencyTest {
 
     private EmailVerificationServiceImpl service;
     private InMemoryEmailVerificationRepository emailVerificationRepository;
+    private SignUpAttemptRepository signUpAttemptRepository;
 
     @BeforeEach
     void setUp() {
         emailVerificationRepository = new InMemoryEmailVerificationRepository();
+
         MailSender mailSender = Mockito.mock(MailSender.class);
         TokenHasher tokenHasher = Mockito.mock(TokenHasher.class);
         UserMapper userMapper = Mockito.mock(UserMapper.class);
+        signUpAttemptRepository = Mockito.mock(SignUpAttemptRepository.class);
 
         service = new EmailVerificationServiceImpl(
                 emailVerificationRepository,
+                signUpAttemptRepository,
                 mailSender,
                 tokenHasher,
                 userMapper
@@ -54,6 +56,8 @@ class EmailVerificationServiceConcurrencyTest {
         when(userMapper.findByEmailForLogin(anyString())).thenReturn(null);
         when(tokenHasher.hash(anyString()))
                 .thenAnswer(invocation -> invocation.getArgument(0, String.class));
+        when(signUpAttemptRepository.markVerifiedIfPending(anyString(), any(LocalDateTime.class)))
+                .thenReturn(1);
     }
 
     @Test
@@ -95,6 +99,7 @@ class EmailVerificationServiceConcurrencyTest {
         String email = "verify@example.com";
         String token = "token-123";
         String tokenHash = token;
+        String attemptId = "attempt-verify";
         LocalDateTime now = LocalDateTime.now();
 
         EmailVerificationToken record = EmailVerificationToken.builder()
@@ -104,6 +109,7 @@ class EmailVerificationServiceConcurrencyTest {
                 .tokenHash(tokenHash)
                 .expiresAt(now.plusMinutes(10))
                 .createdAt(now)
+                .attemptId(attemptId)
                 .build();
         emailVerificationRepository.insertEmailVerificationToken(record);
 
@@ -121,7 +127,7 @@ class EmailVerificationServiceConcurrencyTest {
                     ready.countDown();
                     start.await();
                     try {
-                        service.verifySignupToken(token);
+                        service.verifySignupToken(token, attemptId);
                         successCount.incrementAndGet();
                     } catch (IllegalArgumentException e) {
                         failCount.incrementAndGet();
@@ -152,6 +158,7 @@ class EmailVerificationServiceConcurrencyTest {
         String email = "race@example.com";
         String token = "race-token";
         String tokenHash = token;
+        String attemptId = "attempt-race";
         LocalDateTime now = LocalDateTime.now();
 
         EmailVerificationToken record = EmailVerificationToken.builder()
@@ -161,6 +168,7 @@ class EmailVerificationServiceConcurrencyTest {
                 .tokenHash(tokenHash)
                 .expiresAt(now.plusMinutes(10))
                 .createdAt(now)
+                .attemptId(attemptId)
                 .build();
         emailVerificationRepository.insertEmailVerificationToken(record);
 
@@ -172,7 +180,7 @@ class EmailVerificationServiceConcurrencyTest {
             Future<?> verifyFuture = executor.submit(() -> {
                 ready.countDown();
                 start.await();
-                service.verifySignupToken(token);
+                service.verifySignupToken(token, attemptId);
                 return null;
             });
 
@@ -227,6 +235,7 @@ class EmailVerificationServiceConcurrencyTest {
                         .expiresAt(current.getExpiresAt())
                         .usedAt(usedAt)
                         .createdAt(current.getCreatedAt())
+                        .attemptId(current.getAttemptId())
                         .build();
                 byId.put(emailVerificationTokenId, updated);
                 byHash.put(updated.getTokenHash(), updated);
@@ -235,13 +244,16 @@ class EmailVerificationServiceConcurrencyTest {
         }
 
         @Override
-        public int countVerifiedByEmailPurpose(String email, String purpose, LocalDateTime now) {
+        public int existsUsedTokenByEmailAttempt(String email, String attemptId, String purpose, LocalDateTime now) {
             int count = 0;
             for (EmailVerificationToken token : byId.values()) {
                 if (!email.equals(token.getEmail())) {
                     continue;
                 }
                 if (token.getPurpose() == null || !purpose.equals(token.getPurpose().name())) {
+                    continue;
+                }
+                if (attemptId != null && !attemptId.equals(token.getAttemptId())) {
                     continue;
                 }
                 if (token.getUsedAt() == null) {

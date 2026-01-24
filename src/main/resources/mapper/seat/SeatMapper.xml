@@ -4,32 +4,208 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.flyway.seat.mapper.SeatMapper">
 
-    <!-- 만료된 HOLD 좌석을 AVAILABLE로 복구 -->
+    <!-- 배치 - 만료된 HOLD 좌석 복구 -->
     <update id="releaseExpiredHolds">
         UPDATE flight_seat
         SET seat_status = 'AVAILABLE',
+            hold_reservation_segment_id = NULL,
             hold_expires_at = NULL
         WHERE seat_status = 'HOLD'
           AND hold_expires_at IS NOT NULL
           AND hold_expires_at &lt; NOW()
     </update>
 
-    <!-- 항공편별 좌석 맵 조회 -->
+    <!-- 배치 - 만료된 HOLD 좌석에 매달린 passenger_seat 정리 -->
+    <!-- flight_seat의 hold_reservation_segment_id가 NULL이면(이미 풀린 좌석) 삭제 X -->
+    <delete id="deletePassengerSeatForExpiredHolds">
+        DELETE ps
+        FROM passenger_seat ps
+                 JOIN flight_seat fs
+                      ON fs.flight_seat_id = ps.flight_seat_id
+        WHERE fs.seat_status = 'HOLD'
+          AND fs.hold_expires_at IS NOT NULL
+          AND fs.hold_expires_at &lt; NOW()
+          AND fs.hold_reservation_segment_id IS NOT NULL
+    </delete>
+
+    <!-- 좌석맵 조회 (flight_seat 없어도 AVAILABLE로 포함) -->
     <select id="selectSeatMapByFlightId" resultType="com.flyway.seat.dto.SeatDTO">
         SELECT
-            fs.flight_seat_id   AS flightSeatId,
-            fs.flight_id        AS flightId,
-            a.seat_no           AS seatNo,
-            a.row_no            AS rowNo,
-            a.col_no            AS colNo,
-            a.cabin_class_code  AS cabinClassCode,
-            fs.seat_status      AS seatStatus,
-            fs.hold_expires_at  AS holdExpiresAt
-        FROM flight_seat fs
-                 JOIN aircraft_seat a
-                      ON fs.aircraft_seat_id = a.airplane_seat_id
-        WHERE fs.flight_id = #{flightId}
-        ORDER BY a.cabin_class_code, a.row_no, a.col_no
+            fs.flight_seat_id AS flightSeatId,
+            fi.flight_id      AS flightId,
+
+            aseat.seat_no          AS seatNo,
+            aseat.row_no           AS rowNo,
+            aseat.col_no           AS colNo,
+            aseat.cabin_class_code AS cabinClassCode,
+
+            /* 만료된 HOLD는 즉시 AVAILABLE로 표시 */
+            CASE
+                WHEN fs.seat_status = 'HOLD'
+                    AND fs.hold_expires_at IS NOT NULL
+                    AND fs.hold_expires_at &lt; NOW()
+                    THEN 'AVAILABLE'
+                ELSE COALESCE(fs.seat_status, 'AVAILABLE')
+                END AS seatStatus,
+
+            /* 만료된 HOLD면 holdExpiresAt도 NULL로 내려줌 */
+            CASE
+                WHEN fs.seat_status = 'HOLD'
+                    AND fs.hold_expires_at IS NOT NULL
+                    AND fs.hold_expires_at &lt; NOW()
+                    THEN NULL
+                ELSE fs.hold_expires_at
+                END AS holdExpiresAt
+        FROM flight_info fi
+                 JOIN aircraft_seat aseat
+                      ON aseat.aircraft_id = fi.aircraft_id
+                 LEFT JOIN flight_seat fs
+                           ON fs.flight_id = fi.flight_id
+                               AND fs.aircraft_seat_id = aseat.airplane_seat_id
+        WHERE fi.flight_id = #{flightId}
+        ORDER BY aseat.cabin_class_code, aseat.row_no, aseat.col_no
     </select>
+
+    <!-- reservation(rid) + segment(sid) -> flight_id -->
+    <select id="selectFlightIdByReservationSegment" resultType="string">
+        SELECT rs.flight_id
+        FROM reservation_segment rs
+        WHERE rs.reservation_segment_id = #{reservationSegmentId}
+          AND rs.reservation_id = #{reservationId}
+    </select>
+
+    <!-- reservation 상태 조회 (HELD/CONFIRMED/EXPIRED) -->
+    <select id="selectReservationStatus" resultType="string">
+        SELECT status
+        FROM reservation
+        WHERE reservation_id = #{reservationId}
+    </select>
+
+    <!-- reservation 만료 시각 조회 (expired_at) -->
+    <select id="selectReservationExpiredAt" resultType="java.time.LocalDateTime">
+        SELECT expired_at
+        FROM reservation
+        WHERE reservation_id = #{reservationId}
+    </select>
+
+    <!-- passenger가 reservation에 속하는지 체크 -->
+    <select id="countPassengerInReservation" resultType="int">
+        SELECT COUNT(*)
+        FROM passenger
+        WHERE reservation_id = #{reservationId}
+          AND passenger_id = #{passengerId}
+    </select>
+
+    <!-- aircraft_seat 행만 FOR UPDATE로 잠그기 -->
+    <select id="selectAircraftSeatIdByFlightAndSeatNoForUpdate" resultType="string">
+        SELECT aseat.airplane_seat_id
+        FROM aircraft_seat aseat
+                 JOIN flight_info fi
+                      ON fi.aircraft_id = aseat.aircraft_id
+        WHERE fi.flight_id = #{flightId}
+          AND aseat.seat_no = #{seatNo}
+            FOR UPDATE
+    </select>
+
+
+    <!-- 승객이 이미 구간에서 잡고 있는 좌석이 있으면 그 flight_seat_id 반환 (행 락) -->
+    <select id="selectPassengerHoldFlightSeatIdForUpdate" resultType="string">
+        SELECT ps.flight_seat_id
+        FROM passenger_seat ps
+        WHERE ps.reservation_segment_id = #{reservationSegmentId}
+          AND ps.passenger_id = #{passengerId}
+            FOR UPDATE
+    </select>
+
+    <!-- flight_seat 행을 락 걸고 조회 (없으면 null) -->
+    <select id="selectFlightSeatForUpdate" resultType="com.flyway.seat.dto.SeatLockRow">
+        SELECT
+            fs.flight_seat_id              AS flightSeatId,
+            fs.flight_id                   AS flightId,
+            fs.aircraft_seat_id            AS aircraftSeatId,
+
+            aseat.seat_no                  AS seatNo,
+            aseat.cabin_class_code         AS cabinClassCode,
+
+            fs.seat_status                 AS seatStatus,
+            fs.hold_reservation_segment_id AS holdReservationSegmentId,
+            fs.hold_expires_at             AS holdExpiresAt
+        FROM flight_seat fs
+                 JOIN aircraft_seat aseat
+                      ON aseat.airplane_seat_id = fs.aircraft_seat_id
+        WHERE fs.flight_id = #{flightId}
+          AND fs.aircraft_seat_id = #{aircraftSeatId}
+            FOR UPDATE
+    </select>
+
+    <!-- flight_seat가 없으면 HOLD row를 생성 (UNIQUE(flight_id, aircraft_seat_id) 기반) -->
+    <insert id="insertFlightSeatHold">
+        INSERT INTO flight_seat (
+            flight_seat_id,
+            flight_id,
+            hold_reservation_segment_id,
+            aircraft_seat_id,
+            seat_status,
+            hold_expires_at,
+            booked_at
+        )
+        VALUES (
+                   UUID(),
+                   #{flightId},
+                   #{reservationSegmentId},
+                   #{aircraftSeatId},
+                   'HOLD',
+                   #{holdExpiresAt},
+                   NULL
+               )
+    </insert>
+
+    <!-- flight_seat을 HOLD로 갱신 -->
+    <update id="updateFlightSeatHold">
+        UPDATE flight_seat
+        SET seat_status = 'HOLD',
+            hold_reservation_segment_id = #{reservationSegmentId},
+            hold_expires_at = #{holdExpiresAt},
+            booked_at = NULL
+        WHERE flight_seat_id = #{flightSeatId}
+    </update>
+
+    <!-- 기존 HOLD 좌석 해제 (HOLD인 경우만 AVAILABLE로) -->
+    <!-- CHANGED: 중복 id 제거하고 이 1개만 유지 -->
+    <update id="releaseHoldByFlightSeatId">
+        UPDATE flight_seat
+        SET seat_status = 'AVAILABLE',
+            hold_reservation_segment_id = NULL,
+            hold_expires_at = NULL
+        WHERE flight_seat_id = #{flightSeatId}
+          AND seat_status = 'HOLD'
+          AND hold_reservation_segment_id = #{reservationSegmentId}
+    </update>
+
+    <!-- passenger_seat upsert -->
+    <insert id="upsertPassengerSeat">
+        INSERT INTO passenger_seat (
+            passenger_seat_id,
+            reservation_segment_id,
+            passenger_id,
+            flight_seat_id
+        )
+        VALUES (
+                   UUID(),
+                   #{reservationSegmentId},
+                   #{passengerId},
+                   #{flightSeatId}
+               )
+            ON DUPLICATE KEY UPDATE
+                                 flight_seat_id = VALUES(flight_seat_id)
+    </insert>
+
+    <!-- 좌석 HOLD 해제용: passenger_seat 삭제 -->
+    <!-- id를 인터페이스 메서드명과 정확히 일치 + 컬럼 오타 수정 -->
+    <delete id="deletePassengerSeatBySegmentAndPassenger">
+        DELETE FROM passenger_seat
+        WHERE reservation_segment_id = #{reservationSegmentId}
+          AND passenger_id = #{passengerId}
+    </delete>
 
 </mapper>

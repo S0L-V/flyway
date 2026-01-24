@@ -29,6 +29,11 @@ public class FlightApiController {
         return service.airport(vo);
     }
 
+    @GetMapping("/api/public/airlines")
+    public List<Airline> airline(Airline vo) {
+        return service.airline(vo);
+    }
+
     // 검색
     @PostMapping("/api/public/flights/search")
     public SearchResultDto search(@RequestBody FlightSearchRequest dto) {

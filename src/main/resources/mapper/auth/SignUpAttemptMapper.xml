@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.auth.mapper.SignUpAttemptMapper">
+
+    <insert id="insert" parameterType="com.flyway.auth.domain.SignUpAttempt">
+        INSERT INTO signup_attempt (attempt_id,
+                                    email,
+                                    status,
+                                    created_at,
+                                    expires_at,
+                                    verified_at,
+                                    consumed_at)
+        VALUES (#{attemptId},
+                #{email},
+                #{status},
+                #{createdAt},
+                #{expiresAt},
+                #{verifiedAt},
+                #{consumedAt})
+    </insert>
+
+    <update id="markVerifiedIfPending">
+        UPDATE signup_attempt
+        SET status      = 'VERIFIED',
+            verified_at = #{verifiedAt}
+        WHERE attempt_id = #{attemptId}
+          AND status = 'PENDING'
+          AND expires_at &gt; #{verifiedAt}
+    </update>
+
+    <update id="consumeIfVerified">
+        UPDATE signup_attempt
+        SET status      = 'CONSUMED',
+            consumed_at = #{consumedAt}
+        WHERE attempt_id = #{attemptId}
+          AND email = #{email}
+          AND status = 'VERIFIED'
+          AND expires_at &gt; #{consumedAt}
+    </update>
+
+    <select id="findStatusById" resultType="string">
+        SELECT status
+        FROM signup_attempt
+        WHERE attempt_id = #{attemptId}
+    </select>
+
+    <update id="expireIfPendingAndExpired">
+        UPDATE signup_attempt
+        SET status = 'EXPIRED'
+        WHERE attempt_id = #{attemptId}
+          AND status = 'PENDING'
+          AND expires_at &lt;= #{now}
+    </update>
+
+</mapper>

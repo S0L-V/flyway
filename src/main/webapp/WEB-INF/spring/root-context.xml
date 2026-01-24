@@ -29,7 +29,6 @@
         <property name="connectionTimeout" value="${db.hikari.connection-timeout}"/>
     </bean>
 
-
     <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
         <constructor-arg ref="hikariConfig"/>
     </bean>
@@ -77,4 +76,5 @@
                 ignore-unresolvable="true"
                 ignore-resource-not-found="true"/>
     </beans>
+
 </beans>

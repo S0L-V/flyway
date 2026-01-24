@@ -9,6 +9,7 @@
     const verifyStatus = document.getElementById("verifyStatus");
 
     const emailVerifiedHidden = document.getElementById("emailVerified");
+    const attemptIdHidden = document.getElementById("attemptId");
     const signupForm = document.getElementById("signupForm");
 
     function setText(el, msg, ok) {
@@ -22,6 +23,7 @@
 
     emailInput.addEventListener("input", function () {
         emailVerifiedHidden.value = "false";
+        attemptIdHidden.value = "";
         verifyBox.classList.add("is-hidden");
         setText(sendStatus, "", true);
         setText(verifyStatus, "", true);
@@ -49,6 +51,7 @@
             let data = null;
             try {
                 data = await res.json();
+                attemptIdHidden.value = data.data.attemptId;
             } catch (e) {
                 data = null;
             }
@@ -81,12 +84,14 @@
         setText(verifyStatus, "인증 확인 중입니다...", true);
 
         try {
-            const res = await fetch(
-                base + "/api/auth/email/status?email=" + encodeURIComponent(email)
-            );
+            const query = new URLSearchParams({
+                email: email,
+                attemptId: attemptIdHidden.value
+            });
+            const res = await fetch(base + "/api/auth/email/status?" + query.toString());
 
             if (!res.ok) {
-                setText(verifyStatus, "인증 확인에 실패했습니다. 잠시 후 다시 시도해 주세요.", false);
+                setText(verifyStatus, "인증 확인에 실패했습니다.", false);
                 emailVerifiedHidden.value = "false";
                 return;
             }

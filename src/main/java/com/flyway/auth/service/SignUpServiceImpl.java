@@ -4,6 +4,7 @@ import com.flyway.auth.domain.AuthProvider;
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.auth.domain.KakaoUserInfo;
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.repository.SignUpAttemptRepository;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -27,22 +28,26 @@ public class SignUpServiceImpl implements SignUpService {
     private final UserRepository userRepository;
     private final UserIdentityRepository userIdentityRepository;
     private final UserProfileRepository userProfileRepository;
+    private final SignUpAttemptRepository signUpAttemptRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void signUp(EmailSignUpRequest request) {
         validateRequest(request);
+        LocalDateTime now = LocalDateTime.now();
 
-        // 이메일 가입 회원 중 중복 체크
+        int validAttempt = signUpAttemptRepository.consumeIfVerified(request.getAttemptId(), request.getEmail(), now);
+        if (validAttempt != 1) {
+            throw new BusinessException(ErrorCode.USER_INVALID_SIGN_UP_ATTEMPT);
+        }
+
         boolean existing = userIdentityRepository.existsEmailIdentity(request.getEmail());
         if (existing) {
             throw new BusinessException(ErrorCode.USER_EMAIL_ALREADY_EXISTS);
         }
 
-        // User 생성
         String userId = UUID.randomUUID().toString();
-        LocalDateTime now = LocalDateTime.now();
 
         String encodedPassword;
         try {
@@ -156,45 +161,33 @@ public class SignUpServiceImpl implements SignUpService {
         userProfileRepository.updateProfile(profile);
     }
 
-    /**
-     *  이메일 회원가입 입력값 검증
-     */
     private void validateRequest(EmailSignUpRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
         }
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new BusinessException(ErrorCode.USER_EMAIL_REQUIRED);
-        }
-        if (request.getRawPassword() == null || request.getRawPassword().isBlank()) {
-            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
-        }
-        if (request.getName() == null || request.getName().isBlank()) {
-            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
-        }
+        requireText(request.getEmail(), ErrorCode.USER_EMAIL_REQUIRED);
+        requireText(request.getRawPassword(), ErrorCode.USER_INVALID_INPUT);
+        requireText(request.getName(), ErrorCode.USER_INVALID_INPUT);
+        requireText(request.getAttemptId(), ErrorCode.USER_INVALID_SIGN_UP_ATTEMPT);
     }
 
-    /**
-     * OAuth 최종 회원가입 입력값 검증
-     */
     private void validateOauthRequest(EmailSignUpRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
         }
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new BusinessException(ErrorCode.USER_EMAIL_REQUIRED);
-        }
-        if (request.getName() == null || request.getName().isBlank()) {
+        requireText(request.getEmail(), ErrorCode.USER_EMAIL_REQUIRED);
+        requireText(request.getName(), ErrorCode.USER_INVALID_INPUT);
+    }
+
+    private void validateKakaoUserInfo(KakaoUserInfo userInfo) {
+        if (userInfo == null || userInfo.getId() == null) {
             throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
         }
     }
 
-    /**
-     *  카카오 사용자 정보 필수값 검증
-     */
-    private void validateKakaoUserInfo(KakaoUserInfo userInfo) {
-        if (userInfo == null || userInfo.getId() == null) {
-            throw new BusinessException(ErrorCode.USER_INVALID_INPUT);
+    private void requireText(String value, ErrorCode errorCode) {
+        if (value == null || value.isBlank()) {
+            throw new BusinessException(errorCode);
         }
     }
 }

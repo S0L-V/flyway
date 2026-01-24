@@ -31,6 +31,11 @@ public class FlightServiceImpl implements FlightService{
         return flightRepository.findAirports(vo);
     }
 
+    @Override
+    public List<Airline> airline(Airline vo) {
+        return flightRepository.findAirlines(vo);
+    }
+
     // 검색 결과
     @Override
     public SearchResultDto search(FlightSearchRequest dto) {

@@ -1,5 +1,6 @@
 let AIRPORTS = [];
 let allOptions = [];
+let displayedOptions = [];
 
 async function loadAirports() {
     const res = await fetch(`${CONTEXT_PATH}/api/public/airports`);
@@ -52,12 +53,37 @@ function initTripTabs() {
         if (state.tripType !== trip) {
             state.tripType = trip;
 
-            // 편도로 바꾸면 오는날 값/표시 초기화
             if (trip === "OW") {
-                state.dateEnd = null;
-                // 왕복용 인풋이 있다면 값도 같이 비움
-                const inInput = document.querySelector('[data-in-date-input]');
-                if (inInput) inInput.value = "";
+
+                if (state.dateStart) {
+                    setFieldText("dates", `${state.dateStart}`);
+                } else {
+                    setFieldText("dates", "날짜 선택");
+                }
+
+                const endInput = document.getElementById("dateEnd");
+                if(endInput) endInput.value = "";
+
+            } else {
+
+                if (state.dateStart && state.dateEnd && state.dateStart > state.dateEnd) {
+                    state.dateEnd = null; // 날짜가 꼬였으므로 이때는 초기화
+                }
+
+                // 텍스트 복구 로직
+                const s = state.dateStart;
+                const e = state.dateEnd;
+
+                if (s && e) {
+                    setFieldText("dates", `${s} ~ ${e}`);
+                    // 인풋에도 다시 값 채워주기
+                    const endInput = document.getElementById("dateEnd");
+                    if(endInput) endInput.value = e;
+                } else if (s) {
+                    setFieldText("dates", `${s} ~ 날짜 선택`);
+                } else {
+                    setFieldText("dates", "날짜 선택");
+                }
             }
 
             document.dispatchEvent(new CustomEvent("tripTypeChanged"));
@@ -120,7 +146,6 @@ function initDropdowns() {
         });
     });
 
-    // ✅ 진짜 "바깥 클릭"일 때만 닫기
     document.addEventListener("click", (e) => {
         const clickedInsideAnyDropdown = !!e.target.closest(".dropdown");
         if (!clickedInsideAnyDropdown) closeAllDropdowns();
@@ -216,7 +241,6 @@ function initDates() {
     const end   = document.getElementById("dateEnd");
     const err   = document.getElementById("dateError");
 
-    // ✅ 편도일 때 end input을 숨기고 값 초기화하는 헬퍼
     function syncDateUIByTripType() {
         const isRT = state.tripType === "RT";
 
@@ -226,16 +250,13 @@ function initDates() {
 
         if (!isRT) {
             end.value = "";
-            state.dateEnd = null;
+            //state.dateEnd = null;
             err.hidden = true;
         }
     }
 
-    // ✅ 초기 1회 반영
     syncDateUIByTripType();
 
-    // ✅ 탭 전환 시에도 반영하려면 (initTripTabs에서 커스텀 이벤트를 쏘는 방식)
-    // initTripTabs에서 document.dispatchEvent(new CustomEvent("tripTypeChanged"));
     document.addEventListener("tripTypeChanged", syncDateUIByTripType);
 
     // 시작일 변경 시: 종료일 min을 시작일로 맞춤 (왕복일 때만 의미 있음)
@@ -249,14 +270,14 @@ function initDates() {
         const e = end.value;
         const isRT = state.tripType === "RT";
 
-        // ✅ 공통: 출발일은 항상 필수
+        // 공통: 출발일은 항상 필수
         if (!s) {
             err.textContent = "출발일을 선택해 주세요.";
             err.hidden = false;
             return;
         }
 
-        // ✅ 왕복: 도착일도 필수 + 검증
+        // 왕복: 도착일도 필수 + 검증
         if (isRT) {
             if (!e) {
                 err.textContent = "도착일을 선택해 주세요.";
@@ -278,7 +299,7 @@ function initDates() {
             return;
         }
 
-        // ✅ 편도: end는 null로 고정
+        // 편도: end는 null로 고정
         err.hidden = true;
         state.dateStart = s;
         state.dateEnd = null;
@@ -353,6 +374,10 @@ function initSearchButton() {
             resetFilters();
         }
 
+        if (typeof currentSortType !== "undefined") {
+            currentSortType = null;
+        }
+
         // 2) DTO 1개로 보낼 payload 만들기 (POST)
         const payload = {
             tripType: state.tripType,
@@ -400,6 +425,7 @@ function initSearchButton() {
 
 function handleSearchResult(data){
     allOptions = data.options ?? [];
+    displayedOptions = [...allOptions];
 
     if(allOptions.length > 0) {
         const prices = allOptions.map(f => f.totalPrice).filter(p => p !== undefined && p !== null && !isNaN(p));
