@@ -14,7 +14,7 @@ const AdminWebSocket = (function() {
         maxReconnectAttempts: 10,     // 최대 재연결 시도
         // Heartbeat
         pingInterval: 20000,          // PING 간격 (ms)
-        pongTimeout: 5000             // PONG 대기 시간 (ms)
+        pongTimeout: 10000             // PONG 대기 시간 (ms)
     };
 
     // 상태

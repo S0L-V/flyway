@@ -16,6 +16,9 @@ const AdminDashboard = (function() {
     // 컨텍스트 경로 저장
     let basePath = '';
 
+    // 현재 선택된 기간
+    let currentPeriod = 'daily';
+
     /**
      * 초기화
      */
@@ -37,6 +40,9 @@ const AdminDashboard = (function() {
         // 새로고침 버튼 이벤트
         bindRefreshButton();
 
+        // 기간 선택 탭 이벤트
+        bindPeriodTabs();
+
         console.log('[Dashboard] Initialized');
     }
 
@@ -45,16 +51,26 @@ const AdminDashboard = (function() {
      */
     function cacheElements() {
         elements = {
-            // 통계 카드
-            dailyVisitors: document.getElementById('stat-daily-visitors'),
-            dailyReservations: document.getElementById('stat-daily-reservations'),
-            dailyCancellations: document.getElementById('stat-daily-cancellations'),
-            dailyRevenue: document.getElementById('stat-daily-revenue'),
-            dailyPayments: document.getElementById('stat-daily-payments'),
+            // 통계 카드 (기간별)
+            visitors: document.getElementById('stat-visitors'),
+            reservations: document.getElementById('stat-reservations'),
+            cancellations: document.getElementById('stat-cancellations'),
+            revenue: document.getElementById('stat-revenue'),
+            payments: document.getElementById('stat-payments'),
             totalUsers: document.getElementById('stat-total-users'),
             activeFlights: document.getElementById('stat-active-flights'),
             pendingReservations: document.getElementById('stat-pending-reservations'),
             pendingPayments: document.getElementById('stat-pending-payments'),
+
+            // 라벨
+            labelVisitors: document.getElementById('label-visitors'),
+            labelReservations: document.getElementById('label-reservations'),
+            labelCancellations: document.getElementById('label-cancellations'),
+            labelRevenue: document.getElementById('label-revenue'),
+            labelPayments: document.getElementById('label-payments'),
+
+            // 기간 선택 탭
+            periodTabs: document.querySelectorAll('.period-tab'),
 
             // 알림
             notificationBadge: document.getElementById('notification-badge'),
@@ -85,20 +101,22 @@ const AdminDashboard = (function() {
     }
 
     /**
-     * 통계 업데이트
+     * 통계 업데이트 (일일 - WebSocket)
      */
     function updateStats(stats) {
         console.log('[Dashboard] Updating stats:', stats);
         currentStats = stats;
 
-        // 오늘 통계
-        updateElement(elements.dailyVisitors, formatNumber(stats.dailyVisitors));
-        updateElement(elements.dailyReservations, formatNumber(stats.dailyReservations));
-        updateElement(elements.dailyCancellations, formatNumber(stats.dailyCancellations));
-        updateElement(elements.dailyRevenue, formatCurrency(stats.dailyRevenue));
-        updateElement(elements.dailyPayments, formatNumber(stats.dailyPayments));
+        // 현재 기간이 daily일 때만 WebSocket 데이터로 업데이트
+        if (currentPeriod === 'daily') {
+            updateElement(elements.visitors, formatNumber(stats.dailyVisitors));
+            updateElement(elements.reservations, formatNumber(stats.dailyReservations));
+            updateElement(elements.cancellations, formatNumber(stats.dailyCancellations));
+            updateElement(elements.revenue, formatCurrency(stats.dailyRevenue));
+            updateElement(elements.payments, formatNumber(stats.dailyPayments));
+        }
 
-        // 전체 통계
+        // 전체 통계 (기간에 관계없이 업데이트)
         updateElement(elements.totalUsers, formatNumber(stats.totalUsers));
         updateElement(elements.activeFlights, formatNumber(stats.activeFlights));
 
@@ -108,6 +126,153 @@ const AdminDashboard = (function() {
 
         // 알림 배지
         updateNotificationBadge(stats.unreadNotifications);
+    }
+
+    /**
+     * 기간별 통계 업데이트 (주간/월간 - REST API)
+     */
+    function updatePeriodStats(stats) {
+        console.log('[Dashboard] Updating period stats:', stats);
+
+        updateElement(elements.visitors, formatNumber(stats.activeUsers));
+        updateElement(elements.reservations, formatNumber(stats.totalReservations));
+        updateElement(elements.cancellations, formatNumber(stats.cancelledReservations));
+        updateElement(elements.revenue, formatCurrency(stats.totalRevenue));
+        updateElement(elements.payments, formatNumber(stats.confirmedReservations));
+    }
+
+    /**
+     * 기간별 라벨 업데이트
+     */
+    function updatePeriodLabels(period) {
+        const labels = {
+            daily: { visitors: '일일 방문자', revenue: '오늘의 매출' },
+            weekly: { visitors: '주간 방문자', revenue: '주간 매출' },
+            monthly: { visitors: '월간 방문자', revenue: '월간 매출' }
+        };
+
+        const label = labels[period] || labels.daily;
+        updateElement(elements.labelVisitors, label.visitors);
+        updateElement(elements.labelRevenue, label.revenue);
+    }
+
+    /**
+     * 기간 선택 탭 바인딩
+     */
+    function bindPeriodTabs() {
+        console.log('[Dashboard] Binding period tabs, found:', elements.periodTabs ? elements.periodTabs.length : 0);
+
+        // querySelectorAll로 찾은 탭들에 이벤트 바인딩
+        if (elements.periodTabs && elements.periodTabs.length > 0) {
+            elements.periodTabs.forEach(function(tab) {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var period = this.getAttribute('data-period');
+                    console.log('[Dashboard] Period tab clicked:', period);
+                    switchPeriod(period);
+                });
+            });
+        } else {
+            // Fallback: ID로 직접 바인딩
+            console.log('[Dashboard] Using fallback ID binding for period tabs');
+            var dailyBtn = document.getElementById('period-daily');
+            var weeklyBtn = document.getElementById('period-weekly');
+            var monthlyBtn = document.getElementById('period-monthly');
+
+            if (dailyBtn) {
+                dailyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchPeriod('daily');
+                });
+            }
+            if (weeklyBtn) {
+                weeklyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchPeriod('weekly');
+                });
+            }
+            if (monthlyBtn) {
+                monthlyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchPeriod('monthly');
+                });
+            }
+        }
+    }
+
+    /**
+     * 기간 전환
+     */
+    function switchPeriod(period) {
+        console.log('[Dashboard] switchPeriod called with:', period, 'current:', currentPeriod);
+
+        if (currentPeriod === period) {
+            console.log('[Dashboard] Same period, skipping');
+            return;
+        }
+
+        currentPeriod = period;
+        console.log('[Dashboard] Switching to period:', period);
+
+        // 탭 스타일 업데이트 (querySelectorAll 다시 조회)
+        var tabs = document.querySelectorAll('.period-tab');
+        tabs.forEach(function(tab) {
+            if (tab.getAttribute('data-period') === period) {
+                tab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                tab.classList.remove('text-slate-500');
+            } else {
+                tab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                tab.classList.add('text-slate-500');
+            }
+        });
+
+        // 라벨 업데이트
+        updatePeriodLabels(period);
+
+        // 데이터 로드
+        if (period === 'daily') {
+            // 일일은 WebSocket 데이터 사용
+            if (currentStats) {
+                updateStats(currentStats);
+            }
+        } else {
+            // 주간/월간은 REST API 호출
+            fetchPeriodStats(period.toUpperCase());
+        }
+    }
+
+    /**
+     * 기간별 통계 API 호출
+     */
+    function fetchPeriodStats(period) {
+        // 로딩 표시
+        updateElement(elements.visitors, '-');
+        updateElement(elements.reservations, '-');
+        updateElement(elements.cancellations, '-');
+        updateElement(elements.revenue, '-');
+        updateElement(elements.payments, '-');
+
+        fetch(basePath + '/admin/api/dashboard/stats/' + period, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.success && data.data) {
+                    updatePeriodStats(data.data);
+                } else {
+                    console.warn('[Dashboard] No period stats available');
+                    updateElement(elements.visitors, '0');
+                    updateElement(elements.reservations, '0');
+                    updateElement(elements.cancellations, '0');
+                    updateElement(elements.revenue, '₩ 0');
+                    updateElement(elements.payments, '0');
+                }
+            })
+            .catch(function(error) {
+                console.error('[Dashboard] Failed to fetch period stats:', error);
+            });
     }
 
     /**
@@ -320,17 +485,23 @@ const AdminDashboard = (function() {
         if (!elements.refreshButton) return;
 
         elements.refreshButton.addEventListener('click', function() {
+            // WebSocket 데이터 요청
             AdminWebSocket.requestStats();
             AdminWebSocket.requestActivities();
             AdminWebSocket.requestNotifications();
+
+            // 현재 기간이 daily가 아니면 REST API도 호출
+            if (currentPeriod !== 'daily') {
+                fetchPeriodStats(currentPeriod.toUpperCase());
+            }
 
             // 버튼 피드백
             this.disabled = true;
             this.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 새로고침 중...';
 
-            setTimeout(() => {
-                this.disabled = false;
-                this.innerHTML = '데이터 새로고침';
+            setTimeout(function() {
+                elements.refreshButton.disabled = false;
+                elements.refreshButton.innerHTML = '새로고침';
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
                 }
@@ -438,6 +609,8 @@ const AdminDashboard = (function() {
         init: init,
         markAsRead: markAsRead,
         markAllAsRead: markAllAsRead,
+        switchPeriod: switchPeriod,
+        fetchPeriodStats: fetchPeriodStats,
         getStats: function() { return currentStats; },
         getActivities: function() { return currentActivities; },
         getNotifications: function() { return currentNotifications; }

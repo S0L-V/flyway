@@ -106,18 +106,18 @@
     <!-- 총 예약 건수 (결제 완료) -->
     <select id="countConfirmedReservationsByPeriod" resultType="int">
         SELECT COUNT(*)
-        FROM reservations r
+        FROM reservation r
         JOIN payment p ON r.reservation_id = p.reservation_id
         WHERE DATE(r.reserved_at) BETWEEN #{startDate} AND #{endDate}
             AND p.status = 'PAID'
     </select>
 
-    <!-- 취소 예약 건수 -->
+    <!-- 취소/환불 예약 건수 -->
     <select id="countCancelledReservationsByPeriod" resultType="int">
-        SELECT COUNT(*)
-        FROM reservation
-        WHERE DATE(reserved_at) BETWEEN #{startDate} AND #{endDate}
-            AND status = 'CANCELLED'
+        SELECT COUNT(DISTINCT r.reservation_id)
+        FROM reservation r
+                 JOIN refund rf ON r.reservation_id = rf.reservation_id
+        WHERE DATE(rf.requested_at) BETWEEN #{startDate} AND #{endDate}
     </select>
 
     <!-- 총 매출 -->
@@ -129,7 +129,7 @@
     </select>
 
     <!-- 평균 티켓 가겨 -->
-    <select id="avgTicketPricePeriod" resultType="long">
+    <select id="avgTicketPriceByPeriod" resultType="long">
         SELECT COALESCE(AVG(amount), 0)
         FROM payment
         WHERE DATE (paid_at) BETWEEN #{startDate} AND #{endDate}
@@ -137,7 +137,7 @@
     </select>
 
     <!-- 환불 건수 -->
-    <select id="countRefundByPeriod" resultType="int">
+    <select id="countRefundsByPeriod" resultType="int">
         SELECT COUNT(*)
         FROM refund
         WHERE DATE(requested_at) BETWEEN #{startDate} AND #{endDate}
@@ -148,7 +148,7 @@
         SELECT COALESCE(SUM(refund_amount), 0)
         FROM refund
         WHERE DATE(requested_at) BETWEEN #{startDate} AND #{endDate}
-            AND refund_status = 'COMPLETED'
+            AND refund_status = 'APPROVED'
     </select>
 
     <!-- 신규 가입 회원 수 -->
@@ -161,7 +161,7 @@
     <!-- 활성 사용자 수 (방문자) -->
     <select id="countActiveUsersByPeriod" resultType="int">
         SELECT COUNT(DISTINCT session_id)
-        FROM users
+        FROM visitor_log
         WHERE DATE(visited_at) BETWEEN #{startDate} AND #{endDate}
     </select>
 </mapper>

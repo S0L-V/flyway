@@ -11,40 +11,54 @@
                 <h1 class="text-2xl font-bold text-slate-900">Flyway 관리 현황</h1>
                 <p class="text-slate-500">실시간 항공권 예약 및 시스템 지표입니다.</p>
             </div>
-            <button id="refresh-button" class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-colors">
-                데이터 새로고침
-            </button>
+            <div class="flex items-center gap-3">
+                <!-- 기간 선택 탭 -->
+                <div class="flex bg-slate-100 rounded-lg p-1">
+                    <button type="button" id="period-daily" class="period-tab px-4 py-2 text-sm font-semibold rounded-md bg-white text-slate-900 shadow-sm" data-period="daily">
+                        오늘
+                    </button>
+                    <button type="button" id="period-weekly" class="period-tab px-4 py-2 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700" data-period="weekly">
+                        이번 주
+                    </button>
+                    <button type="button" id="period-monthly" class="period-tab px-4 py-2 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700" data-period="monthly">
+                        이번 달
+                    </button>
+                </div>
+                <button id="refresh-button" class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-colors">
+                    새로고침
+                </button>
+            </div>
         </div>
 
-        <!-- 오늘 통계 카드 -->
+        <!-- 통계 카드 (기간별) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-slate-500">일일 방문자</span>
+                    <span id="label-visitors" class="text-sm font-semibold text-slate-500">일일 방문자</span>
                     <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-daily-visitors" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-visitors" class="text-2xl font-bold text-slate-900">-</div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-slate-500">예약 건수</span>
+                    <span id="label-reservations" class="text-sm font-semibold text-slate-500">예약 건수</span>
                     <div class="p-2 bg-orange-50 text-orange-600 rounded-lg"><i data-lucide="ticket" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-daily-reservations" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-reservations" class="text-2xl font-bold text-slate-900">-</div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-slate-500">취소/환불</span>
+                    <span id="label-cancellations" class="text-sm font-semibold text-slate-500">취소/환불</span>
                     <div class="p-2 bg-rose-50 text-rose-600 rounded-lg"><i data-lucide="alert-circle" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-daily-cancellations" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-cancellations" class="text-2xl font-bold text-slate-900">-</div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-slate-500">오늘의 매출</span>
+                    <span id="label-revenue" class="text-sm font-semibold text-slate-500">오늘의 매출</span>
                     <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="credit-card" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-daily-revenue" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-revenue" class="text-2xl font-bold text-slate-900">-</div>
             </div>
         </div>
 
@@ -52,10 +66,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-slate-500">결제 완료</span>
+                    <span id="label-payments" class="text-sm font-semibold text-slate-500">결제 완료</span>
                     <div class="p-2 bg-teal-50 text-teal-600 rounded-lg"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-daily-payments" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-payments" class="text-2xl font-bold text-slate-900">-</div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
@@ -102,10 +116,37 @@
 <!-- Dashboard 초기화 -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // WebSocket 대시보드 초기화
+        console.log('[JSP] 페이지 로드 완료 - 대시보드 초기화 시작');
+
+        // 1. WebSocket 및 대시보드 코어 초기화
         if (typeof AdminDashboard !== 'undefined') {
             AdminDashboard.init(window.CONTEXT_PATH || '');
+        } else {
+            console.error('[JSP] AdminDashboard JS가 로드되지 않았습니다.');
         }
+
+        // 2. 기간 선택 버튼 강제 연결 (JS 내부 바인딩 실패 대비)
+        // 'daily', 'weekly', 'monthly' 버튼을 찾아서 클릭 이벤트를 직접 붙여줍니다.
+        var periods = ['daily', 'weekly', 'monthly'];
+
+        periods.forEach(function(period) {
+            var btn = document.getElementById('period-' + period);
+
+            if (btn) {
+                // 기존 이벤트 제거 후 새로 할당 (중복 방지)
+                btn.onclick = function(e) {
+                    e.preventDefault(); // 링크 이동 막기
+                    console.log('[JSP] 기간 버튼 클릭됨:', period);
+
+                    if (typeof AdminDashboard !== 'undefined') {
+                        // JS 내부의 switchPeriod 함수를 직접 호출하여 안전하게 기간 변경
+                        AdminDashboard.switchPeriod(period);
+                    }
+                };
+            } else {
+                console.warn('[JSP] 버튼을 찾을 수 없음: period-' + period);
+            }
+        });
     });
 </script>
 </body>
