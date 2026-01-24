@@ -1,9 +1,9 @@
 package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.service.AuthTokenService;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
-import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;
@@ -44,7 +44,7 @@ class UserAuthControllerTest {
     private MockMvc mockMvc;
     private SignUpService signUpService;
     private EmailUserDetailsService emailUserDetailsService;
-    private LoginSuccessHandler loginSuccessHandler;
+    private AuthTokenService authTokenService;
 
 
     @BeforeEach
@@ -53,14 +53,14 @@ class UserAuthControllerTest {
         KakaoLoginService kakaoLoginService = Mockito.mock(KakaoLoginService.class);
         emailUserDetailsService = Mockito.mock(EmailUserDetailsService.class);
         UserIdUserDetailsService userIdUserDetailsService = Mockito.mock(UserIdUserDetailsService.class);
-        loginSuccessHandler = Mockito.mock(LoginSuccessHandler.class);
+        authTokenService = Mockito.mock(AuthTokenService.class);
 
         AuthController controller = new AuthController(
                 signUpService,
                 kakaoLoginService,
                 emailUserDetailsService,
                 userIdUserDetailsService,
-                loginSuccessHandler
+                authTokenService
         );
 
         InternalResourceViewResolver vr = new InternalResourceViewResolver();
@@ -84,7 +84,7 @@ class UserAuthControllerTest {
                 .build();
         when(emailUserDetailsService.loadUserByUsername("test@example.com"))
                 .thenReturn(principal);
-        doNothing().when(loginSuccessHandler).issueAccessTokenCookie(any(), anyString());
+        doNothing().when(authTokenService).issueLoginCookies(any(), any(), anyString());
 
         // when & then
         mockMvc.perform(post("/auth/signup")
