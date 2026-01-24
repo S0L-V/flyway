@@ -46,6 +46,7 @@ function closeDetailPage() {
 }
 
 function createDetail(f, details, type) {
+    const segmentKey = type === "가는 편" ? "outbound" : "inbound";
     const flightNumber = f.flightNumber ?? "-";
     const depAirport = f.departureAirport ?? "-";
     const arrAirport = f.arrivalAirport ?? "-";
@@ -84,29 +85,29 @@ function createDetail(f, details, type) {
     }
 
     return `
-        <div class="flight-card" id="dynamic-outbound">
+        <div class="flight-card" id="dynamic-${segmentKey}">
             <div class="badge-label">${type}</div>
-            <div class="flight-airline" id="modal-out-airline">${airlineLogoHtml}${airlineName} ${flightNumber}</div> 
+            <div class="flight-airline" id="modal-${segmentKey}-airline">${airlineLogoHtml}${airlineName} ${flightNumber}</div> 
             <div class="flight-route">
                 <div class="flight-point">
                     <div class="flight-time">
-                        <span id="modal-out-start-date">${depDate}</span><br>
-                        <span id="modal-out-start-time" class="time-highlight">${depTime}</span>
+                        <span id="modal-${segmentKey}-start-date">${depDate}</span><br>
+                        <span id="modal-${segmentKey}-start-time" class="time-highlight">${depTime}</span>
                     </div>
-                    <div class="flight-airport" id="modal-out-start-airport">${depCity}(${depAirport}) ${terminalNo}</div>
+                    <div class="flight-airport" id="modal-${segmentKey}-start-airport">${depCity}(${depAirport}) ${terminalNo}</div>
                 </div>
     
                 <div class="flight-duration">
                     <span class="flight-direct-badge">직항</span>
-                    <div class="flight-duration-text" id="modal-out-duration">${time}</div>
+                    <div class="flight-duration-text" id="modal-${segmentKey}-duration">${time}</div>
                 </div>
     
                 <div class="flight-point">
                     <div class="flight-time">
-                        <span id="modal-out-end-date">${arrDate}</span><br>
-                        <span id="modal-out-end-time" class="time-highlight">${arrTime}</span>
+                        <span id="modal-${segmentKey}-end-date">${arrDate}</span><br>
+                        <span id="modal-${segmentKey}-end-time" class="time-highlight">${arrTime}</span>
                     </div>
-                    <div class="flight-airport" id="modal-out-end-airport">${arrCity}(${arrAirport})</div>
+                    <div class="flight-airport" id="modal-${segmentKey}-end-airport">${arrCity}(${arrAirport})</div>
                 </div>
             </div>
 
@@ -130,7 +131,7 @@ function formatTimeArray(arr) {
 function formatDateArray(arr) {
     if (!Array.isArray(arr) || arr.length < 5) return "-";
     const year = String(arr[0]);
-    const month = String(arr[1] - 1).padStart(2, "0");
+    const month = String(arr[1]).padStart(2, "0");
     const day = String(arr[2]).padStart(2,"0");
     return `${year}-${month}-${day}`;
 }
