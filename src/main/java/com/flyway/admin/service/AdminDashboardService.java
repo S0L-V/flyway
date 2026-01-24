@@ -5,6 +5,7 @@ import java.util.List;
 import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.DashboardStatsDto;
 import com.flyway.admin.dto.RecentActivityDto;
+import com.flyway.admin.dto.StatisticsDto;
 
 public interface AdminDashboardService {
 
@@ -32,4 +33,14 @@ public interface AdminDashboardService {
 	 * 모든 알림 읽음 처리
 	 */
 	int markAllNotificationsAsRead(String adminId);
+
+	/**
+	 * 기간별 통계 조회 (주간/월간)
+	 */
+	StatisticsDto getPeriodStats(String period);
+
+	/**
+	 * 최근 N일간 일일 통계 목록 조회 (차트용)
+	 */
+	List<StatisticsDto> getRecentDailyStats(int days);
 }
