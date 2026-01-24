@@ -63,7 +63,7 @@ public class StatisticsScheduler {
 	}
 
 	/**
-	 * 매일 1월 00:15 - 전월 월간 통계 계산
+	 * 매월 1일 00:15 - 전월 월간 통계 계산
 	 */
 	@Scheduled(cron = "0 15 0 1 * *")
 	public void calculateMonthlyStatistics() {
