@@ -40,7 +40,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry.addInterceptor(visitorTrackingInterceptor)
 			.addPathPatterns(
 				"/",
-				"/flight/**",
+				"/search/**",
 				"/reservation/**",
 				"/mypage/**"
 			)
