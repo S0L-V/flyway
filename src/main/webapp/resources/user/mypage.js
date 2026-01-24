@@ -1,9 +1,6 @@
 import { fetchWithRefresh } from "../common/authFetch";
 
 async function loadProfile() {
-    const base = window.APP?.contextPath ?? "";
-    let retried = false;
-
     async function requestProfile() {
         const response = await fetchWithRefresh("/api/profile", {
             method: "GET",
@@ -21,7 +18,6 @@ async function loadProfile() {
 
     try {
         const res = await requestProfile();
-        if (!res) return;
 
         const data = res.data;
 

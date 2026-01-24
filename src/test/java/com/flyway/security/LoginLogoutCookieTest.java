@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class LoginLogoutCookieTest {
 
     @Test
-    @DisplayName("로그인 성공 시 토큰 쿠키 발급을 AuthTokenService에 위임한다q")
+    @DisplayName("로그인 성공 시 토큰 쿠키 발급을 AuthTokenService에 위임한다")
     void login_delegates_to_authTokenService() throws Exception {
         AuthTokenService authTokenService = mock(AuthTokenService.class);
         LoginSuccessHandler handler = new LoginSuccessHandler(authTokenService);

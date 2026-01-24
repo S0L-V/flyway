@@ -4,7 +4,6 @@ import com.flyway.auth.dto.EmailSignUpRequest;
 import com.flyway.auth.service.AuthTokenService;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
-import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;

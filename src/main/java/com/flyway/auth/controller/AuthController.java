@@ -7,7 +7,6 @@ import com.flyway.auth.service.SignUpService;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;
-import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +101,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<ApiResponse<String>> refresh(
+    public ResponseEntity<Void> refresh(
             HttpServletRequest request,
             HttpServletResponse response
     ) {
