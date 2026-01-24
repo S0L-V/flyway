@@ -13,8 +13,8 @@ import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.DashboardStatsDto;
 import com.flyway.admin.dto.RecentActivityDto;
 import com.flyway.admin.dto.StatisticsDto;
-import com.flyway.admin.mapper.StatisticsMapper;
 import com.flyway.admin.repository.AdminDashboardRepository;
+import com.flyway.admin.repository.StatisticsRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminDashboardServiceImpl implements AdminDashboardService {
 
 	private final AdminDashboardRepository dashboardRepository;
-	private final StatisticsMapper statisticsMapper;
+	private final StatisticsRepository statisticsRepository;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -118,7 +118,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 	public StatisticsDto getPeriodStats(String period) {
 		try {
 			LocalDate statDate = calculateStatDate(period);
-			StatisticsDto stats = statisticsMapper.selectStatistics(period, statDate);
+			StatisticsDto stats = statisticsRepository.findStatistics(period, statDate);
 
 			// 저장된 통계가 없으면 실시간 계산
 			if (stats == null) {
@@ -138,7 +138,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 	@Transactional(readOnly = true)
 	public List<StatisticsDto> getRecentDailyStats(int days) {
 		try {
-			return statisticsMapper.selectRecentDailyStatistics(days);
+			return statisticsRepository.findRecentDailyStatistics(days);
 		} catch (Exception e) {
 			log.error("Failed to get recent daily stats", e);
 			return Collections.emptyList();
@@ -179,15 +179,15 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 		return StatisticsDto.builder()
 			.statType(period)
 			.statDate(startDate)
-			.totalReservations(statisticsMapper.countReservationsByPeriod(startDate, endDate))
-			.confirmedReservations(statisticsMapper.countConfirmedReservationsByPeriod(startDate, endDate))
-			.cancelledReservations(statisticsMapper.countCancelledReservationsByPeriod(startDate, endDate))
-			.totalRevenue(statisticsMapper.sumRevenueByPeriod(startDate, endDate))
-			.averageTicketPrice(statisticsMapper.avgTicketPriceByPeriod(startDate, endDate))
-			.refundCount(statisticsMapper.countRefundsByPeriod(startDate, endDate))
-			.totalRefunds(statisticsMapper.sumRefundsByPeriod(startDate, endDate))
-			.newUsers(statisticsMapper.countNewUsersByPeriod(startDate, endDate))
-			.activeUsers(statisticsMapper.countActiveUsersByPeriod(startDate, endDate))
+			.totalReservations(statisticsRepository.countReservationsByPeriod(startDate, endDate))
+			.confirmedReservations(statisticsRepository.countConfirmedReservationsByPeriod(startDate, endDate))
+			.cancelledReservations(statisticsRepository.countCancelledReservationsByPeriod(startDate, endDate))
+			.totalRevenue(statisticsRepository.sumRevenueByPeriod(startDate, endDate))
+			.averageTicketPrice(statisticsRepository.avgTicketPriceByPeriod(startDate, endDate))
+			.refundCount(statisticsRepository.countRefundsByPeriod(startDate, endDate))
+			.totalRefunds(statisticsRepository.sumRefundsByPeriod(startDate, endDate))
+			.newUsers(statisticsRepository.countNewUsersByPeriod(startDate, endDate))
+			.activeUsers(statisticsRepository.countActiveUsersByPeriod(startDate, endDate))
 			.build();
 	}
 
