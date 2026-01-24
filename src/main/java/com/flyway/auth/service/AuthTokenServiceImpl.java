@@ -109,9 +109,6 @@ public class AuthTokenServiceImpl implements AuthTokenService {
                 .expiresAt(newExpiresAt)
                 .build();
 
-        /* 새 refreshToken 저장 */
-        refreshTokenRepository.insert(newToken);
-
         /* 기존 refresh 회전 처리 (1건만 성공) */
         int rotated = refreshTokenRepository.markRotated(
                 stored.getRefreshTokenId(), now, newRefreshId
@@ -121,6 +118,9 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         if (rotated == 0) {
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_ALREADY_USED);
         }
+
+        /* 새 refreshToken 저장 */
+        refreshTokenRepository.insert(newToken);
 
         /* AccessToken 재발급 + 쿠키 세팅 */
         addAccessTokenCookie(response, stored.getUserId());
