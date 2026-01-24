@@ -3,8 +3,6 @@ package com.flyway.admin.repository;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.cglib.core.Local;
-
 import com.flyway.admin.dto.StatisticsDto;
 
 public interface StatisticsRepository {
