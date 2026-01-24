@@ -1,3 +1,5 @@
+let detailRequestSeq = 0;
+
 async function openDetailPage(index) {
     const flight = displayedOptions[index];
 
@@ -23,11 +25,13 @@ async function openDetailPage(index) {
     const routeType = flight.outbound.routeType;
     const cabinClass = state.cabin;
 
+    const requestSeq = ++detailRequestSeq;
     try {
         const res = await fetch(`${CONTEXT_PATH}/api/public/flights/details?cabinClass=${cabinClass}&routeType=${routeType}`);
 
         if (res.ok) {
             const details = await res.json();
+            if (requestSeq !== detailRequestSeq) return; // stale response
 
             let updatedHtml = "";
             updatedHtml += createDetail(flight.outbound, details, "가는 편");
