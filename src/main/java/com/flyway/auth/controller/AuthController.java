@@ -85,15 +85,6 @@ public class AuthController {
         kakaoLoginService.handleCallback(code, state, req, res);
     }
 
-    @PostMapping("/auth/logout")
-    public ResponseEntity<ApiResponse<String>> logout(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
-        authTokenService.logout(request, response);
-        return ResponseEntity.ok(ApiResponse.success("Logout success"));
-    }
-
     private String extractAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
