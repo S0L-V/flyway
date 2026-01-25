@@ -102,4 +102,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 		log.info("Logout: adminId={}", adminId);
 		// 활동 로그 추가
 	}
+
+	@Override
+	public Admin getAdminByEmail(String email) {
+		return adminRepository.findByEmail(email);
+	}
 }
