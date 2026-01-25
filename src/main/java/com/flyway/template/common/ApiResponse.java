@@ -50,4 +50,16 @@ public class ApiResponse<T> {
 	public static <T> ApiResponse<T> error(String errorCode, String message) {
 		return new ApiResponse<>(false, null, errorCode, message);
 	}
+
+	/**
+	 * 실패 응답 (데이터 포함)
+	 * @param errorCode
+	 * @param message
+	 * @param data
+	 * @return
+	 * @param <T>
+	 */
+	public static <T> ApiResponse<T> error(String errorCode, String message, T data) {
+		return new ApiResponse<>(false, data, errorCode, message);
+	}
 }
