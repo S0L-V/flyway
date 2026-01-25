@@ -42,9 +42,4 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     public int deleteExpiredRevokedTokens(LocalDateTime now) {
         return refreshTokenMapper.deleteExpiredRevokedTokens(now);
     }
-
-    @Override
-    public int revokeAllActiveByUserId(String userId, LocalDateTime now) {
-        return refreshTokenMapper.revokeAllActiveByUserId(userId, now);
-    }
 }

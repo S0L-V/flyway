@@ -57,7 +57,7 @@ if (withdrawButton) {
             }
 
             alert("회원탈퇴가 완료되었습니다.");
-            window.location.replace("/");
+            window.location.replace(window.APP?.contextPath || "/");
         } catch (e) {
             console.error(e);
             alert("회원탈퇴에 실패했습니다.");

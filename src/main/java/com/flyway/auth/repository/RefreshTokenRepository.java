@@ -18,6 +18,4 @@ public interface RefreshTokenRepository {
     int revokeAllByUserId(String userId, LocalDateTime now);
 
     int deleteExpiredRevokedTokens(LocalDateTime now);
-
-    int revokeAllActiveByUserId(String userId, LocalDateTime now);
 }

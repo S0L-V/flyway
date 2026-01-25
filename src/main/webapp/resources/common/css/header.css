@@ -4,6 +4,7 @@
   position: fixed;
   top: 0;
   width: 100vw;
+  z-index: 1000;
 }
 
 .header__content {
@@ -40,7 +41,7 @@
 
 .header__margin {
   width: 100vw;
-  height: 95px
+  height: 95px;
 }
 
 .banner {
@@ -50,7 +51,7 @@
 
 
 .header__menu-item--logout {
-  font-family: var(--font-family-primary);;
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);

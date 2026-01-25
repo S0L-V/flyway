@@ -146,8 +146,9 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         deleteCookie(response, REFRESH_COOKIE, REFRESH_COOKIE_PATH);
     }
 
+    @Transactional
     public void revokeAllRefreshTokens(String userId, LocalDateTime now) {
-        refreshTokenRepository.revokeAllActiveByUserId(userId, now);
+        refreshTokenRepository.revokeAllByUserId(userId, now);
     }
 
 
