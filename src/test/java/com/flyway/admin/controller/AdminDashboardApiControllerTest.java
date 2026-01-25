@@ -54,14 +54,12 @@ class AdminDashboardApiControllerTest {
 			// given
 			DashboardStatsDto stats = DashboardStatsDto.builder()
 				.dailyVisitors(100)
-				.dailyReservations(50)
 				.dailyPayments(30)
 				.dailyCancellations(5)
 				.dailyRevenue(5000000)
 				.totalUsers(1000)
 				.activeFlights(200)
 				.pendingReservations(10)
-				.pendingPayments(3)
 				.unreadNotifications(7)
 				.build();
 			given(dashboardService.getStats(TEST_ADMIN_ID)).willReturn(stats);
@@ -73,7 +71,6 @@ class AdminDashboardApiControllerTest {
 			assertThat(response).isNotNull();
 			assertThat(response.isSuccess()).isTrue();
 			assertThat(response.getData().getDailyVisitors()).isEqualTo(100);
-			assertThat(response.getData().getDailyReservations()).isEqualTo(50);
 		}
 
 		@Test
