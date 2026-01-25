@@ -53,7 +53,7 @@ public class RepriceProcessor implements ItemProcessor<RepriceCandidateRow, Pric
                 .departureTime(item.getDepartureTime())
                 .totalSeats(seatStatus.getTotalSeats())
                 .remainingSeats(seatStatus.getRemainingSeats())
-                .now(LocalDateTime.now()) // 배치는 현재 시각 기준
+                .now(batchReferenceTime)
                 .eventBased(false)
                 .lastEventPricedAt(item.getLastEventPricedAt())
                 .build();
