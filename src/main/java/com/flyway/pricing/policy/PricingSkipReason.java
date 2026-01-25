@@ -1,4 +1,4 @@
-package com.flyway.pricing;
+package com.flyway.pricing.policy;
 
 public final class PricingSkipReason {
     public static final String INVALID_SEATS = "INVALID_SEATS";

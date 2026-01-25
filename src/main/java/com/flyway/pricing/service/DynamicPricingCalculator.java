@@ -1,8 +1,9 @@
-package com.flyway.pricing;
+package com.flyway.pricing.service;
 
-import com.flyway.pricing.dto.PricingInput;
-import com.flyway.pricing.dto.PricingResult;
+import com.flyway.pricing.model.PricingInput;
+import com.flyway.pricing.model.PricingResult;
 import com.flyway.pricing.policy.PricingPolicy;
+import com.flyway.pricing.policy.PricingSkipReason;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;

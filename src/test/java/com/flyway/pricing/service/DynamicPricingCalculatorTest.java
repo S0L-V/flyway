@@ -1,8 +1,9 @@
-package com.flyway.pricing;
+package com.flyway.pricing.service;
 
-import com.flyway.pricing.dto.PricingInput;
-import com.flyway.pricing.dto.PricingResult;
+import com.flyway.pricing.model.PricingInput;
+import com.flyway.pricing.model.PricingResult;
 import com.flyway.pricing.policy.PricingPolicy;
+import com.flyway.pricing.policy.PricingSkipReason;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
