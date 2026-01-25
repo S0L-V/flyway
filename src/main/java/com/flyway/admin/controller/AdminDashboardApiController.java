@@ -18,6 +18,7 @@ import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.DashboardStatsDto;
 import com.flyway.admin.dto.RecentActivityDto;
 import com.flyway.admin.dto.StatisticsDto;
+import com.flyway.admin.dto.VisitorDetailDto;
 import com.flyway.admin.service.AdminDashboardService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.ErrorCode;
@@ -195,6 +196,21 @@ public class AdminDashboardApiController {
 		} catch (Exception e) {
 			log.error("Failed to get recent daily stats", e);
 			return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), "통계 조회 중 오류가 발생했습니다.");
+		}
+	}
+
+	@GetMapping("/visitors")
+	public ApiResponse<List<VisitorDetailDto>> getTodayVisitors(@RequestParam(defaultValue = "50") int limit) {
+		if (limit <= 0 || limit > 100) {
+			return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(), "조회 건수는 1~100 사이어야 합니다.");
+		}
+
+		try {
+			List<VisitorDetailDto> visitors = dashboardService.getTodayVisitors(limit);
+			return ApiResponse.success(visitors);
+		} catch (Exception e) {
+			log.error("Failed to get today visitors", e);
+			return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), "방문자 조회 중 오류가 발생했습니다.");
 		}
 	}
 
