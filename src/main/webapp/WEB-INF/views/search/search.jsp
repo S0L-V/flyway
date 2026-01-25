@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/search.css?v=<%= System.currentTimeMillis() %>">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/details.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/flights.css?v=<%= System.currentTimeMillis() %>">
 </head>
 
@@ -280,11 +281,14 @@
 <script>
     const CONTEXT_PATH = "${pageContext.request.contextPath}";
 </script>
+
+<jsp:include page="include/flight-detail.jsp" />
+
 <script src="${pageContext.request.contextPath}/resources/search/js/search.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/filtering.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/sort.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/flight.js?v=<%= System.currentTimeMillis() %>"></script>
-
+<script src="${pageContext.request.contextPath}/resources/search/js/details.js?v=<%= System.currentTimeMillis() %>"></script>
 <script>
     // 1. 기본값은 비로그인(false)으로 설정
     let isUserLoggedIn = false;

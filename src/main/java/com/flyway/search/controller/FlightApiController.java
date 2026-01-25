@@ -1,14 +1,12 @@
 package com.flyway.search.controller;
 
 import com.flyway.search.domain.*;
+import com.flyway.search.dto.FlightDetailDto;
 import com.flyway.search.dto.FlightSearchRequest;
 import com.flyway.search.dto.SearchResultDto;
 import com.flyway.search.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -38,6 +36,12 @@ public class FlightApiController {
     @PostMapping("/api/public/flights/search")
     public SearchResultDto search(@RequestBody FlightSearchRequest dto) {
         return service.search(dto);
+    }
+
+    // 여정상세
+    @GetMapping("/api/public/flights/details")
+    public FlightDetailDto details(@RequestParam String cabinClass, @RequestParam String routeType) {
+        return service.details(cabinClass, routeType);
     }
 
 }

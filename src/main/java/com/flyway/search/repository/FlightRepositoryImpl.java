@@ -3,6 +3,7 @@ package com.flyway.search.repository;
 import com.flyway.search.domain.Airline;
 import com.flyway.search.domain.Airport;
 import com.flyway.search.domain.Flight;
+import com.flyway.search.dto.FlightDetailDto;
 import com.flyway.search.dto.FlightSearchRequest;
 import com.flyway.search.dto.FlightSearchResponse;
 import com.flyway.search.mapper.FlightMapper;
@@ -20,9 +21,7 @@ public class FlightRepositoryImpl implements FlightRepository {
         return mapper.list(vo);
     }
 
-    public List<Airport> findAirports(Airport vo) {
-        return mapper.airport(vo);
-    }
+    public List<Airport> findAirports(Airport vo) { return mapper.airport(vo); }
 
     public List<Airline> findAirlines(Airline vo) { return mapper.airline(vo); }
 
@@ -33,4 +32,6 @@ public class FlightRepositoryImpl implements FlightRepository {
     public List<FlightSearchResponse> findInboundFlights(FlightSearchRequest dto) {
         return mapper.inbound(dto);
     }
+
+    public FlightDetailDto findDetails(String cabinClass, String routeType) { return mapper.details(cabinClass, routeType); }
 }

@@ -16,5 +16,7 @@ public class FlightSearchResponse {
     private String flightNumber;
     private Integer seatCount;
     private Integer durationMinutes;
-    //private int currentPrice;
+    private String terminalNo;
+    private String routeType;
+//    private Integer currentPrice;
 }
