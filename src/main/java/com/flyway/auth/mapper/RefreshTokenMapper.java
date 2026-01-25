@@ -42,4 +42,10 @@ public interface RefreshTokenMapper {
      * 만료 + revoke된 토큰 정리
      */
     int deleteExpiredRevokedTokens(@Param("now") LocalDateTime now);
+
+    /**
+     * 회원 토큰 폐기 처리
+     */
+    int revokeAllActiveByUserId(@Param("userId") String userId,
+                                @Param("now") LocalDateTime now);
 }
