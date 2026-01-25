@@ -76,13 +76,14 @@ public class RepriceReaderConfig {
         // 3. 쿼리 설정
         // (1) SELECT 절
         factory.setSelectClause(
-                "SELECT temp.flight_id, " +
-                        "       temp.departure_time, " +
-                        "       temp.cabin_class_code, " +
-                        "       temp.current_price, " +
-                        "       temp.base_price, " +
-                        "       temp.last_event_priced_at"
+                "SELECT temp.flight_id AS flight_id, " +
+                        "       temp.departure_time AS departure_time, " +
+                        "       temp.cabin_class_code AS cabin_class_code, " +
+                        "       temp.current_price AS current_price, " +
+                        "       temp.base_price AS base_price, " +
+                        "       temp.last_event_priced_at AS last_event_priced_at"
         );
+
         // (2) FROM 절 : 서브쿼리를 사용하여 JOIN과 컬럼명을 미리 정리
         factory.setFromClause(
                 "FROM (" +
@@ -97,14 +98,15 @@ public class RepriceReaderConfig {
                         ") AS temp"
         );
         // (3) WHERE 절 : 서브쿼리 별칭 'temp'를 사용하여 조건 걸기
-        factory.setWhereClause("WHERE temp.departure_time < TIMESTAMPADD(DAY, 30, CAST(:asOf AS DATETIME))");
+        factory.setWhereClause(
+                "WHERE departure_time < TIMESTAMPADD(DAY, 30, CAST(:asOf AS DATETIME))"
+        );
 
         // 4. 정렬 키 설정
         Map<String, Order> sortKeys = new LinkedHashMap<>();
-        sortKeys.put("temp.departure_time", Order.ASCENDING);
-        sortKeys.put("temp.flight_id", Order.ASCENDING);
-        sortKeys.put("temp.cabin_class_code", Order.ASCENDING);
-
+        sortKeys.put("departure_time", Order.ASCENDING);
+        sortKeys.put("flight_id", Order.ASCENDING);
+        sortKeys.put("cabin_class_code", Order.ASCENDING);
         factory.setSortKeys(sortKeys);
 
         // 5. 객체 반환 (FactoryBean이므로 .getObject() 호출 가능)
