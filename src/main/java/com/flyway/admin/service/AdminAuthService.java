@@ -1,5 +1,6 @@
 package com.flyway.admin.service;
 
+import com.flyway.admin.domain.Admin;
 import com.flyway.admin.dto.LoginRequest;
 import com.flyway.admin.dto.LoginResponse;
 
@@ -12,4 +13,6 @@ public interface AdminAuthService {
 	LoginResponse login(LoginRequest req, String ipAddress);
 
 	void logout(String adminId);
+
+	Admin getAdminByEmail(String email);
 }
