@@ -27,3 +27,4 @@
     </nav>
   </div>
 </header>
+<div class="header__margin"></div>

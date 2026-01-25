@@ -1,6 +1,9 @@
 .header {
   background-color: var(--color-white);
   padding: 24px 0;
+  position: fixed;
+  top: 0;
+  width: 100vw;
 }
 
 .header__content {
@@ -33,6 +36,11 @@
 
 .header__menu-item:hover {
   color: var(--color-primary);
+}
+
+.header__margin {
+  width: 100vw;
+  height: 95px
 }
 
 .banner {
