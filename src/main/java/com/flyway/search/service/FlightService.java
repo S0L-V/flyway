@@ -1,6 +1,7 @@
 package com.flyway.search.service;
 
 import com.flyway.search.domain.*;
+import com.flyway.search.dto.FlightDetailDto;
 import com.flyway.search.dto.FlightSearchRequest;
 import com.flyway.search.dto.SearchResultDto;
 
@@ -11,4 +12,5 @@ public interface FlightService {
     List<Airport> airport(Airport vo);
     List<Airline> airline(Airline vo);
     SearchResultDto search(FlightSearchRequest dto);
+    FlightDetailDto details(String cabinClass, String routeType);
 }

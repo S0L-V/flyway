@@ -96,13 +96,13 @@ function renderSegment(f) {
       </div>
     `;
 }
-function renderFooter(option) {
+function renderFooter(option, index) {
     const seatCount = option.totalSeats ?? "-";
     return `
       <div class="flight-footer">
         <div class="flight-actions">
           <button class="action-button">가격 변동 그래프</button>
-          <button class="action-button">여정 상세</button>
+          <button class="action-button" onclick="openDetailPage(${index})">여정 상세</button>
         </div>
         <div class="seats-remaining">${seatCount}석 남음</div>
         <div class="flight-price" tabindex="0">
@@ -113,18 +113,18 @@ function renderFooter(option) {
     `;
 }
 
-function createOneWayCard(option) {
+function createOneWayCard(option, index) {
     const f = option.outbound;
 
     return `
     <article class="flight-card" data-out-id="${option.outbound.flightId}">
       ${renderSegment(f)}
-      ${renderFooter(option)}
+      ${renderFooter(option, index)}
     </article>
   `;
 }
 
-function createRoundTripCard(option) {
+function createRoundTripCard(option, index) {
     const o = option.outbound;
     const i = option.inbound;
 
@@ -135,7 +135,7 @@ function createRoundTripCard(option) {
     >
       ${renderSegment(o)}
       ${renderSegment(i)}
-      ${renderFooter(option)}
+      ${renderFooter(option, index)}
     </article>
   `;
 }
@@ -152,7 +152,7 @@ function renderOneWay(options) {
     displayedOptions = options;
 
     el.innerHTML = options
-        .map(option => createOneWayCard(option))
+        .map((option, index) => createOneWayCard(option, index))
         .join("");
 }
 
@@ -168,7 +168,7 @@ function renderRoundTrip(options) {
     displayedOptions = options;
 
     el.innerHTML = options
-        .map(option => createRoundTripCard(option))
+        .map((option, index) => createRoundTripCard(option, index))
         .join("");
 }
 

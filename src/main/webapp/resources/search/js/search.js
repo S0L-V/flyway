@@ -1,6 +1,7 @@
 let AIRPORTS = [];
 let allOptions = [];
 let displayedOptions = [];
+let details = {};
 
 async function loadAirports() {
     const res = await fetch(`${CONTEXT_PATH}/api/public/airports`);
@@ -101,7 +102,6 @@ function initTripTabs() {
 function syncTripUI() {
     const rtOnly = document.querySelectorAll("[data-rt-only]");
     rtOnly.forEach(el => {
-        // hidden 속성 쓰면 간단
         el.hidden = (state.tripType !== "RT");
     });
 
@@ -425,6 +425,7 @@ function initSearchButton() {
 
 function handleSearchResult(data){
     allOptions = data.options ?? [];
+    details = data.details;
     displayedOptions = [...allOptions];
 
     if(allOptions.length > 0) {
