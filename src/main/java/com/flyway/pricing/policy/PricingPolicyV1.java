@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public final class PricingPolicyV1 implements PricingPolicy {
     @Override
     public String version() {
-        return "v1.0";
+        return "v1";
     }
 
     /** M_load(r) : 구간별 선형 보간 */

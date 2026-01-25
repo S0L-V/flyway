@@ -1,4 +1,4 @@
-package com.flyway.pricing.dto;
+package com.flyway.pricing.model;
 
 import lombok.Builder;
 import lombok.Getter;
