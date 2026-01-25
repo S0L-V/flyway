@@ -1,5 +1,8 @@
 package com.flyway.admin.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -10,12 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.flyway.admin.domain.Admin;
 import com.flyway.admin.dto.LoginRequest;
 import com.flyway.admin.dto.LoginResponse;
 import com.flyway.admin.service.AdminAuthService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.admin.util.IpUtil;
+import com.flyway.template.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +69,7 @@ public class AdminAuthController {
 	 */
 	@PostMapping("/admin/api/auth/login")
 	@ResponseBody
-	public ApiResponse<LoginResponse> login(
+	public ApiResponse<?> login(
 		@RequestBody LoginRequest loginRequest,
 		HttpServletRequest httpRequest,
 		HttpSession session) {
@@ -92,8 +97,21 @@ public class AdminAuthController {
 
 			return ApiResponse.success(loginResponse, "로그인 성공");
 		} catch (BusinessException e) {
-			log.error("Login failed: {}", e.getMessage());
-			return ApiResponse.error(e.getErrorCode().getCode(), e.getMessage());
+			log.warn("Login failed for {}: {}", loginRequest.getEmail(), e.getMessage());
+
+			// 실패 시 추가 정보 담기
+			Map<String, Object> errorData = new HashMap<>();
+			Admin admin = adminAuthService.getAdminByEmail(loginRequest.getEmail());
+
+			if (admin != null) {
+				if (e.getErrorCode() == ErrorCode.ADMIN_LOGIN_FAILED) {
+					errorData.put("failCount", admin.getFailedLoginCount());
+				} else if (e.getErrorCode() == ErrorCode.ADMIN_ACCOUNT_LOCKED) {
+					errorData.put("lockedUntil", admin.getLockedUntil());
+				}
+			}
+
+			return ApiResponse.error(e.getErrorCode().getCode(), e.getMessage(), errorData);
 		} catch (Exception e) {
 			log.error("Unexpected error during login", e);
 			return ApiResponse.error("C002","서버 오류가 발생했습니다.");
