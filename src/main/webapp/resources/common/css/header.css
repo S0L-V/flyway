@@ -42,9 +42,13 @@
 
 
 .header__menu-item--logout {
+  font-family: var(--font-family-primary);;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   text-decoration: none;
   transition: color 0.2s;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
