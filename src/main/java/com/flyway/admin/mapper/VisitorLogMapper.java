@@ -1,9 +1,12 @@
 package com.flyway.admin.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.flyway.admin.domain.VisitorLog;
+import com.flyway.admin.dto.VisitorDetailDto;
 
 /**
  * 방문자 로그
@@ -36,4 +39,11 @@ public interface VisitorLogMapper {
 	 * @return 기록 존재 여부 (1: 존재, 0: 미존재)
 	 */
 	int existsTodayBySessionId(@Param("sessionId") String sessionId);
+
+	/**
+	 * 오늘 방문자 상세 목록 조회 (유니크 세션 기준, 최신순)
+	 * @param limit 조회 건수
+	 * @return 방문자 상세 목록
+	 */
+	List<VisitorDetailDto> selectTodayVisitors(@Param("limit") int limit);
 }
