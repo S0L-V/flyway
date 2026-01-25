@@ -694,10 +694,26 @@ const AdminDashboard = (function() {
         return '₩ ' + new Intl.NumberFormat('ko-KR').format(amount);
     }
 
-    function formatTimeAgo(dateString) {
-        if (!dateString) return '';
+    function formatTimeAgo(dateInput) {
+        if (!dateInput) return '';
 
-        const date = new Date(dateString);
+        let date;
+        if (typeof dateInput === 'string') {
+            // ISO 문자열 형식 처리
+            date = new Date(dateInput.replace('T', ' '));
+        } else if (Array.isArray(dateInput)) {
+            // Jackson의 숫자 배열 형식 처리 [year, month, day, hour, minute, second]
+            // Javascript의 월은 0부터 시작하므로 월 값에서 1을 빼줍니다.
+            date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3], dateInput[4], dateInput[5]);
+        } else {
+            // 다른 타입에 대한 폴백 처리
+            date = new Date(dateInput);
+        }
+
+        if (isNaN(date.getTime())) {
+            return '유효하지 않은 날짜';
+        }
+
         const now = new Date();
         const diff = Math.floor((now - date) / 1000);
 
@@ -740,7 +756,7 @@ const AdminDashboard = (function() {
             case 'PENDING':
                 return '<span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">대기</span>';
             case 'HELD':
-                return '<span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">보류</span>';
+                return '<span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">좌석 선점</span>';
             case 'CANCELLED':
             case 'REFUNDED':
             case 'EXPIRED':
