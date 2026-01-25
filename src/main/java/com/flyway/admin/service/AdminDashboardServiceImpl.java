@@ -144,11 +144,16 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 		}
 	}
 
+	/**
+	 * 오늘 방문자 상세 목록 조회
+	 */
 	@Override
 	@Transactional(readOnly = true)
 	public List<VisitorDetailDto> getTodayVisitors(int limit) {
 		try {
-			return dashboardRepository.findTodayVisitors(limit);
+			List<VisitorDetailDto> visitors = dashboardRepository.findTodayVisitors(limit);
+			log.info("Found {} visitors for today.", visitors.size());
+			return visitors;
 		} catch (Exception e) {
 			log.error("Failed to get today visitors", e);
 			return Collections.emptyList();
