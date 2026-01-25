@@ -22,9 +22,14 @@ public class FlightApiController {
     }
 
     // 공항 api(검색 옵션)
-    @GetMapping("/api/public/airports")
-    public List<Airport> airport(Airport vo) {
-        return service.airport(vo);
+    @GetMapping("/api/public/depAirports")
+    public List<Airport> depAirport(Airport vo) {
+        return service.depAirport(vo);
+    }
+
+    @GetMapping("/api/public/arrAirports")
+    public List<Airport> airport(@RequestParam String depAirport) {
+        return service.arrAirport(depAirport);
     }
 
     @GetMapping("/api/public/airlines")

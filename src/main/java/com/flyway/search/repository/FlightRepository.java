@@ -13,7 +13,9 @@ import java.util.List;
 public interface FlightRepository {
     List<Flight> findAll(Flight vo);
 
-    List<Airport> findAirports(Airport vo);
+    List<Airport> findDepAirports(Airport vo);
+
+    List<Airport> findArrAirports(String depAirport);
 
     List<Airline> findAirlines(Airline vo);
 

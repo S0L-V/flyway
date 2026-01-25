@@ -12,11 +12,21 @@
         LIMIT 20;
     </select>
 
-    <select id="airport" parameterType="com.flyway.search.domain.Airport" resultType="com.flyway.search.domain.Airport">
+    <select id="depAirport" parameterType="com.flyway.search.domain.Airport" resultType="com.flyway.search.domain.Airport">
         select airport_id AS airportId,
                country,
                city
         from airport;
+    </select>
+
+    <select id="arrAirport" parameterType="String" resultType="com.flyway.search.domain.Airport">
+        SELECT DISTINCT
+            a.airport_id AS airportId,
+            a.country,
+            a.city
+        FROM flight f
+                 JOIN airport a ON a.airport_id = f.arrival_airport
+        WHERE f.departure_airport = #{depAirport};
     </select>
 
     <select id="airline" parameterType="com.flyway.search.domain.Airline" resultType="com.flyway.search.domain.Airline">
@@ -38,6 +48,7 @@
         f.route_type        AS routeType,
         da.city             AS departureCity,
         aa.city             AS arrivalCity,
+        fsp.current_price   AS currentPrice,
         <choose>
             <when test="cabinClass == 'BIZ'"> fi.business_class_seat </when>
             <when test="cabinClass == 'ECO'"> fi.economy_class_seat </when>
@@ -48,6 +59,7 @@
         JOIN airport da      ON f.departure_airport = da.airport_id
         JOIN airport aa      ON f.arrival_airport   = aa.airport_id
         JOIN flight_info fi  ON f.flight_id = fi.flight_id
+        JOIN flight_seat_price fsp ON f.flight_id = fsp.flight_id AND fsp.cabin_class_code = #{cabinClass}
         WHERE 1=1
             AND f.departure_airport = #{from}
             AND f.arrival_airport = #{to}
@@ -81,6 +93,7 @@
         f.route_type        AS routeType,
         da.city             AS departureCity,
         aa.city             AS arrivalCity,
+        fsp.current_price   AS currentPrice,
         <choose>
             <when test="cabinClass == 'BIZ'"> fi.business_class_seat </when>
             <when test="cabinClass == 'ECO'"> fi.economy_class_seat </when>
@@ -91,6 +104,7 @@
         JOIN airport da      ON f.departure_airport = da.airport_id
         JOIN airport aa      ON f.arrival_airport   = aa.airport_id
         JOIN flight_info fi  ON f.flight_id = fi.flight_id
+        JOIN flight_seat_price fsp ON f.flight_id = fsp.flight_id AND fsp.cabin_class_code = #{cabinClass}
         WHERE 1=1
         AND f.departure_airport = #{to}
         AND f.arrival_airport = #{from}

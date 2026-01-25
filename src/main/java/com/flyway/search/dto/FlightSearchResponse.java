@@ -18,5 +18,5 @@ public class FlightSearchResponse {
     private Integer durationMinutes;
     private String terminalNo;
     private String routeType;
-//    private Integer currentPrice;
+    private Integer currentPrice;
 }

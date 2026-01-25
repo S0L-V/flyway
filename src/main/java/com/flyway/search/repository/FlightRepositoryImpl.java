@@ -21,7 +21,9 @@ public class FlightRepositoryImpl implements FlightRepository {
         return mapper.list(vo);
     }
 
-    public List<Airport> findAirports(Airport vo) { return mapper.airport(vo); }
+    public List<Airport> findDepAirports(Airport vo) { return mapper.depAirport(vo); }
+
+    public List<Airport> findArrAirports(String depAirport) { return mapper.arrAirport(depAirport); }
 
     public List<Airline> findAirlines(Airline vo) { return mapper.airline(vo); }
 
