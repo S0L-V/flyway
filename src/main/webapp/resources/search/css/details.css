@@ -139,7 +139,15 @@
 .itinerary-modal-style .flight-point {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.itinerary-modal-style .date-highlight {
+    font-size: 16px;
+    font-weight: 700; /* 굵게 */
+    color: #222;      /* 진한 검정 */
 }
 
 /* 시간 (크고 진하게) */

@@ -95,7 +95,7 @@ function createDetail(f, details, type) {
             <div class="flight-route">
                 <div class="flight-point">
                     <div class="flight-time">
-                        <span id="modal-${segmentKey}-start-date">${depDate}</span><br>
+                        <span id="modal-${segmentKey}-start-date" class="date-highlight">${depDate}</span>
                         <span id="modal-${segmentKey}-start-time" class="time-highlight">${depTime}</span>
                     </div>
                     <div class="flight-airport" id="modal-${segmentKey}-start-airport">${depCity}(${depAirport}) ${terminalNo}</div>
@@ -108,7 +108,7 @@ function createDetail(f, details, type) {
     
                 <div class="flight-point">
                     <div class="flight-time">
-                        <span id="modal-${segmentKey}-end-date">${arrDate}</span><br>
+                        <span id="modal-${segmentKey}-end-date" class="date-highlight">${arrDate}</span>
                         <span id="modal-${segmentKey}-end-time" class="time-highlight">${arrTime}</span>
                     </div>
                     <div class="flight-airport" id="modal-${segmentKey}-end-airport">${arrCity}(${arrAirport})</div>
