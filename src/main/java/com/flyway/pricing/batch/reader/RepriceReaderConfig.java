@@ -61,19 +61,13 @@ public class RepriceReaderConfig {
                 .build();
     }
 
-    /**
-     * MariaDB/MySQL 계열에서 사용 가능한 PagingQueryProvider
-     * - 정렬키는 "유일하게" 만들 것: (departure_time, flight_id, cabin_class_code) 조합 추천
-     */
     @Bean
     public PagingQueryProvider repriceQueryProvider(DataSource dataSource) throws Exception {
         SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 
-        // 2. 필수 설정
         factory.setDataSource(dataSource);
-        factory.setDatabaseType("MySQL"); // H2를 MySQL 모드로 쓰므로 명시적으로 지정
+        factory.setDatabaseType("MySQL");
 
-        // 3. 쿼리 설정
         // (1) SELECT 절
         factory.setSelectClause(
                 "SELECT temp.flight_id AS flight_id, " +
@@ -102,14 +96,14 @@ public class RepriceReaderConfig {
                 "WHERE departure_time < TIMESTAMPADD(DAY, 30, CAST(:asOf AS DATETIME))"
         );
 
-        // 4. 정렬 키 설정
+        // 정렬 키 설정
         Map<String, Order> sortKeys = new LinkedHashMap<>();
         sortKeys.put("departure_time", Order.ASCENDING);
         sortKeys.put("flight_id", Order.ASCENDING);
         sortKeys.put("cabin_class_code", Order.ASCENDING);
         factory.setSortKeys(sortKeys);
 
-        // 5. 객체 반환 (FactoryBean이므로 .getObject() 호출 가능)
+        // 객체 반환
         return factory.getObject();
     }
 
