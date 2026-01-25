@@ -45,7 +45,7 @@ if (withdrawButton) {
         if (!ok) return;
 
         try {
-            const response = await fetchWithRefresh("/api/auth/withdraw", {
+            const response = await fetchWithRefresh("/api/user/withdraw", {
                 method: "POST",
                 headers: {
                     "Accept": "application/json",
@@ -57,7 +57,7 @@ if (withdrawButton) {
             }
 
             alert("회원탈퇴가 완료되었습니다.");
-            window.location.href = window.APP?.contextPath ?? "/";
+            window.location.replace("/");
         } catch (e) {
             console.error(e);
             alert("회원탈퇴에 실패했습니다.");

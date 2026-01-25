@@ -13,6 +13,7 @@ import com.flyway.user.domain.User;
 import com.flyway.user.controller.UserApiController;
 import com.flyway.user.dto.UserProfileResponse;
 import com.flyway.user.service.UserProfileService;
+import com.flyway.user.service.UserWithdrawalService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -159,6 +160,7 @@ class UserAuthControllerTest {
     void getProfile_success() throws Exception {
         // given
         UserProfileService userProfileService = Mockito.mock(UserProfileService.class);
+        UserWithdrawalService userWithdrawalService = Mockito.mock(UserWithdrawalService.class);
 
         UserProfileResponse response = UserProfileResponse.builder()
                 .userId("user-123") // UserProfile에 userId가 있다면
@@ -191,7 +193,7 @@ class UserAuthControllerTest {
             }
         };
 
-        UserApiController controller = new UserApiController(userProfileService);
+        UserApiController controller = new UserApiController(userProfileService, userWithdrawalService);
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setCustomArgumentResolvers(resolver)
                 .build();
@@ -210,7 +212,9 @@ class UserAuthControllerTest {
     @DisplayName("GET /api/profile - 인증 정보 없으면 401 반환")
     void getProfile_unauthorized_returns401() throws Exception {
         UserProfileService userProfileService = Mockito.mock(UserProfileService.class);
-        UserApiController controller = new UserApiController(userProfileService);
+        UserWithdrawalService userWithdrawalService = Mockito.mock(UserWithdrawalService.class);
+
+        UserApiController controller = new UserApiController(userProfileService, userWithdrawalService);
         HandlerMethodArgumentResolver resolver = new HandlerMethodArgumentResolver() {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {
