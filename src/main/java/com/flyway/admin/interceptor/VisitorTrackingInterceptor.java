@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * 대상 경로:
  * - / (메인 페이지)
- * - /flight/** (항공편 검색/조회)
+ * - /search/** (항공편 검색/조회)
  * - /reservation/** (예약 관련)
  * - /mypage/** (마이페이지)
  *
@@ -109,7 +109,8 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 			log.debug("Visitor tracked - sessionId: {}, ip:{}, url:{}", sessionId, ipAddress, pageUrl);
 		} catch (Exception e) {
 			// 방문 추적 실패해도 요청은 계속 처리
-			log.warn("Failed to track visitor: {}", e.getMessage());
+			// log.warn("Failed to track visitor: {}", e.getMessage());
+			log.error("Failed to track visitor", e);
 		}
 
 		return true; // 항상 요청 계속 처리
