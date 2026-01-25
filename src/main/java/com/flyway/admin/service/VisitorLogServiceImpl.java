@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.flyway.admin.domain.VisitorLog;
-import com.flyway.admin.mapper.VisitorLogMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,11 +12,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VisitorLogServiceImpl implements VisitorLogService {
 
-	private final VisitorLogMapper visitorLogMapper;
+	private final VisitorLogService visitorLogService;
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void saveVisitorLog(VisitorLog visitorLog) {
-		visitorLogMapper.insertVisitorLog(visitorLog);
+		visitorLogService.saveVisitorLog(visitorLog);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean existsToday(String sessionId) {
+		return visitorLogService.existsToday(sessionId);
 	}
 }
