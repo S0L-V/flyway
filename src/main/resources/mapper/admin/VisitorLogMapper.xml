@@ -4,7 +4,7 @@
 
 <mapper namespace="com.flyway.admin.mapper.VisitorLogMapper">
 
-    <!-- 방문 로그 저장 (중복 방지 - 동시 요청 시 race condition 방지 -->
+    <!-- 방문 로그 저장 (중복 방지 - 동시 요청 시 race condition 방지) -->
     <insert id="insertVisitorLog" parameterType="com.flyway.admin.domain.VisitorLog">
         INSERT IGNORE visitor_log(
             session_id,
@@ -46,6 +46,45 @@
         WHERE session_id = #{sessionId}
             AND DATE(visited_at) = CURDATE()
         LIMIT 1
+    </select>
+
+    <!-- 오늘 방문자 상세 목록 조회 (유니크 세션 기준, 최신순) -->
+    <resultMap id="visitorDetailResultMap" type="com.flyway.admin.dto.VisitorDetailDto">
+        <result property="logId" column="log_id"/>
+        <result property="sessionId" column="session_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="userAgent" column="user_agent"/>
+        <result property="pageUrl" column="page_url"/>
+        <result property="referer" column="referer"/>
+        <result property="visitedAt" column="visited_at"/>
+    </resultMap>
+
+    <select id="selectTodayVisitors" resultMap="visitorDetailResultMap">
+        SELECT
+            vl.log_id,
+            vl.session_id,
+            vl.user_id,
+            CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, '')) AS user_name,
+            u.email AS user_email,
+            vl.ip_address,
+            vl.user_agent,
+            vl.page_url,
+            vl.referer,
+            vl.visited_at
+        FROM (
+            SELECT session_id, MIN(log_id) AS first_log_id
+            FROM visitor_log
+            WHERE DATE(visited_at) = CURDATE()
+            GROUP BY session_id
+        ) AS first_visits
+        JOIN visitor_log vl ON first_visits.first_log_id = vl.log_id
+        LEFT JOIN users u ON vl.user_id = u.user_id
+        LEFT JOIN uesr_profile up ON u.user_id = up.user_id
+        ORDER BY vl.visited_at DESC
+        LIMIT #{limit}
     </select>
 
 </mapper>
