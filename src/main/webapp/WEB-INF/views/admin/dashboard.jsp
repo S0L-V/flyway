@@ -30,21 +30,24 @@
             </div>
         </div>
 
-        <!-- 통계 카드 (기간별) -->
+        <!-- 통계 카드 (기간별) - 1행: 방문자, 결제 완료, 취소/환불, 매출 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div id="visitor-card" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer hover:border-blue-300" title="클릭하여 방문자 상세 보기">
                 <div class="flex items-center justify-between mb-4">
                     <span id="label-visitors" class="text-sm font-semibold text-slate-500">일일 방문자</span>
                     <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-visitors" class="text-2xl font-bold text-slate-900">-</div>
+                <div class="flex items-center gap-2">
+                    <div id="stat-visitors" class="text-2xl font-bold text-slate-900">-</div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                </div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span id="label-reservations" class="text-sm font-semibold text-slate-500">예약 건수</span>
-                    <div class="p-2 bg-orange-50 text-orange-600 rounded-lg"><i data-lucide="ticket" class="w-5 h-5"></i></div>
+                    <span id="label-payments" class="text-sm font-semibold text-slate-500">결제 완료</span>
+                    <div class="p-2 bg-teal-50 text-teal-600 rounded-lg"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-reservations" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-payments" class="text-2xl font-bold text-slate-900">-</div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
@@ -62,14 +65,14 @@
             </div>
         </div>
 
-        <!-- 전체 통계 및 실시간 상태 -->
+        <!-- 실시간/전체 통계 - 2행: 대기 중 예약, 총 회원 수, 신규 가입, 운항 중 항공편 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span id="label-payments" class="text-sm font-semibold text-slate-500">결제 완료</span>
-                    <div class="p-2 bg-teal-50 text-teal-600 rounded-lg"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+                    <span class="text-sm font-semibold text-slate-500">대기 중 예약</span>
+                    <div class="p-2 bg-yellow-50 text-yellow-600 rounded-lg"><i data-lucide="clock" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-payments" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-pending-reservations" class="text-2xl font-bold text-slate-900">-</div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
@@ -80,14 +83,14 @@
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-slate-500">대기 중 예약</span>
-                    <div class="p-2 bg-yellow-50 text-yellow-600 rounded-lg"><i data-lucide="clock" class="w-5 h-5"></i></div>
+                    <span class="text-sm font-semibold text-slate-500">신규 가입</span>
+                    <div class="p-2 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="user-plus" class="w-5 h-5"></i></div>
                 </div>
-                <div id="stat-pending-reservations" class="text-2xl font-bold text-slate-900">-</div>
+                <div id="stat-new-users" class="text-2xl font-bold text-slate-900">-</div>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-slate-500">운항 중 항공편</span>
+                    <span class="text-sm font-semibold text-slate-500">운항 예정 항공편</span>
                     <div class="p-2 bg-sky-50 text-sky-600 rounded-lg"><i data-lucide="plane" class="w-5 h-5"></i></div>
                 </div>
                 <div id="stat-active-flights" class="text-2xl font-bold text-slate-900">-</div>
@@ -112,6 +115,30 @@
         </div>
     </div>
 </main>
+
+<!-- 방문자 상세 모달 -->
+<div id="visitor-modal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" id="visitor-modal-backdrop"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-6 border-b border-slate-100">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">오늘 방문자 목록</h2>
+                    <p class="text-sm text-slate-500">유니크 세션 기준 방문자 목록입니다.</p>
+                </div>
+                <button id="visitor-modal-close" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-slate-500"></i>
+                </button>
+            </div>
+            <div id="visitor-list" class="flex-1 overflow-y-auto p-6">
+                <div class="text-center text-slate-400 py-12">
+                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>
+                    <p>방문자 목록을 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Dashboard 초기화 -->
 <script>

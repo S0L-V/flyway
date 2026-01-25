@@ -43,6 +43,9 @@ const AdminDashboard = (function() {
         // 기간 선택 탭 이벤트
         bindPeriodTabs();
 
+        // 방문자 모달 이벤트
+        bindVisitorModal();
+
         console.log('[Dashboard] Initialized');
     }
 
@@ -51,23 +54,23 @@ const AdminDashboard = (function() {
      */
     function cacheElements() {
         elements = {
-            // 통계 카드 (기간별)
+            // 통계 카드 - 1행: 방문자, 결제 완료, 취소/환불, 매출
             visitors: document.getElementById('stat-visitors'),
-            reservations: document.getElementById('stat-reservations'),
+            payments: document.getElementById('stat-payments'),
             cancellations: document.getElementById('stat-cancellations'),
             revenue: document.getElementById('stat-revenue'),
-            payments: document.getElementById('stat-payments'),
-            totalUsers: document.getElementById('stat-total-users'),
-            activeFlights: document.getElementById('stat-active-flights'),
+
+            // 통계 카드 - 2행: 대기 중 예약, 총 회원 수, 신규 가입, 운항 예정 항공편
             pendingReservations: document.getElementById('stat-pending-reservations'),
-            pendingPayments: document.getElementById('stat-pending-payments'),
+            totalUsers: document.getElementById('stat-total-users'),
+            newUsers: document.getElementById('stat-new-users'),
+            activeFlights: document.getElementById('stat-active-flights'),
 
             // 라벨
             labelVisitors: document.getElementById('label-visitors'),
-            labelReservations: document.getElementById('label-reservations'),
+            labelPayments: document.getElementById('label-payments'),
             labelCancellations: document.getElementById('label-cancellations'),
             labelRevenue: document.getElementById('label-revenue'),
-            labelPayments: document.getElementById('label-payments'),
 
             // 기간 선택 탭
             periodTabs: document.querySelectorAll('.period-tab'),
@@ -84,7 +87,14 @@ const AdminDashboard = (function() {
             connectionStatus: document.getElementById('connection-status'),
 
             // 새로고침 버튼
-            refreshButton: document.getElementById('refresh-button')
+            refreshButton: document.getElementById('refresh-button'),
+
+            // 방문자 모달
+            visitorCard: document.getElementById('visitor-card'),
+            visitorModal: document.getElementById('visitor-modal'),
+            visitorModalBackdrop: document.getElementById('visitor-modal-backdrop'),
+            visitorModalClose: document.getElementById('visitor-modal-close'),
+            visitorList: document.getElementById('visitor-list')
         };
     }
 
@@ -108,21 +118,19 @@ const AdminDashboard = (function() {
         currentStats = stats;
 
         // 현재 기간이 daily일 때만 WebSocket 데이터로 업데이트
+        // 1행: 방문자, 결제 완료, 취소/환불, 매출
         if (currentPeriod === 'daily') {
             updateElement(elements.visitors, formatNumber(stats.dailyVisitors));
-            updateElement(elements.reservations, formatNumber(stats.dailyReservations));
+            updateElement(elements.payments, formatNumber(stats.dailyPayments));
             updateElement(elements.cancellations, formatNumber(stats.dailyCancellations));
             updateElement(elements.revenue, formatCurrency(stats.dailyRevenue));
-            updateElement(elements.payments, formatNumber(stats.dailyPayments));
         }
 
-        // 전체 통계 (기간에 관계없이 업데이트)
-        updateElement(elements.totalUsers, formatNumber(stats.totalUsers));
-        updateElement(elements.activeFlights, formatNumber(stats.activeFlights));
-
-        // 실시간 상태
+        // 2행: 대기 중 예약, 총 회원 수, 신규 가입, 운항 예정 항공편 (기간에 관계없이 업데이트)
         updateElement(elements.pendingReservations, formatNumber(stats.pendingReservations));
-        updateElement(elements.pendingPayments, formatNumber(stats.pendingPayments));
+        updateElement(elements.totalUsers, formatNumber(stats.totalUsers));
+        updateElement(elements.newUsers, formatNumber(stats.dailyNewUsers));
+        updateElement(elements.activeFlights, formatNumber(stats.activeFlights));
 
         // 알림 배지
         updateNotificationBadge(stats.unreadNotifications);
@@ -130,15 +138,15 @@ const AdminDashboard = (function() {
 
     /**
      * 기간별 통계 업데이트 (주간/월간 - REST API)
+     * 1행: 방문자(activeUsers), 결제 완료(confirmedReservations), 취소/환불(cancelledReservations), 매출(totalRevenue)
      */
     function updatePeriodStats(stats) {
         console.log('[Dashboard] Updating period stats:', stats);
 
         updateElement(elements.visitors, formatNumber(stats.activeUsers));
-        updateElement(elements.reservations, formatNumber(stats.totalReservations));
+        updateElement(elements.payments, formatNumber(stats.confirmedReservations));
         updateElement(elements.cancellations, formatNumber(stats.cancelledReservations));
         updateElement(elements.revenue, formatCurrency(stats.totalRevenue));
-        updateElement(elements.payments, formatNumber(stats.confirmedReservations));
     }
 
     /**
@@ -146,13 +154,15 @@ const AdminDashboard = (function() {
      */
     function updatePeriodLabels(period) {
         const labels = {
-            daily: { visitors: '일일 방문자', revenue: '오늘의 매출' },
-            weekly: { visitors: '주간 방문자', revenue: '주간 매출' },
-            monthly: { visitors: '월간 방문자', revenue: '월간 매출' }
+            daily: { visitors: '일일 방문자', payments: '결제 완료', cancellations: '취소/환불', revenue: '오늘의 매출' },
+            weekly: { visitors: '주간 활성 사용자', payments: '주간 확정 예약', cancellations: '주간 취소', revenue: '주간 매출' },
+            monthly: { visitors: '월간 활성 사용자', payments: '월간 확정 예약', cancellations: '월간 취소', revenue: '월간 매출' }
         };
 
         const label = labels[period] || labels.daily;
         updateElement(elements.labelVisitors, label.visitors);
+        updateElement(elements.labelPayments, label.payments);
+        updateElement(elements.labelCancellations, label.cancellations);
         updateElement(elements.labelRevenue, label.revenue);
     }
 
@@ -246,12 +256,11 @@ const AdminDashboard = (function() {
      * 기간별 통계 API 호출
      */
     function fetchPeriodStats(period) {
-        // 로딩 표시
+        // 로딩 표시 (1행만 업데이트)
         updateElement(elements.visitors, '-');
-        updateElement(elements.reservations, '-');
+        updateElement(elements.payments, '-');
         updateElement(elements.cancellations, '-');
         updateElement(elements.revenue, '-');
-        updateElement(elements.payments, '-');
 
         fetch(basePath + '/admin/api/dashboard/stats/' + period, {
             method: 'GET',
@@ -264,10 +273,9 @@ const AdminDashboard = (function() {
                 } else {
                     console.warn('[Dashboard] No period stats available');
                     updateElement(elements.visitors, '0');
-                    updateElement(elements.reservations, '0');
+                    updateElement(elements.payments, '0');
                     updateElement(elements.cancellations, '0');
                     updateElement(elements.revenue, '₩ 0');
-                    updateElement(elements.payments, '0');
                 }
             })
             .catch(function(error) {
@@ -507,6 +515,159 @@ const AdminDashboard = (function() {
                 }
             }, 1000);
         });
+    }
+
+    /**
+     * 방문자 모달 바인딩
+     */
+    function bindVisitorModal() {
+        // 방문자 카드 클릭 -> 모달 열기
+        if (elements.visitorCard) {
+            elements.visitorCard.addEventListener('click', function() {
+                openVisitorModal();
+            });
+        }
+
+        // 모달 닫기 버튼
+        if (elements.visitorModalClose) {
+            elements.visitorModalClose.addEventListener('click', closeVisitorModal);
+        }
+
+        // 모달 배경 클릭 -> 닫기
+        if (elements.visitorModalBackdrop) {
+            elements.visitorModalBackdrop.addEventListener('click', closeVisitorModal);
+        }
+
+        // ESC 키 -> 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && elements.visitorModal && !elements.visitorModal.classList.contains('hidden')) {
+                closeVisitorModal();
+            }
+        });
+    }
+
+    /**
+     * 방문자 모달 열기
+     */
+    function openVisitorModal() {
+        if (!elements.visitorModal) return;
+
+        elements.visitorModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // 방문자 목록 조회
+        fetchVisitors();
+    }
+
+    /**
+     * 방문자 모달 닫기
+     */
+    function closeVisitorModal() {
+        if (!elements.visitorModal) return;
+
+        elements.visitorModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    /**
+     * 방문자 목록 조회
+     */
+    function fetchVisitors() {
+        if (!elements.visitorList) return;
+
+        // 로딩 표시
+        elements.visitorList.innerHTML = `
+            <div class="text-center text-slate-400 py-12">
+                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>
+                <p>방문자 목록을 불러오는 중...</p>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        fetch(basePath + '/admin/api/dashboard/visitors?limit=50', {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.success && data.data) {
+                    renderVisitors(data.data);
+                } else {
+                    elements.visitorList.innerHTML = `
+                        <div class="text-center text-slate-400 py-12">
+                            <i data-lucide="users" class="w-8 h-8 mx-auto mb-2"></i>
+                            <p>오늘 방문자가 없습니다.</p>
+                        </div>
+                    `;
+                }
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            })
+            .catch(function(error) {
+                console.error('[Dashboard] Failed to fetch visitors:', error);
+                elements.visitorList.innerHTML = `
+                    <div class="text-center text-red-400 py-12">
+                        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p>방문자 목록을 불러오지 못했습니다.</p>
+                    </div>
+                `;
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            });
+    }
+
+    /**
+     * 방문자 목록 렌더링
+     */
+    function renderVisitors(visitors) {
+        if (!elements.visitorList || visitors.length === 0) {
+            elements.visitorList.innerHTML = `
+                <div class="text-center text-slate-400 py-12">
+                    <i data-lucide="users" class="w-8 h-8 mx-auto mb-2"></i>
+                    <p>오늘 방문자가 없습니다.</p>
+                </div>
+            `;
+            return;
+        }
+
+        var html = '<div class="overflow-x-auto">';
+        html += '<table class="min-w-full divide-y divide-slate-200">';
+        html += '<thead class="bg-slate-50">';
+        html += '<tr>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">시간</th>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">사용자</th>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">IP 주소</th>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">페이지</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody class="divide-y divide-slate-100">';
+
+        visitors.forEach(function(visitor) {
+            var timeStr = formatTimeAgo(visitor.visitedAt);
+            var userName = visitor.userName && visitor.userName.trim() ? escapeHtml(visitor.userName) : '<span class="text-slate-400">비회원</span>';
+            var userEmail = visitor.userEmail ? '<div class="text-xs text-slate-400">' + escapeHtml(visitor.userEmail) + '</div>' : '';
+            var pageUrl = visitor.pageUrl ? escapeHtml(visitor.pageUrl) : '-';
+            if (pageUrl.length > 30) {
+                pageUrl = pageUrl.substring(0, 30) + '...';
+            }
+
+            html += '<tr class="hover:bg-slate-50">';
+            html += '<td class="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">' + timeStr + '</td>';
+            html += '<td class="px-4 py-3">' + userName + userEmail + '</td>';
+            html += '<td class="px-4 py-3 text-sm text-slate-600 font-mono">' + escapeHtml(visitor.ipAddress) + '</td>';
+            html += '<td class="px-4 py-3 text-sm text-slate-600" title="' + escapeHtml(visitor.pageUrl || '') + '">' + pageUrl + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody>';
+        html += '</table>';
+        html += '</div>';
+
+        elements.visitorList.innerHTML = html;
     }
 
     // === 유틸리티 함수 ===
