@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.flyway.admin.domain.VisitorLog;
-import com.flyway.admin.mapper.VisitorLogMapper;
+import com.flyway.admin.service.VisitorLogService;
 import com.flyway.security.principal.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class VisitorTrackingInterceptor implements HandlerInterceptor {
 
-	private final VisitorLogMapper visitorLogMapper;
+	private final VisitorLogService visitorLogService;
 
 	private static final String VISITOR_TRACKED_KEY = "visitorTracked";
 
@@ -63,11 +63,9 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 			}
 
 			// DB에서 오늘 이미 기록되었는지 확인
-			int exists = visitorLogMapper.existsTodayBySessionId(sessionId);
-			if (exists > 0) {
+			if (visitorLogService.existsToday(sessionId)) {
 				// DB에 이미 있으면 세션에 마킹하고 스킵
 				session.setAttribute(VISITOR_TRACKED_KEY, true);
-				return true;
 			}
 
 			// 방문 로그 저장
@@ -101,7 +99,7 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 				.referer(referer)
 				.build();
 
-			visitorLogMapper.insertVisitorLog(visitorLog);
+			visitorLogService.saveVisitorLog(visitorLog);
 
 			// 세션에 추적 완료 마킹
 			session.setAttribute(VISITOR_TRACKED_KEY, true);
