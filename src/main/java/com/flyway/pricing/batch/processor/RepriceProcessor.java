@@ -85,9 +85,10 @@ public class RepriceProcessor implements ItemProcessor<RepriceCandidateRow, Pric
                 .flightId(item.getFlightId())
                 .cabinClassCode(item.getCabinClassCode())
                 .newPrice(result.getNewPrice())
-                .currentPrice(item.getCurrentPrice()) // 낙관적 락을 위해 필수
+                .currentPrice(item.getCurrentPrice())
                 .applied(true)
                 .policyVersion(version)
+                .calcContextJson(contextJson)
                 .calculatedAt(batchReferenceTime)
                 .build();
     }
