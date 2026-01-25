@@ -6,11 +6,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.flyway.admin.domain.VisitorLog;
 import com.flyway.admin.mapper.VisitorLogMapper;
+import com.flyway.security.principal.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +71,7 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 			}
 
 			// 방문 로그 저장
-			String userId = (String)session.getAttribute("userId"); // 로그인 사용자인 경우
+			String userId = getUserIdFromSession(session); // 로그인 사용자인 경우
 			String ipAddress = getClientIp(request);
 			String userAgent = request.getHeader("User-Agent");
 			String pageUrl = request.getRequestURI();
@@ -109,5 +113,26 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 		}
 
 		return true; // 항상 요청 계속 처리
+	}
+
+	public String getUserIdFromSession(HttpSession session) {
+		SecurityContext securityContext = (SecurityContext)session.getAttribute(
+			HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+		if (securityContext == null) {
+			return null;
+		}
+
+		Authentication authentication = securityContext.getAuthentication();
+		if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(
+			authentication.getPrincipal().toString())) {
+			return null;
+		}
+
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof CustomUserDetails) {
+			return ((CustomUserDetails)principal).getUserId();
+		}
+
+		return null;
 	}
 }
