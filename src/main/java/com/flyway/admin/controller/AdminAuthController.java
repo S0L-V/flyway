@@ -107,7 +107,8 @@ public class AdminAuthController {
 				if (e.getErrorCode() == ErrorCode.ADMIN_LOGIN_FAILED) {
 					errorData.put("failCount", admin.getFailedLoginCount());
 				} else if (e.getErrorCode() == ErrorCode.ADMIN_ACCOUNT_LOCKED) {
-					errorData.put("lockedUntil", admin.getLockedUntil().toString());
+					errorData.put("lockedUntil",
+						admin.getLockedUntil() != null ? admin.getLockedUntil().toString() : null);
 				}
 			}
 

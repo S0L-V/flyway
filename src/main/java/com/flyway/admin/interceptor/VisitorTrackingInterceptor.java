@@ -69,6 +69,7 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 			if (visitorLogQueryService.existsToday(sessionId)) {
 				// DB에 이미 있으면 세션에 마킹하고 스킵
 				session.setAttribute(VISITOR_TRACKED_KEY, true);
+				return true;
 			}
 
 			// 방문 로그 저장

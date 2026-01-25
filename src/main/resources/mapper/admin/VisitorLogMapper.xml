@@ -75,12 +75,12 @@
             vl.referer,
             vl.visited_at
         FROM (
-            SELECT session_id, MIN(log_id) AS first_log_id
+            SELECT session_id, MAX(log_id) AS latest_log_id
             FROM visitor_log
             WHERE DATE(visited_at) = CURDATE()
             GROUP BY session_id
-        ) AS first_visits
-        JOIN visitor_log vl ON first_visits.first_log_id = vl.log_id
+        ) AS latest_visits
+        JOIN visitor_log vl ON latest_visits.latest_log_id = vl.log_id
         LEFT JOIN users u ON vl.user_id = u.user_id
         LEFT JOIN user_profile up ON u.user_id = up.user_id
         ORDER BY vl.visited_at DESC
