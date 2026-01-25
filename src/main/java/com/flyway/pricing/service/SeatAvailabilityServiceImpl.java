@@ -11,9 +11,13 @@ import java.util.Map;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class SeatAvailabilityServiceImpl implements SeatAvailabilityService {
+
     private final JdbcTemplate jdbcTemplate;
+
+    public SeatAvailabilityServiceImpl(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
     @Override
     public SeatStatus getSeatStatus(String flightId, String cabinClassCode) {
