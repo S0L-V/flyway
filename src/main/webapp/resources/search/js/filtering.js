@@ -278,6 +278,8 @@ function updateFilterStateAndRender() {
     const maxInput = document.getElementById('price-max-input');
 
     if (minInput && maxInput) {
+        const UNIT = 10000;
+
         const currentMin = parseInt(minInput.value);
         const currentMax = parseInt(maxInput.value);
         const totalMin = parseInt(minInput.min);
@@ -285,10 +287,18 @@ function updateFilterStateAndRender() {
 
         // 사용자가 전체 범위를 다 선택했으면 굳이 필터링할 필요 없음
         // 최소값이나 최대값을 조금이라도 움직였을 때만 상태에 저장
-        if (currentMin > totalMin || currentMax < totalMax) {
-            filterState.price = { min: currentMin, max: currentMax };
+        const curMinU = Math.floor(currentMin / UNIT) * UNIT;
+        const curMaxU = Math.ceil(currentMax / UNIT) * UNIT;
+        const totMinU = Math.floor(totalMin / UNIT) * UNIT;
+        const totMaxU = Math.ceil(totalMax / UNIT) * UNIT;
+
+        if (curMinU > totMinU || curMaxU < totMaxU) {
+            filterState.price = {
+                min: curMinU,
+                max: curMaxU
+            };
         } else {
-            filterState.price = null; // 전체 범위면 필터 해제
+            filterState.price = null;
         }
     }
 
