@@ -1,12 +1,13 @@
-let AIRPORTS = [];
+let DEP_AIRPORTS = [];
+let ARR_AIRPORTS = [];
 let allOptions = [];
 let displayedOptions = [];
 let details = {};
 
-async function loadAirports() {
-    const res = await fetch(`${CONTEXT_PATH}/api/public/airports`);
+async function loadDepAirports() {
+    const res = await fetch(`${CONTEXT_PATH}/api/public/depAirports`);
     const data = await res.json();
-    AIRPORTS = data.map(a => ({
+    DEP_AIRPORTS = data.map(a => ({
         code: a.airportId,
         name: a.city,
         country: a.country
@@ -14,7 +15,7 @@ async function loadAirports() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadAirports();
+    await loadDepAirports();
     initTripTabs();
     initDropdowns();
     initAirports();
@@ -174,9 +175,24 @@ function setFieldText(fieldName, mainText, hintText = "") {
     if (hintEl) hintEl.textContent = hintText;
 }
 
+async function loadArrAirports(depCode) {
+    if (!depCode) return;
+
+    const res = await fetch(
+        `${CONTEXT_PATH}/api/public/arrAirports?depAirport=${depCode}`
+    );
+    const data = await res.json();
+
+    ARR_AIRPORTS = data.map(a => ({
+        code: a.airportId,
+        name: a.city,
+        country: a.country
+    }));
+}
+
 function initAirports() {
-    setupAirportDropdown("from");
-    setupAirportDropdown("to");
+    setupAirportDropdown("from", () => DEP_AIRPORTS);
+    setupAirportDropdown("to",   () => ARR_AIRPORTS);
 }
 
 function groupByCountry(items) {
@@ -187,7 +203,7 @@ function groupByCountry(items) {
     }, {});
 }
 
-function setupAirportDropdown(fieldName) {
+function setupAirportDropdown(fieldName, getDataFn) {
     const dd = document.querySelector(`.dropdown[data-field="${fieldName}"]`);
     const ul = dd.querySelector("[data-list]");
     const input = dd.querySelector(".dropdown-search");
@@ -211,18 +227,19 @@ function setupAirportDropdown(fieldName) {
       `).join("");
     };
 
+    const getItems = () => getDataFn ? getDataFn() : [];
 
-    render(AIRPORTS);
+    render(getItems());
 
     input.addEventListener("input", () => {
         const q = input.value.trim().toLowerCase();
-        const filtered = AIRPORTS.filter(a =>
+        const filtered = getItems().filter(a =>
             a.country.toLowerCase().includes(q) || a.code.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
         );
         render(filtered);
     });
 
-    ul.addEventListener("click", (e) => {
+    ul.addEventListener("click", async (e) => {
         const item = e.target.closest(".airport-item");
         if (!item) return;
 
@@ -232,6 +249,18 @@ function setupAirportDropdown(fieldName) {
         state[fieldName] = { code, name };
         setFieldText(fieldName, `${name}(${code})`);
         closeAllDropdowns();
+
+        if (fieldName === "from") {
+            state.to = null;
+            setFieldText("to", "도착 공항 선택");
+            document.dispatchEvent(new CustomEvent("departureChanged"));
+            await loadArrAirports(code);
+
+            const toInput = document.querySelector(
+                '.dropdown[data-field="to"] .dropdown-search'
+            );
+            toInput.dispatchEvent(new Event("input"));
+        }
     });
 }
 
@@ -433,8 +462,11 @@ function handleSearchResult(data){
 
         if(prices.length > 0) {
             const minPrice = Math.min(...prices);
-            const maxPrice = Math.max(...prices);
+            const rawMax = Math.max(...prices);
 
+            const maxPrice = Math.ceil(rawMax / 10000) * 10000;
+
+            console.log("최소", minPrice, "최대", maxPrice);
             if(typeof initPriceSlider === 'function'){
                 initPriceSlider(minPrice, maxPrice);
             }

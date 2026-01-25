@@ -98,6 +98,7 @@ function renderSegment(f) {
 }
 function renderFooter(option, index) {
     const seatCount = option.totalSeats ?? "-";
+    const totalPrice = option.totalPrice ?? "-";
     return `
       <div class="flight-footer">
         <div class="flight-actions">
@@ -106,7 +107,7 @@ function renderFooter(option, index) {
         </div>
         <div class="seats-remaining">${seatCount}석 남음</div>
         <div class="flight-price" tabindex="0">
-          <span class="price">411,700원</span>
+          <span class="price">${totalPrice}원</span>
           <img src="${CONTEXT_PATH}/resources/search/img/arrow-right.svg" alt="" class="price-arrow" />
         </div>
       </div>

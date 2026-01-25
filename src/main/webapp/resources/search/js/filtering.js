@@ -110,11 +110,21 @@ function initTimeChips() {
 }
 
 // 가격 포멧팅
-function formatPrice(price) {
+function minFormatPrice(price) {
     if (price === undefined || price === null) return "0";
     if (price >= 10000) {
         // 만 단위로 표시 (소수점 버림)
         return Math.floor(price / 10000) + "만";
+    }
+    // 만 원 미만은 콤마 찍어서 표시
+    return price.toLocaleString();
+}
+
+function maxFormatPrice(price) {
+    if (price === undefined || price === null) return "0";
+    if (price >= 10000) {
+        // 만 단위로 표시 (소수점 버림)
+        return Math.ceil(price / 10000) + "만";
     }
     // 만 원 미만은 콤마 찍어서 표시
     return price.toLocaleString();
@@ -137,12 +147,17 @@ function initPriceSlider(minPrice, maxPrice) {
     const totalMax = (maxPrice !== undefined && maxPrice !== null && maxPrice > totalMin) ? maxPrice : (totalMin + 1000000);
 
     // 2. 슬라이더 범위 및 초기값 설정 (처음엔 전체 범위로 선택)
-    minInput.min = totalMin; minInput.max = totalMax; minInput.value = totalMin;
-    maxInput.min = totalMin; maxInput.max = totalMax; maxInput.value = totalMax;
+    minInput.max = totalMax;
+    maxInput.max = totalMax;
+    minInput.min = totalMin;
+    maxInput.min = totalMin;
+    minInput.value = totalMin;
+    maxInput.value = totalMax;
 
     // 3. 양 끝 레이블 텍스트 설정
-    totalMinLabel.textContent = formatPrice(totalMin);
-    totalMaxLabel.textContent = formatPrice(totalMax);
+    console.log("최대", totalMax);
+    totalMinLabel.textContent = minFormatPrice(totalMin);
+    totalMaxLabel.textContent = maxFormatPrice(totalMax);
 
     // 4. 초기 UI 그리기 (텍스트, 파란색 바 위치)
     updateSliderUI();
@@ -182,8 +197,8 @@ function initPriceSlider(minPrice, maxPrice) {
         const maxVal = parseInt(maxInput.value);
 
         // 상단 텍스트 업데이트
-        minDisplay.textContent = formatPrice(minVal);
-        maxDisplay.textContent = formatPrice(maxVal);
+        minDisplay.textContent = minFormatPrice(minVal);
+        maxDisplay.textContent = maxFormatPrice(maxVal);
 
         // 파란색 바의 위치와 너비를 백분율로 계산
         const range = totalMax - totalMin || 1; // 0 나누기 방지
@@ -254,28 +269,28 @@ function getSelectedTimeRanges(type) {
 // 필터 상태 업데이트 및 리렌더링 트리거
 function updateFilterStateAndRender() {
     // 1. DOM에서 현재 선택된 값들을 읽어와 state 업데이트
-    filterState.airline = new Set(getSelectedAirlines()); // 배열을 Set으로 변환 (원하시면 배열 그대로 써도 됨)
+    filterState.airline = new Set(getSelectedAirlines());
     filterState.outTime = getSelectedTimeRanges('out-time');
     filterState.inTime = getSelectedTimeRanges('in-time');
 
     // 가격 정보 저장
-    // const minInput = document.getElementById('price-min-input');
-    // const maxInput = document.getElementById('price-max-input');
-    //
-    // if (minInput && maxInput) {
-    //     const currentMin = parseInt(minInput.value);
-    //     const currentMax = parseInt(maxInput.value);
-    //     const totalMin = parseInt(minInput.min);
-    //     const totalMax = parseInt(maxInput.max);
-    //
-    //     // 사용자가 전체 범위를 다 선택했으면 굳이 필터링할 필요 없음
-    //     // 최소값이나 최대값을 조금이라도 움직였을 때만 상태에 저장
-    //     if (currentMin > totalMin || currentMax < totalMax) {
-    //         filterState.price = { min: currentMin, max: currentMax };
-    //     } else {
-    //         filterState.price = null; // 전체 범위면 필터 해제
-    //     }
-    // }
+    const minInput = document.getElementById('price-min-input');
+    const maxInput = document.getElementById('price-max-input');
+
+    if (minInput && maxInput) {
+        const currentMin = parseInt(minInput.value);
+        const currentMax = parseInt(maxInput.value);
+        const totalMin = parseInt(minInput.min);
+        const totalMax = parseInt(maxInput.max);
+
+        // 사용자가 전체 범위를 다 선택했으면 굳이 필터링할 필요 없음
+        // 최소값이나 최대값을 조금이라도 움직였을 때만 상태에 저장
+        if (currentMin > totalMin || currentMax < totalMax) {
+            filterState.price = { min: currentMin, max: currentMax };
+        } else {
+            filterState.price = null; // 전체 범위면 필터 해제
+        }
+    }
 
     console.log("변경된 필터 상태:", filterState);
 
@@ -339,17 +354,17 @@ function applyFilters(allFlights, state) {
         }
 
         // 4. 가격 필터
-        // if (state.price) {
-        //     const price = flight.totalPrice;
-        //
-        //     if (price === undefined || price === null || isNAN(price)) {
-        //         return false;
-        //     }
-        //
-        //     if (price < state.price.min || price > state.price.max) {
-        //         return false;
-        //     }
-        // }
+        if (state.price) {
+            const price = Number(flight.totalPrice);
+
+            if (price === undefined || price === null || isNaN(price)) {
+                return false;
+            }
+
+            if (price < state.price.min || price > state.price.max) {
+                return false;
+            }
+        }
         // 모두 통과
         return true;
     });
