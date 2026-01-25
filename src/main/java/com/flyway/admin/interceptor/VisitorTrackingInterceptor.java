@@ -13,7 +13,6 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.flyway.admin.domain.VisitorLog;
 import com.flyway.admin.events.VisitorEvent;
 import com.flyway.admin.service.VisitorLogQueryService;
 import com.flyway.security.principal.CustomUserDetails;
@@ -56,6 +55,7 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 
 		try {
 			// 세션 가져오기
+			log.info("--- VisitorTrackingInterceptor PREHANDLE START for path: {}", request.getRequestURI());
 			HttpSession session = request.getSession(true);
 			String sessionId = session.getId();
 
@@ -92,6 +92,9 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 			if (referer != null && referer.length() > 500) {
 				referer = referer.substring(0, 500);
 			}
+
+			// 진단용 로그
+			log.info("Visitor tracking data collected. userId: {}, pageUrl: {}, referer: {}", userId, pageUrl, referer);
 
 			// 이벤트 발생
 			VisitorEvent event = new VisitorEvent(this, sessionId, userId, ipAddress,
