@@ -33,13 +33,19 @@ public class RepriceProcessor implements ItemProcessor<RepriceCandidateRow, Pric
     @Value("#{jobParameters['asOf']}") // JobParameter 주입
     private Long asOfEpochMillis;
 
+    private static final ZoneId BATCH_ZONE = ZoneId.of("Asia/Seoul");
 
     @Override
     public PricingResultRow process(RepriceCandidateRow item) throws Exception {
+
+        if (asOfEpochMillis == null) {
+            throw new IllegalArgumentException("요구된 job parameter 'asOf' 가 누락되었습니다.");
+        }
+
         // asOf 변환
-        LocalDateTime batchReferenceTime = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(asOfEpochMillis), ZoneId.of("Asia/Seoul")
-        );
+        LocalDateTime batchReferenceTime =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(asOfEpochMillis), BATCH_ZONE);
+
 
         // 1. 실시간 좌석 정보 조회 (Reader에서 못 가져온 정보 보충)
         var seatStatus = seatService.getSeatStatus(item.getFlightId(), item.getCabinClassCode());
