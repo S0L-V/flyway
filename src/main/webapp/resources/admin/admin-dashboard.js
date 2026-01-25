@@ -650,16 +650,20 @@ const AdminDashboard = (function() {
             var timeStr = formatTimeAgo(visitor.visitedAt);
             var userName = visitor.userName && visitor.userName.trim() ? escapeHtml(visitor.userName) : '<span class="text-slate-400">비회원</span>';
             var userEmail = visitor.userEmail ? '<div class="text-xs text-slate-400">' + escapeHtml(visitor.userEmail) + '</div>' : '';
-            var pageUrl = visitor.pageUrl ? escapeHtml(visitor.pageUrl) : '-';
-            if (pageUrl.length > 30) {
-                pageUrl = pageUrl.substring(0, 30) + '...';
+            var pageUrl = visitor.pageUrl || ''; // null 체크
+            var displayPageUrl = pageUrl;
+            var titleAttribute = pageUrl ? escapeHtml(pageUrl) : ''; // title에는 전체 URL
+
+            if (displayPageUrl.length > 30) {
+                displayPageUrl = displayPageUrl.substring(0, 30) + '...'; // 원본 자르기
             }
+            displayPageUrl = escapeHtml(displayPageUrl); // 자른 후 이스케이프
 
             html += '<tr class="hover:bg-slate-50">';
             html += '<td class="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">' + timeStr + '</td>';
             html += '<td class="px-4 py-3">' + userName + userEmail + '</td>';
             html += '<td class="px-4 py-3 text-sm text-slate-600 font-mono">' + escapeHtml(visitor.ipAddress) + '</td>';
-            html += '<td class="px-4 py-3 text-sm text-slate-600" title="' + escapeHtml(visitor.pageUrl || '') + '">' + pageUrl + '</td>';
+            html += '<td class="px-4 py-3 text-sm text-slate-600" title="' + titleAttribute + '">' + displayPageUrl + '</td>';
             html += '</tr>';
         });
 
