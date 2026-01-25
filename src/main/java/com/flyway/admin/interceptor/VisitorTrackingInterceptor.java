@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.flyway.admin.domain.VisitorLog;
+import com.flyway.admin.events.VisitorEvent;
+import com.flyway.admin.service.VisitorLogQueryService;
 import com.flyway.security.principal.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class VisitorTrackingInterceptor implements HandlerInterceptor {
 
-	private final VisitorLogService visitorLogService;
+	private final ApplicationEventPublisher eventPublisher;
+	private final VisitorLogQueryService visitorLogQueryService;
+
 	private static final String VISITOR_TRACKED_KEY = "visitorTracked";
 
 	@Override
@@ -61,7 +66,7 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 			}
 
 			// DB에서 오늘 이미 기록되었는지 확인
-			if (visitorLogService.existsToday(sessionId)) {
+			if (visitorLogQueryService.existsToday(sessionId)) {
 				// DB에 이미 있으면 세션에 마킹하고 스킵
 				session.setAttribute(VISITOR_TRACKED_KEY, true);
 			}
@@ -88,18 +93,11 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 				referer = referer.substring(0, 500);
 			}
 
-			VisitorLog visitorLog = VisitorLog.builder()
-				.sessionId(sessionId)
-				.userId(userId)
-				.ipAddress(ipAddress)
-				.userAgent(userAgent)
-				.pageUrl(pageUrl)
-				.referer(referer)
-				.build();
+			// 이벤트 발생
+			VisitorEvent event = new VisitorEvent(this, sessionId, userId, ipAddress,
+				userAgent, pageUrl, referer);
+			eventPublisher.publishEvent(event);
 
-			visitorLogService.saveVisitorLog(visitorLog);
-
-			// 세션에 추적 완료 마킹
 			session.setAttribute(VISITOR_TRACKED_KEY, true);
 
 			log.debug("Visitor tracked - sessionId: {}, ip:{}, url:{}", sessionId, ipAddress, pageUrl);
