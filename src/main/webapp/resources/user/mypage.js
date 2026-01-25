@@ -1,4 +1,4 @@
-import { fetchWithRefresh } from "../common/authFetch.js";
+import { fetchWithRefresh } from "../common/js/authFetch.js";
 
 async function loadProfile() {
     async function requestProfile() {

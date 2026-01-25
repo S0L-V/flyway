@@ -39,3 +39,12 @@
   height: 162px;
   background-color: var(--color-bg-banner);
 }
+
+
+.header__menu-item--logout {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
