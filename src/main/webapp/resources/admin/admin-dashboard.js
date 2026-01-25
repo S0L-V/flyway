@@ -708,7 +708,15 @@ const AdminDashboard = (function() {
         } else if (Array.isArray(dateInput)) {
             // Jackson의 숫자 배열 형식 처리 [year, month, day, hour, minute, second]
             // Javascript의 월은 0부터 시작하므로 월 값에서 1을 빼줍니다.
-            date = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3], dateInput[4], dateInput[5]);
+            // 누락된 시간 요소에 대해 0으로 기본값 설정
+            date = new Date(
+                dateInput[0],                  // year
+                (dateInput[1] || 1) - 1,       // month (0-indexed, default to Jan if missing or 0)
+                dateInput[2] || 1,             // day (default to 1 if missing or 0)
+                dateInput[3] || 0,             // hour (default to 0)
+                dateInput[4] || 0,             // minute (default to 0)
+                dateInput[5] || 0              // second (default to 0)
+            );
         } else {
             // 다른 타입에 대한 폴백 처리
             date = new Date(dateInput);
