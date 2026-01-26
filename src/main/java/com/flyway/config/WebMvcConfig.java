@@ -28,6 +28,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		log.info("--- WebMvcConfig.addInterceptors method called ---");
+		log.info("VisitorTrackingInterceptor instance: {}", visitorTrackingInterceptor);
 		// 관리자 인증 Interceptor
 		registry.addInterceptor(adminAuthInterceptor)
 			.addPathPatterns("/admin/**")
@@ -43,9 +44,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry.addInterceptor(visitorTrackingInterceptor)
 			.addPathPatterns(
 				"/",
-				"/search/**",
-				"/reservation/**",
-				"/mypage/**"
+				"/search", "/search/**",
+				"/reservation", "/reservation/**",
+				"/mypage, /mypage/**"
 			)
 			.excludePathPatterns(
 				"/admin/**",
