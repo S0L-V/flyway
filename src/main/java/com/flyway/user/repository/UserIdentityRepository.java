@@ -33,5 +33,5 @@ public interface UserIdentityRepository {
     /**
      * EMAIL 가입자의 provider_user_id(이메일) 익명화
      */
-    int anonymizeEmailProviderUserIdIfWithdrawn(String userId, String anonymizedEmail);
+    int anonymizeProviderUserIdIfWithdrawn(String userId, AuthProvider provider, String anonymizedEmail);
 }

@@ -1,11 +1,9 @@
 package com.flyway.user.mapper;
 
-import com.flyway.user.domain.UserIdentity;
 import com.flyway.auth.domain.AuthProvider;
+import com.flyway.user.domain.UserIdentity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 @Mapper
 public interface UserIdentityMapper {
@@ -34,8 +32,9 @@ public interface UserIdentityMapper {
     );
 
     /**
-     * EMAIL 가입자의 provider_user_id(이메일) 익명화
+     * provider_user_id 익명화
      */
-    int anonymizeEmailProviderUserIdIfWithdrawn(@Param("userId") String userId,
-                                                @Param("anonymizedEmail") String anonymizedEmail);
+    int anonymizeProviderUserIdIfWithdrawn(@Param("userId") String userId,
+                                           @Param("provider") String provider,
+                                           @Param("anonymizedProviderUserId") String anonymizedProviderUserId);
 }

@@ -33,7 +33,7 @@ public class UserIdentityRepositoryImpl implements UserIdentityRepository {
     }
 
     @Override
-    public int anonymizeEmailProviderUserIdIfWithdrawn(String userId, String anonymizedEmail) {
-        return userIdentityMapper.anonymizeEmailProviderUserIdIfWithdrawn(userId, anonymizedEmail);
+    public int anonymizeProviderUserIdIfWithdrawn(String userId, AuthProvider provider, String anonymizedProviderUserId) {
+        return userIdentityMapper.anonymizeProviderUserIdIfWithdrawn(userId, provider.toString(), anonymizedProviderUserId);
     }
 }
