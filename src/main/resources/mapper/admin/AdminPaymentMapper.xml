@@ -13,7 +13,7 @@
 
     <!-- 승인 대기 건수 (PENDING) -->
     <select id="countPendingPayments" resultType="long">
-        SELECT CONUT(*)
+        SELECT COUNT(*)
         FROM payment
         WHERE status = 'PENDING'
     </select>
@@ -81,7 +81,7 @@
             </if>
         </where>
         ORDER BY p.paid_at DESC, p.created_at DESC
-        LIMIT #{limit} OFFSET #{offest}
+        LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <!-- 결제 내역 총 건수 -->
