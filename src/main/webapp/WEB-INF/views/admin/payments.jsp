@@ -2,7 +2,6 @@
 <%@ include file="layout/head.jsp" %>
 <%@ include file="layout/sidebar.jsp" %>
 <%@ include file="layout/topbar.jsp" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <main class="pl-64 pt-16 min-h-screen">
     <div class="p-8 max-w-[1600px] mx-auto space-y-8">
@@ -140,7 +139,7 @@
 
 
         function fetchPaymentStats() {
-            fetch('${pageContext.request.contextPath}/admin/payments/api/stats')
+            fetch(window.CONTEXT_PATH + '/admin/payments/api/stats')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
@@ -163,7 +162,7 @@
             elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>결제 내역을 불러오는 중...</p></td></tr>';
             lucide.createIcons(); // 로딩 아이콘 렌더링
 
-            const url = new URL('${pageContext.request.contextPath}/admin/payments/api/list', window.location.origin);
+            const url = new URL(window.CONTEXT_PATH + '/admin/payments/api/list', window.location.origin);
             url.searchParams.append('page', currentPage);
             url.searchParams.append('size', pageSize);
             if (currentFilterStatus) {
@@ -196,49 +195,43 @@
                 return;
             }
 
-            payments.forEach(payment => {
-                const row = document.createElement('tr');
+            payments.forEach(function(payment) {
+                var row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50';
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-sm text-slate-800 font-medium">${escapeHtml(payment.paymentId)}</td>
-                    <td class="px-4 py-3 text-sm text-slate-600">
-                        <div class="font-medium">${escapeHtml(payment.userName || '비회원')}</div>
-                        <div class="text-xs text-slate-500">${escapeHtml(payment.userEmail || '-')}</div>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-slate-800 font-semibold">
-                        <fmt:formatNumber value="${payment.amount}" type="currency" currencySymbol="₩" groupingUsed="true"/>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-slate-600">${escapeHtml(payment.paymentMethodDisplay)}</td>
-                    <td class="px-4 py-3 text-sm">
-                        <span class="px-2 py-1 text-xs font-medium rounded-full ${payment.statusBadgeClass}">${escapeHtml(payment.statusDisplay)}</span>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-slate-600">
-                        <div class="font-medium">${escapeHtml(payment.flightNumber || '-')}</div>
-                        <div class="text-xs text-slate-500">${escapeHtml(payment.route || '-')}</div>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-slate-600">
-                        <fmt:parseDate value="${payment.paidAt}" pattern="yyyy-MM-dd'T'HH:mm:ss" var="paidDate"/>
-                        <fmt:formatDate value="${paidDate}" pattern="yyyy-MM-dd HH:mm"/>
-                    </td>
-                `;
+                row.innerHTML =
+                    '<td class="px-4 py-3 text-sm text-slate-800 font-medium">' + escapeHtml(payment.paymentId) + '</td>' +
+                    '<td class="px-4 py-3 text-sm text-slate-600">' +
+                    '<div class="font-medium">' + escapeHtml(payment.userName || '비회원') + '</div>' +
+                    '<div class="text-xs text-slate-500">' + escapeHtml(payment.userEmail || '-') + '</div>' +
+                    '</td>' +
+                    '<td class="px-4 py-3 text-sm text-slate-800 font-semibold">' + formatCurrency(payment.amount) + '</td>' +
+                    '<td class="px-4 py-3 text-sm text-slate-600">' + escapeHtml(payment.paymentMethodDisplay) + '</td>' +
+                    '<td class="px-4 py-3 text-sm">' +
+                    '<span class="px-2 py-1 text-xs font-medium rounded-full ' + payment.statusBadgeClass + '">' + escapeHtml(payment.statusDisplay) + '</span>' +
+                    '</td>' +
+                    '<td class="px-4 py-3 text-sm text-slate-600">' +
+                    '<div class="font-medium">' + escapeHtml(payment.flightNumber || '-') + '</div>' +
+                    '<div class="text-xs text-slate-500">' + escapeHtml(payment.route || '-') + '</div>' +
+                    '</td>' +
+                    '<td class="px-4 py-3 text-sm text-slate-600">' + formatDateTime(payment.paidAt) + '</td>';
                 elements.paymentListBody.appendChild(row);
             });
         }
 
-        function renderPagination(totalCount, currentPage, pageSize, totalPages) {
+        function renderPagination(totalCount, curPage, pageSize, totalPages) {
             elements.paginationControls.innerHTML = ''; // 기존 내용 지우기
             if (totalPages <= 1) return;
 
-            const ul = document.createElement('ul');
+            var ul = document.createElement('ul');
             ul.className = 'flex items-center space-x-1';
 
             // 이전 페이지 버튼
-            const prevLi = document.createElement('li');
-            const prevButton = document.createElement('button');
+            var prevLi = document.createElement('li');
+            var prevButton = document.createElement('button');
             prevButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
             prevButton.innerHTML = '<i data-lucide="chevron-left" class="w-4 h-4"></i>';
-            prevButton.disabled = currentPage === 0;
-            prevButton.addEventListener('click', () => {
+            prevButton.disabled = curPage === 0;
+            prevButton.addEventListener('click', function() {
                 if (currentPage > 0) {
                     currentPage--;
                     fetchPaymentList();
@@ -248,26 +241,28 @@
             ul.appendChild(prevLi);
 
             // 페이지 번호
-            for (let i = 0; i < totalPages; i++) {
-                const li = document.createElement('li');
-                const button = document.createElement('button');
-                button.className = `px-3 py-1 rounded-lg text-sm font-medium transition-colors ${i == currentPage ? 'bg-blue-600 text-white' : 'hover:bg-slate-100'}`;
+            for (var i = 0; i < totalPages; i++) {
+                var li = document.createElement('li');
+                var button = document.createElement('button');
+                button.className = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors ' + (i == curPage ? 'bg-blue-600 text-white' : 'hover:bg-slate-100');
                 button.textContent = i + 1;
-                button.addEventListener('click', () => {
-                    currentPage = i;
-                    fetchPaymentList();
-                });
+                (function(pageIndex) {
+                    button.addEventListener('click', function() {
+                        currentPage = pageIndex;
+                        fetchPaymentList();
+                    });
+                })(i);
                 li.appendChild(button);
                 ul.appendChild(li);
             }
 
             // 다음 페이지 버튼
-            const nextLi = document.createElement('li');
-            const nextButton = document.createElement('button');
+            var nextLi = document.createElement('li');
+            var nextButton = document.createElement('button');
             nextButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
             nextButton.innerHTML = '<i data-lucide="chevron-right" class="w-4 h-4"></i>';
-            nextButton.disabled = currentPage === totalPages - 1;
-            nextButton.addEventListener('click', () => {
+            nextButton.disabled = curPage === totalPages - 1;
+            nextButton.addEventListener('click', function() {
                 if (currentPage < totalPages - 1) {
                     currentPage++;
                     fetchPaymentList();
@@ -296,6 +291,22 @@
             }
             return '₩ ' + new Intl.NumberFormat('ko-KR').format(amount);
         }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString.replace('T', ' ')); // "2023-01-01T12:30:00" -> "2023-01-01 12:30:00"
+            if (isNaN(date.getTime())) {
+                // Jackson의 숫자 배열 형식 처리 [year, month, day, hour, minute, second]
+                const dateParts = dateString.split(/[-\s:T]/).map(Number);
+                if (dateParts.length >= 6) {
+                    return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], dateParts[3], dateParts[4], dateParts[5])
+                        .toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                }
+                return '잘못된 날짜';
+            }
+            return date.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
 
         function escapeHtml(text) {
             if (text === null || text === undefined) return ''; // null 또는 undefined 처리
