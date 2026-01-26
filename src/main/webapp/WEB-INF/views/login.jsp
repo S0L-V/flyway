@@ -4,10 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>로그인</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/resources/auth/login.css">
 </head>
 <body>
+
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
 
 <div class="login-container">
     <h2>로그인</h2>

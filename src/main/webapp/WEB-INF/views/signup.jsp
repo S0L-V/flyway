@@ -6,10 +6,13 @@
 <head>
     <meta charset="UTF-8">
     <title>회원가입</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/resources/auth/signup.css">
 </head>
 <body>
+
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
 
 <div class="register-container">
     <h2>회원가입</h2>

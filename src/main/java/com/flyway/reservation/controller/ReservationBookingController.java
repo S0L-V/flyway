@@ -4,6 +4,7 @@ import com.flyway.reservation.dto.BookingViewModel;
 import com.flyway.reservation.dto.PassengerSaveForm;
 import com.flyway.reservation.service.ReservationBookingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -40,6 +43,20 @@ public class ReservationBookingController {
         bookingService.savePassengers(reservationId, userId, form.getPassengers());
 
         return "redirect:/reservations/" + reservationId + "/booking?saved=1";
+    }
+//json형식
+    @PostMapping("/{reservationId}/passengers/api")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> savePassengersApi(
+            @PathVariable String reservationId,
+            @RequestBody PassengerSaveForm form
+    ) {
+        String userId = getAuthenticatedUserIdOrThrow();
+        bookingService.savePassengers(reservationId, userId, form.getPassengers());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        return ResponseEntity.ok(result);
     }
 
     private String getAuthenticatedUserIdOrThrow() {

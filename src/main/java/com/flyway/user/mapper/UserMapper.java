@@ -4,6 +4,8 @@ import com.flyway.user.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
+
 @Mapper
 public interface UserMapper {
 
@@ -37,4 +39,10 @@ public interface UserMapper {
             @Param("userId") String userId,
             @Param("status") String status
     );
+
+    /**
+     * 사용자 탈퇴 처리
+     */
+    int markWithdrawn(@Param("userId") String userId,
+                      @Param("now") LocalDateTime now);
 }

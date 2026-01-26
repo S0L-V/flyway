@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.auth.mapper.RefreshTokenMapper">
+
+    <insert id="insert" parameterType="com.flyway.auth.domain.RefreshToken">
+        INSERT INTO refresh_token (refresh_token_id, user_id, token_hash,
+                                   issued_at, expires_at,
+                                   revoked_at, rotated_at, replaced_by_token_id)
+        VALUES (#{refreshTokenId}, #{userId}, #{tokenHash},
+                #{issuedAt}, #{expiresAt},
+                #{revokedAt}, #{rotatedAt}, #{replacedByTokenId})
+    </insert>
+
+    <select id="findByTokenHash" parameterType="string"
+            resultType="com.flyway.auth.domain.RefreshToken">
+        SELECT refresh_token_id     AS refreshTokenId,
+               user_id              AS userId,
+               token_hash           AS tokenHash,
+               issued_at            AS issuedAt,
+               expires_at           AS expiresAt,
+               revoked_at           AS revokedAt,
+               rotated_at           AS rotatedAt,
+               replaced_by_token_id AS replacedByTokenId
+        FROM refresh_token
+        WHERE token_hash = #{tokenHash}
+    </select>
+
+    <update id="markRotated">
+        UPDATE refresh_token
+        SET rotated_at           = #{now},
+            replaced_by_token_id = #{replacedByTokenId}
+        WHERE refresh_token_id = #{refreshTokenId}
+          AND revoked_at IS NULL
+          AND rotated_at IS NULL
+          AND expires_at &gt; #{now}
+    </update>
+
+    <update id="revokeById">
+        UPDATE refresh_token
+        SET revoked_at = #{now}
+        WHERE refresh_token_id = #{refreshTokenId}
+          AND revoked_at IS NULL
+    </update>
+
+    <update id="revokeAllByUserId">
+        UPDATE refresh_token
+        SET revoked_at = #{now}
+        WHERE user_id = #{userId}
+          AND revoked_at IS NULL
+    </update>
+
+    <delete id="deleteExpiredRevokedTokens">
+        DELETE
+        FROM refresh_token
+        WHERE expires_at &lt;= #{now}
+          AND revoked_at IS NOT NULL
+    </delete>
+
+</mapper>

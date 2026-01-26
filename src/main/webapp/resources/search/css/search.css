@@ -325,6 +325,9 @@
   background: rgba(0,0,0,.06);
 }
 
+.airport-item.active {
+  background-color: #f0f4ff;
+}
 
 .time-filter-panel {
   position: absolute;

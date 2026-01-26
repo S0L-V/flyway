@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.RecentActivityDto;
+import com.flyway.admin.dto.VisitorDetailDto;
 
 /**
  * 관리자 대시보드 Repository 인터페이스
@@ -11,10 +12,8 @@ import com.flyway.admin.dto.RecentActivityDto;
  */
 public interface AdminDashboardRepository {
 
-	// == 통계 조회 ==
+	// == 기간별 통계 조회 (첫 번째 줄) ==
 	long countDailyVisitors();
-
-	long countDailyReservations();
 
 	long countDailyPayments();
 
@@ -22,13 +21,17 @@ public interface AdminDashboardRepository {
 
 	long sumDailyRevenue();
 
+	// == 실시간/전체 통계 (두 번째 줄) ==
+	long countPendingReservations();
+
 	long countTotalUsers();
+
+	long countDailyNewUsers();
 
 	long countActiveFlights();
 
-	long countPendingReservations();
-
-	long countPendingPayments();
+	// == 방문자 상세 조회 ==
+	List<VisitorDetailDto> findTodayVisitors(int limit);
 
 	// == 최근 활동 조회 ==
 	List<RecentActivityDto> findRecentActivities(int limit);

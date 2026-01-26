@@ -1,9 +1,9 @@
 package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.service.AuthTokenService;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
-import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;
@@ -13,6 +13,7 @@ import com.flyway.user.domain.User;
 import com.flyway.user.controller.UserApiController;
 import com.flyway.user.dto.UserProfileResponse;
 import com.flyway.user.service.UserProfileService;
+import com.flyway.user.service.UserWithdrawalService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class UserAuthControllerTest {
     private MockMvc mockMvc;
     private SignUpService signUpService;
     private EmailUserDetailsService emailUserDetailsService;
-    private LoginSuccessHandler loginSuccessHandler;
+    private AuthTokenService authTokenService;
 
 
     @BeforeEach
@@ -53,14 +54,14 @@ class UserAuthControllerTest {
         KakaoLoginService kakaoLoginService = Mockito.mock(KakaoLoginService.class);
         emailUserDetailsService = Mockito.mock(EmailUserDetailsService.class);
         UserIdUserDetailsService userIdUserDetailsService = Mockito.mock(UserIdUserDetailsService.class);
-        loginSuccessHandler = Mockito.mock(LoginSuccessHandler.class);
+        authTokenService = Mockito.mock(AuthTokenService.class);
 
         AuthController controller = new AuthController(
                 signUpService,
                 kakaoLoginService,
                 emailUserDetailsService,
                 userIdUserDetailsService,
-                loginSuccessHandler
+                authTokenService
         );
 
         InternalResourceViewResolver vr = new InternalResourceViewResolver();
@@ -84,7 +85,7 @@ class UserAuthControllerTest {
                 .build();
         when(emailUserDetailsService.loadUserByUsername("test@example.com"))
                 .thenReturn(principal);
-        doNothing().when(loginSuccessHandler).issueAccessTokenCookie(any(), anyString());
+        doNothing().when(authTokenService).issueLoginCookies(any(), any(), anyString());
 
         // when & then
         mockMvc.perform(post("/auth/signup")
@@ -159,6 +160,7 @@ class UserAuthControllerTest {
     void getProfile_success() throws Exception {
         // given
         UserProfileService userProfileService = Mockito.mock(UserProfileService.class);
+        UserWithdrawalService userWithdrawalService = Mockito.mock(UserWithdrawalService.class);
 
         UserProfileResponse response = UserProfileResponse.builder()
                 .userId("user-123") // UserProfile에 userId가 있다면
@@ -191,7 +193,7 @@ class UserAuthControllerTest {
             }
         };
 
-        UserApiController controller = new UserApiController(userProfileService);
+        UserApiController controller = new UserApiController(userProfileService, userWithdrawalService);
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setCustomArgumentResolvers(resolver)
                 .build();
@@ -210,7 +212,9 @@ class UserAuthControllerTest {
     @DisplayName("GET /api/profile - 인증 정보 없으면 401 반환")
     void getProfile_unauthorized_returns401() throws Exception {
         UserProfileService userProfileService = Mockito.mock(UserProfileService.class);
-        UserApiController controller = new UserApiController(userProfileService);
+        UserWithdrawalService userWithdrawalService = Mockito.mock(UserWithdrawalService.class);
+
+        UserApiController controller = new UserApiController(userProfileService, userWithdrawalService);
         HandlerMethodArgumentResolver resolver = new HandlerMethodArgumentResolver() {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {

@@ -29,7 +29,20 @@ public enum ErrorCode {
 	USER_PASSWORD_ENCODE_ERROR(500, "U006", "비밀번호 처리 중 오류가 발생했습니다."),
 	USER_DB_ERROR(500, "U007", "회원 정보 저장 중 오류가 발생했습니다."),
 	USER_INVALID_SIGN_UP_ATTEMPT(400, "U008", "유효하지 않은 회원가입 요청입니다."),
+	USER_ALREADY_WITHDRAWN(409, "U009", "이미 탈퇴 처리된 사용자입니다."),
 	USER_INTERNAL_ERROR(500, "U999", "회원 처리 중 알 수 없는 오류가 발생했습니다."),
+
+	// ==================== 인증 (AU) ====================
+	AUTH_REFRESH_TOKEN_MISSING(401, "AU001", "리프레시 토큰이 존재하지 않습니다."),
+	AUTH_REFRESH_TOKEN_INVALID(401, "AU002", "유효하지 않은 리프레시 토큰입니다."),
+	AUTH_REFRESH_TOKEN_EXPIRED(401, "AU003", "만료되었거나 폐기된 리프레시 토큰입니다."),
+	AUTH_REFRESH_TOKEN_REUSED(401, "AU004", "리프레시 토큰이 재사용되었습니다. 다시 로그인해 주세요."),
+	AUTH_REFRESH_TOKEN_ALREADY_USED(401, "AU005", "이미 사용된 리프레시 토큰입니다."),
+	AUTH_ACCESS_TOKEN_INVALID(401, "AU006", "유효하지 않은 액세스 토큰입니다."),
+	AUTH_ACCESS_TOKEN_EXPIRED(401, "AU007", "만료된 액세스 토큰입니다."),
+	AUTH_UNAUTHORIZED(401, "AU008", "인증이 필요합니다."),
+	AUTH_FORBIDDEN(403, "AU009", "접근 권한이 없습니다."),
+	AUTH_INTERNAL_ERROR(500, "AU999", "인증 처리 중 알 수 없는 오류가 발생했습니다."),
 
 	// ==================== 관리자 (A) ====================
 	ADMIN_NOT_FOUND(404, "A001", "관리자를 찾을 수 없습니다."),

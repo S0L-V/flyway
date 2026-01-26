@@ -1,9 +1,9 @@
 package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.service.AuthTokenService;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
-import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;
 import com.flyway.template.exception.BusinessException;
@@ -23,15 +23,9 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class AuthControllerTest {
 
@@ -40,7 +34,7 @@ class AuthControllerTest {
     private KakaoLoginService kakaoLoginService;
     private EmailUserDetailsService emailUserDetailsService;
     private UserIdUserDetailsService userIdUserDetailsService;
-    private LoginSuccessHandler loginSuccessHandler;
+    private AuthTokenService authTokenService;
 
     @BeforeEach
     void setUp() {
@@ -48,14 +42,14 @@ class AuthControllerTest {
         kakaoLoginService = Mockito.mock(KakaoLoginService.class);
         emailUserDetailsService = Mockito.mock(EmailUserDetailsService.class);
         userIdUserDetailsService = Mockito.mock(UserIdUserDetailsService.class);
-        loginSuccessHandler = Mockito.mock(LoginSuccessHandler.class);
+        authTokenService = Mockito.mock(AuthTokenService.class);
 
         AuthController controller = new AuthController(
                 signUpService,
                 kakaoLoginService,
                 emailUserDetailsService,
                 userIdUserDetailsService,
-                loginSuccessHandler
+                authTokenService
         );
 
         InternalResourceViewResolver vr = new InternalResourceViewResolver();
@@ -87,7 +81,7 @@ class AuthControllerTest {
                 .andExpect(redirectedUrl("/"));
 
         verify(signUpService).signUp(any(EmailSignUpRequest.class));
-        verify(loginSuccessHandler).issueAccessTokenCookie(any(), eq("test@example.com"));
+        verify(authTokenService).issueLoginCookies(any(), any(), eq("test@example.com"));
     }
 
     @Test

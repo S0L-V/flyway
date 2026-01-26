@@ -1,8 +1,7 @@
 package com.flyway.security;
 
+import com.flyway.auth.service.AuthTokenService;
 import com.flyway.security.handler.LoginSuccessHandler;
-import com.flyway.security.jwt.JwtProperties;
-import com.flyway.security.jwt.JwtProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -20,20 +19,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class LoginLogoutCookieTest {
 
     @Test
-    @DisplayName("로그인 시 accessToken 쿠키가 내려가고 세션이 생성된다")
-    void login_adds_accessToken_cookie_and_session_created() throws Exception {
-        JwtProvider jwtProvider = mock(JwtProvider.class);
-        JwtProperties jwtProperties = mock(JwtProperties.class);
-        LoginSuccessHandler handler = new LoginSuccessHandler(jwtProvider, jwtProperties);
-
-        when(jwtProvider.createAccessToken("user-123")).thenReturn("access.jwt.token");
-        when(jwtProperties.getAccessTokenTtlSeconds()).thenReturn(3600L);
+    @DisplayName("로그인 성공 시 토큰 쿠키 발급을 AuthTokenService에 위임한다")
+    void login_delegates_to_authTokenService() throws Exception {
+        AuthTokenService authTokenService = mock(AuthTokenService.class);
+        LoginSuccessHandler handler = new LoginSuccessHandler(authTokenService);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -45,7 +39,7 @@ class LoginLogoutCookieTest {
 
         handler.onAuthenticationSuccess(request, response, authentication);
 
-        assertTrue(hasCookie(response, "accessToken"));
+        verify(authTokenService).issueLoginCookies(request, response, "user-123");
     }
 
     @Test

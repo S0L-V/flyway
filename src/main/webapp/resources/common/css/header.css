@@ -1,6 +1,10 @@
 .header {
   background-color: var(--color-white);
   padding: 24px 0;
+  position: fixed;
+  top: 0;
+  width: 100vw;
+  z-index: 1000;
 }
 
 .header__content {
@@ -35,7 +39,25 @@
   color: var(--color-primary);
 }
 
+.header__margin {
+  width: 100vw;
+  height: 95px;
+}
+
 .banner {
   height: 162px;
   background-color: var(--color-bg-banner);
+}
+
+
+.header__menu-item--logout {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  border: none;
+  background: none;
+  cursor: pointer;
 }

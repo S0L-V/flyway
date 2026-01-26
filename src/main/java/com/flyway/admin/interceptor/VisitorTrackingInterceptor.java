@@ -6,11 +6,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.flyway.admin.domain.VisitorLog;
-import com.flyway.admin.mapper.VisitorLogMapper;
+import com.flyway.admin.events.VisitorEvent;
+import com.flyway.admin.service.VisitorLogQueryService;
+import com.flyway.security.principal.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * 대상 경로:
  * - / (메인 페이지)
- * - /flight/** (항공편 검색/조회)
+ * - /search/** (항공편 검색/조회)
  * - /reservation/** (예약 관련)
  * - /mypage/** (마이페이지)
  *
@@ -37,7 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class VisitorTrackingInterceptor implements HandlerInterceptor {
 
-	private final VisitorLogMapper visitorLogMapper;
+	private final ApplicationEventPublisher eventPublisher;
+	private final VisitorLogQueryService visitorLogQueryService;
 
 	private static final String VISITOR_TRACKED_KEY = "visitorTracked";
 
@@ -49,6 +55,7 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 
 		try {
 			// 세션 가져오기
+			log.info("--- VisitorTrackingInterceptor PREHANDLE START for path: {}", request.getRequestURI());
 			HttpSession session = request.getSession(true);
 			String sessionId = session.getId();
 
@@ -59,15 +66,14 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 			}
 
 			// DB에서 오늘 이미 기록되었는지 확인
-			int exists = visitorLogMapper.existsTodayBySessionId(sessionId);
-			if (exists > 0) {
+			if (visitorLogQueryService.existsToday(sessionId)) {
 				// DB에 이미 있으면 세션에 마킹하고 스킵
 				session.setAttribute(VISITOR_TRACKED_KEY, true);
 				return true;
 			}
 
 			// 방문 로그 저장
-			String userId = (String)session.getAttribute("userId"); // 로그인 사용자인 경우
+			String userId = getUserIdFromSession(session); // 로그인 사용자인 경우
 			String ipAddress = getClientIp(request);
 			String userAgent = request.getHeader("User-Agent");
 			String pageUrl = request.getRequestURI();
@@ -88,26 +94,44 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 				referer = referer.substring(0, 500);
 			}
 
-			VisitorLog visitorLog = VisitorLog.builder()
-				.sessionId(sessionId)
-				.userId(userId)
-				.ipAddress(ipAddress)
-				.userAgent(userAgent)
-				.pageUrl(pageUrl)
-				.referer(referer)
-				.build();
+			// 진단용 로그
+			log.info("Visitor tracking data collected. userId: {}, pageUrl: {}, referer: {}", userId, pageUrl, referer);
 
-			visitorLogMapper.insertVisitorLog(visitorLog);
+			// 이벤트 발생
+			VisitorEvent event = new VisitorEvent(this, sessionId, userId, ipAddress,
+				userAgent, pageUrl, referer);
+			eventPublisher.publishEvent(event);
 
-			// 세션에 추적 완료 마킹
 			session.setAttribute(VISITOR_TRACKED_KEY, true);
 
 			log.debug("Visitor tracked - sessionId: {}, ip:{}, url:{}", sessionId, ipAddress, pageUrl);
 		} catch (Exception e) {
 			// 방문 추적 실패해도 요청은 계속 처리
-			log.warn("Failed to track visitor: {}", e.getMessage());
+			// log.warn("Failed to track visitor: {}", e.getMessage());
+			log.error("Failed to track visitor", e);
 		}
 
 		return true; // 항상 요청 계속 처리
+	}
+
+	public String getUserIdFromSession(HttpSession session) {
+		SecurityContext securityContext = (SecurityContext)session.getAttribute(
+			HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+		if (securityContext == null) {
+			return null;
+		}
+
+		Authentication authentication = securityContext.getAuthentication();
+		if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(
+			authentication.getPrincipal().toString())) {
+			return null;
+		}
+
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof CustomUserDetails) {
+			return ((CustomUserDetails)principal).getUserId();
+		}
+
+		return null;
 	}
 }

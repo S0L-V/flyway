@@ -17,7 +17,6 @@ public class OnboardingAccessFilter extends OncePerRequestFilter {
     private static final String[] ALLOWED_PREFIXES = {
             "/signup",
             "/auth/",
-            "/logout",
             "/resources/",
             "/css/",
             "/js/",

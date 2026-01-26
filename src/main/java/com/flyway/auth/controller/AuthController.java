@@ -1,9 +1,9 @@
 package com.flyway.auth.controller;
 
 import com.flyway.auth.dto.EmailSignUpRequest;
+import com.flyway.auth.service.AuthTokenService;
 import com.flyway.auth.service.KakaoLoginService;
 import com.flyway.auth.service.SignUpService;
-import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.security.service.EmailUserDetailsService;
 import com.flyway.security.service.UserIdUserDetailsService;
@@ -11,6 +11,7 @@ import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,7 +38,7 @@ public class AuthController {
     private final KakaoLoginService kakaoLoginService;
     private final EmailUserDetailsService emailUserDetailsService;
     private final UserIdUserDetailsService userIdUserDetailsService;
-    private final LoginSuccessHandler loginSuccessHandler;
+    private final AuthTokenService authTokenService;
 
     @PostMapping("/auth/signup")
     public String postSignUp(
@@ -62,7 +63,7 @@ public class AuthController {
             model.addAttribute("error", e.getMessage());
             return "signup";
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("[AUTH] signup failed", e);
             model.addAttribute("error", "회원가입 처리 중 오류가 발생했습니다.");
             return "signup";
         }
@@ -99,10 +100,26 @@ public class AuthController {
         throw new BusinessException(ErrorCode.UNAUTHORIZED);
     }
 
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<Void> refresh(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        try {
+            authTokenService.refresh(request, response);
+            return ResponseEntity.noContent().build();
+        } catch (BusinessException e) {
+            return ResponseEntity.status(e.getErrorCode().getStatus()).build();
+        } catch (Exception e) {
+            log.error("[AUTH] refresh failed", e);
+            return ResponseEntity.status(500).build();
+        }
+    }
+
     private void autoLoginByEmail(String email, HttpServletRequest req, HttpServletResponse res) {
         UserDetails userDetails = emailUserDetailsService.loadUserByUsername(email);
         authenticateAndSave(userDetails, req, res);
-        loginSuccessHandler.issueAccessTokenCookie(res, userDetails.getUsername());
+        authTokenService.issueLoginCookies(req, res, userDetails.getUsername());
     }
 
     private void refreshAuthentication(String userId, HttpServletRequest req, HttpServletResponse res) {

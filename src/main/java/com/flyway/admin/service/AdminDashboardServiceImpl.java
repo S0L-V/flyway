@@ -1,5 +1,8 @@
 package com.flyway.admin.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.DashboardStatsDto;
 import com.flyway.admin.dto.RecentActivityDto;
+import com.flyway.admin.dto.StatisticsDto;
+import com.flyway.admin.dto.VisitorDetailDto;
 import com.flyway.admin.repository.AdminDashboardRepository;
+import com.flyway.admin.repository.StatisticsRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,24 +26,23 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminDashboardServiceImpl implements AdminDashboardService {
 
 	private final AdminDashboardRepository dashboardRepository;
+	private final StatisticsRepository statisticsRepository;
 
 	@Override
 	@Transactional(readOnly = true)
 	public DashboardStatsDto getStats(String adminId) {
 		try {
 			return DashboardStatsDto.builder()
-				// 오늘 통계
-				.dailyVisitors(safeCount(() -> dashboardRepository.countDailyVisitors()))
-				.dailyReservations(safeCount(() -> dashboardRepository.countDailyReservations()))
-				.dailyPayments(safeCount(() -> dashboardRepository.countDailyPayments()))
-				.dailyCancellations(safeCount(() -> dashboardRepository.countDailyCancellations()))
-				.dailyRevenue(safeCount(() -> dashboardRepository.sumDailyRevenue()))
-				// 전체 통계
-				.totalUsers(safeCount(() -> dashboardRepository.countTotalUsers()))
-				.activeFlights(safeCount(() -> dashboardRepository.countActiveFlights()))
-				// 실시간 상태
-				.pendingReservations(safeCount(() -> dashboardRepository.countPendingReservations()))
-				.pendingPayments(safeCount(() -> dashboardRepository.countPendingPayments()))
+				// 기간별 통계 (첫 번째 줄)
+				.dailyVisitors(safeCount(dashboardRepository::countDailyVisitors))
+				.dailyPayments(safeCount(dashboardRepository::countDailyPayments))
+				.dailyCancellations(safeCount(dashboardRepository::countDailyCancellations))
+				.dailyRevenue(safeCount(dashboardRepository::sumDailyRevenue))
+				// 실시간/전체 통계 (두 번째 줄)
+				.pendingReservations(safeCount(dashboardRepository::countPendingReservations))
+				.totalUsers(safeCount(dashboardRepository::countTotalUsers))
+				.dailyNewUsers(safeCount(dashboardRepository::countDailyNewUsers))
+				.activeFlights(safeCount(dashboardRepository::countActiveFlights))
 				// 알림
 				.unreadNotifications(safeCount(() -> dashboardRepository.countUnreadNotifications(adminId)))
 				.build();
@@ -102,6 +107,103 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 			log.error("Failed to mark all notifications as read for adminId: {}", adminId, e);
 			return 0;
 		}
+	}
+
+	/**
+	 * 기간별 통계 조회 (주간/월간)
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public StatisticsDto getPeriodStats(String period) {
+		try {
+			LocalDate statDate = calculateStatDate(period);
+			StatisticsDto stats = statisticsRepository.findStatistics(period, statDate);
+
+			// 저장된 통계가 없으면 실시간 계산
+			if (stats == null) {
+				stats = calculatePeriodStats(period);
+			}
+			return stats;
+		} catch (Exception e) {
+			log.error("Failed to get {} stats", period, e);
+			return null;
+		}
+	}
+
+	/**
+	 * 최근 N일간 일일 통계 목록 조회
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<StatisticsDto> getRecentDailyStats(int days) {
+		try {
+			return statisticsRepository.findRecentDailyStatistics(days);
+		} catch (Exception e) {
+			log.error("Failed to get recent daily stats", e);
+			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * 오늘 방문자 상세 목록 조회
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<VisitorDetailDto> getTodayVisitors(int limit) {
+		try {
+			List<VisitorDetailDto> visitors = dashboardRepository.findTodayVisitors(limit);
+			log.info("Found {} visitors for today.", visitors.size());
+			return visitors;
+		} catch (Exception e) {
+			log.error("Failed to get today visitors", e);
+			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * 기간별 통계 날짜 계산
+	 */
+	private LocalDate calculateStatDate(String period) {
+		LocalDate today = LocalDate.now();
+		if ("WEEKLY".equals(period)) {
+			// 이번 주 월요일
+			return today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		} else if ("MONTHLY".equals(period)) {
+			// 이번 달 1일
+			return today.withDayOfMonth(1);
+		}
+		return today;
+	}
+
+	/**
+	 * 실시간 기간별 통계 계산 (저장된 데이터 없을 때)
+	 */
+	private StatisticsDto calculatePeriodStats(String period) {
+		LocalDate today = LocalDate.now();
+		LocalDate startDate;
+		LocalDate endDate = today;
+
+		if ("WEEKLY".equals(period)) {
+			startDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		} else if ("MONTHLY".equals(period)) {
+			startDate = today.withDayOfMonth(1);
+		} else {
+			startDate = today;
+		}
+
+		return StatisticsDto.builder()
+			.statType(period)
+			.statDate(startDate)
+			.totalReservations(statisticsRepository.countReservationsByPeriod(startDate, endDate))
+			.confirmedReservations(statisticsRepository.countConfirmedReservationsByPeriod(startDate, endDate))
+			.cancelledReservations(statisticsRepository.countCancelledReservationsByPeriod(startDate, endDate))
+			.totalRevenue(statisticsRepository.sumRevenueByPeriod(startDate, endDate))
+			.averageTicketPrice(statisticsRepository.avgTicketPriceByPeriod(startDate, endDate))
+			.refundCount(statisticsRepository.countRefundsByPeriod(startDate, endDate))
+			.totalRefunds(statisticsRepository.sumRefundsByPeriod(startDate, endDate))
+			.newUsers(statisticsRepository.countNewUsersByPeriod(startDate, endDate))
+			.activeUsers(statisticsRepository.countActiveUsersByPeriod(startDate, endDate))
+			.build();
 	}
 
 	/**

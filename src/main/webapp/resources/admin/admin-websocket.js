@@ -1,446 +1,306 @@
 /**
- * 관리자 대시보드 UI 업데이트
- * WebSocket 데이터를 받아 화면에 렌더링
+ * 관리자 대시보드 WebSocket 연결 관리
+ * SockJS + 폴백 지원
  */
-const AdminDashboard = (function() {
+const AdminWebSocket = (function() {
     'use strict';
 
-    // DOM 요소 캐시
-    let elements = {};
+    // 설정
+    const CONFIG = {
+        // WebSocket 엔드포인트 (contextPath 포함)
+        endpoint: '/admin/ws/dashboard',
+        // 재연결 설정
+        reconnectInterval: 3000,      // 재연결 간격 (ms)
+        maxReconnectAttempts: 10,     // 최대 재연결 시도
+        // Heartbeat
+        pingInterval: 20000,          // PING 간격 (ms)
+        pongTimeout: 10000             // PONG 대기 시간 (ms)
+    };
 
-    // 데이터 캐시
-    let currentStats = null;
-    let currentActivities = [];
-    let currentNotifications = [];
+    // 상태
+    let socket = null;
+    let connected = false;
+    let reconnectAttempts = 0;
+    let pingTimer = null;
+    let pongTimer = null;
+    let intentionalDisconnect = false;  // 의도적 연결 해제 플래그
+    let reconnectTimer = null;          // 재연결 타이머
 
-    // 컨텍스트 경로 저장
-    let basePath = '';
-
-    /**
-     * 초기화
-     */
-    function init(contextPath) {
-        console.log('[Dashboard] Initializing...');
-
-        // 컨텍스트 경로 저장
-        basePath = contextPath || '';
-
-        // DOM 요소 캐시
-        cacheElements();
-
-        // WebSocket 이벤트 핸들러 등록
-        registerWebSocketHandlers();
-
-        // WebSocket 연결
-        AdminWebSocket.connect(basePath);
-
-        // 새로고침 버튼 이벤트
-        bindRefreshButton();
-
-        console.log('[Dashboard] Initialized');
-    }
+    // 콜백 핸들러
+    const handlers = {
+        onStats: null,
+        onActivities: null,
+        onNotifications: null,
+        onConnect: null,
+        onDisconnect: null,
+        onError: null
+    };
 
     /**
-     * DOM 요소 캐시
+     * WebSocket 연결
+     * @param {string} contextPath - 애플리케이션 컨텍스트 경로
      */
-    function cacheElements() {
-        elements = {
-            // 통계 카드
-            dailyVisitors: document.getElementById('stat-daily-visitors'),
-            dailyReservations: document.getElementById('stat-daily-reservations'),
-            dailyCancellations: document.getElementById('stat-daily-cancellations'),
-            dailyRevenue: document.getElementById('stat-daily-revenue'),
-            dailyPayments: document.getElementById('stat-daily-payments'),
-            totalUsers: document.getElementById('stat-total-users'),
-            activeFlights: document.getElementById('stat-active-flights'),
-            pendingReservations: document.getElementById('stat-pending-reservations'),
-            pendingPayments: document.getElementById('stat-pending-payments'),
+    function connect(contextPath) {
+        const wsUrl = (contextPath || '') + CONFIG.endpoint;
+        console.log('[WebSocket] Connecting to:', wsUrl);
 
-            // 알림
-            notificationBadge: document.getElementById('notification-badge'),
-            notificationList: document.getElementById('notification-list'),
-            notificationDropdown: document.getElementById('notification-dropdown'),
+        // 의도적 연결 해제 플래그 초기화
+        intentionalDisconnect = false;
 
-            // 최근 활동
-            activityList: document.getElementById('activity-list'),
+        try {
+            // SockJS 사용
+            socket = new SockJS(wsUrl);
 
-            // 연결 상태
-            connectionStatus: document.getElementById('connection-status'),
+            socket.onopen = function() {
+                console.log('[WebSocket] Connected');
+                connected = true;
+                reconnectAttempts = 0;
+                startHeartbeat();
 
-            // 새로고침 버튼
-            refreshButton: document.getElementById('refresh-button')
-        };
-    }
-
-    /**
-     * WebSocket 이벤트 핸들러 등록
-     */
-    function registerWebSocketHandlers() {
-        AdminWebSocket.on('stats', updateStats);
-        AdminWebSocket.on('activities', updateActivities);
-        AdminWebSocket.on('notifications', updateNotifications);
-        AdminWebSocket.on('connect', onConnect);
-        AdminWebSocket.on('disconnect', onDisconnect);
-        AdminWebSocket.on('error', onError);
-    }
-
-    /**
-     * 통계 업데이트
-     */
-    function updateStats(stats) {
-        console.log('[Dashboard] Updating stats:', stats);
-        currentStats = stats;
-
-        // 오늘 통계
-        updateElement(elements.dailyVisitors, formatNumber(stats.dailyVisitors));
-        updateElement(elements.dailyReservations, formatNumber(stats.dailyReservations));
-        updateElement(elements.dailyCancellations, formatNumber(stats.dailyCancellations));
-        updateElement(elements.dailyRevenue, formatCurrency(stats.dailyRevenue));
-        updateElement(elements.dailyPayments, formatNumber(stats.dailyPayments));
-
-        // 전체 통계
-        updateElement(elements.totalUsers, formatNumber(stats.totalUsers));
-        updateElement(elements.activeFlights, formatNumber(stats.activeFlights));
-
-        // 실시간 상태
-        updateElement(elements.pendingReservations, formatNumber(stats.pendingReservations));
-        updateElement(elements.pendingPayments, formatNumber(stats.pendingPayments));
-
-        // 알림 배지
-        updateNotificationBadge(stats.unreadNotifications);
-    }
-
-    /**
-     * 최근 활동 업데이트
-     */
-    function updateActivities(activities) {
-        console.log('[Dashboard] Updating activities:', activities.length);
-        currentActivities = activities;
-
-        if (!elements.activityList) return;
-
-        if (activities.length === 0) {
-            elements.activityList.innerHTML = `
-                <div class="text-center text-slate-400 py-8">
-                    최근 활동이 없습니다.
-                </div>
-            `;
-            return;
-        }
-
-        const html = activities.map(activity => {
-            const icon = getActivityIcon(activity.activityType);
-            const statusBadge = getStatusBadge(activity.status);
-            const timeAgo = formatTimeAgo(activity.createdAt);
-
-            return `
-                <div class="flex items-start gap-4 p-4 hover:bg-slate-50 rounded-lg transition-colors">
-                    <div class="p-2 ${icon.bgColor} ${icon.textColor} rounded-lg">
-                        <i data-lucide="${icon.name}" class="w-5 h-5"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-slate-800 truncate">${escapeHtml(activity.description)}</span>
-                            ${statusBadge}
-                        </div>
-                        <div class="text-sm text-slate-500 truncate">
-                            ${escapeHtml(activity.userName)} · ${escapeHtml(activity.userEmail)}
-                        </div>
-                        <div class="text-xs text-slate-400 mt-1">${timeAgo}</div>
-                    </div>
-                    ${activity.amount ? `<div class="text-sm font-semibold text-slate-700">${formatCurrency(activity.amount)}</div>` : ''}
-                </div>
-            `;
-        }).join('');
-
-        elements.activityList.innerHTML = html;
-
-        // Lucide 아이콘 재초기화
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-    }
-
-    /**
-     * 알림 업데이트
-     */
-    function updateNotifications(notifications) {
-        console.log('[Dashboard] Updating notifications:', notifications.length);
-        currentNotifications = notifications;
-
-        if (!elements.notificationList) return;
-
-        if (notifications.length === 0) {
-            elements.notificationList.innerHTML = `
-                <div class="text-center text-slate-400 py-4 px-4">
-                    알림이 없습니다.
-                </div>
-            `;
-            return;
-        }
-
-        const html = notifications.map(notification => {
-            const icon = getNotificationIcon(notification.notificationType);
-            const isUnread = notification.isRead === 'N';
-            const timeAgo = formatTimeAgo(notification.createdAt);
-
-            return `
-                <div class="notification-item p-4 ${isUnread ? 'bg-blue-50' : ''} hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
-                     data-notification-id="${escapeHtml(notification.notificationId)}">
-                    <div class="flex items-start gap-3">
-                        <div class="p-1.5 ${icon.bgColor} ${icon.textColor} rounded-full">
-                            <i data-lucide="${icon.name}" class="w-4 h-4"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="font-medium text-sm text-slate-800 ${isUnread ? 'font-semibold' : ''}">${escapeHtml(notification.title)}</div>
-                            <div class="text-xs text-slate-500 mt-0.5 truncate">${escapeHtml(notification.message)}</div>
-                            <div class="text-xs text-slate-400 mt-1">${timeAgo}</div>
-                        </div>
-                        ${isUnread ? '<span class="w-2 h-2 bg-blue-500 rounded-full"></span>' : ''}
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        elements.notificationList.innerHTML = html;
-
-        // 이벤트 위임으로 클릭 처리 (XSS 방지)
-        elements.notificationList.querySelectorAll('.notification-item').forEach(function(item) {
-            item.addEventListener('click', function() {
-                var id = this.getAttribute('data-notification-id');
-                if (id) {
-                    markAsRead(id);
+                if (handlers.onConnect) {
+                    handlers.onConnect();
                 }
+            };
+
+            socket.onmessage = function(event) {
+                handleMessage(event.data);
+            };
+
+            socket.onclose = function(event) {
+                console.log('[WebSocket] Disconnected:', event);
+                connected = false;
+                stopHeartbeat();
+
+                if (handlers.onDisconnect) {
+                    handlers.onDisconnect(event);
+                }
+
+                // 의도적 연결 해제가 아닌 경우에만 자동 재연결
+                if (!intentionalDisconnect) {
+                    scheduleReconnect(contextPath);
+                }
+            };
+
+            socket.onerror = function(error) {
+                console.error('[WebSocket] Error:', error);
+                if (handlers.onError) {
+                    handlers.onError(error);
+                }
+            };
+
+        } catch (e) {
+            console.error('[WebSocket] Connection failed:', e);
+            scheduleReconnect(contextPath);
+        }
+    }
+
+    /**
+     * 메시지 처리
+     */
+    function handleMessage(data) {
+        try {
+            const message = JSON.parse(data);
+            console.log('[WebSocket] Received:', message.type);
+
+            switch (message.type) {
+                case 'STATS':
+                    if (handlers.onStats) {
+                        handlers.onStats(message.data);
+                    }
+                    break;
+
+                case 'ACTIVITIES':
+                    if (handlers.onActivities) {
+                        handlers.onActivities(message.data);
+                    }
+                    break;
+
+                case 'NOTIFICATIONS':
+                    if (handlers.onNotifications) {
+                        handlers.onNotifications(message.data);
+                    }
+                    break;
+
+                case 'PONG':
+                    clearTimeout(pongTimer);
+                    break;
+
+                case 'ERROR':
+                    console.error('[WebSocket] Server error:', message.errorMessage);
+                    if (handlers.onError) {
+                        handlers.onError(new Error(message.errorMessage));
+                    }
+                    break;
+
+                default:
+                    console.warn('[WebSocket] Unknown message type:', message.type);
+            }
+
+        } catch (e) {
+            console.error('[WebSocket] Failed to parse message:', e);
+        }
+    }
+
+    /**
+     * 메시지 전송
+     */
+    function send(type, data) {
+        if (!connected || !socket) {
+            console.warn('[WebSocket] Not connected');
+            return false;
+        }
+
+        try {
+            const message = JSON.stringify({
+                type: type,
+                data: data,
+                timestamp: new Date().toISOString()
             });
-        });
-
-        // Lucide 아이콘 재초기화
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
+            socket.send(message);
+            return true;
+        } catch (e) {
+            console.error('[WebSocket] Send failed:', e);
+            return false;
         }
     }
 
     /**
-     * 알림 배지 업데이트
+     * 통계 요청
      */
-    function updateNotificationBadge(count) {
-        if (!elements.notificationBadge) return;
+    function requestStats() {
+        return send('REQUEST_STATS');
+    }
 
-        if (count > 0) {
-            elements.notificationBadge.textContent = count > 99 ? '99+' : count;
-            elements.notificationBadge.classList.remove('hidden');
+    /**
+     * 활동 요청
+     */
+    function requestActivities() {
+        return send('REQUEST_ACTIVITIES');
+    }
+
+    /**
+     * 알림 요청
+     */
+    function requestNotifications() {
+        return send('REQUEST_NOTIFICATIONS');
+    }
+
+    /**
+     * Heartbeat 시작
+     */
+    function startHeartbeat() {
+        stopHeartbeat();
+
+        pingTimer = setInterval(function() {
+            if (connected) {
+                send('PING');
+
+                // PONG 대기 타이머
+                pongTimer = setTimeout(function() {
+                    console.warn('[WebSocket] PONG timeout, reconnecting...');
+
+                    if (socket) {
+                        socket.close();
+                    }
+                }, CONFIG.pongTimeout);
+            }
+        }, CONFIG.pingInterval);
+    }
+
+    /**
+     * Heartbeat 중지
+     */
+    function stopHeartbeat() {
+        if (pingTimer) {
+            clearInterval(pingTimer);
+            pingTimer = null;
+        }
+        if (pongTimer) {
+            clearTimeout(pongTimer);
+            pongTimer = null;
+        }
+    }
+
+    /**
+     * 재연결 스케줄링
+     */
+    function scheduleReconnect(contextPath) {
+        // 의도적 연결 해제 시 재연결 안함
+        if (intentionalDisconnect) {
+            return;
+        }
+
+        if (reconnectAttempts >= CONFIG.maxReconnectAttempts) {
+            console.error('[WebSocket] Max reconnect attempts reached');
+            return;
+        }
+
+        // 기존 재연결 타이머 정리 (중복 방지)
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+        }
+
+        reconnectAttempts++;
+        console.log('[WebSocket] Reconnecting in', CONFIG.reconnectInterval, 'ms (attempt', reconnectAttempts + ')');
+
+        reconnectTimer = setTimeout(function() {
+            reconnectTimer = null;
+            connect(contextPath);
+        }, CONFIG.reconnectInterval);
+    }
+
+    /**
+     * 연결 해제
+     */
+    function disconnect() {
+        // 의도적 연결 해제 플래그 설정 (자동 재연결 방지)
+        intentionalDisconnect = true;
+
+        // 재연결 타이머 정리
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+
+        stopHeartbeat();
+
+        if (socket) {
+            socket.close();
+            socket = null;
+        }
+
+        connected = false;
+    }
+
+    /**
+     * 이벤트 핸들러 등록
+     */
+    function on(event, callback) {
+        const handlerKey = 'on' + event.charAt(0).toUpperCase() + event.slice(1);
+        if (handlers.hasOwnProperty(handlerKey)) {
+            handlers[handlerKey] = callback;
         } else {
-            elements.notificationBadge.classList.add('hidden');
+            console.warn('[WebSocket] Unknown event:', event);
         }
     }
 
     /**
-     * 알림 읽음 처리
+     * 연결 상태 확인
      */
-    function markAsRead(notificationId) {
-        fetch(basePath + '/admin/api/dashboard/notifications/' + encodeURIComponent(notificationId) + '/read', {
-            method: 'POST',
-            credentials: 'same-origin'
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // WebSocket으로 새 데이터 요청
-                    AdminWebSocket.requestNotifications();
-                    AdminWebSocket.requestStats();
-                }
-            })
-            .catch(error => console.error('[Dashboard] Failed to mark as read:', error));
-    }
-
-    /**
-     * 모든 알림 읽음 처리
-     */
-    function markAllAsRead() {
-        fetch(basePath + '/admin/api/dashboard/notifications/read-all', {
-            method: 'POST',
-            credentials: 'same-origin'
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    AdminWebSocket.requestNotifications();
-                    AdminWebSocket.requestStats();
-                }
-            })
-            .catch(error => console.error('[Dashboard] Failed to mark all as read:', error));
-    }
-
-    /**
-     * 연결 성공 시
-     */
-    function onConnect() {
-        console.log('[Dashboard] WebSocket connected');
-        updateConnectionStatus(true);
-    }
-
-    /**
-     * 연결 해제 시
-     */
-    function onDisconnect() {
-        console.log('[Dashboard] WebSocket disconnected');
-        updateConnectionStatus(false);
-    }
-
-    /**
-     * 에러 발생 시
-     */
-    function onError(error) {
-        console.error('[Dashboard] WebSocket error:', error);
-    }
-
-    /**
-     * 연결 상태 표시 업데이트
-     */
-    function updateConnectionStatus(connected) {
-        if (!elements.connectionStatus) return;
-
-        if (connected) {
-            elements.connectionStatus.innerHTML = `
-                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span class="text-green-600 text-xs">실시간 연결됨</span>
-            `;
-        } else {
-            elements.connectionStatus.innerHTML = `
-                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                <span class="text-red-600 text-xs">연결 끊김</span>
-            `;
-        }
-    }
-
-    /**
-     * 새로고침 버튼 바인딩
-     */
-    function bindRefreshButton() {
-        if (!elements.refreshButton) return;
-
-        elements.refreshButton.addEventListener('click', function() {
-            AdminWebSocket.requestStats();
-            AdminWebSocket.requestActivities();
-            AdminWebSocket.requestNotifications();
-
-            // 버튼 피드백
-            this.disabled = true;
-            this.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 새로고침 중...';
-
-            setTimeout(() => {
-                this.disabled = false;
-                this.innerHTML = '데이터 새로고침';
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-            }, 1000);
-        });
-    }
-
-    // === 유틸리티 함수 ===
-
-    function updateElement(el, value) {
-        if (el) {
-            el.textContent = value;
-        }
-    }
-
-    function formatNumber(num) {
-        if (num === null || num === undefined) return '0';
-        return new Intl.NumberFormat('ko-KR').format(num);
-    }
-
-    function formatCurrency(amount) {
-        if (amount === null || amount === undefined) return '₩ 0';
-        if (amount >= 100000000) {
-            return '₩ ' + (amount / 100000000).toFixed(1) + '억';
-        }
-        if (amount >= 10000) {
-            return '₩ ' + (amount / 10000).toFixed(0) + '만';
-        }
-        return '₩ ' + new Intl.NumberFormat('ko-KR').format(amount);
-    }
-
-    function formatTimeAgo(dateString) {
-        if (!dateString) return '';
-
-        const date = new Date(dateString);
-        const now = new Date();
-        const diff = Math.floor((now - date) / 1000);
-
-        if (diff < 60) return '방금 전';
-        if (diff < 3600) return Math.floor(diff / 60) + '분 전';
-        if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
-        if (diff < 604800) return Math.floor(diff / 86400) + '일 전';
-
-        return date.toLocaleDateString('ko-KR');
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function getActivityIcon(type) {
-        switch (type) {
-            case 'RESERVATION':
-                return { name: 'ticket', bgColor: 'bg-blue-50', textColor: 'text-blue-600' };
-            case 'PAYMENT':
-                return { name: 'credit-card', bgColor: 'bg-emerald-50', textColor: 'text-emerald-600' };
-            case 'REFUND':
-                return { name: 'rotate-ccw', bgColor: 'bg-orange-50', textColor: 'text-orange-600' };
-            case 'CANCELLATION':
-                return { name: 'x-circle', bgColor: 'bg-rose-50', textColor: 'text-rose-600' };
-            default:
-                return { name: 'activity', bgColor: 'bg-slate-50', textColor: 'text-slate-600' };
-        }
-    }
-
-    function getStatusBadge(status) {
-        switch (status) {
-            case 'PAID':
-            case 'CONFIRMED':
-            case 'APPROVED':
-                return '<span class="px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full">완료</span>';
-            case 'PENDING':
-                return '<span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">대기</span>';
-            case 'HELD':
-                return '<span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">보류</span>';
-            case 'CANCELLED':
-            case 'REFUNDED':
-            case 'EXPIRED':
-                return '<span class="px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-700 rounded-full">취소</span>';
-            default:
-                return '';
-        }
-    }
-
-    function getNotificationIcon(type) {
-        switch (type) {
-            case 'NEW_RESERVATION':
-                return { name: 'ticket', bgColor: 'bg-blue-100', textColor: 'text-blue-600' };
-            case 'REFUND_REQUEST':
-                return { name: 'rotate-ccw', bgColor: 'bg-orange-100', textColor: 'text-orange-600' };
-            case 'PAYMENT_FAILED':
-                return { name: 'alert-circle', bgColor: 'bg-rose-100', textColor: 'text-rose-600' };
-            case 'SYSTEM_ALERT':
-                return { name: 'alert-triangle', bgColor: 'bg-yellow-100', textColor: 'text-yellow-600' };
-            default:
-                return { name: 'bell', bgColor: 'bg-slate-100', textColor: 'text-slate-600' };
-        }
+    function isConnected() {
+        return connected;
     }
 
     // Public API
     return {
-        init: init,
-        markAsRead: markAsRead,
-        markAllAsRead: markAllAsRead,
-        getStats: function() { return currentStats; },
-        getActivities: function() { return currentActivities; },
-        getNotifications: function() { return currentNotifications; }
+        connect: connect,
+        disconnect: disconnect,
+        send: send,
+        requestStats: requestStats,
+        requestActivities: requestActivities,
+        requestNotifications: requestNotifications,
+        on: on,
+        isConnected: isConnected
     };
 
 })();
