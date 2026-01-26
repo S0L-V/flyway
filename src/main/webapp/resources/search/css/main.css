@@ -1,0 +1,381 @@
+/* ===== Design Tokens ===== */
+:root {
+    /* Colors */
+    --color-primary-blue: #2f93f7;
+    --color-primary-blue-dark: #3276ff;
+    --color-accent-red: #fd5355;
+    --color-text-primary: #000000;
+    --color-text-secondary: #828c94;
+    --color-text-tertiary: #3c4043;
+    --color-text-muted: #949494;
+    --color-text-link: #6d6d6d;
+    --color-text-chatbot: #6f6f6f;
+    --color-bg-hero: #e0eef7;
+    --color-bg-light: #fafafa;
+    --color-bg-white: #ffffff;
+    --color-border-inactive: #979797;
+
+    /* Typography */
+    --font-family: 'Pretendard Variable', system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, sans-serif;
+    --font-size-small: 16px;
+    --font-size-medium: 18px;
+    --font-size-large: 20px;
+    --font-size-xlarge: 24px;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Spacing */
+    --gap-small: 10px;
+    --gap-medium: 15px;
+    --gap-large: 20px;
+    --gap-xlarge: 27px;
+    --gap-section: 36px;
+
+    /* Border Radius */
+    --radius-small: 10px;
+    --radius-large: 22px;
+
+    /* Shadows */
+    --shadow-search: 0px 5px 30px 0.16px rgba(0, 0, 0, 0.10);
+    --shadow-card: 0px 1px 4px rgba(0, 0, 0, 0.10), 0px 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== Base Styles ===== */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: var(--font-family);
+    color: var(--color-text-primary);
+}
+
+body {
+    background: var(--color-bg-white);
+}
+
+/* ===== Typography ===== */
+.text-primary {
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.text-heading {
+    font-family: var(--font-family);
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+}
+
+.text-content {
+    font-family: var(--font-family);
+    font-size: var(--font-size-medium);
+    font-weight: var(--font-weight-bold);
+}
+
+/* ===== Hero Banner ===== */
+.hero-banner {
+    background: var(--color-bg-hero);
+    height: 162px;
+    width: 100%;
+}
+
+/* ===== Container ===== */
+.container {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 0 395px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section);
+    padding-top: 80px;
+    padding-bottom: 50px;
+}
+
+/* ===== Flight Listings ===== */
+.flight-row {
+    display: flex;
+    gap: var(--gap-small);
+}
+
+.flight-section {
+    flex: 1;
+    background: var(--color-bg-white);
+    border-radius: var(--radius-small);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small);
+}
+
+.section-title {
+    font-family: var(--font-family);
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    padding: 0;
+    margin: 0;
+}
+
+.flight-list {
+    background: var(--color-bg-light);
+    border-radius: var(--radius-small);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small);
+}
+
+.flight-item {
+    background: var(--color-bg-white);
+    border-radius: var(--radius-small);
+    padding: 10px;
+    display: flex;
+    gap: var(--gap-medium);
+    align-items: center;
+}
+
+.rank-number {
+    font-family: var(--font-family);
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-blue-dark);
+    min-width: 30px;
+    text-align: center;
+}
+
+.flight-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-bg-white);
+    border-radius: var(--radius-small);
+    padding: 16px 21px;
+    box-shadow: var(--shadow-card);
+}
+
+.flight-route {
+    display: flex;
+    align-items: center;
+    gap: 54px;
+}
+
+.airport {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.airport-name {
+    font-family: var(--font-family);
+    font-size: var(--font-size-medium);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+}
+
+.airport-code {
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-muted);
+}
+
+.airplane-icon {
+    width: 61px;
+    height: 51px;
+}
+
+.flight-price {
+    font-family: var(--font-family);
+    font-size: var(--font-size-medium);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-accent-red);
+}
+
+/* ===== Chatbot ===== */
+.chatbot-section {
+    background: var(--color-bg-white);
+    border-radius: var(--radius-small);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small);
+}
+
+.chatbot-container {
+    background: var(--color-bg-light);
+    border-radius: var(--radius-small);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small);
+    align-items: center;
+}
+
+.chatbot-greeting {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-small);
+}
+
+.greeting-header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-small);
+}
+
+.chatbot-icon {
+    width: 32px;
+    height: 22px;
+}
+
+.greeting-text {
+    font-family: var(--font-family);
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.greeting-question {
+    font-family: var(--font-family);
+    font-size: var(--font-size-xlarge);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    text-align: center;
+}
+
+.chatbot-actions {
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small);
+    margin-top: 20px;
+}
+
+.action-link {
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-link);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.action-link:hover {
+    color: var(--color-text-tertiary);
+}
+
+.chatbot-input {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 80px;
+}
+
+.chatbot-input input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-chatbot);
+}
+
+.chatbot-input input::placeholder {
+    color: var(--color-text-chatbot);
+}
+
+/* ===== Popular Destinations ===== */
+.destinations-section {
+    background: var(--color-bg-white);
+    border-radius: var(--radius-small);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small);
+}
+
+.destinations-container {
+    background: var(--color-bg-light);
+    border-radius: var(--radius-small);
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap-small);
+}
+
+.destination-item {
+    background: var(--color-bg-white);
+    border-radius: var(--radius-small);
+    padding: 10px 15px;
+    display: flex;
+    gap: var(--gap-medium);
+    align-items: center;
+}
+
+.destination-airport {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1600px) {
+    .header {
+        padding: 24px 100px;
+    }
+
+    .container {
+        padding: 0 100px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .header {
+        padding: 24px 40px;
+    }
+
+    .container {
+        padding: 0 40px;
+    }
+
+    .flight-row {
+        flex-direction: column;
+    }
+
+    .destinations-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 20px;
+    }
+
+    .container {
+        padding: 0 20px;
+    }
+
+    .search-inputs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-btn {
+        width: 100%;
+    }
+
+    .menu {
+        gap: var(--gap-small);
+    }
+}

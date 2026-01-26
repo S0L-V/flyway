@@ -99,6 +99,9 @@ function renderSegment(f) {
 function renderFooter(option, index) {
     const seatCount = option.totalSeats ?? "-";
     const totalPrice = option.totalPrice ?? "-";
+
+    const price = formatPrice(totalPrice);
+
     return `
       <div class="flight-footer">
         <div class="flight-actions">
@@ -107,7 +110,7 @@ function renderFooter(option, index) {
         </div>
         <div class="seats-remaining">${seatCount}석 남음</div>
         <div class="flight-price" tabindex="0">
-          <span class="price">${totalPrice}원</span>
+          <span class="price">${price}원</span>
           <img src="${CONTEXT_PATH}/resources/search/img/arrow-right.svg" alt="" class="price-arrow" />
         </div>
       </div>
@@ -284,6 +287,10 @@ function isNextDay(depArr, arrArr) {
     const oneDayMs = 24 * 60 * 60 * 1000;
 
     return Math.round(diffMs / oneDayMs);
+}
+
+function formatPrice(price) {
+    return Number(price).toLocaleString('ko-KR');
 }
 
 document.getElementById("resultList").addEventListener("click", (e) => {
