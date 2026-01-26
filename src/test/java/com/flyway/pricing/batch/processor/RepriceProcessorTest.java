@@ -5,7 +5,6 @@ import com.flyway.pricing.batch.row.PricingResultRow;
 import com.flyway.pricing.batch.row.RepriceCandidateRow;
 import com.flyway.pricing.model.PricingInput;
 import com.flyway.pricing.model.PricingResult;
-import com.flyway.pricing.service.SeatAvailabilityServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -20,9 +19,6 @@ class RepriceProcessorTest {
 
     @Mock
     DynamicPricingCalculator calculator;
-
-    @Mock
-    SeatAvailabilityServiceImpl seatService;
 
     @InjectMocks
     RepriceProcessor processor;
@@ -44,9 +40,6 @@ class RepriceProcessorTest {
         // given
         RepriceCandidateRow item = sampleCandidate();
 
-        Mockito.when(seatService.getSeatStatus(any(), any()))
-                .thenReturn(new SeatAvailabilityServiceImpl.SeatStatus(180, 120));
-
         Mockito.when(calculator.calculate(any(PricingInput.class)))
                 .thenReturn(
                         PricingResult.builder()
@@ -65,9 +58,6 @@ class RepriceProcessorTest {
     void 가격적용_결과Row생성() throws Exception {
         // given
         RepriceCandidateRow item = sampleCandidate();
-
-        Mockito.when(seatService.getSeatStatus(any(), any()))
-                .thenReturn(new SeatAvailabilityServiceImpl.SeatStatus(180, 120));
 
         Mockito.when(calculator.calculate(any(PricingInput.class)))
                 .thenReturn(
@@ -95,6 +85,8 @@ class RepriceProcessorTest {
                 .basePrice(120_000L)
                 .currentPrice(150_000L)
                 .departureTime(LocalDateTime.now().plusDays(3))
+                .totalSeats(180)
+                .remainingSeats(90)
                 .lastEventPricedAt(null)
                 .build();
     }
