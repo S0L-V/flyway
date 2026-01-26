@@ -23,6 +23,14 @@ const AdminDashboard = (function() {
      * 초기화
      */
     function init(contextPath) {
+        // 대시보드 페이지인지 확인 (stat-visitors 요소가 있는 경우에만)
+        var isDashboardPage = document.getElementById('stat-visitors') !== null;
+
+        if (!isDashboardPage) {
+            console.log('[Dashboard] Not on dashboard page, skipping initialization');
+            return;
+        }
+
         console.log('[Dashboard] Initializing...');
 
         // 컨텍스트 경로 저장

@@ -31,7 +31,7 @@
         FROM payment
         WHERE status = 'PAID'
             AND YEAR(paid_at) = YEAR(CURDATE())
-            AND MONTH(paid_at) = YEAR(CURDATE())
+            AND MONTH(paid_at) = MONTH(CURDATE())
     </select>
 
     <!-- 결제 내역 ResultMap -->
@@ -53,8 +53,8 @@
 
     <!-- 결제 내역 목록 조회 -->
     <select id="selectPaymentList" resultMap="paymentListResultMap">
-        select from
-           p.payment_id,
+        SELECT
+            p.payment_id,
            p.reservation_id,
            p.transaction_id,
            p.amount,
@@ -69,7 +69,7 @@
            CONCAT(dep.airport_id, ' → ', arr.airport_id) AS route
         FROM payment p
         JOIN reservation r ON p.reservation_id = r.reservation_id
-        JOIN user u ON r.user_id = u.user_id
+        JOIN users u ON r.user_id = u.user_id
         LEFT JOIN user_profile up ON u.user_id = up.user_id
         LEFT JOIN reservation_segment rs ON r.reservation_id = rs.reservation_id AND rs.segment_order = 1
         LEFT JOIN flight f ON rs.flight_id = f.flight_id
