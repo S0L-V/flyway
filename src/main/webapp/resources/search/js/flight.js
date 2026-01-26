@@ -153,8 +153,6 @@ function renderOneWay(options) {
         return;
     }
 
-    displayedOptions = options;
-
     el.innerHTML = options
         .map((option, index) => createOneWayCard(option, index))
         .join("");
@@ -168,8 +166,6 @@ function renderRoundTrip(options) {
         el.innerHTML = `<div class="empty">검색 결과가 없습니다.</div>`;
         return;
     }
-
-    displayedOptions = options;
 
     el.innerHTML = options
         .map((option, index) => createRoundTripCard(option, index))
@@ -186,75 +182,6 @@ function renderByTripType(data) {
         renderRoundTrip(options);
     }
 }
-
-// document.addEventListener("click", (e) => {
-//     const priceBtn = e.target.closest(".flight-price");
-//     if (!priceBtn) return;
-//
-//     if (typeof isUserLoggedIn !== 'undefined' && !isUserLoggedIn) {
-//         if (confirm("로그인이 필요한 서비스입니다")) {
-//             location.href = `${CONTEXT_PATH}/login`;
-//         }
-//         return;
-//     }
-//
-//     void toReservation(priceBtn);
-// });
-//
-// async function toReservation(priceBtn) {
-//     // id 검증 필요
-//     const card = priceBtn.closest(".flight-card");
-//     if (!card) return;
-//
-//     const outId = card.dataset.outId;
-//     const inId  = card.dataset.inId || null;
-//
-//
-//     const payload = {
-//         tripType: state.tripType,
-//         outFlightId: outId,
-//         passengerCount: state.passengers,
-//         cabinClassCode: state.cabin
-//     };
-//     if (state.tripType === "RT") {
-//         payload.inFlightId = inId;
-//     }
-//     try {
-//         // 3) 검색 API 호출 (POST)
-//         const res = await fetch(`${CONTEXT_PATH}/api/public/reservation/prepare`, {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "Accept": "application/json"
-//             },
-//             body: JSON.stringify(payload)
-//         });
-//
-//         const json = await res.json();
-//         const rid = json.rid;
-//
-//         console.log(json);
-//
-//         //location.href = `${CONTEXT_PATH}/reservations/agreement/${rid}`;
-//
-//         const targetUrl = `${CONTEXT_PATH}/reservations/agreement/${rid}`;
-//
-//         const formParams = {
-//             rid: json.rid,
-//             outFlightId: json.outFlightId,
-//             inFlightId: json.inFlightId,       // 편도면 null일 수 있음 -> sendPost에서 처리됨
-//             passengerCount: json.passengerCount,
-//             cabinClassCode: json.cabinClassCode
-//         };
-//
-//         // POST 방식으로 페이지 이동
-//         sendPost(targetUrl, formParams);
-//     } catch (err) {
-//         console.error(err);
-//         alert("네트워크 오류가 발생했습니다.");
-//     }
-// }
-
 
 // departureTime: [2026,2,1,8,45] → "08:45"
 function formatDepTimeArray(arr) {
@@ -310,38 +237,3 @@ document.getElementById("resultList").addEventListener("click", (e) => {
     // 폼 제출 → /reservations/draft → 동의 페이지로 redirect
     document.getElementById("reservationForm").submit();
 });
-
-
-// document.addEventListener("click", (e) => {
-//     const card = e.target.closest(".flight-price");
-//     if (!card) return;
-//
-//     if (typeof isUserLoggedIn !== 'undefined' && !isUserLoggedIn) {
-//         if (confirm("로그인이 필요한 서비스입니다")) {
-//             location.href = `${CONTEXT_PATH}/login`;
-//         }
-//         return;
-//     }
-//
-//     // hidden 폼에 값 설정
-//     document.getElementById("hiddenOutFlightId").value = card.dataset.outId;
-//     document.getElementById("hiddenInFlightId").value = card.dataset.inId || "";
-//     document.getElementById("hiddenPassengerCount").value = state.passengers;
-//     document.getElementById("hiddenCabinClassCode").value = state.cabin;
-//
-//     // 폼 제출 → /reservations/draft → 동의 페이지로 redirect
-//     document.getElementById("reservationForm").submit();
-// });
-// document.addEventListener("click", (e) => {
-//     const priceBtn = e.target.closest(".flight-price");
-//     if (!priceBtn) return;
-//
-//     if (typeof isUserLoggedIn !== 'undefined' && !isUserLoggedIn) {
-//         if (confirm("로그인이 필요한 서비스입니다")) {
-//             location.href = `${CONTEXT_PATH}/login`;
-//         }
-//         return;
-//     }
-//
-//     void toReservation(priceBtn);
-// });

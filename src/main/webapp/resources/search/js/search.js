@@ -484,11 +484,16 @@ function syncSearchBarFromState() {
         setFieldText("dates", `${state.dateStart} ~ ${state.dateEnd}`);
     } else {
         setFieldText("dates", state.dateStart);
+        state.dateEnd = null;
     }
 
     setFieldText(
         "paxCabin",
         `탑승 인원 ${state.passengers} / ${cabinText(state.cabin)}`
+    );
+
+    document.querySelectorAll(".search-tab").forEach(t =>
+        t.classList.remove("search-tab--active")
     );
 
     document.querySelector(
@@ -599,6 +604,6 @@ function handleSearchResult(data){
     if (typeof updateFilterStateAndRender === 'function') {
         updateFilterStateAndRender();
     } else {
-        renderByTripType(allOptions);
+        renderPage(1);
     }
 }

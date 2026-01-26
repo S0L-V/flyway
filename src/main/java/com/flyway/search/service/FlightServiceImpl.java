@@ -2,11 +2,8 @@ package com.flyway.search.service;
 
 import com.flyway.search.domain.*;
 import com.flyway.search.dto.*;
-import com.flyway.search.mapper.FlightMapper;
 import com.flyway.search.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -72,7 +69,7 @@ public class FlightServiceImpl implements FlightService{
         // 왕복
         List<FlightSearchResponse> inbounds = flightRepository.findInboundFlights(dto);
 
-        int limit = 100;  // 폭발 방지(원하는 숫자로)
+        int limit = 3000;  // 폭발 방지(원하는 숫자로)
         for (FlightSearchResponse o : outbounds) {
             for (FlightSearchResponse i : inbounds) {
 

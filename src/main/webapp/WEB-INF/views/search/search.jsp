@@ -276,6 +276,24 @@
 
         <div id="resultList" class="flights-list"></div>
 
+        <div class="pagination-container" id="paginationBox">
+            <button type="button" class="pg-btn pg-control" data-action="first" title="처음 페이지">
+                &lt;&lt;
+            </button>
+            <button type="button" class="pg-btn pg-control" data-action="prev" title="이전 페이지">
+                &lt;
+            </button>
+
+            <div class="pg-pages" id="paginationNumbers">
+            </div>
+
+            <button type="button" class="pg-btn pg-control" data-action="next" title="다음 페이지">
+                &gt;
+            </button>
+            <button type="button" class="pg-btn pg-control" data-action="last" title="마지막 페이지">
+                &gt;&gt;
+            </button>
+        </div>
     </section>
 </main>
 <script>
@@ -285,6 +303,7 @@
 <jsp:include page="include/flight-detail.jsp" />
 
 <script src="${pageContext.request.contextPath}/resources/search/js/search.js?v=<%= System.currentTimeMillis() %>"></script>
+<script src="${pageContext.request.contextPath}/resources/search/js/paging.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/filtering.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/sort.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/flight.js?v=<%= System.currentTimeMillis() %>"></script>
