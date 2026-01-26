@@ -50,7 +50,22 @@ public class PaymentListDto {
 		}
 	}
 
-
+	/**
+	 * 상태 한글 변환
+	 */
+	public String getStatusDisplay() {
+		if (status == null) {
+			return "-";
+		}
+		switch (status) {
+			case "PENDING": return "대기 중";
+			case "PAID": return "완료";
+			case "FAILED": return "실패";
+			case "CANCELLED": return "취소됨";
+			case "REFUNDED": return "환불됨";
+			default: return status;
+		}
+	}
 
 	/**
 	 * 상태 배지 색상
