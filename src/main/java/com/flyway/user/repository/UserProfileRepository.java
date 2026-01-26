@@ -19,4 +19,9 @@ public interface UserProfileRepository {
      * - null이 아닌 필드만 업데이트
      */
     void updateProfile(UserProfile profile);
+
+    /**
+     * user_profile 개인정보 NULL 처리
+     */
+    int nullifyProfileIfWithdrawn(String userId, String maskedName);
 }

@@ -11,4 +11,8 @@ public interface UserWithdrawalService {
      */
     void withdraw(String userId, LocalDateTime now, HttpServletRequest request, HttpServletResponse response);
 
+    /**
+     * 회원 정보 익명화
+     */
+    void anonymizeWithdrawnUser(String userId);
 }

@@ -25,4 +25,9 @@ public class UserProfileRepositoryImpl implements UserProfileRepository {
     public void updateProfile(UserProfile profile) {
         userProfileMapper.updateProfile(profile);
     }
+
+    @Override
+    public int nullifyProfileIfWithdrawn(String userId, String maskedName) {
+        return userProfileMapper.nullifyProfileIfWithdrawn(userId, maskedName);
+    }
 }

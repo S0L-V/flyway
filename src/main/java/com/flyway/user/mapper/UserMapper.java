@@ -45,4 +45,10 @@ public interface UserMapper {
      */
     int markWithdrawn(@Param("userId") String userId,
                       @Param("now") LocalDateTime now);
+
+    /**
+     * users.email 이메일 익명화
+     */
+    int anonymizeEmailIfWithdrawn(@Param("userId") String userId,
+                                  @Param("anonymizedEmail") String anonymizedEmail);
 }

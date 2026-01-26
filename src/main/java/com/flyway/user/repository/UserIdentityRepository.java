@@ -2,6 +2,7 @@ package com.flyway.user.repository;
 
 import com.flyway.auth.domain.AuthProvider;
 import com.flyway.user.domain.UserIdentity;
+import org.apache.ibatis.annotations.Param;
 
 public interface UserIdentityRepository {
 
@@ -23,4 +24,9 @@ public interface UserIdentityRepository {
      * provider가 EMAIL인 사용자 중 이메일 중복 여부 확인
      */
     boolean existsEmailIdentity(String email);
+
+    /**
+     * EMAIL 가입자의 provider_user_id(이메일) 익명화
+     */
+    int anonymizeEmailProviderUserIdIfWithdrawn(String userId, String anonymizedEmail);
 }

@@ -49,26 +49,34 @@
 
 
     <!-- 이메일 업데이트 (OAuth 온보딩에서 이메일 입력 완료 시) -->
-    <update id="updateEmail" parameterType="map">
+    <update id="updateEmail">
         UPDATE users
         SET email = #{email}
         WHERE user_id = #{userId}
     </update>
 
     <!-- 상태 변경 -->
-    <update id="updateStatus" parameterType="map">
+    <update id="updateStatus">
         UPDATE users
         SET status = #{status}
         WHERE user_id = #{userId}
     </update>
 
     <!-- 사용자 탈퇴 처리 -->
-    <update id="markWithdrawn" parameterType="map">
+    <update id="markWithdrawn">
         UPDATE users
         SET status = 'WITHDRAWN',
         withdrawn_at = #{now}
         WHERE user_id = #{userId}
         AND status != 'WITHDRAWN'
+    </update>
+
+    <!-- users.email 익명화 -->
+    <update id="anonymizeEmailIfWithdrawn">
+        UPDATE users
+        SET email = #{anonymizedEmail}
+        WHERE user_id = #{userId}
+          AND status = 'WITHDRAWN'
     </update>
 
 </mapper>
