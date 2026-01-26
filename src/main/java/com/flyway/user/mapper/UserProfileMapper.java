@@ -26,5 +26,5 @@ public interface UserProfileMapper {
     /**
      * user_profile 개인정보 NULL 처리
      */
-    int nullifyProfileIfWithdrawn(@Param("userId") String userId);
+    int nullifyProfileIfWithdrawn(@Param("userId") String userId, @Param("maskedName") String maskedName);
 }

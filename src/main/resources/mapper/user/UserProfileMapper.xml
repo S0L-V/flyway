@@ -51,7 +51,7 @@
             up.passport_no = NULL,
             up.first_name  = NULL,
             up.last_name   = NULL,
-            up.name        = NULL
+            up.name        = #{maskedName}
         WHERE up.user_id = #{userId}
           AND u.status = 'WITHDRAWN'
     </update>

@@ -27,7 +27,7 @@ public class UserProfileRepositoryImpl implements UserProfileRepository {
     }
 
     @Override
-    public int nullifyProfileIfWithdrawn(String userId) {
-        return userProfileMapper.nullifyProfileIfWithdrawn(userId);
+    public int nullifyProfileIfWithdrawn(String userId, String maskedName) {
+        return userProfileMapper.nullifyProfileIfWithdrawn(userId, maskedName);
     }
 }
