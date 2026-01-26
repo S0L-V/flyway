@@ -85,7 +85,7 @@
     </select>
 
     <!-- 결제 내역 총 건수 -->
-    <select id="countPayments" resultMap="resultType">
+    <select id="countPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment p
         <where>
