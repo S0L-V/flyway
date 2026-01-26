@@ -1,10 +1,10 @@
-package com.flyway.auth.service;
+package com.flyway.admin.service;
 
 import java.util.List;
 
 import com.flyway.admin.dto.PaymentListDto;
 
-public interface AdminPaymentServiceImpl {
+public interface AdminPaymentService {
 
 	/**
 	 * 관리자 대시보드 결제 통계 조회
