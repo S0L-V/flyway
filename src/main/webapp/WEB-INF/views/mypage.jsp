@@ -39,6 +39,7 @@
         <form class="btn btn-logout" action="${pageContext.request.contextPath}/auth/logout" method="post">
             <button type="submit">로그아웃</button>
         </form>
+        <button type="button" class="btn btn-withdraw" id="withdrawButton">회원탈퇴</button>
     </div>
 </div>
 
@@ -47,6 +48,6 @@
         contextPath: "${pageContext.request.contextPath}"
     };
 </script>
-<script src="${pageContext.request.contextPath}/resources/user/mypage.js"></script>
+<script type="module" src="${pageContext.request.contextPath}/resources/user/mypage.js"></script>
 </body>
 </html>

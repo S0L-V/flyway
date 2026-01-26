@@ -5,6 +5,7 @@ import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.dto.UserProfileResponse;
 import com.flyway.user.service.UserProfileService;
+import com.flyway.user.service.UserWithdrawalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserApiController {
 
     private final UserProfileService userProfileService;
+    private final UserWithdrawalService userWithdrawalService;
 
     @GetMapping("/api/profile")
     public ResponseEntity<ApiResponse<UserProfileResponse>> profile(
@@ -39,4 +46,13 @@ public class UserApiController {
         UserProfileResponse profile = userProfileService.getUserProfile(userId);
         return ResponseEntity.ok(ApiResponse.success(profile));
     }
+
+    @PostMapping("/api/user/withdraw")
+    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal CustomUserDetails principal, HttpServletRequest request, HttpServletResponse response) {
+
+        userWithdrawalService.withdraw(principal.getUserId(), LocalDateTime.now(), request, response);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

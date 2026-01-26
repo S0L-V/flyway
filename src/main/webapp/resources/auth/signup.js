@@ -53,7 +53,8 @@
                 data = await res.json();
                 attemptIdHidden.value = data.data.attemptId;
             } catch (e) {
-                data = null;
+                const text = await res.text().catch(() => "");
+                data = text ? { message: text } : {};
             }
 
             if (!res.ok) {

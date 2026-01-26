@@ -1,4 +1,4 @@
-import { fetchWithRefresh } from "../common/authFetch";
+import { fetchWithRefresh } from "../common/js/authFetch.js";
 
 async function loadProfile() {
     async function requestProfile() {
@@ -37,3 +37,30 @@ async function loadProfile() {
 }
 
 loadProfile();
+
+const withdrawButton = document.getElementById("withdrawButton");
+if (withdrawButton) {
+    withdrawButton.addEventListener("click", async () => {
+        const ok = window.confirm("탈퇴하시겠습니까?");
+        if (!ok) return;
+
+        try {
+            const response = await fetchWithRefresh("/api/user/withdraw", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("회원탈퇴 실패: " + response.status);
+            }
+
+            alert("회원탈퇴가 완료되었습니다.");
+            window.location.replace(window.APP?.contextPath || "/");
+        } catch (e) {
+            console.error(e);
+            alert("회원탈퇴에 실패했습니다.");
+        }
+    });
+}

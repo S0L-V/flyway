@@ -1,8 +1,8 @@
 package com.flyway.reservation.controller;
 
-import com.flyway.reservation.dto.BookingViewModel;
-import com.flyway.reservation.dto.PassengerSaveForm;
-import com.flyway.reservation.service.ReservationBookingService;
+import com.flyway.reservation.domain.BaggageSaveRequest;
+import com.flyway.reservation.dto.*;
+import com.flyway.reservation.service.PassengerServiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,46 +18,65 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/reservations")
-public class ReservationBookingController {
+public class PassengerServiceController {
 
-    private final ReservationBookingService bookingService;
+    private final PassengerServiceService serviceService;
 
-    @GetMapping("/{reservationId}/booking")
-    public String bookingPage(@PathVariable String reservationId, Model model) {
 
+    //부가서비스 팝업 페이지
+    @GetMapping("/{reservationId}/services")
+    public String servicePopup(@PathVariable String reservationId, Model model) {
         String userId = getAuthenticatedUserIdOrThrow();
-
-        BookingViewModel vm = bookingService.getBookingView(reservationId, userId);
+        ServicePopupViewModel vm = serviceService.getServicePopup(reservationId, userId);
         model.addAttribute("vm", vm);
-
-        return "reservations/booking";
+        return "reservations/service-popup";
     }
 
-    @PostMapping("/{reservationId}/passengers")
-    public String savePassengers(
-            @PathVariable String reservationId,
-            @ModelAttribute PassengerSaveForm form
-    ) {
-        String userId = getAuthenticatedUserIdOrThrow();
 
-        bookingService.savePassengers(reservationId, userId, form.getPassengers());
-
-        return "redirect:/reservations/" + reservationId + "/booking?saved=1";
-    }
-//json형식
-    @PostMapping("/{reservationId}/passengers/api")
+     //수하물 저장
+    @PostMapping("/{reservationId}/services/baggage")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> savePassengersApi(
+    public ResponseEntity<Map<String, Object>> saveBaggage(
             @PathVariable String reservationId,
-            @RequestBody PassengerSaveForm form
+            @RequestBody BaggageSaveRequest request
     ) {
         String userId = getAuthenticatedUserIdOrThrow();
-        bookingService.savePassengers(reservationId, userId, form.getPassengers());
+        serviceService.saveBaggage(reservationId, userId, request);
 
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         return ResponseEntity.ok(result);
     }
+
+
+    // 기내식 저장
+    @PostMapping("/{reservationId}/services/meal")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> saveMeal(
+            @PathVariable String reservationId,
+            @RequestBody MealSaveRequest request
+    ) {
+        String userId = getAuthenticatedUserIdOrThrow();
+        serviceService.saveMeal(reservationId, userId, request);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        return ResponseEntity.ok(result);
+    }
+
+    //부가서비스 총액 조회
+    @GetMapping("/{reservationId}/services/total")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getServiceTotal(@PathVariable String reservationId) {
+        String userId = getAuthenticatedUserIdOrThrow();
+        Long total = serviceService.getServiceTotal(reservationId, userId);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("total", total);
+        return ResponseEntity.ok(result);
+    }
+
 
     private String getAuthenticatedUserIdOrThrow() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
