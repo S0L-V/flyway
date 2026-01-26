@@ -13,6 +13,7 @@ import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.DashboardStatsDto;
 import com.flyway.admin.dto.RecentActivityDto;
 import com.flyway.admin.dto.StatisticsDto;
+import com.flyway.admin.dto.VisitorDetailDto;
 import com.flyway.admin.repository.AdminDashboardRepository;
 import com.flyway.admin.repository.StatisticsRepository;
 
@@ -32,18 +33,16 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 	public DashboardStatsDto getStats(String adminId) {
 		try {
 			return DashboardStatsDto.builder()
-				// 오늘 통계
-				.dailyVisitors(safeCount(() -> dashboardRepository.countDailyVisitors()))
-				.dailyReservations(safeCount(() -> dashboardRepository.countDailyReservations()))
-				.dailyPayments(safeCount(() -> dashboardRepository.countDailyPayments()))
-				.dailyCancellations(safeCount(() -> dashboardRepository.countDailyCancellations()))
-				.dailyRevenue(safeCount(() -> dashboardRepository.sumDailyRevenue()))
-				// 전체 통계
-				.totalUsers(safeCount(() -> dashboardRepository.countTotalUsers()))
-				.activeFlights(safeCount(() -> dashboardRepository.countActiveFlights()))
-				// 실시간 상태
-				.pendingReservations(safeCount(() -> dashboardRepository.countPendingReservations()))
-				.pendingPayments(safeCount(() -> dashboardRepository.countPendingPayments()))
+				// 기간별 통계 (첫 번째 줄)
+				.dailyVisitors(safeCount(dashboardRepository::countDailyVisitors))
+				.dailyPayments(safeCount(dashboardRepository::countDailyPayments))
+				.dailyCancellations(safeCount(dashboardRepository::countDailyCancellations))
+				.dailyRevenue(safeCount(dashboardRepository::sumDailyRevenue))
+				// 실시간/전체 통계 (두 번째 줄)
+				.pendingReservations(safeCount(dashboardRepository::countPendingReservations))
+				.totalUsers(safeCount(dashboardRepository::countTotalUsers))
+				.dailyNewUsers(safeCount(dashboardRepository::countDailyNewUsers))
+				.activeFlights(safeCount(dashboardRepository::countActiveFlights))
 				// 알림
 				.unreadNotifications(safeCount(() -> dashboardRepository.countUnreadNotifications(adminId)))
 				.build();
@@ -146,7 +145,23 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 	}
 
 	/**
-	 * 기간 별 통계 날짜 계산
+	 * 오늘 방문자 상세 목록 조회
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<VisitorDetailDto> getTodayVisitors(int limit) {
+		try {
+			List<VisitorDetailDto> visitors = dashboardRepository.findTodayVisitors(limit);
+			log.info("Found {} visitors for today.", visitors.size());
+			return visitors;
+		} catch (Exception e) {
+			log.error("Failed to get today visitors", e);
+			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * 기간별 통계 날짜 계산
 	 */
 	private LocalDate calculateStatDate(String period) {
 		LocalDate today = LocalDate.now();

@@ -29,7 +29,7 @@ public interface StatisticsMapper {
 	 */
 	List<StatisticsDto> selectStatisticsByPeriod(
 		@Param("statType") String statType,
-		@Param("startDate")LocalDate startDate,
+		@Param("startDate") LocalDate startDate,
 		@Param("endDate") LocalDate endDate
 	);
 

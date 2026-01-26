@@ -8,11 +8,13 @@ import com.flyway.admin.interceptor.AdminAuthInterceptor;
 import com.flyway.admin.interceptor.VisitorTrackingInterceptor;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Spring MVC 전역 설정
  * - Interceptor 등록
  */
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -25,6 +27,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
+		log.info("--- WebMvcConfig.addInterceptors method called ---");
 		// 관리자 인증 Interceptor
 		registry.addInterceptor(adminAuthInterceptor)
 			.addPathPatterns("/admin/**")

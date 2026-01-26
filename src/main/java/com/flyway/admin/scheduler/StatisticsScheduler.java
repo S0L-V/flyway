@@ -14,6 +14,12 @@ import com.flyway.admin.repository.StatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 통계 스케줄러
+ * - 매일 자정: 전일 일일 통계 계산
+ * - 매주 월요일 자정: 전주 주간 통계 계산
+ * - 매월 1일 자정: 전월 월간 통계 계산
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -91,7 +97,7 @@ public class StatisticsScheduler {
 	private StatisticsDto calculateStatistics(String statType, LocalDate startDate, LocalDate endDate) {
 		int totalReservations = statisticsRepository.countReservationsByPeriod(startDate, endDate);
 		int confirmedReservations = statisticsRepository.countConfirmedReservationsByPeriod(startDate, endDate);
-		int cancelledReservation = statisticsRepository.countCancelledReservationsByPeriod(startDate, endDate);
+		int cancelledReservations = statisticsRepository.countCancelledReservationsByPeriod(startDate, endDate);
 		long totalRevenue = statisticsRepository.sumRevenueByPeriod(startDate, endDate);
 		long avgTicketPrice = statisticsRepository.avgTicketPriceByPeriod(startDate, endDate);
 		int refundCount = statisticsRepository.countRefundsByPeriod(startDate, endDate);
@@ -105,7 +111,7 @@ public class StatisticsScheduler {
 			.statDate(startDate)
 			.totalReservations(totalReservations)
 			.confirmedReservations(confirmedReservations)
-			.cancelledReservations(cancelledReservation)
+			.cancelledReservations(cancelledReservations)
 			.totalRevenue(totalRevenue)
 			.averageTicketPrice(avgTicketPrice)
 			.refundCount(refundCount)

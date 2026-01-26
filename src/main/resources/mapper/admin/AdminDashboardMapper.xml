@@ -15,13 +15,6 @@
         WHERE DATE(visited_at) = CURDATE()
     </select>
 
-    <!-- 일일 예약 건수 (reservation.reserved_at 기준) -->
-    <select id="countDailyReservations" resultType="long">
-        SELECT COUNT(*)
-        FROM reservation
-        WHERE DATE(reserved_at) = CURDATE()
-    </select>
-
     <!-- 일일 결제 완료 건수 (payment.status = 'PAID') -->
     <select id="countDailyPayments" resultType="long">
         SELECT COUNT(*)
@@ -60,18 +53,19 @@
         WHERE departure_time > NOW()
     </select>
 
-    <!-- 대기 중 예약 수 (HELD) -->
+    <!-- 대기 중 예약 수 (HELD - 결제 대기) -->
     <select id="countPendingReservations" resultType="long">
         SELECT COUNT(*)
         FROM reservation
         WHERE status = 'HELD'
+            AND expired_at > NOW()
     </select>
 
-    <!-- 대기 중 결제 수 (PENDING) -->
-    <select id="countPendingPayments" resultType="long">
+    <!-- 일일 신규 가입자 수 -->
+    <select id="countDailyNewUsers" resultType="long">
         SELECT COUNT(*)
-        FROM payment
-        WHERE status = 'PENDING'
+        FROM users
+        WHERE DATE(created_at) = CURDATE()
     </select>
 
     <!-- ============================================ -->

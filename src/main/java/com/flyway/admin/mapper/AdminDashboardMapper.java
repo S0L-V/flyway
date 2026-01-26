@@ -15,61 +15,57 @@ import com.flyway.admin.dto.RecentActivityDto;
 @Mapper
 public interface AdminDashboardMapper {
 
-	// == 통계 조회 ==
+	// == 기간별 통계 조회 ==
 
 	/**
 	 * 일일 방문자 수 조회
-	 * statistics 테이블에서 오늘 날짜 기준
+	 * visitor_log 테이블에서 유니크 세션 기준
 	 */
 	long countDailyVisitors();
 
 	/**
-	 * 일일 예약 건수 조회
-	 * reservation 테이블에서 오늘 생성된 예약
-	 */
-	long countDailyReservations();
-
-	/**
 	 * 일일 결제 완료 건수 조회
-	 * payment 테이블에서 오늘 COMPLETED 상태
+	 * payment 테이블에서 오늘 PAID 상태
 	 */
 	long countDailyPayments();
 
 	/**
 	 * 일일 취소/환불 건수 조회
-	 * reservation 테이블에서 오늘 CANCELLED 상태
+	 * payment 테이블에서 오늘 CANCELLED/REFUNDED 상태
 	 */
 	long countDailyCancellations();
 
 	/**
 	 * 일일 매출 조회
-	 * payment 테이블에서 오늘 COMPLETED 상태의 총합
+	 * payment 테이블에서 오늘 PAID 상태의 총합
 	 */
 	long sumDailyRevenue();
 
-	/**
-	 * 총 회원 수 조회
-	 * user 테이블 전체 카운트 (is_active = 'Y')
-	 */
-	long countTotalUsers();
-
-	/**
-	 * 운항 중 항공편 수 조회
-	 * flight 테이블에서 현재 운항 중인 항공편
-	 */
-	long countActiveFlights();
+	// == 실시간/전체 통계 조회 ==
 
 	/**
 	 * 대기 중 예약 수 조회
-	 * reservation 테이블에서 HELD 상태
+	 * reservation 테이블에서 HELD 상태 (만료되지 않은 것만)
 	 */
 	long countPendingReservations();
 
 	/**
-	 * 대기 중 결제 수 조회
-	 * payment 테이블에서 PENDING 상태
+	 * 총 회원 수 조회
+	 * users 테이블 ACTIVE 상태
 	 */
-	long countPendingPayments();
+	long countTotalUsers();
+
+	/**
+	 * 일일 신규 가입자 수 조회
+	 * users 테이블에서 오늘 가입한 회원
+	 */
+	long countDailyNewUsers();
+
+	/**
+	 * 운항 예정 항공편 수 조회
+	 * flight 테이블에서 출발 시간이 현재 이후
+	 */
+	long countActiveFlights();
 
 	// == 최근 활동 조회 ==
 

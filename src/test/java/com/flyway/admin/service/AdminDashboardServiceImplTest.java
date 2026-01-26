@@ -29,6 +29,9 @@ class AdminDashboardServiceImplTest {
 	@Mock
 	private AdminDashboardRepository dashboardRepository;
 
+	@Mock
+	private com.flyway.admin.repository.StatisticsRepository statisticsRepository;
+
 	@InjectMocks
 	private AdminDashboardServiceImpl dashboardService;
 
@@ -42,15 +45,16 @@ class AdminDashboardServiceImplTest {
 		@DisplayName("모든 통계 조회 성공")
 		void getStats_Success() {
 			// given
+			// 1행: 방문자, 결제 완료, 취소/환불, 매출
 			given(dashboardRepository.countDailyVisitors()).willReturn(100L);
-			given(dashboardRepository.countDailyReservations()).willReturn(50L);
 			given(dashboardRepository.countDailyPayments()).willReturn(30L);
 			given(dashboardRepository.countDailyCancellations()).willReturn(5L);
 			given(dashboardRepository.sumDailyRevenue()).willReturn(5000000L);
-			given(dashboardRepository.countTotalUsers()).willReturn(1000L);
-			given(dashboardRepository.countActiveFlights()).willReturn(200L);
+			// 2행: 대기 중 예약, 총 회원 수, 신규 가입, 운항 예정 항공편
 			given(dashboardRepository.countPendingReservations()).willReturn(10L);
-			given(dashboardRepository.countPendingPayments()).willReturn(3L);
+			given(dashboardRepository.countTotalUsers()).willReturn(1000L);
+			given(dashboardRepository.countDailyNewUsers()).willReturn(20L);
+			given(dashboardRepository.countActiveFlights()).willReturn(200L);
 			given(dashboardRepository.countUnreadNotifications(TEST_ADMIN_ID)).willReturn(7L);
 
 			// when
@@ -58,15 +62,16 @@ class AdminDashboardServiceImplTest {
 
 			// then
 			assertThat(stats).isNotNull();
+			// 1행 검증
 			assertThat(stats.getDailyVisitors()).isEqualTo(100L);
-			assertThat(stats.getDailyReservations()).isEqualTo(50L);
 			assertThat(stats.getDailyPayments()).isEqualTo(30L);
 			assertThat(stats.getDailyCancellations()).isEqualTo(5L);
 			assertThat(stats.getDailyRevenue()).isEqualTo(5000000L);
-			assertThat(stats.getTotalUsers()).isEqualTo(1000L);
-			assertThat(stats.getActiveFlights()).isEqualTo(200L);
+			// 2행 검증
 			assertThat(stats.getPendingReservations()).isEqualTo(10L);
-			assertThat(stats.getPendingPayments()).isEqualTo(3L);
+			assertThat(stats.getTotalUsers()).isEqualTo(1000L);
+			assertThat(stats.getDailyNewUsers()).isEqualTo(20L);
+			assertThat(stats.getActiveFlights()).isEqualTo(200L);
 			assertThat(stats.getUnreadNotifications()).isEqualTo(7L);
 		}
 
@@ -75,14 +80,13 @@ class AdminDashboardServiceImplTest {
 		void getStats_PartialFailure_ReturnsZero() {
 			// given
 			given(dashboardRepository.countDailyVisitors()).willReturn(100L);
-			given(dashboardRepository.countDailyReservations()).willThrow(new RuntimeException("DB Error"));
-			given(dashboardRepository.countDailyPayments()).willReturn(30L);
+			given(dashboardRepository.countDailyPayments()).willThrow(new RuntimeException("DB Error"));
 			given(dashboardRepository.countDailyCancellations()).willReturn(5L);
 			given(dashboardRepository.sumDailyRevenue()).willReturn(5000000L);
-			given(dashboardRepository.countTotalUsers()).willReturn(1000L);
-			given(dashboardRepository.countActiveFlights()).willReturn(200L);
 			given(dashboardRepository.countPendingReservations()).willReturn(10L);
-			given(dashboardRepository.countPendingPayments()).willReturn(3L);
+			given(dashboardRepository.countTotalUsers()).willReturn(1000L);
+			given(dashboardRepository.countDailyNewUsers()).willReturn(20L);
+			given(dashboardRepository.countActiveFlights()).willReturn(200L);
 			given(dashboardRepository.countUnreadNotifications(TEST_ADMIN_ID)).willReturn(7L);
 
 			// when
@@ -91,8 +95,8 @@ class AdminDashboardServiceImplTest {
 			// then
 			assertThat(stats).isNotNull();
 			assertThat(stats.getDailyVisitors()).isEqualTo(100L);
-			assertThat(stats.getDailyReservations()).isEqualTo(0L); // 실패 시 0
-			assertThat(stats.getDailyPayments()).isEqualTo(30L);
+			assertThat(stats.getDailyPayments()).isEqualTo(0L); // 실패 시 0
+			assertThat(stats.getDailyCancellations()).isEqualTo(5L);
 		}
 
 		@Test
@@ -100,14 +104,13 @@ class AdminDashboardServiceImplTest {
 		void getStats_NullAdminId() {
 			// given
 			given(dashboardRepository.countDailyVisitors()).willReturn(100L);
-			given(dashboardRepository.countDailyReservations()).willReturn(50L);
 			given(dashboardRepository.countDailyPayments()).willReturn(30L);
 			given(dashboardRepository.countDailyCancellations()).willReturn(5L);
 			given(dashboardRepository.sumDailyRevenue()).willReturn(5000000L);
-			given(dashboardRepository.countTotalUsers()).willReturn(1000L);
-			given(dashboardRepository.countActiveFlights()).willReturn(200L);
 			given(dashboardRepository.countPendingReservations()).willReturn(10L);
-			given(dashboardRepository.countPendingPayments()).willReturn(3L);
+			given(dashboardRepository.countTotalUsers()).willReturn(1000L);
+			given(dashboardRepository.countDailyNewUsers()).willReturn(20L);
+			given(dashboardRepository.countActiveFlights()).willReturn(200L);
 			given(dashboardRepository.countUnreadNotifications(null)).willReturn(0L);
 
 			// when

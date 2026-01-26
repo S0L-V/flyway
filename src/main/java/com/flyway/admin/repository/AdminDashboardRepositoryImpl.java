@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.RecentActivityDto;
+import com.flyway.admin.dto.VisitorDetailDto;
 import com.flyway.admin.mapper.AdminDashboardMapper;
+import com.flyway.admin.mapper.VisitorLogMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,15 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminDashboardRepositoryImpl implements AdminDashboardRepository {
 
 	private final AdminDashboardMapper dashboardMapper;
+	private final VisitorLogMapper visitorLogMapper;
 
+	// == 기간별 통계 (첫 번째 줄) ==
 	@Override
 	public long countDailyVisitors() {
 		return dashboardMapper.countDailyVisitors();
-	}
-
-	@Override
-	public long countDailyReservations() {
-		return dashboardMapper.countDailyReservations();
 	}
 
 	@Override
@@ -43,24 +42,25 @@ public class AdminDashboardRepositoryImpl implements AdminDashboardRepository {
 		return dashboardMapper.sumDailyRevenue();
 	}
 
-	@Override
-	public long countTotalUsers() {
-		return dashboardMapper.countTotalUsers();
-	}
-
-	@Override
-	public long countActiveFlights() {
-		return dashboardMapper.countActiveFlights();
-	}
-
+	// == 실시간/전체 통계 (두 번째 줄) ==
 	@Override
 	public long countPendingReservations() {
 		return dashboardMapper.countPendingReservations();
 	}
 
 	@Override
-	public long countPendingPayments() {
-		return dashboardMapper.countPendingPayments();
+	public long countTotalUsers() {
+		return dashboardMapper.countTotalUsers();
+	}
+
+	@Override
+	public long countDailyNewUsers() {
+		return dashboardMapper.countDailyNewUsers();
+	}
+
+	@Override
+	public long countActiveFlights() {
+		return dashboardMapper.countActiveFlights();
 	}
 
 	@Override
@@ -94,5 +94,12 @@ public class AdminDashboardRepositoryImpl implements AdminDashboardRepository {
 		int updated = dashboardMapper.markAllNotificationsAsRead(adminId);
 		log.debug("Marked {} notifications as read for admin: {}", updated, adminId);
 		return updated;
+	}
+
+	// == 방문자 상세 조회 ==
+	@Override
+	public List<VisitorDetailDto> findTodayVisitors(int limit) {
+		log.debug("Finding today visitors, limit: {}", limit);
+		return visitorLogMapper.selectTodayVisitors(limit);
 	}
 }
