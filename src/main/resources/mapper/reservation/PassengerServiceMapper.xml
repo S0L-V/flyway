@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.reservation.mapper.PassengerServiceMapper">
+
+    <!-- 수하물 정책 -->
+    <select id="selectBaggagePolicy" resultType="com.flyway.reservation.dto.BaggagePolicyView">
+        SELECT
+            policy_id           AS policyId,
+            cabin_class_code    AS cabinClassCode,
+            route_type          AS routeType,
+            free_checked_bags   AS freeCheckedBags,
+            free_checked_weight_kg AS freeCheckedWeightKg,
+            extra_bag_fee       AS extraBagFee,
+            overweight_fee_per_kg AS overweightFeePerKg,
+            max_weight_per_bag_kg AS maxWeightPerBagKg,
+            max_total_weight_kg AS maxTotalWeightKg
+        FROM baggage_policy
+        WHERE cabin_class_code = #{cabinClassCode}
+          AND route_type = #{routeType}
+    </select>
+
+    <!-- 기내식 옵션-->
+    <!-- 기내식 옵션 조회 (등급에 맞는 것만) -->
+    <select id="selectMealOptions" resultType="com.flyway.reservation.dto.MealOptionView">
+        SELECT
+            meal_id             AS mealId,
+            meal_name           AS mealName,
+            available_for_class AS availableForClass,
+            image_url           AS imageUrl,
+            is_active           AS isActive,
+            route_type          AS routeType
+        FROM meal_option
+        WHERE route_type = #{routeType}
+          AND is_active = 'Y'
+          AND FIND_IN_SET(#{cabinClassCode}, available_for_class) > 0
+        ORDER BY meal_name
+    </select>
+
+    <!-- route type 조회-->
+    <select id="selectRouteTypeBySegment" resultType="string">
+        SELECT f.route_type
+        FROM reservation_segment rs
+                 JOIN flight f ON rs.flight_id = f.flight_id
+        WHERE rs.reservation_segment_id = #{reservationSegmentId}
+    </select>
+    <!-- 탑승자 부가서비스 (구간별)-->
+    <select id="selectByPassengerAndSegment" resultType="com.flyway.reservation.dto.PassengerServiceView">
+        SELECT
+            ps.ps_id                    AS psId,
+            ps.passenger_id             AS passengerId,
+            ps.reservation_segment_id   AS reservationSegmentId,
+            ps.meal_id                  AS mealId,
+            ps.policy_id                AS policyId,
+            ps.service_type             AS serviceType,
+            ps.quantity                 AS quantity,
+            ps.total_price              AS totalPrice,
+            ps.service_details          AS serviceDetails,
+            ps.trip_type                AS tripType,
+            ps.added_at                 AS addedAt,
+            mo.meal_name                AS mealName,
+            mo.image_url                AS mealImageUrl
+        FROM passenger_service ps
+                 LEFT JOIN meal_option mo ON ps.meal_id = mo.meal_id
+        WHERE ps.passenger_id = #{passengerId}
+          AND ps.reservation_segment_id = #{reservationSegmentId}
+    </select>
+    <!-- 부가서비스 합계 금액-->
+    <select id="selectServiceTotalByReservation" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(ps.total_price), 0)
+        FROM passenger_service ps
+                 JOIN passenger p ON ps.passenger_id = p.passenger_id
+        WHERE p.reservation_id = #{reservationId}
+    </select>
+
+    <!-- insert -->
+    <insert id="insertPassengerService" parameterType="com.flyway.reservation.dto.PassengerServiceInsertDTO">
+    INSERT INTO passenger_service (
+    ps_id,
+    passenger_id,
+    reservation_segment_id,
+    meal_id,
+    policy_id,
+    service_type,
+    quantity,
+    total_price,
+    service_details,
+    trip_type,
+    added_at
+    ) VALUES (
+    #{psId},
+    #{passengerId},
+    #{reservationSegmentId},
+    #{mealId},
+    #{policyId},
+    #{serviceType},
+    #{quantity},
+    #{totalPrice},
+    #{serviceDetails},
+    #{tripType},
+    NOW()
+    )
+    </insert>
+    <!-- 찾아서 수정하는 거 보단 삭제 후 새로 추가하는 것이 더 간단 -->
+    <delete id="deleteByPassengerSegmentType">
+        DELETE FROM passenger_service
+        WHERE passenger_id = #{passengerId}
+          AND reservation_segment_id = #{reservationSegmentId}
+          AND service_type = #{serviceType}
+    </delete>
+</mapper>
