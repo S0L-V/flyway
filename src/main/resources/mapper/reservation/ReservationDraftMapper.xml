@@ -87,5 +87,12 @@
         <when test="cabinClass == 'ECO'">economy_class_seat = economy_class_seat - #{count}</when>
     </choose>
     WHERE flight_id = #{flightId}
+        AND
+        <choose>
+            <when test="cabinClass == 'FST'">first_class_seat &gt;= #{count}</when>
+            <when test="cabinClass == 'BIZ'">business_class_seat &gt;= #{count}</when>
+            <when test="cabinClass == 'ECO'">economy_class_seat &gt;= #{count}</when>
+            <otherwise>1 = 0</otherwise>
+        </choose>
     </update>
 </mapper>

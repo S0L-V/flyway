@@ -35,7 +35,7 @@ public class ReservationDraftRepositoryImpl implements ReservationDraftRepositor
         return draftMapper.lockFlightInfoForUpdate(flightId);
     }
     @Override
-    public void decrementSeat(String flightId, String cabinClassCode, int count) {
-        draftMapper.decrementSeat(flightId, cabinClassCode, count);
+    public int decrementSeat(String flightId, String cabinClassCode, int count) {
+        return draftMapper.decrementSeat(flightId, cabinClassCode, count);
     }
 }
