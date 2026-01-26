@@ -54,7 +54,11 @@ public enum ErrorCode {
 	ADMIN_INVALID_TOKEN(401, "A005", "유효하지 않은 토큰입니다."),
 	ADMIN_TOKEN_EXPIRED(401, "A006", "만료된 토큰입니다."),
 	ADMIN_INSUFFICIENT_PERMISSION(403, "A007", "권한이 없습니다."),
-	ADMIN_DUPLICATE_EMAIL(400, "A008", "이미 사용 중인 이메일입니다.")
+	ADMIN_DUPLICATE_EMAIL(400, "A008", "이미 사용 중인 이메일입니다."),
+
+	// ==================== 결제 통계 관련 (P) ====================
+	PAYMENT_STATUS_FETCH_FAILED(400, "P001", "결제 통계 조회 중 오류가 발생했습니다."),
+	PAYMENT_LIST_FETCH_FAILED(400, "P002", "결제 내역 조회 중 오류가 발생했습니다."),
 	;
 
 	private final int status;

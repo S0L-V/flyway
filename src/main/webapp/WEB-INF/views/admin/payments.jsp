@@ -1,0 +1,310 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="layout/head.jsp" %>
+<%@ include file="layout/sidebar.jsp" %>
+<%@ include file="layout/topbar.jsp" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<main class="pl-64 pt-16 min-h-screen">
+    <div class="p-8 max-w-[1600px] mx-auto space-y-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">결제 내역 관리</h1>
+                <p class="text-slate-500">전체 결제 내역 및 통계 정보를 확인합니다.</p>
+            </div>
+            <button id="refresh-button" class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-colors">
+                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 inline-block"></i> 새로고침
+            </button>
+        </div>
+
+        <!-- 결제 통계 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-slate-500">결제 완료 건수</span>
+                    <div class="p-2 bg-green-50 text-green-600 rounded-lg"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-paid-count" class="text-2xl font-bold text-slate-900">-</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-slate-500">승인 대기 건수</span>
+                    <div class="p-2 bg-yellow-50 text-yellow-600 rounded-lg"><i data-lucide="clock" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-pending-count" class="text-2xl font-bold text-slate-900">-</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-slate-500">환불/취소 건수</span>
+                    <div class="p-2 bg-orange-50 text-orange-600 rounded-lg"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-refunded-count" class="text-2xl font-bold text-slate-900">-</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-slate-500">이번 달 매출</span>
+                    <div class="p-2 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="dollar-sign" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-monthly-revenue" class="text-2xl font-bold text-slate-900">-</div>
+            </div>
+        </div>
+
+        <!-- 결제 내역 테이블 -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-800">결제 내역</h2>
+                <div class="flex items-center space-x-3">
+                    <select id="filter-status" class="p-2 border border-slate-300 rounded-lg text-sm">
+                        <option value="">전체 상태</option>
+                        <option value="PAID">결제 완료</option>
+                        <option value="PENDING">대기 중</option>
+                        <option value="FAILED">실패</option>
+                        <option value="CANCELLED">취소됨</option>
+                        <option value="REFUNDED">환불됨</option>
+                    </select>
+                    <button id="search-button" class="px-3 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">
+                        <i data-lucide="search" class="w-4 h-4 inline-block mr-1"></i> 검색
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">결제 ID</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">회원 정보</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">금액</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">결제 수단</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">상태</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">대상 항공편</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">결제 시각</th>
+                        </tr>
+                        </thead>
+                        <tbody id="payment-list-body" class="bg-white divide-y divide-slate-100">
+                        <tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역을 불러오는 중...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav id="pagination-controls" class="flex items-center justify-between pt-4">
+                    <!-- 페이지네이션 컨트롤이 여기에 렌더링됩니다. -->
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        lucide.createIcons();
+
+        let currentPage = 0;
+        const pageSize = 10;
+        let currentFilterStatus = '';
+
+        const elements = {
+            stats: {
+                paidCount: document.getElementById('stat-paid-count'),
+                pendingCount: document.getElementById('stat-pending-count'),
+                refundedCount: document.getElementById('stat-refunded-count'),
+                monthlyRevenue: document.getElementById('stat-monthly-revenue')
+            },
+            filterStatus: document.getElementById('filter-status'),
+            searchButton: document.getElementById('search-button'),
+            refreshButton: document.getElementById('refresh-button'),
+            paymentListBody: document.getElementById('payment-list-body'),
+            paginationControls: document.getElementById('pagination-controls')
+        };
+
+        // 초기 데이터 로딩
+        fetchPaymentStats();
+        fetchPaymentList();
+
+        // 이벤트 리스너
+        elements.refreshButton.addEventListener('click', function() {
+            currentPage = 0;
+            fetchPaymentStats();
+            fetchPaymentList();
+        });
+
+        elements.searchButton.addEventListener('click', function() {
+            currentPage = 0;
+            currentFilterStatus = elements.filterStatus.value;
+            fetchPaymentList();
+        });
+
+        elements.filterStatus.addEventListener('change', function() {
+            currentPage = 0;
+            currentFilterStatus = elements.filterStatus.value;
+            fetchPaymentList();
+        });
+
+
+        function fetchPaymentStats() {
+            fetch('${pageContext.request.contextPath}/admin/payments/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        elements.stats.paidCount.textContent = formatNumber(data.data.paidCount);
+                        elements.stats.pendingCount.textContent = formatNumber(data.data.pendingCount);
+                        elements.stats.refundedCount.textContent = formatNumber(data.data.refundedCount);
+                        elements.stats.monthlyRevenue.textContent = formatCurrency(data.data.monthlyRevenue);
+                    } else {
+                        console.error('Failed to fetch payment stats:', data.message);
+                        alert('결제 통계 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching payment stats:', error);
+                    alert('결제 통계 조회 중 네트워크 오류가 발생했습니다.');
+                });
+        }
+
+        function fetchPaymentList() {
+            elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>결제 내역을 불러오는 중...</p></td></tr>';
+            lucide.createIcons(); // 로딩 아이콘 렌더링
+
+            const url = new URL('${pageContext.request.contextPath}/admin/payments/api/list', window.location.origin);
+            url.searchParams.append('page', currentPage);
+            url.searchParams.append('size', pageSize);
+            if (currentFilterStatus) {
+                url.searchParams.append('status', currentFilterStatus);
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        renderPaymentList(data.data.list);
+                        renderPagination(data.data.totalCount, data.data.currentPage, data.data.pageSize, data.data.totalPages);
+                    } else {
+                        console.error('Failed to fetch payment list:', data.message);
+                        elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류') + '</td></tr>';
+                    }
+                    lucide.createIcons(); // 상태 아이콘 렌더링
+                })
+                .catch(error => {
+                    console.error('Error fetching payment list:', error);
+                    elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-red-500">결제 내역 조회 중 네트워크 오류가 발생했습니다.</td></tr>';
+                    lucide.createIcons(); // 에러 아이콘 렌더링
+                });
+        }
+
+        function renderPaymentList(payments) {
+            elements.paymentListBody.innerHTML = ''; // 기존 내용 지우기
+            if (payments.length === 0) {
+                elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역이 없습니다.</td></tr>';
+                return;
+            }
+
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm text-slate-800 font-medium">${escapeHtml(payment.paymentId)}</td>
+                    <td class="px-4 py-3 text-sm text-slate-600">
+                        <div class="font-medium">${escapeHtml(payment.userName || '비회원')}</div>
+                        <div class="text-xs text-slate-500">${escapeHtml(payment.userEmail || '-')}</div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-800 font-semibold">
+                        <fmt:formatNumber value="${payment.amount}" type="currency" currencySymbol="₩" groupingUsed="true"/>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-600">${escapeHtml(payment.paymentMethodDisplay)}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${payment.statusBadgeClass}">${escapeHtml(payment.statusDisplay)}</span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-600">
+                        <div class="font-medium">${escapeHtml(payment.flightNumber || '-')}</div>
+                        <div class="text-xs text-slate-500">${escapeHtml(payment.route || '-')}</div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-600">
+                        <fmt:parseDate value="${payment.paidAt}" pattern="yyyy-MM-dd'T'HH:mm:ss" var="paidDate"/>
+                        <fmt:formatDate value="${paidDate}" pattern="yyyy-MM-dd HH:mm"/>
+                    </td>
+                `;
+                elements.paymentListBody.appendChild(row);
+            });
+        }
+
+        function renderPagination(totalCount, currentPage, pageSize, totalPages) {
+            elements.paginationControls.innerHTML = ''; // 기존 내용 지우기
+            if (totalPages <= 1) return;
+
+            const ul = document.createElement('ul');
+            ul.className = 'flex items-center space-x-1';
+
+            // 이전 페이지 버튼
+            const prevLi = document.createElement('li');
+            const prevButton = document.createElement('button');
+            prevButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
+            prevButton.innerHTML = '<i data-lucide="chevron-left" class="w-4 h-4"></i>';
+            prevButton.disabled = currentPage === 0;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 0) {
+                    currentPage--;
+                    fetchPaymentList();
+                }
+            });
+            prevLi.appendChild(prevButton);
+            ul.appendChild(prevLi);
+
+            // 페이지 번호
+            for (let i = 0; i < totalPages; i++) {
+                const li = document.createElement('li');
+                const button = document.createElement('button');
+                button.className = `px-3 py-1 rounded-lg text-sm font-medium transition-colors ${i == currentPage ? 'bg-blue-600 text-white' : 'hover:bg-slate-100'}`;
+                button.textContent = i + 1;
+                button.addEventListener('click', () => {
+                    currentPage = i;
+                    fetchPaymentList();
+                });
+                li.appendChild(button);
+                ul.appendChild(li);
+            }
+
+            // 다음 페이지 버튼
+            const nextLi = document.createElement('li');
+            const nextButton = document.createElement('button');
+            nextButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
+            nextButton.innerHTML = '<i data-lucide="chevron-right" class="w-4 h-4"></i>';
+            nextButton.disabled = currentPage === totalPages - 1;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    fetchPaymentList();
+                }
+            });
+            nextLi.appendChild(nextButton);
+            ul.appendChild(nextLi);
+
+            elements.paginationControls.appendChild(ul);
+            lucide.createIcons(); // 페이지네이션 아이콘 렌더링
+        }
+
+        // 유틸리티 함수 (dashboard.js에서 복사)
+        function formatNumber(num) {
+            if (num === null || num === undefined) return '0';
+            return new Intl.NumberFormat('ko-KR').format(num);
+        }
+
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return '₩ 0';
+            if (amount >= 100000000) {
+                return '₩ ' + (amount / 100000000).toFixed(1) + '억';
+            }
+            if (amount >= 10000) {
+                return '₩ ' + (amount / 10000).toFixed(0) + '만';
+            }
+            return '₩ ' + new Intl.NumberFormat('ko-KR').format(amount);
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return ''; // null 또는 undefined 처리
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+    });
+</script>
+</body>
+</html>
