@@ -4,7 +4,6 @@ import com.flyway.pricing.service.DynamicPricingCalculator;
 import com.flyway.pricing.batch.reader.RepriceReaderConfig;
 import com.flyway.pricing.batch.writer.RepriceWriterConfig;
 import com.flyway.pricing.batch.processor.RepriceProcessor;
-import com.flyway.pricing.service.SeatAvailabilityServiceImpl;
 import com.flyway.pricing.batch.step.RepriceStepConfig;
 import com.flyway.pricing.policy.PricingPolicyV1;
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +36,6 @@ import static org.mockito.BDDMockito.given;
         RepriceProcessor.class,       // Processor
         DynamicPricingCalculator.class, // Calculator (실제 로직 사용)
         PricingPolicyV1.class,         // Policy
-        RepriceStepIntegrationTest.TestMockConfig.class
 })
 class RepriceStepIntegrationTest {
 
@@ -47,21 +45,8 @@ class RepriceStepIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private SeatAvailabilityServiceImpl seatService;
-
-    @Configuration
-    static class TestMockConfig {
-        @Bean
-        public SeatAvailabilityServiceImpl seatAvailabilityService() {
-            return Mockito.mock(SeatAvailabilityServiceImpl.class);
-        }
-    }
-
     @BeforeEach
     void setUp() {
-        // Mock 객체 상태 초기화
-        Mockito.reset(seatService);
 
         // 1. 비즈니스 테이블 생성 (H2 메모리 DB)
         jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS flight (" +
@@ -78,6 +63,13 @@ class RepriceStepIntegrationTest {
                 "current_price BIGINT, update_type VARCHAR(20), calculated_at DATETIME)");
 
         // 2. 테스트 데이터 Insert (출발 5일 남은 항공편)
+        // (1) 항공기 정보 (총 100석)
+        jdbcTemplate.update("INSERT INTO aircraft VALUES ('AC-001', 100, 30, 10)");
+
+        // (2) 운항 정보 (FK 연결, 잔여석 50석 설정)
+        jdbcTemplate.update("INSERT INTO flight_info VALUES ('F1', 'AC-001', 50, 15, 5)");
+
+        // (3) 항공편 및 가격 정보
         jdbcTemplate.update("INSERT INTO flight VALUES ('F1', DATEADD('DAY', 5, NOW()))");
         jdbcTemplate.update("INSERT INTO flight_seat_price VALUES ('F1', 'ECO', 100000, 100000, NULL, NOW())");
     }
@@ -87,15 +79,13 @@ class RepriceStepIntegrationTest {
         jdbcTemplate.execute("DROP TABLE flight_seat_price");
         jdbcTemplate.execute("DROP TABLE price_history");
         jdbcTemplate.execute("DROP TABLE flight");
+        jdbcTemplate.execute("DROP TABLE flight_info");
+        jdbcTemplate.execute("DROP TABLE aircraft");
     }
 
     @Test
     @DisplayName("Step 실행 테스트")
     void testStepExecution() {
-        // given
-        // Mock: 좌석은 100석 중 50석 남음 (판매율 50% -> 가격 상승 예상)
-        given(seatService.getSeatStatus(any(), any()))
-                .willReturn(new SeatAvailabilityServiceImpl.SeatStatus(100, 50));
 
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("asOf", System.currentTimeMillis())
