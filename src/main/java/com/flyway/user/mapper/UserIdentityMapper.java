@@ -15,7 +15,15 @@ public interface UserIdentityMapper {
      */
     void insertIdentity(UserIdentity identity);
 
+    /**
+     * Email 가입 회원 중 중복 이메일 보유 회원 조회
+     */
     boolean existsEmailIdentity(@Param("email") String email);
+
+    /**
+     * userId로 인증 정보 조회
+     */
+    UserIdentity findByUserId(String email);
 
     /**
      * provider + providerUserId로 인증 정보 조회 (OAuth 재로그인 시 기존 사용자 찾기)

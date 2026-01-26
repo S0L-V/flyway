@@ -18,6 +18,11 @@ public class UserIdentityRepositoryImpl implements UserIdentityRepository {
     }
 
     @Override
+    public UserIdentity findByUserId(String userId) {
+        return userIdentityMapper.findByUserId(userId);
+    }
+
+    @Override
     public UserIdentity findByProviderUserId(AuthProvider provider, String providerUserId) {
         return userIdentityMapper.findByProviderUserId(provider, providerUserId);
     }

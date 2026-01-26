@@ -27,6 +27,17 @@
           AND provider_user_id = #{email}
     </select>
 
+    <!-- userId로 Identity 조회 -->
+    <select id="findByUserId" parameterType="map" resultType="com.flyway.user.domain.UserIdentity">
+        SELECT user_identity_id,
+               user_id,
+               provider,
+               provider_user_id,
+               created_at
+        FROM user_identity
+        WHERE user_id = #{userId}
+    </select>
+
     <!-- provider + provider_user_id 로 Identity 조회 (OAuth 재로그인 시 기존 회원 조회) -->
     <select id="findByProviderUserId" parameterType="map" resultType="com.flyway.user.domain.UserIdentity">
         SELECT user_identity_id,

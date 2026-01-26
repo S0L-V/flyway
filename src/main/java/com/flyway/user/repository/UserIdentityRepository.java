@@ -12,6 +12,11 @@ public interface UserIdentityRepository {
     void save(UserIdentity identity);
 
     /**
+     * userId로 조회
+     */
+    UserIdentity findByUserId(String userId);
+
+    /**
      * (인증 제공자, 제공자 유저 ID)로 조회
      * (OAuth 재로그인 시 기존 사용자 식별)
      */
