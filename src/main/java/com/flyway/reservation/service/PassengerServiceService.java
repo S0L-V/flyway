@@ -24,7 +24,7 @@ public class PassengerServiceService {
 
     private final PassengerServiceRepository serviceRepository;
     private final ReservationBookingRepository bookingRepository;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new  ObjectMapper();
 
     @Transactional(readOnly = true)
     public ServicePopupViewModel getServicePopup(String reservationId, String userId) {
