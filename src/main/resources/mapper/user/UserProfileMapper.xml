@@ -43,4 +43,17 @@
         WHERE user_id = #{userId}
     </update>
 
+    <!-- user_profile 개인정보 NULL 처리 -->
+    <update id="nullifyProfileIfWithdrawn">
+        UPDATE user_profile up
+            JOIN users u ON u.user_id = up.user_id
+        SET
+            up.passport_no = NULL,
+            up.first_name  = NULL,
+            up.last_name   = NULL,
+            up.name        = NULL
+        WHERE up.user_id = #{userId}
+          AND u.status = 'WITHDRAWN'
+    </update>
+
 </mapper>

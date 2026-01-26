@@ -24,4 +24,10 @@ public interface UserIdentityMapper {
             @Param("provider") AuthProvider provider,
             @Param("providerUserId") String providerUserId
     );
+
+    /**
+     * EMAIL 가입자의 provider_user_id(이메일) 익명화
+     */
+    int anonymizeEmailProviderUserIdIfWithdrawn(@Param("userId") String userId,
+                                                @Param("anonymizedEmail") String anonymizedEmail);
 }

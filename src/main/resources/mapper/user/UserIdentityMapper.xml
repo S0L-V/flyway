@@ -39,4 +39,15 @@
           AND provider_user_id = #{providerUserId}
     </select>
 
+    <!-- EMAIL 가입자의 provider_user_id(이메일) 익명화 -->
+    <update id="anonymizeEmailProviderUserIdIfWithdrawn">
+        UPDATE user_identity ui
+            JOIN users u ON u.user_id = ui.user_id
+        SET ui.provider_user_id = #{anonymizedEmail}
+        WHERE ui.user_id = #{userId}
+          AND ui.provider = 'EMAIL'
+          AND u.status = 'WITHDRAWN'
+    </update>
+
+
 </mapper>
