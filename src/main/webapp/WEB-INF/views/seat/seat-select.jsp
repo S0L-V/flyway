@@ -48,11 +48,15 @@
 
                 <!-- Seat Map Container (Dynamic) -->
                 <div class="seat-map-container">
-                    <div id="seat-grid" class="seat-grid">
-                        <!-- Seats will be dynamically rendered by JavaScript -->
+                    <div id="seat-grid"
+                         class="seat-grid"
+                         data-ctx="${pageContext.request.contextPath}"
+                         data-rid="${reservationId}"
+                         data-sid="${reservationSegmentId}">
                         <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
                     </div>
-                    
+
+
                     <!-- Legend -->
                     <div class="seat-legend">
                         <div class="seat-legend__item">
