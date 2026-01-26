@@ -5,6 +5,7 @@ import com.flyway.search.dto.*;
 import com.flyway.search.mapper.FlightMapper;
 import com.flyway.search.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,13 @@ public class FlightServiceImpl implements FlightService{
 
     // 공항 토글
     @Override
-    public List<Airport> airport(Airport vo) {
-        return flightRepository.findAirports(vo);
+    public List<Airport> depAirport(Airport vo) {
+        return flightRepository.findDepAirports(vo);
+    }
+
+    @Override
+    public List<Airport> arrAirport(String depAirport) {
+        return flightRepository.findArrAirports(depAirport);
     }
 
     @Override
@@ -56,7 +62,7 @@ public class FlightServiceImpl implements FlightService{
                 opt.setOutbound(o);
                 opt.setInbound(null);
                 opt.setTotalSeats(o.getSeatCount());     // 좌석은 각각 total로 하려면 추가
-//                opt.setTotalPrice(o.getCurrentPrice);                // 아직 운임 없으면 null
+                opt.setTotalPrice(o.getCurrentPrice());                // 아직 운임 없으면 null
                 options.add(opt);
             }
             result.setOptions(options);
@@ -95,16 +101,16 @@ public class FlightServiceImpl implements FlightService{
                 opt.setTotalSeats(seats);
 
                 // totalPrice
-//                if (sameAirline(o.getFlightNumber(), i.getFlightNumber())) {
-//                    double Price = (o.getCurrentPrice() + i.getCurrentPrice()) * 10 / 14;
-//                    int totalPrice = (int) ((price + 50) / 100 * 100)   // 100단위로
-//                    opt.setTotalPrice(totalPrice);
-//                } else {
-//                    int totalPrice = o.getCurrentPrice() + i.getCurrentPrice();
-//                    opt.setTotalPrice(totalPrice);
-//                }
+                double rawPrice;
+                if (sameAirline(o.getFlightNumber(), i.getFlightNumber())) {
+                    rawPrice = (o.getCurrentPrice() + i.getCurrentPrice()) * 10.0 / 14.0;
+                } else {
+                    rawPrice = o.getCurrentPrice() + i.getCurrentPrice();
+                }
 
-                opt.setTotalPrice(0); // 임시 가격
+                int totalPrice = ((int) ((rawPrice + 50) / 100)) * 100;
+
+                opt.setTotalPrice(totalPrice);
 
                 options.add(opt);
 
