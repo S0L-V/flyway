@@ -1,6 +1,7 @@
 package com.flyway.reservation.repository;
 
 import com.flyway.reservation.domain.FlightSnapshot;
+import com.flyway.reservation.dto.FlightInfoView;
 import com.flyway.reservation.dto.ReservationInsertDTO;
 import com.flyway.reservation.dto.ReservationSegmentInsertDTO;
 import com.flyway.reservation.mapper.ReservationDraftMapper;
@@ -28,5 +29,13 @@ public class ReservationDraftRepositoryImpl implements ReservationDraftRepositor
     @Override
     public void saveReservationSegment(ReservationSegmentInsertDTO param) {
         draftMapper.insertReservationSegment(param);
+    }
+    @Override
+    public FlightInfoView lockFlightInfoForUpdate(String flightId) {
+        return draftMapper.lockFlightInfoForUpdate(flightId);
+    }
+    @Override
+    public void decrementSeat(String flightId, String cabinClassCode, int count) {
+        draftMapper.decrementSeat(flightId, cabinClassCode, count);
     }
 }

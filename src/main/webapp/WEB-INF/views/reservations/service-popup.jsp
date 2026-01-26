@@ -97,7 +97,7 @@
 
                         <select id="extraKg_${pax.passengerId}_${seg.reservationSegmentId}"
                                 onchange="calculateBaggagePrice()"
-                                data-saved-details="${savedBaggage.serviceDetails}">
+                                data-saved-details='${savedBaggage.serviceDetails}'>
                             <option value="0">0kg</option>
                             <option value="5">+5kg</option>
                             <option value="10">+10kg</option>
@@ -306,11 +306,11 @@
                     var parsed = JSON.parse(details);
                     var id = el.id;
                     if (id.startsWith('extraKg_')) {
-                        el.value = parsed.extraWeightKg || 0;
+                        el.value = parsed.extraKg || 0;
                         // 같은 승객/구간의 extraBags도 설정
                         var bagsId = id.replace('extraKg_', 'extraBags_');
                         var bagsEl = document.getElementById(bagsId);
-                        if (bagsEl) bagsEl.value = parsed.extraBagCount || 0;
+                        if (bagsEl) bagsEl.value = parsed.extraBags || 0;
                     }
                 } catch (e) {
                     console.error('Failed to parse serviceDetails', e);
