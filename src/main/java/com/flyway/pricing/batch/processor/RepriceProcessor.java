@@ -7,7 +7,6 @@ import com.flyway.pricing.batch.row.RepriceCandidateRow;
 import com.flyway.pricing.model.PricingInput;
 import com.flyway.pricing.model.PricingResult;
 import com.flyway.pricing.policy.PricingPolicy;
-import com.flyway.pricing.service.SeatAvailabilityService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ public class RepriceProcessor implements ItemProcessor<RepriceCandidateRow, Pric
     private final DynamicPricingCalculator calculator;
     private final PricingPolicy pricingPolicy;
     private final ObjectMapper objectMapper; // JSON 변환기
-    private final SeatAvailabilityService seatService;
 
     @Value("#{jobParameters['asOf']}") // JobParameter 주입
     private Long asOfEpochMillis;
