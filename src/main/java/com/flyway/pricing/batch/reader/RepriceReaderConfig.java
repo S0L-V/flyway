@@ -1,6 +1,7 @@
 package com.flyway.pricing.batch.reader;
 
 import com.flyway.pricing.batch.row.RepriceCandidateRow;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
@@ -24,87 +25,94 @@ import java.util.Map;
  * Reader 객체(Bean)를 생성하고 SQL을 정의하는 설정 파일
  */
 @Configuration
+@RequiredArgsConstructor
 public class RepriceReaderConfig {
 
+    private final DataSource dataSource;
     private static final int CHUNK_SIZE = 500;   // page size와 동일
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
+    /**
+     * JobParameter를 받아 실제 값(Map)을 세팅하는 역할
+     * 아래의 repriceQueryProvider를 주입받아 SQL을 실행함
+     */
     @Bean
     @StepScope
-    public JdbcPagingItemReader<RepriceCandidateRow> repriceCandidateReader(
-            DataSource dataSource,
+    public JdbcPagingItemReader<RepriceCandidateRow> repriceItemReader(
             PagingQueryProvider repriceQueryProvider,
             @Value("#{jobParameters['asOf']}") Long asOfEpochMillis
     ) {
+        LocalDateTime referenceTime;
         if (asOfEpochMillis == null) {
-            throw new IllegalArgumentException("JobParameter 'asOf' (epoch millis) is required.");
+            referenceTime = LocalDateTime.now(KST);
+        } else {
+            referenceTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(asOfEpochMillis), KST);
         }
 
-        // 1. 기준 시간 변환 (KST)
-        LocalDateTime referenceTime = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(asOfEpochMillis), KST
-        );
-
-        // 2. 파라미터 맵 (LocalDateTime을 그대로 넘기면 드라이버가 알아서 처리)
+        // 2. 쿼리에 바인딩할 파라미터 Map 생성
         Map<String, Object> parameterValues = new HashMap<>();
         parameterValues.put("asOf", referenceTime);
 
         return new JdbcPagingItemReaderBuilder<RepriceCandidateRow>()
-                .name("repriceCandidateReader")
-                .dataSource(dataSource)
-                .pageSize(CHUNK_SIZE)
-                .fetchSize(CHUNK_SIZE)
-                .queryProvider(repriceQueryProvider) // MariaDB 호환
+                .name("repriceItemReader")
+                .dataSource(this.dataSource)
+                .queryProvider(repriceQueryProvider)
                 .parameterValues(parameterValues)
-                // DTO 필드명과 컬럼 별칭(Alias)이 일치하면 자동 매핑
+                .pageSize(CHUNK_SIZE)
                 .rowMapper(new BeanPropertyRowMapper<>(RepriceCandidateRow.class))
                 .build();
     }
 
+    /**
+     * PagingReader가 사용할 SQL 구조를 정의하는 역할
+     */
     @Bean
-    public PagingQueryProvider repriceQueryProvider(DataSource dataSource) throws Exception {
+    public PagingQueryProvider repriceQueryProvider() throws Exception {
         SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
-
-        factory.setDataSource(dataSource);
+        factory.setDataSource(this.dataSource);
         factory.setDatabaseType("MySQL");
 
-        // (1) SELECT 절
+        // 1) SELECT : CASE문으로 좌석 정보 계산
         factory.setSelectClause(
-                "SELECT temp.flight_id AS flight_id, " +
-                        "       temp.departure_time AS departure_time, " +
-                        "       temp.cabin_class_code AS cabin_class_code, " +
-                        "       temp.current_price AS current_price, " +
-                        "       temp.base_price AS base_price, " +
-                        "       temp.last_event_priced_at AS last_event_priced_at"
+                "SELECT f.flight_id, " +
+                        "       f.departure_time, " +
+                        "       fsp.cabin_class_code, " +
+                        "       fsp.current_price, " +
+                        "       fsp.base_price, " +
+                        "       fsp.last_event_priced_at, " +
+                        "       CASE " +
+                        "           WHEN fsp.cabin_class_code = 'ECO' THEN fi.economy_class_seat " +
+                        "           WHEN fsp.cabin_class_code = 'BIZ' THEN fi.business_class_seat " +
+                        "           WHEN fsp.cabin_class_code = 'FST' THEN fi.first_class_seat " +
+                        "       END AS remaining_seats, " +
+                        "       CASE " +
+                        "           WHEN fsp.cabin_class_code = 'ECO' THEN ac.economy_class_seats " +
+                        "           WHEN fsp.cabin_class_code = 'BIZ' THEN ac.business_class_seats " +
+                        "           WHEN fsp.cabin_class_code = 'FST' THEN ac.first_class_seats " +
+                        "       END AS total_seats "
         );
 
-        // (2) FROM 절 : 서브쿼리를 사용하여 JOIN과 컬럼명을 미리 정리
+        // 2) FROM
         factory.setFromClause(
-                "FROM (" +
-                        "  SELECT f.flight_id, " +
-                        "         f.departure_time, " +
-                        "         fsp.cabin_class_code, " +
-                        "         fsp.current_price, " +
-                        "         fsp.base_price, " +
-                        "         fsp.last_event_priced_at " +
-                        "  FROM flight f " +
-                        "  JOIN flight_seat_price fsp ON f.flight_id = fsp.flight_id " +
-                        ") AS temp"
-        );
-        // (3) WHERE 절 : 서브쿼리 별칭 'temp'를 사용하여 조건 걸기
-        factory.setWhereClause(
-                "WHERE departure_time < TIMESTAMPADD(DAY, 30, CAST(:asOf AS DATETIME))"
+                "FROM flight f " +
+                        "JOIN flight_seat_price fsp ON f.flight_id = fsp.flight_id " +
+                        "JOIN flight_info fi ON f.flight_id = fi.flight_id " +
+                        "JOIN aircraft ac ON fi.aircraft_id = ac.aircraft_id "
         );
 
-        // 정렬 키 설정
+        // 3) WHERE
+        factory.setWhereClause(
+                "WHERE f.departure_time >= CAST(:asOf AS DATETIME) " +
+                        "  AND f.departure_time < TIMESTAMPADD(DAY, 30, CAST(:asOf AS DATETIME))"
+        );
+
+        // 4) 정렬
         Map<String, Order> sortKeys = new LinkedHashMap<>();
-        sortKeys.put("departure_time", Order.ASCENDING);
-        sortKeys.put("flight_id", Order.ASCENDING);
-        sortKeys.put("cabin_class_code", Order.ASCENDING);
+        sortKeys.put("f.departure_time", Order.ASCENDING);
+        sortKeys.put("f.flight_id", Order.ASCENDING);
+        sortKeys.put("fsp.cabin_class_code", Order.ASCENDING);
         factory.setSortKeys(sortKeys);
 
-        // 객체 반환
         return factory.getObject();
     }
-
 }
