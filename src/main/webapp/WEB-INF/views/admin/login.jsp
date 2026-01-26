@@ -13,7 +13,7 @@
 </head>
 <body class="bg-[#f1f5f9] flex flex-col items-center justify-center min-h-screen p-4">
 <div class="mb-10 text-center">
-    <img src="${pageContext.request.contextPath}/resources/search/img/logo.svg"
+    <img src="${pageContext.request.contextPath}/resources/common/img/logo.svg"
          alt="Flyway Logo"
          class="h-16 w-auto mx-auto mb-2 drop-shadow-sm">
     <p class="text-sm text-slate-500 font-medium">실시간 항공 통합 관리 포털</p>

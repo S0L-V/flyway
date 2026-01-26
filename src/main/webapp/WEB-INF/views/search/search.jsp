@@ -9,9 +9,7 @@
 
     <title>검색 결과 - Flyway</title>
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/variables.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/global.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/search.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/details.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/flights.css?v=<%= System.currentTimeMillis() %>">
@@ -19,18 +17,7 @@
 
 <body>
 <!-- Header -->
-<header class="header">
-    <div class="header__content">
-        <div class="header__logo">
-            <img src="${pageContext.request.contextPath}/resources/search/img/logo.svg" alt="Flyway" />
-        </div>
-        <nav class="header__menu">
-            <a href="${pageContext.request.contextPath}/login" class="header__menu-item">로그인</a>
-            <a href="${pageContext.request.contextPath}/signup" class="header__menu-item">회원가입</a>
-            <a href="${pageContext.request.contextPath}/mypage" class="header__menu-item">마이페이지</a>
-        </nav>
-    </div>
-</header>
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
 
 <!-- Banner -->
 <div class="banner"></div>

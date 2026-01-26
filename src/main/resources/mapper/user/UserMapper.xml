@@ -62,4 +62,13 @@
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 사용자 탈퇴 처리 -->
+    <update id="markWithdrawn" parameterType="map">
+        UPDATE users
+        SET status = 'WITHDRAWN',
+        withdrawn_at = #{now}
+        WHERE user_id = #{userId}
+        AND status != 'WITHDRAWN'
+    </update>
+
 </mapper>

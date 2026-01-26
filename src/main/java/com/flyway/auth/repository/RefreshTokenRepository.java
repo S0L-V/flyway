@@ -1,6 +1,7 @@
 package com.flyway.auth.repository;
 
 import com.flyway.auth.domain.RefreshToken;
+import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
 

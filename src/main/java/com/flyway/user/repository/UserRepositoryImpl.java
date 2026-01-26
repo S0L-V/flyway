@@ -6,6 +6,8 @@ import com.flyway.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
@@ -34,4 +36,7 @@ public class UserRepositoryImpl implements UserRepository {
     public void updateStatus(String userId, AuthStatus status) {
         userMapper.updateStatus(userId, status.name());
     }
+
+    @Override
+    public int markWithdrawn(String userId, LocalDateTime now) { return userMapper.markWithdrawn(userId, now); }
 }

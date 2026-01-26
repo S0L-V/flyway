@@ -2,6 +2,7 @@ package com.flyway.auth.service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 
 public interface AuthTokenService {
 
@@ -19,4 +20,9 @@ public interface AuthTokenService {
      * 로그아웃: refresh 폐기 및 쿠키 삭제
      */
     void logout(HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 토큰 폐기
+     */
+    void revokeAllRefreshTokens(String userId, LocalDateTime now);
 }
