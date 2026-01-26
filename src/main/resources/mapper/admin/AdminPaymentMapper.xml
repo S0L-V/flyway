@@ -5,28 +5,28 @@
 <mapper namespace="com.flyway.admin.mapper.AdminPaymentMapper">
 
     <!-- 결제 성공 건수 (PAID) -->
-    <select id="countPaidPayments" resultMap="long">
+    <select id="countPaidPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment
         WHERE status = 'PAID'
     </select>
 
     <!-- 승인 대기 건수 (PENDING) -->
-    <select id="countPendingPayments" resultMap="long">
+    <select id="countPendingPayments" resultType="long">
         SELECT CONUT(*)
         FROM payment
         WHERE status = 'PENDING'
     </select>
 
     <!-- 환불 요청 건수 (REFUNDED + CANCELLED) -->
-    <select id="countRefundedPayments" resultMap="long">
+    <select id="countRefundedPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment
         WHERE status IN ('REFUNDED', 'CANCELLED')
     </select>
 
     <!-- 이번 달 매출 -->
-    <select id="sumMonthlyRevenue" resultMap="long">
+    <select id="sumMonthlyRevenue" resultType="long">
         SELECT COALESCE(SUM(amount), 0)
         FROM payment
         WHERE status = 'PAID'
@@ -85,7 +85,7 @@
     </select>
 
     <!-- 결제 내역 총 건수 -->
-    <select id="countPayments" resultMap="long">
+    <select id="countPayments" resultMap="resultType">
         SELECT COUNT(*)
         FROM payment p
         <where>
