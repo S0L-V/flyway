@@ -481,16 +481,14 @@ const AdminDashboard = (function() {
     function updateConnectionStatus(connected) {
         if (!elements.connectionStatus) return;
 
+        // 대시보드에서만 표시 (hidden 제거, flex 추가)
+        elements.connectionStatus.classList.remove('hidden');
+        elements.connectionStatus.classList.add('flex');
+
         if (connected) {
-            elements.connectionStatus.innerHTML = `
-                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span class="text-green-600 text-xs">실시간 연결됨</span>
-            `;
+            elements.connectionStatus.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full"></span><span class="text-green-600 text-xs">실시간 연결됨</span>';
         } else {
-            elements.connectionStatus.innerHTML = `
-                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                <span class="text-red-600 text-xs">연결 끊김</span>
-            `;
+            elements.connectionStatus.innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span><span class="text-red-600 text-xs">연결 끊김</span>';
         }
     }
 

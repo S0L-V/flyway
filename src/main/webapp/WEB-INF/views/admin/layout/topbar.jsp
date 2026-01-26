@@ -8,8 +8,8 @@
                    class="w-full bg-slate-50 border-none rounded-md py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none">
         </div>
 
-        <!-- 연결 상태 -->
-        <div id="connection-status" class="flex items-center gap-1.5">
+        <!-- 연결 상태 (대시보드에서만 표시) -->
+        <div id="connection-status" class="hidden items-center gap-1.5">
             <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
             <span class="text-slate-400 text-xs">연결 중...</span>
         </div>
