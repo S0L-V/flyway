@@ -4,7 +4,7 @@ const pageSize = 10;
 function renderPage(pageNum) {
     if (pageNum < 1) pageNum = 1;
     currentPage = pageNum;
-    const totalPages = Math.ceil(displayedOptions.length / 10);
+    const totalPages = Math.ceil(displayedOptions.length / pageSize);
 
     const start = (pageNum -  1) * pageSize;
     const end = start + pageSize;
@@ -45,8 +45,8 @@ function renderPagination(currentPage, totalPages) {
     const btnLast = container.querySelector('[data-action="last"]');
 
     btnFirst.disabled = currentPage === 1;
-    btnPrev.disabled = currentPage <= 5;
-    btnNext.disabled = currentPage >= totalPages - 5;
+    btnPrev.disabled = startPage === 1;
+    btnNext.disabled = endPage >= totalPages;
     btnLast.disabled = currentPage === totalPages;
 
     btnFirst.onclick = () => goToPage(1);

@@ -567,15 +567,3 @@
   display: flex;
   gap: 6px;
 }
-
-/* 말줄임표 (...) */
-.pg-ellipsis {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  color: #9ca3af;
-  font-weight: bold;
-  pointer-events: none;
-}
