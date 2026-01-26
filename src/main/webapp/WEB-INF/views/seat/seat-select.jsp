@@ -46,7 +46,7 @@
                     <img src="${pageContext.request.contextPath}/resources/seat/img/airplane-diagram.svg" alt="Airplane Layout" />
                 </div>
 
-                <!-- Seat Map Container (Dynamic) -->
+                <!-- Seat Map + Legend 묶음 -->
                 <div class="seat-map-container">
                     <div id="seat-grid"
                          class="seat-grid"
@@ -55,7 +55,6 @@
                          data-sid="${reservationSegmentId}">
                         <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
                     </div>
-
 
                     <!-- Legend -->
                     <div class="seat-legend">
@@ -182,7 +181,7 @@
         });
     </script>
 
-    <script src="${pageContext.request.contextPath}/resources/seat/seat-select.js"></script>
+    <script src="${pageContext.request.contextPath}/resources/seat/seat-select.js?v=<%= System.currentTimeMillis() %>"></script>
 
 </body>
 </html>
