@@ -20,6 +20,6 @@ public interface ReservationDraftRepository {
     // 잔여석 처리
     FlightInfoView lockFlightInfoForUpdate(String flightId);
 
-    void decrementSeat(String flightId, String cabinClass, int count);
+    int decrementSeat(String flightId, String cabinClass, int count);
 
 }

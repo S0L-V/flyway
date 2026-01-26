@@ -48,7 +48,11 @@ public class ReservationDraftService {
             throw new IllegalStateException("잔여석 부족 (가는편): 남은 좌석 " + outRemaining + "석");
         }
 
-        draftRepository.decrementSeat(req.getOutFlightId(), req.getCabinClassCode(), req.getPassengerCount());
+        int outUpdated = draftRepository.decrementSeat(req.getOutFlightId(), req.getCabinClassCode(),
+                req.getPassengerCount());
+        if (outUpdated == 0) {
+            throw new IllegalStateException("잔여석 차감 실패 (가는편): 좌석 부족 또는 유효하지 않은 좌석등급");
+        }
 
         // ========== 잔여석 처리 (오는편 - 왕복인 경우) ==========
         if (isRoundTrip) {
@@ -62,7 +66,11 @@ public class ReservationDraftService {
                 throw new IllegalStateException("잔여석 부족 (오는편): 남은 좌석 " + inRemaining + "석");
             }
 
-            draftRepository.decrementSeat(req.getInFlightId(), req.getCabinClassCode(), req.getPassengerCount());
+            int inUpdated = draftRepository.decrementSeat(req.getInFlightId(), req.getCabinClassCode(),
+                    req.getPassengerCount());
+            if (inUpdated == 0) {
+                throw new IllegalStateException("잔여석 차감 실패 (오는편): 좌석 부족 또는 유효하지 않은 좌석등급");
+            }
         }
 
         // ========== 예약 생성 ==========
