@@ -79,44 +79,6 @@ body {
     font-weight: var(--font-weight-bold);
 }
 
-/* ===== Header ===== */
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 410px;
-    background: var(--color-bg-white);
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-small);
-}
-
-.logo img {
-    width: 190px;
-    height: 42px;
-}
-
-.menu {
-    display: flex;
-    gap: var(--gap-large);
-}
-
-.menu-item {
-    font-family: var(--font-family);
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.menu-item:hover {
-    color: var(--color-text-tertiary);
-}
-
 /* ===== Hero Banner ===== */
 .hero-banner {
     background: var(--color-bg-hero);
@@ -138,81 +100,6 @@ body {
     padding-top: 80px;
     padding-bottom: 50px;
 }
-
-/* ===== Search Box ===== */
-/*.search-box {*/
-/*    background: var(--color-bg-white);*/
-/*    border-radius: var(--radius-large);*/
-/*    box-shadow: var(--shadow-search);*/
-/*    padding: 34px 40px;*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    gap: var(--gap-large);*/
-/*    margin-top: -80px;*/
-/*    position: relative;*/
-/*    z-index: 1;*/
-/*}*/
-
-/*.search-tabs {*/
-/*    display: flex;*/
-/*    gap: var(--gap-xlarge);*/
-/*}*/
-
-/*.search-tab {*/
-/*    font-family: var(--font-family);*/
-/*    font-size: var(--font-size-large);*/
-/*    font-weight: var(--font-weight-bold);*/
-/*    cursor: pointer;*/
-/*    border: none;*/
-/*    background: none;*/
-/*    padding: 0;*/
-/*}*/
-
-/*.search-tab.active {*/
-/*    color: var(--color-primary-blue);*/
-/*}*/
-
-/*.search-tab.inactive {*/
-/*    color: var(--color-border-inactive);*/
-/*}*/
-
-/*.search-inputs {*/
-/*    display: flex;*/
-/*    gap: var(--gap-large);*/
-/*    align-items: center;*/
-/*}*/
-
-/*.search-input {*/
-/*    flex: 1;*/
-/*    font-family: var(--font-family);*/
-/*    font-size: var(--font-size-small);*/
-/*    font-weight: var(--font-weight-medium);*/
-/*    color: var(--color-text-tertiary);*/
-/*    border: none;*/
-/*    padding: 12px 20px;*/
-/*    cursor: pointer;*/
-/*    background: transparent;*/
-/*}*/
-
-/*.search-input::placeholder {*/
-/*    color: var(--color-text-tertiary);*/
-/*}*/
-
-/*.search-btn {*/
-/*    background: var(--color-primary-blue);*/
-/*    color: var(--color-bg-white);*/
-/*    font-family: var(--font-family);*/
-/*    font-size: var(--font-size-small);*/
-/*    font-weight: var(--font-weight-semibold);*/
-/*    border: none;*/
-/*    border-radius: 8px;*/
-/*    padding: 12px 32px;*/
-/*    cursor: pointer;*/
-/*}*/
-
-/*.search-btn:hover {*/
-/*    filter: brightness(0.95);*/
-/*}*/
 
 /* ===== Flight Listings ===== */
 .flight-row {
