@@ -88,7 +88,7 @@ public class RepriceProcessor implements ItemProcessor<RepriceCandidateRow, Pric
                 .currentPrice(item.getCurrentPrice())
                 .applied(true)
                 .policyVersion(version)
-                //.calcContextJson(contextJson)
+                .calcContextJson(contextJson)
                 .calculatedAt(batchReferenceTime)
                 .build();
     }
