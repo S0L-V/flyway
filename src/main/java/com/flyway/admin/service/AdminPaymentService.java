@@ -3,13 +3,14 @@ package com.flyway.admin.service;
 import java.util.List;
 
 import com.flyway.admin.dto.PaymentListDto;
+import com.flyway.admin.dto.PaymentStatsDto;
 
 public interface AdminPaymentService {
 
 	/**
 	 * 관리자 대시보드 결제 통계 조회
 	 */
-	PaymentListDto getPaymentStats();
+	PaymentStatsDto getPaymentStats();
 
 	/**
 	 * 결제 내역 목록 조회 (페이징 포함)
