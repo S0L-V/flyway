@@ -5,10 +5,13 @@
 <head>
     <meta charset="UTF-8">
     <title>마이페이지</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/resources/user/mypage.css">
 </head>
 <body>
+
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
 
 <div class="mypage-container">
     <h2>내 프로필</h2>
