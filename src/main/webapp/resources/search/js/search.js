@@ -473,37 +473,6 @@ function initSearchButton() {
         console.log("메인값 전달", params);
 
         window.location.href = `${CONTEXT_PATH}/search?${params.toString()}`;
-        // try {
-        //     // 3) 검색 API 호출 (POST)
-        //     const res = await fetch(`${CONTEXT_PATH}/api/public/flights/search`, {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //             "Accept": "application/json"
-        //         },
-        //         body: JSON.stringify(payload)
-        //     });
-        //
-        //     const json = await res.json();
-        //
-        //     if (!res.ok) {
-        //         console.error("search failed", json);
-        //         alert(json?.message ?? "검색 중 오류가 발생했습니다.");
-        //         return;
-        //     }
-        //
-        //     const data = json.data ?? json;
-        //
-        //     handleSearchResult(data);
-        //
-        //     syncTripUI();
-        //
-        //     console.log(json);
-        //
-        // } catch (err) {
-        //     console.error(err);
-        //     alert("네트워크 오류가 발생했습니다.");
-        // }
     });
 }
 
