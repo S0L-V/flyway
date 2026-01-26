@@ -24,6 +24,10 @@ public class RepriceCandidateRow {
     private long currentPrice;  // P_old
     private LocalDateTime lastEventPricedAt; // 쿨다운 체크용
 
+    // 좌석 정보 (점유율 확인)
+    private int remainingSeats;
+    private int totalSeats;
+
     // 시간 정보 (Flight 테이블 Join)
     private LocalDateTime departureTime;
 }

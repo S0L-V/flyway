@@ -46,19 +46,15 @@ public class RepriceProcessor implements ItemProcessor<RepriceCandidateRow, Pric
         LocalDateTime batchReferenceTime =
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(asOfEpochMillis), BATCH_ZONE);
 
-
-        // 1. 실시간 좌석 정보 조회 (Reader에서 못 가져온 정보 보충)
-        var seatStatus = seatService.getSeatStatus(item.getFlightId(), item.getCabinClassCode());
-
-        // 2. DynamicPricingCalculator Input 생성
+        // 1. DynamicPricingCalculator Input 생성
         PricingInput input = PricingInput.builder()
                 .flightId(item.getFlightId())
                 .cabinClassCode(item.getCabinClassCode())
                 .basePrice(item.getBasePrice())
                 .currentPrice(item.getCurrentPrice())
                 .departureTime(item.getDepartureTime())
-                .totalSeats(seatStatus.getTotalSeats())
-                .remainingSeats(seatStatus.getRemainingSeats())
+                .totalSeats(item.getTotalSeats())
+                .remainingSeats(item.getRemainingSeats())
                 .now(batchReferenceTime)
                 .eventBased(false)
                 .lastEventPricedAt(item.getLastEventPricedAt())
@@ -94,7 +90,7 @@ public class RepriceProcessor implements ItemProcessor<RepriceCandidateRow, Pric
                 .currentPrice(item.getCurrentPrice())
                 .applied(true)
                 .policyVersion(version)
-                .calcContextJson(contextJson)
+                //.calcContextJson(contextJson)
                 .calculatedAt(batchReferenceTime)
                 .build();
     }
