@@ -22,6 +22,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     initDates();
     initPaxCabin();
     initSearchButton();
+
+    const hasQuery = loadStateFromQuery();
+    if (hasQuery) {
+        syncSearchBarFromState();
+        executeSearch(); // ← 검색 API 호출만 분리
+    }
 });
 
 const state = {
@@ -454,7 +460,7 @@ function initSearchButton() {
         }
 
         // 2) DTO 1개로 보낼 payload 만들기 (POST)
-        const payload = {
+        const params = new URLSearchParams({
             tripType: state.tripType,
             from: state.from.code,
             to: state.to.code,
@@ -462,40 +468,139 @@ function initSearchButton() {
             dateEnd: state.tripType === "RT" ? state.dateEnd : null,
             passengers: state.passengers,
             cabinClass: state.cabin
-        };
+        });
 
-        try {
-            // 3) 검색 API 호출 (POST)
-            const res = await fetch(`${CONTEXT_PATH}/api/public/flights/search`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
+        console.log("메인값 전달", params);
 
-            const json = await res.json();
-
-            if (!res.ok) {
-                console.error("search failed", json);
-                alert(json?.message ?? "검색 중 오류가 발생했습니다.");
-                return;
-            }
-
-            const data = json.data ?? json;
-
-            handleSearchResult(data);
-
-            syncTripUI();
-
-            console.log(json);
-
-        } catch (err) {
-            console.error(err);
-            alert("네트워크 오류가 발생했습니다.");
-        }
+        window.location.href = `${CONTEXT_PATH}/search?${params.toString()}`;
+        // try {
+        //     // 3) 검색 API 호출 (POST)
+        //     const res = await fetch(`${CONTEXT_PATH}/api/public/flights/search`, {
+        //         method: "POST",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //             "Accept": "application/json"
+        //         },
+        //         body: JSON.stringify(payload)
+        //     });
+        //
+        //     const json = await res.json();
+        //
+        //     if (!res.ok) {
+        //         console.error("search failed", json);
+        //         alert(json?.message ?? "검색 중 오류가 발생했습니다.");
+        //         return;
+        //     }
+        //
+        //     const data = json.data ?? json;
+        //
+        //     handleSearchResult(data);
+        //
+        //     syncTripUI();
+        //
+        //     console.log(json);
+        //
+        // } catch (err) {
+        //     console.error(err);
+        //     alert("네트워크 오류가 발생했습니다.");
+        // }
     });
+}
+
+function syncSearchBarFromState() {
+    setFieldText("from", `${state.from.name}(${state.from.code})`);
+    setFieldText("to", `${state.to.name}(${state.to.code})`);
+
+    if (state.tripType === "RT" && state.dateEnd) {
+        setFieldText("dates", `${state.dateStart} ~ ${state.dateEnd}`);
+    } else {
+        setFieldText("dates", state.dateStart);
+    }
+
+    setFieldText(
+        "paxCabin",
+        `탑승 인원 ${state.passengers} / ${cabinText(state.cabin)}`
+    );
+
+    document.querySelector(
+        `.search-tab[data-trip="${state.tripType}"]`
+    )?.classList.add("search-tab--active");
+}
+
+function loadStateFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (!params.has("from")) return false;
+
+    state.tripType = params.get("tripType") || "RT";
+
+    const fromCode = params.get("from");
+    const toCode   = params.get("to");
+
+    if (fromCode) {
+        const dep = DEP_AIRPORTS.find(a => a.code === fromCode);
+        state.from = dep
+            ? { code: dep.code, name: dep.name }
+            : { code: fromCode, name: fromCode };
+    }
+
+    if (toCode) {
+        const arr = DEP_AIRPORTS.find(a => a.code === toCode);
+        state.to = arr
+            ? { code: arr.code, name: arr.name }
+            : { code: toCode, name: toCode };
+    }
+
+    state.dateStart = params.get("dateStart");
+    state.dateEnd   = params.get("dateEnd") || null;
+    state.passengers = Number(params.get("passengers") || 1);
+    state.cabin = params.get("cabinClass") || "ECO";
+
+    return true;
+}
+
+async function executeSearch() {
+    const payload = {
+        tripType: state.tripType,
+        from: state.from.code,
+        to: state.to.code,
+        dateStart: state.dateStart,
+        dateEnd: state.tripType === "RT" ? state.dateEnd : null,
+        passengers: state.passengers,
+        cabinClass: state.cabin
+    };
+
+    try {
+        // 3) 검색 API 호출 (POST)
+        const res = await fetch(`${CONTEXT_PATH}/api/public/flights/search`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+            console.error("search failed", json);
+            alert(json?.message ?? "검색 중 오류가 발생했습니다.");
+            return;
+        }
+
+        const data = json.data ?? json;
+
+        handleSearchResult(data);
+
+        syncTripUI();
+
+        console.log(json);
+
+    } catch (err) {
+        console.error(err);
+        alert("네트워크 오류가 발생했습니다.");
+    }
 }
 
 function handleSearchResult(data){

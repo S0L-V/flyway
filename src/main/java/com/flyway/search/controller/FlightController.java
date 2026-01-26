@@ -13,4 +13,9 @@ public class FlightController {
     public String list() {
         return "search/search";
     }
+
+    @GetMapping("/main")
+    public String main() {
+        return "main";
+    }
 }
