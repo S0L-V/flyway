@@ -311,8 +311,8 @@ function updateFilterStateAndRender() {
 
 // 검색결과에 필터링 적용
 function onFilterChanged(){
-    const filtered = applyFilters(allOptions, filterState);
-    renderByTripType(filtered);
+    displayedOptions = applyFilters(allOptions, filterState);
+    renderPage(1);
 }
 
 // 필터링 적용 로직
