@@ -121,6 +121,21 @@
             <version>3.1.8</version>
         </dependency>
 
+        <!-- Spring Batch -->
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+            <version>4.3.10</version>
+        </dependency>
+
+        <!-- JDBC 기반 Reader/Writer 사용 -->
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-infrastructure</artifactId>
+            <version>4.3.10</version>
+        </dependency>
+
+
 
         <!-- test code -->
         <!-- JUnit5 의존성 -->
@@ -138,6 +153,15 @@
             <version>${org.springframework-version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Spring Batch Test -->
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-test</artifactId>
+            <version>4.3.10</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <!-- Mockito -->
         <dependency>

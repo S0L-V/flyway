@@ -1,4 +1,4 @@
-package com.flyway.pricing.dto;
+package com.flyway.pricing.model;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class PricingRequest {
+public class PricingInput {
 
     /* ===== 식별자 (계산 로직에서 사용x) ===== */
     private String flightId;
