@@ -1,6 +1,7 @@
 package com.flyway.user.repository;
 
 import com.flyway.user.domain.UserProfile;
+import org.apache.ibatis.annotations.Param;
 
 public interface UserProfileRepository {
 
@@ -19,4 +20,9 @@ public interface UserProfileRepository {
      * - null이 아닌 필드만 업데이트
      */
     void updateProfile(UserProfile profile);
+
+    /**
+     * user_profile 개인정보 NULL 처리
+     */
+    int nullifyProfileIfWithdrawn(String userId);
 }

@@ -39,4 +39,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public int markWithdrawn(String userId, LocalDateTime now) { return userMapper.markWithdrawn(userId, now); }
+
+    @Override
+    public int anonymizeEmailIfWithdrawn(String userId, String anonymizedEmail) {
+        return userMapper.anonymizeEmailIfWithdrawn(userId, anonymizedEmail);
+    }
 }

@@ -2,6 +2,7 @@ package com.flyway.user.repository;
 
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.user.domain.User;
+import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
 
@@ -36,4 +37,10 @@ public interface UserRepository {
      * 사용자 탈퇴 처리
      */
     int markWithdrawn(String userId, LocalDateTime now);
+
+    /**
+     * users.email 익명화
+     */
+    int anonymizeEmailIfWithdrawn(@Param("userId") String userId,
+                                  @Param("anonymizedEmail") String anonymizedEmail);
 }

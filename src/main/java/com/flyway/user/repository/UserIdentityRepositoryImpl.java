@@ -26,4 +26,9 @@ public class UserIdentityRepositoryImpl implements UserIdentityRepository {
     public boolean existsEmailIdentity(String email) {
         return userIdentityMapper.existsEmailIdentity(email);
     }
+
+    @Override
+    public int anonymizeEmailProviderUserIdIfWithdrawn(String userId, String anonymizedEmail) {
+        return userIdentityMapper.anonymizeEmailProviderUserIdIfWithdrawn(userId, anonymizedEmail);
+    }
 }
