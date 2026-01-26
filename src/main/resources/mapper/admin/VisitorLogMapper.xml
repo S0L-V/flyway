@@ -67,7 +67,7 @@
             vl.log_id,
             vl.session_id,
             vl.user_id,
-            CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, '')) AS user_name,
+            COALESCE(NULLIF(TRIM(CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, ''))), ''), u.email) AS user_name,
             u.email AS user_email,
             vl.ip_address,
             vl.user_agent,
