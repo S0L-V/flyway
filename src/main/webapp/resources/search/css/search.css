@@ -502,3 +502,80 @@
   accent-color: #2563eb;   /* 체크되었을 때 파란색 (브랜드 컬러로 변경 가능) */
   cursor: pointer;
 }
+
+   /* 페이징 컨테이너 */
+ .pagination-container {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 6px;
+   margin-top: 40px;
+   margin-bottom: 60px;
+ }
+
+/* 공통 버튼 스타일 */
+.pg-btn {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb; /* 연한 회색 */
+  background-color: #ffffff;
+  color: #374151;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0 6px;
+}
+
+/* 호버 효과 */
+.pg-btn:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+/* 현재 활성화된 페이지 */
+.pg-btn.active {
+  background-color: #2563eb; /* Flyway 포인트 컬러 (파랑) */
+  border-color: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  pointer-events: none; /* 클릭 방지 */
+}
+
+/* 비활성화 버튼 (이전/다음 없을 때) */
+.pg-btn:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #f3f4f6;
+}
+
+/* 컨트롤 버튼 (<< < > >>) 폰트 조정 */
+.pg-control {
+  font-family: monospace; /* 화살표 모양 깔끔하게 */
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+
+/* 번호 나열 영역 */
+.pg-pages {
+  display: flex;
+  gap: 6px;
+}
+
+/* 말줄임표 (...) */
+.pg-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #9ca3af;
+  font-weight: bold;
+  pointer-events: none;
+}

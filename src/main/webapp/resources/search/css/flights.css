@@ -205,10 +205,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   margin-left: auto;
-  cursor: pointer;
 }
-
-.flight-price:focus { outline: 2px solid rgba(0,0,0,.2); outline-offset: 2px; }
 
 .price {
   font-size: var(--font-size-xl);
