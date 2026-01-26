@@ -16,4 +16,7 @@ public class KakaoProperties {
 
     @Value("${kakao.client-secret}")
     private String kakaoClientSecret;
+
+    @Value("${kakao.admin-key}")
+    private String kakaoAdminKey;
 }
