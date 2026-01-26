@@ -63,5 +63,36 @@
             #{snapCabinClassCode}
                  )
     </insert>
+    <!-- flight_info 행 락 (FOR UPDATE) -->
+    <select id="lockFlightInfoForUpdate" parameterType="string"
+            resultType="com.flyway.reservation.dto.FlightInfoView">
+        SELECT
+            flight_info_id AS flightInfoId,
+            flight_id AS flightId,
+            first_class_seat AS firstClassSeat,
+            business_class_seat AS businessClassSeat,
+            economy_class_seat AS economyClassSeat
+        FROM flight_info
+        WHERE flight_id = #{flightId}
+            FOR UPDATE
+    </select>
 
+    <!-- 잔여석 차감 -->
+    <update id="decrementSeat">
+    UPDATE flight_info
+    SET
+    <choose>
+        <when test="cabinClass == 'FST'">first_class_seat = first_class_seat - #{count}</when>
+        <when test="cabinClass == 'BIZ'">business_class_seat = business_class_seat - #{count}</when>
+        <when test="cabinClass == 'ECO'">economy_class_seat = economy_class_seat - #{count}</when>
+    </choose>
+    WHERE flight_id = #{flightId}
+        AND
+        <choose>
+            <when test="cabinClass == 'FST'">first_class_seat &gt;= #{count}</when>
+            <when test="cabinClass == 'BIZ'">business_class_seat &gt;= #{count}</when>
+            <when test="cabinClass == 'ECO'">economy_class_seat &gt;= #{count}</when>
+            <otherwise>1 = 0</otherwise>
+        </choose>
+    </update>
 </mapper>

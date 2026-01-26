@@ -1,6 +1,7 @@
 package com.flyway.reservation.repository;
 
 import com.flyway.reservation.domain.FlightSnapshot;
+import com.flyway.reservation.dto.FlightInfoView;
 import com.flyway.reservation.dto.ReservationInsertDTO;
 import com.flyway.reservation.dto.ReservationSegmentInsertDTO;
 import org.apache.ibatis.annotations.Param;
@@ -15,5 +16,10 @@ public interface ReservationDraftRepository {
     void saveReservation(ReservationInsertDTO param);
 
     void saveReservationSegment(ReservationSegmentInsertDTO param);
+
+    // 잔여석 처리
+    FlightInfoView lockFlightInfoForUpdate(String flightId);
+
+    int decrementSeat(String flightId, String cabinClass, int count);
 
 }
