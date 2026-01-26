@@ -2,7 +2,7 @@
 <div class="w-64 bg-[#1a1f26] text-slate-300 flex flex-col h-screen fixed left-0 top-0 z-50 shadow-2xl">
     <div class="p-8 flex items-center justify-center border-b border-slate-700/30">
         <a href="${pageContext.request.contextPath}/admin/dashboard">
-            <img src="${pageContext.request.contextPath}/resources/search/img/logo.svg"
+            <img src="${pageContext.request.contextPath}/resources/common/img/logo.svg"
                  alt="Flyway Admin"
                  class="h-10 w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity">
         </a>
