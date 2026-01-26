@@ -42,6 +42,7 @@ public class AdminAuthController {
 	 */
 	@GetMapping("/admin/login")
 	public String loginPage(HttpSession session) {
+		log.info("=========================================");
 		if (session.getAttribute("adminId") != null) {
 			return "redirect:/admin/dashboard";
 		}
@@ -50,6 +51,7 @@ public class AdminAuthController {
 
 	@GetMapping("/admin/dashboard")
 	public String dashboardPage(HttpSession session, Model model) {
+		log.info("=========================================");
 		// 세션 확인
 		String adminId = (String)session.getAttribute("adminId");
 		if (adminId == null) {
