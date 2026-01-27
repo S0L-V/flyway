@@ -3,9 +3,7 @@ package com.flyway.auth.service;
 import com.flyway.auth.config.KakaoProperties;
 import com.flyway.auth.domain.KakaoToken;
 import com.flyway.auth.domain.KakaoUserInfo;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -17,15 +15,18 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class KakaoOAuthServiceImpl implements KakaoOAuthService {
     private static final String AUTHORIZE_URL = "https://kauth.kakao.com/oauth/authorize";
     private static final String TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     private static final String USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 
     private final KakaoProperties kakaoProperties;
+    private final RestTemplate restTemplate;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    public KakaoOAuthServiceImpl(KakaoProperties kakaoProperties, RestTemplate externalApiRestTemplate) {
+        this.kakaoProperties = kakaoProperties;
+        this.restTemplate = externalApiRestTemplate;
+    }
 
     public String buildAuthorizeUrl(String state) {
         String redirectUri = URLEncoder.encode(kakaoProperties.getKakaoRedirectUri(), StandardCharsets.UTF_8);
