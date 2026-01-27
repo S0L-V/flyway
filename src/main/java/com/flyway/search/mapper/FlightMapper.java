@@ -4,6 +4,7 @@ import com.flyway.search.domain.*;
 import com.flyway.search.dto.FlightDetailDto;
 import com.flyway.search.dto.FlightSearchRequest;
 import com.flyway.search.dto.FlightSearchResponse;
+import com.flyway.search.dto.LastPriceDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,4 +19,5 @@ public interface FlightMapper {
     List<FlightSearchResponse> outbound(FlightSearchRequest dto);
     List<FlightSearchResponse> inbound(FlightSearchRequest dto);
     FlightDetailDto details(@Param("cabinClass") String cabinClass, @Param("routeType") String routeType);
+    List<LastPriceDto> findPrice(@Param("outFlightId") String outFlightId, @Param("inFlightId") String inFlightId,@Param("cabinClassCode") String cabinClassCode);
 }

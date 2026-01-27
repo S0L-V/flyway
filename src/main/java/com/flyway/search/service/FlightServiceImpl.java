@@ -125,4 +125,48 @@ public class FlightServiceImpl implements FlightService{
         if (a == null || b == null || a.length() < 2 || b.length() < 2) return false;
         return a.substring(0, 2).equalsIgnoreCase(b.substring(0, 2));
     }
+
+    // 예매 페이지 이동 시 가격 재조회
+    @Override
+    public List<LastPriceDto> findPrice(String outFlightId, String inFlightId, String cabinClassCode) {
+        List<LastPriceDto> prePrice = flightRepository.findPrice(outFlightId, inFlightId, cabinClassCode);
+
+
+        if (prePrice.isEmpty()) {
+            return prePrice;
+        }
+
+
+        LastPriceDto outFlight = prePrice.stream()
+                .filter(f -> f.getFlightId().equals(outFlightId))
+                .findFirst()
+                .orElse(null);
+
+        if(outFlight == null) {
+            return prePrice;
+        }
+
+        LastPriceDto inFlight = null;
+        if (inFlightId != null && prePrice.size() > 1) {
+            inFlight = prePrice.stream()
+                    .filter(f -> f.getFlightId().equals(inFlightId))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (inFlight == null || !sameAirline(outFlight.getFlightNumber(), inFlight.getFlightNumber())) {
+            return prePrice;
+        }
+
+        double originalOut = outFlight.getFlightPrice();
+        double originalIn = inFlight.getFlightPrice();
+
+        double rawTotal = (originalOut + originalIn) * 10.0 / 14.0;
+        long totalPrice = (long) ((rawTotal + 500) / 1000) * 1000;
+
+        outFlight.setFlightPrice(totalPrice / 2);
+        inFlight.setFlightPrice(totalPrice / 2);
+
+        return prePrice;
+    }
 }

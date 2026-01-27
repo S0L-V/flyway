@@ -133,4 +133,16 @@
         WHERE route_type = #{routeType} AND cabin_class_code = #{cabinClass}
     </select>
 
+    <!--    예약 가격 조회-->
+    <select id="findPrice" resultType="com.flyway.search.dto.LastPriceDto">
+        SELECT
+            f.flight_id AS flightId,
+            f.flight_number AS flightNumber,
+            fsp.current_price AS flightPrice
+        FROM flight f
+        JOIN flight_seat_price fsp
+            ON f.flight_id = fsp.flight_id AND fsp.cabin_class_code = #{cabinClassCode}
+        WHERE f.flight_id IN (#{outFlightId}, #{inFlightId})
+    </select>
+
 </mapper>
