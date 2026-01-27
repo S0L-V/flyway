@@ -330,6 +330,8 @@
     <input type="hidden" name="inFlightId" id="hiddenInFlightId">
     <input type="hidden" name="passengerCount" id="hiddenPassengerCount">
     <input type="hidden" name="cabinClassCode" id="hiddenCabinClassCode">
+    <input type="hidden" name="outPrice" id="hiddenOutPrice">
+    <input type="hidden" name="inPrice" id="hiddenInPrice">
 </form>
 </body>
 </html>

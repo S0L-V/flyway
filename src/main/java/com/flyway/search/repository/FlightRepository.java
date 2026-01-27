@@ -6,7 +6,7 @@ import com.flyway.search.domain.Flight;
 import com.flyway.search.dto.FlightDetailDto;
 import com.flyway.search.dto.FlightSearchRequest;
 import com.flyway.search.dto.FlightSearchResponse;
-import com.flyway.search.mapper.FlightMapper;
+import com.flyway.search.dto.LastPriceDto;
 
 import java.util.List;
 
@@ -24,4 +24,6 @@ public interface FlightRepository {
     List<FlightSearchResponse> findInboundFlights(FlightSearchRequest dto);
 
     FlightDetailDto findDetails(String cabinClass, String routeType);
+
+    List<LastPriceDto> findPrice(String outFlightId, String inFlightId, String cabinClassCode);
 }

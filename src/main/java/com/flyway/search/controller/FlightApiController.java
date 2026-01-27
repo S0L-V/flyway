@@ -3,6 +3,7 @@ package com.flyway.search.controller;
 import com.flyway.search.domain.*;
 import com.flyway.search.dto.FlightDetailDto;
 import com.flyway.search.dto.FlightSearchRequest;
+import com.flyway.search.dto.LastPriceDto;
 import com.flyway.search.dto.SearchResultDto;
 import com.flyway.search.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,11 @@ public class FlightApiController {
     @GetMapping("/api/public/flights/details")
     public FlightDetailDto details(@RequestParam String cabinClass, @RequestParam String routeType) {
         return service.details(cabinClass, routeType);
+    }
+
+    @GetMapping("/api/public/flights/prices")
+    public List<LastPriceDto> prices(@RequestParam String outFlightId, @RequestParam String inFlightId, @RequestParam String cabinClassCode) {
+        return service.findPrice(outFlightId, inFlightId, cabinClassCode);
     }
 
 }
