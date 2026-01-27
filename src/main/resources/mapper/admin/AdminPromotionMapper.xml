@@ -17,13 +17,16 @@
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="createdBy" column="created_by"/>
+        <!-- JOIN -->
+        <result property="flightNumber" column="flight_number"/>
+        <result property="departureAirport" column="departure_airport"/>
         <result property="departureAirportName" column="departure_airport_name"/>
+        <result property="arrivalAirport" column="arrival_airport"/>
         <result property="arrivalAirportName" column="arrival_airport_name"/>
         <result property="airlineName" column="airline_name"/>
         <result property="departureTime" column="departure_time"/>
         <result property="arrivalTime" column="arrival_time"/>
         <result property="originalPrice" column="current_price"/>
-        <result property="arrivalAirportImageUrl" column="arrival_airport_image_url"/>
     </resultMap>
 
     <sql id="promotionColumns">
@@ -39,6 +42,9 @@
         p.created_at,
         p.updated_at,
         p.created_by,
+        f.flight_number,
+        f.departure_airport,
+        f.arrival_airport,
         dep.city AS departure_airport_name,
         arr.city AS arrival_airport_name,
         arr.image_url AS arrival_airport_image_url
