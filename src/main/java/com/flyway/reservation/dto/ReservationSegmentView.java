@@ -20,4 +20,6 @@ public class ReservationSegmentView {
     private LocalDateTime snapArrivalTime;
     private String snapFlightNumber;
     private String snapCabinClassCode;
+
+    private Long snapPrice;
 }

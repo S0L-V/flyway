@@ -25,7 +25,9 @@ public class ReservationDraftController {
             @RequestParam String outFlightId,
             @RequestParam(required = false) String inFlightId,
             @RequestParam int passengerCount,
-            @RequestParam String cabinClassCode
+            @RequestParam String cabinClassCode,
+            @RequestParam Long outPrice,
+            @RequestParam(required = false) Long inPrice
     ) {
         //  SecurityContext에서 userId 추출
         String userId = getAuthenticatedUserIdOrThrow();
@@ -35,6 +37,8 @@ public class ReservationDraftController {
                 .inFlightId(inFlightId)
                 .passengerCount(passengerCount)
                 .cabinClassCode(cabinClassCode)
+                .outPrice(outPrice)
+                .inPrice(inPrice)
                 .build();
 
         String reservationId = draftService.createDraft(userId, req);
