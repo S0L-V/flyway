@@ -138,6 +138,18 @@
             FOR UPDATE
     </select>
 
+    <!-- 테스트용 탑승객 1명 passengerId -->
+    <select id="selectFirstPassengerIdByReservationId"
+            parameterType="string"
+            resultType="string">
+        SELECT p.passenger_id
+        FROM passenger p
+        WHERE p.reservation_id = #{reservationId}
+        ORDER BY p.passenger_id
+            LIMIT 1
+    </select>
+
+
     <!-- flight_seat가 없으면 HOLD row를 생성 (UNIQUE(flight_id, aircraft_seat_id) 기반) -->
     <insert id="insertFlightSeatHold">
         INSERT INTO flight_seat (

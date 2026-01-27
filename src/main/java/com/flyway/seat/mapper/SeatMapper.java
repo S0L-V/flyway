@@ -89,4 +89,8 @@ public interface SeatMapper {
             @Param("reservationSegmentId") String reservationSegmentId,
             @Param("passengerId") String passengerId
     );
+    // 좌석 팝업에서 HOLD 테스트용 해당 승객 1명 passenger_id 조회
+    String selectFirstPassengerIdByReservationId(@Param("reservationId")
+            String reservationId);
+
 }

@@ -1,131 +1,221 @@
-// 좌석 선택 페이지에서 좌석 맵 조회 + 렌더링 담당
+// 좌석 선택 페이지 (좌석 맵 조회 + 렌더링 + HOLD API 연동)
+
+async function safeJson(res) {
+    const ct = res.headers.get("content-type") || "";
+    const text = await res.text();
+    if (!ct.includes("application/json")) {
+        throw new Error(`JSON이 아닌 응답: ${ct} / 미리보기: ${text.slice(0, 80)}`);
+    }
+    return JSON.parse(text);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 좌석 그리드 컨테이너
     const seatGrid = document.getElementById("seat-grid");
     if (!seatGrid) {
-        console.error("좌석 배치를 찾을 수 없습니다.");
+        console.error("seat-grid element not found");
         return;
     }
 
-    // JSP에서 data-* 로 내려준 값 읽기
-    const ctx = seatGrid.dataset.ctx || "";              // contextPath
-    const reservationId = seatGrid.dataset.rid;          // reservationId
-    const segmentId = seatGrid.dataset.sid;              // reservationSegmentId
+    const ctx = seatGrid.dataset.ctx || "";
+    const reservationId = seatGrid.dataset.rid;
+    const segmentId = seatGrid.dataset.sid;
 
-    // 필수 값 검증
+    // HOLD에 필요한 passengerId (JSP에서 data-pid로 내려줘야 테스트 가능)
+    const passengerId = seatGrid.dataset.pid;
+
+    const cabinClassCode = seatGrid.dataset.cabin || null;
+
     if (!reservationId || !segmentId) {
-        console.error("해당 예약이나 구간이 존재하지 않습니다.", {
-            reservationId,
-            segmentId
-        });
-
-        seatGrid.innerHTML =
-            `<p class="seat-grid__loading">
-                좌석 정보를 불러올 수 없습니다.<br/>
-                (예약 정보 또는 구간 정보 없음)
-             </p>`;
+        console.error("Missing reservationId or segmentId", { reservationId, segmentId });
+        seatGrid.innerHTML = `
+      <p class="seat-grid__loading">
+        좌석 정보를 불러올 수 없습니다.<br/>(예약 정보 또는 구간 정보 없음)
+      </p>`;
         return;
     }
 
-    // 좌석 API 호출
-    fetchSeatMap(ctx, reservationId, segmentId);
+    // passengerId 없으면 HOLD 테스트 불가
+    if (!passengerId) {
+        console.error("Missing passengerId (data-pid)", { passengerId });
+        seatGrid.innerHTML = `
+      <p class="seat-grid__loading">
+        좌석 HOLD를 위해 승객 정보가 필요합니다.<br/>(data-pid 누락)
+      </p>`;
+        return;
+    }
+
+    let selectedSeatNo = null;
+    let isHolding = false; // [NEW] 중복 클릭 방지
+
+    // 최초 로딩
+    refreshAndRender();
+
+    // 좌석 클릭 → HOLD/RELEASE 연동
+    seatGrid.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button.seat-item");
+        if (!btn) return;
+        if (btn.disabled) return;
+        if (isHolding) return; // [NEW]
+
+        const seatNo = btn.dataset.seatNo;
+        if (!seatNo) return;
+
+        try {
+            isHolding = true;
+
+            // 같은 좌석 다시 누르면 HOLD 해제
+            if (selectedSeatNo === seatNo) {
+                // [NEW] RELEASE 먼저 호출
+                await releaseHold(ctx, reservationId, segmentId, passengerId);
+                selectedSeatNo = null;
+
+                await refreshAndRender(); // 서버 상태 반영해서 다시 그림
+                renderSelectedSummary(null);
+                return;
+            }
+
+            // 다른 좌석을 누르면: 기존 HOLD 해제 후 새 HOLD
+            if (selectedSeatNo) {
+                await releaseHold(ctx, reservationId, segmentId, passengerId); // [NEW]
+            }
+
+            // HOLD 호출
+            await holdSeat(ctx, reservationId, segmentId, {
+                passengerId,
+                seatNo,
+            });
+
+            selectedSeatNo = seatNo;
+
+            await refreshAndRender();
+            renderSelectedSummary(selectedSeatNo);
+        } catch (err) {
+            console.error("HOLD 처리 실패", err);
+            alert(`좌석 처리 실패: ${err.message}`);
+            // 실패 시에도 서버 상태 기준으로 다시 로딩
+            await refreshAndRender();
+        } finally {
+            isHolding = false;
+        }
+    });
+
+    // 좌석 목록 다시 받아서 렌더링하는 함수 (HOLD/RELEASE 후 서버 상태 반영)
+    async function refreshAndRender() {
+        const seats = await fetchSeatMap(ctx, reservationId, segmentId);
+
+        const filtered = cabinClassCode
+            ? seats.filter(
+                (s) =>
+                    String(s.cabinClassCode || "").toUpperCase() ===
+                    String(cabinClassCode).toUpperCase()
+            )
+            : seats;
+
+        renderSeatGrid(filtered, selectedSeatNo);
+    }
 });
 
-// 좌석 맵 조회 API 호출
+// 좌석 맵 조회: content-type 체크 + safeJson 사용
 function fetchSeatMap(ctx, reservationId, segmentId) {
-    const seatGrid = document.getElementById("seat-grid");
-
     const url =
         `${ctx}/api/public/reservations/` +
         `${encodeURIComponent(reservationId)}` +
         `/segments/${encodeURIComponent(segmentId)}/seats`;
 
-    fetch(url)
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}`);
-            }
-            return res.json();
-        })
-        .then((data) => {
-            // 서버 응답 구조: { success, data }
-            renderSeatGrid(data?.data ?? []);
-        })
-        .catch((err) => {
-            console.error("좌석 조회 실패", err);
-            seatGrid.innerHTML =
-                `<p class="seat-grid__loading">
-                    좌석 조회 실패: ${err.message}
-                 </p>`;
-        });
+    return fetch(url)
+        .then((res) => safeJson(res))
+        .then((data) => data?.data ?? []);
+}
+
+// HOLD API 호출
+function holdSeat(ctx, reservationId, segmentId, body) {
+    const url =
+        `${ctx}/api/public/reservations/` +
+        `${encodeURIComponent(reservationId)}` +
+        `/segments/${encodeURIComponent(segmentId)}/seats/hold`;
+
+    return fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        body: JSON.stringify(body),
+    })
+        .then((res) => safeJson(res))
+        .then((data) => data);
+}
+
+// RELEASE API 호출
+function releaseHold(ctx, reservationId, segmentId, passengerId) {
+    const url =
+        `${ctx}/api/public/reservations/` +
+        `${encodeURIComponent(reservationId)}` +
+        `/segments/${encodeURIComponent(segmentId)}` +
+        `/seats/hold/${encodeURIComponent(passengerId)}`;
+
+    return fetch(url, {
+        method: "DELETE",
+        headers: { "Accept": "application/json" },
+    })
+        .then((res) => safeJson(res))
+        .then((data) => data);
 }
 
 // 좌석 그리드 렌더링
-function renderSeatGrid(seats) {
+function renderSeatGrid(seats, selectedSeatNo) {
     const seatGrid = document.getElementById("seat-grid");
     seatGrid.innerHTML = "";
 
     if (!seats || seats.length === 0) {
-        seatGrid.innerHTML =
-            `<p class="seat-grid__loading">좌석 정보가 없습니다.</p>`;
+        seatGrid.innerHTML = `<p class="seat-grid__loading">좌석 정보가 없습니다.</p>`;
         return;
     }
 
-    // rowNo 기준으로 좌석 그룹핑
     const rows = new Map();
     seats.forEach((seat) => {
-        const rowNo = seat.rowNo;
-        if (!rows.has(rowNo)) {
-            rows.set(rowNo, []);
-        }
+        const rowNo = seat.rowNo ?? -1;
+        if (!rows.has(rowNo)) rows.set(rowNo, []);
         rows.get(rowNo).push(seat);
     });
 
-    // row 번호 오름차순 정렬
     [...rows.keys()]
         .sort((a, b) => Number(a) - Number(b))
         .forEach((rowNo) => {
             const rowDiv = document.createElement("div");
             rowDiv.className = "seat-row";
 
-            // 행 번호
             const rowNumber = document.createElement("div");
             rowNumber.className = "seat-row__number";
             rowNumber.textContent = rowNo;
             rowDiv.appendChild(rowNumber);
 
-            // 좌석 영역
             const seatArea = document.createElement("div");
             seatArea.className = "seat-row__seats";
 
-            // 같은 행 내 좌석을 A, B, C… 순으로 정렬
             const rowSeats = rows.get(rowNo);
-            rowSeats.sort((a, b) =>
-                String(a.colNo).localeCompare(String(b.colNo))
-            );
+            rowSeats.sort((a, b) => String(a.colNo).localeCompare(String(b.colNo)));
 
             rowSeats.forEach((seat) => {
                 const seatBtn = document.createElement("button");
                 seatBtn.type = "button";
                 seatBtn.className = "seat-item";
                 seatBtn.textContent = seat.seatNo;
+                seatBtn.dataset.seatNo = seat.seatNo;
 
-                // 좌석 상태별 처리
-                switch (seat.seatStatus) {
-                    case "AVAILABLE":
-                        seatBtn.classList.add("seat-item--available");
-                        break;
+                if (seat.seatStatus === "AVAILABLE") {
+                    seatBtn.classList.add("seat-item--available");
+                    seatBtn.disabled = false;
+                } else if (seat.seatStatus === "HOLD") {
+                    seatBtn.classList.add("seat-item--hold");
+                    seatBtn.disabled = true;
+                } else {
+                    seatBtn.classList.add("seat-item--unavailable");
+                    seatBtn.disabled = true;
+                }
 
-                    case "HELD":
-                        seatBtn.classList.add("seat-item--hold");
-                        seatBtn.disabled = true;
-                        break;
-
-                    default:
-                        seatBtn.classList.add("seat-item--unavailable");
-                        seatBtn.disabled = true;
-                        break;
+                if (selectedSeatNo && seat.seatNo === selectedSeatNo) {
+                    seatBtn.classList.add("seat-item--selected");
                 }
 
                 seatArea.appendChild(seatBtn);
@@ -134,4 +224,33 @@ function renderSeatGrid(seats) {
             rowDiv.appendChild(seatArea);
             seatGrid.appendChild(rowDiv);
         });
+}
+
+// 우측 요약 패널 렌더
+function renderSelectedSummary(selectedSeatNo) {
+    const box = document.getElementById("selected-summary");
+    if (!box) return;
+
+    if (!selectedSeatNo) {
+        box.innerHTML = `
+      <div class="selected-summary__empty">
+        <p>선택된 좌석이 없습니다.</p>
+      </div>`;
+        return;
+    }
+
+    box.innerHTML = `
+    <div class="selected-summary__item">
+      <div class="selected-summary__label">선택 좌석</div>
+      <div class="selected-summary__value">${escapeHtml(selectedSeatNo)}</div>
+    </div>`;
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
