@@ -1,18 +1,20 @@
 package com.flyway.admin.repository;
 
-import java.util.List;
+import com.flyway.admin.dto.AdminFlightDto;
 
-import com.flyway.search.domain.Flight;
+import java.util.List;
 
 public interface AdminFlightRepository {
 
-	List<Flight> findFlightList(Flight filter);
+	List<AdminFlightDto> findFlightList(String departureAirport, String arrivalAirport, int offset, int limit);
 
-	Flight findFlightById(String flightId);
+	int countFlights(String departureAirport, String arrivalAirport);
 
-	int saveFlight(Flight flight);
+	AdminFlightDto findFlightById(String flightId);
 
-	int updateFlight(Flight flight);
+	int saveFlight(AdminFlightDto flight);
+
+	int updateFlight(AdminFlightDto flight);
 
 	int deleteFlight(String flightId);
 }
