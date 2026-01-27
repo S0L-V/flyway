@@ -137,7 +137,7 @@
     <select id="findPrice" resultType="com.flyway.search.dto.LastPriceDto">
         SELECT
             f.flight_id AS flightId,
-            f.flight_number AS flight_number,
+            f.flight_number AS flightNumber,
             fsp.current_price AS flightPrice
         FROM flight f
         JOIN flight_seat_price fsp

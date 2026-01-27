@@ -140,10 +140,14 @@ public class FlightServiceImpl implements FlightService{
         LastPriceDto outFlight = prePrice.stream()
                 .filter(f -> f.getFlightId().equals(outFlightId))
                 .findFirst()
-                .orElse(prePrice.get(0));
+                .orElse(null);
+
+        if(outFlight == null) {
+            return prePrice;
+        }
 
         LastPriceDto inFlight = null;
-        if (prePrice.size() > 1) {
+        if (inFlightId != null && prePrice.size() > 1) {
             inFlight = prePrice.stream()
                     .filter(f -> f.getFlightId().equals(inFlightId))
                     .findFirst()
