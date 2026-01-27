@@ -13,7 +13,7 @@
         <result property="cabinClassCode" column="cabin_class_code"/>
         <result property="tags" column="tags"/>
         <result property="isActive" column="is_active"/>
-        <result property="displayOrder" column="displayOrder"/>
+        <result property="displayOrder" column="display_order"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="createdBy" column="created_by"/>
@@ -22,7 +22,8 @@
         <result property="airlineName" column="airline_name"/>
         <result property="departureTime" column="departure_time"/>
         <result property="arrivalTime" column="arrival_time"/>
-        <result property="currentPrice" column="current_price"/>
+        <result property="originalPrice" column="current_price"/>
+        <result property="arrivalAirportImageUrl" column="arrival_airport_image_url"/>
     </resultMap>
 
     <sql id="promotionColumns">
@@ -31,15 +32,16 @@
         p.title,
         p.passenger_count,
         p.discount_percentage,
-        p.cabinClassCode,
+        p.cabin_class_code,
         p.tags,
         p.is_active,
         p.display_order,
-        p.craeted_at,
+        p.created_at,
         p.updated_at,
         p.created_by,
         dep.city AS departure_airport_name,
         arr.city AS arrival_airport_name,
+        arr.image_url AS arrival_airport_image_url
         al.airline_name,
         f.departure_time,
         f.arrival_time,
@@ -49,7 +51,7 @@
     <sql id="promotionJoins">
         FROM promotion p
         JOIN flight f ON p.flight_id = f.flight_id
-        LEFT JOIN airline_al ON f.airline_id = al.airline_id
+        LEFT JOIN airline al ON f.airline_id = al.airline_id
         LEFT JOIN airport dep ON f.departure_airport = dep.airport_id
         LEFT JOIN airport arr ON f.arrival_airport = arr.airport_id
         LEFT JOIN flight_seat_price fsp ON p.flight_id = fsp.flight_id AND p.cabin_class_code = fsp.cabin_class_code
@@ -60,13 +62,13 @@
         <include refid="promotionColumns"/>
         <include refid="promotionJoins"/>
         <where>
-            <if test="isActive != null ans isActive != ''">
+            <if test="isActive != null and isActive != ''">
                 AND p.is_active = #{isActive}
             </if>
-            <if test="searchKeyword != null ans searchKeyword != ''">
+            <if test="searchKeyword != null and searchKeyword != ''">
                 AND(
                     p.title LIKE CONCAT('%', #{searchKeyword}, '%') OR
-                    f.flight_number LIKE CONCAT('%', #{searchKeyword}, '%')
+                    f.flight_number LIKE CONCAT('%', #{searchKeyword}, '%') OR
                     al.airline_name LIKE CONCAT('%', #{searchKeyword}, '%')
                 )
             </if>
@@ -84,7 +86,7 @@
             <if test="isActive != null and isActive != ''">
                 AND p.is_active = #{isActive}
             </if>
-            <if test="searchKeyword != null ans searchKeyword != ''">
+            <if test="searchKeyword != null and searchKeyword != ''">
                 AND (
                     p.title LIKE CONCAT('%', #{searchKeyword}, '%') OR
                     f.flight_number LIKE CONCAT('%', #{searchKeyword}, '%') OR
@@ -104,7 +106,7 @@
     <insert id="insertPromotion" parameterType="com.flyway.admin.dto.PromotionDto">
         INSERT INTO promotion(
             promotion_id, flight_id, title, passenger_count, discount_percentage,
-            cabin_class_code, tags, is_active, display_order, created_by, creatd_at
+            cabin_class_code, tags, is_active, display_order, created_by, created_at
         ) VALUES (
             #{promotionId}, #{flightId}, #{title}, #{passengerCount}, #{discountPercentage},
             #{cabinClassCode}, #{tags}, #{isActive}, #{displayOrder}, #{createdBy}, NOW()
@@ -114,9 +116,9 @@
     <update id="updatePromotion" parameterType="com.flyway.admin.dto.PromotionDto">
         UPDATE promotion
         SET
-            flight_id = #{flight_id},
+            flight_id = #{flightId},
             title = #{title},
-            passenger_count = #{passengerCcount},
+            passenger_count = #{passengerCount},
             discount_percentage = #{discountPercentage},
             tags = #{tags},
             is_active = #{isActive},
@@ -142,7 +144,7 @@
         <include refid="promotionJoins"/>
         WHERE p.is_active = 'Y'
         ORDER BY p.display_order ASC, p.created_at DESC
-        LIMIT = #{limit}
+        LIMIT #{limit}
     </select>
 
 </mapper>
