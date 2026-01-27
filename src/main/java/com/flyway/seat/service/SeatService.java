@@ -31,4 +31,6 @@ public interface SeatService {
             String passengerId
     );
 
+    String findFirstPassengerId(String reservationId);
+
 }

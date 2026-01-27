@@ -1,6 +1,7 @@
 :root {
   /* Colors */
   --color-primary: #2f93f7;
+  --color-primary-seat: #2a74e3;
   --color-text-primary: #000000;
   --color-text-secondary: #3c4043;
   --color-text-tertiary: #404040;
@@ -9,23 +10,39 @@
   --color-text-dark-gray: #7d7d7d;
   --color-text-medium: #414141;
   --color-text-inactive: #979797;
+  --color-text-light-gray: #6c6c6c;
+  --color-text-subtle: #636363;
   --color-white: #ffffff;
   
   --color-bg-main: #f7f7f7;
   --color-bg-banner: #e0eef7;
   --color-bg-card-footer: #f5f6f6;
+  --color-bg-light-gray: #f1f1f1;
+  --color-bg-gray: #ebebeb;
   
   --color-border-light: #d4d5da;
   --color-border-card: #d3dbd9;
+  --color-border-gray: #c3c3c3;
+  --color-border-medium: #cbcbcb;
+  
+  /* Seat-specific Colors */
+  --color-seat-available: #2a74e3;
+  --color-seat-premium: #2a74e3;
+  --color-seat-selected: #ff5733;
+  --color-seat-unavailable: #d4d5da;
+  --color-seat-text-white: #ffffff;
   
   /* Typography */
   --font-family-primary: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  --font-family-logo: 'Paperlogy', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   
-  --font-size-xs: 14px;
-  --font-size-sm: 16px;
-  --font-size-md: 18px;
-  --font-size-lg: 20px;
-  --font-size-xl: 24px;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
   
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -43,6 +60,7 @@
   --spacing-5xl: 50px;
   
   /* Border Radius */
+  --radius-xs: 5px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 22px;
