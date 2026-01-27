@@ -43,6 +43,15 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    public String findFirstPassengerId(String reservationId) {
+        String passengerId = seatMapper.selectFirstPassengerIdByReservationId(reservationId);
+        if (passengerId == null || passengerId.isBlank()) {
+            throw new IllegalArgumentException("해당 예약에 승객이 없습니다.");
+        }
+        return passengerId;
+    }
+
+    @Override
     @Transactional
     public SeatHoldResponse holdSeat(String reservationId, String reservationSegmentId, SeatHoldRequest request) {
         if (request == null
@@ -56,8 +65,8 @@ public class SeatServiceImpl implements SeatService {
         if (status == null) {
             throw new IllegalArgumentException("예약이 존재하지 않습니다.");
         }
-        if (!"HOLD".equalsIgnoreCase(status)) {
-            throw new IllegalArgumentException("좌석 선택은 HOLD 상태에서만 가능합니다.");
+        if (!"HELD".equalsIgnoreCase(status)) {
+            throw new IllegalArgumentException("좌석 선택은 예약 진행 중에만 가능합니다.");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -173,7 +182,7 @@ public class SeatServiceImpl implements SeatService {
         if (status == null) {
             throw new IllegalArgumentException("예약이 존재하지 않습니다.");
         }
-        if (!"HOLD".equalsIgnoreCase(status)) {
+        if (!"HELD".equalsIgnoreCase(status)) {
             throw new IllegalArgumentException("좌석 해제는 HOLD 상태에서만 가능합니다.");
         }
 

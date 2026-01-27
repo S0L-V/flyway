@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>사전 좌석 지정 - Flyway</title>
     
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/variables.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/global.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/variables.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/global.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/seat-select.css">
 </head>
 <body>
@@ -52,7 +52,9 @@
                          class="seat-grid"
                          data-ctx="${pageContext.request.contextPath}"
                          data-rid="${reservationId}"
-                         data-sid="${reservationSegmentId}">
+                         data-sid="${reservationSegmentId}"
+                         data-pid="${passengerId}"
+                    >
                         <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
                     </div>
 
