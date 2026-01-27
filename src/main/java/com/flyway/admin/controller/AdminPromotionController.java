@@ -23,7 +23,6 @@ import com.flyway.admin.service.AdminPromotionService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.ErrorCode;
 
-import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
