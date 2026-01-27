@@ -12,4 +12,7 @@ public class DraftCreateRequest {
     private String inFlightId;
     private int passengerCount;
     private String cabinClassCode;
+
+    private Long outPrice;  //가는편
+    private Long inPrice;  // 오는편
 }

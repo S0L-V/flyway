@@ -49,7 +49,8 @@
             snap_departure_time,
             snap_arrival_time,
             snap_flight_number,
-            snap_cabin_class_code
+            snap_cabin_class_code,
+            snap_price
         ) VALUES (
             #{reservationSegmentId},
             #{flightId},
@@ -60,8 +61,9 @@
             #{snapDepartureTime},
             #{snapArrivalTime},
             #{snapFlightNumber},
-            #{snapCabinClassCode}
-                 )
+            #{snapCabinClassCode},
+            #{snapPrice}
+            )
     </insert>
     <!-- flight_info 행 락 (FOR UPDATE) -->
     <select id="lockFlightInfoForUpdate" parameterType="string"
