@@ -44,9 +44,15 @@
             snap_arrival_time AS snapArrivalTime,
             snap_flight_number AS snapFlightNumber,
             snap_cabin_class_code AS snapCabinClassCode,
-            snap_price AS snapPrice
-        FROM reservation_segment
-        WHERE reservation_id = #{reservationId}
+            snap_price AS snapPrice,
+            dep_ap.city AS snapDepartureCity,
+            arr_ap.city AS snapArrivalCity,
+            al.airline_name AS snapAirlineName
+        FROM reservation_segment rs
+        LEFT JOIN airport dep_ap ON rs.snap_departure_airport = dep_ap.airport_id
+        LEFT JOIN airport arr_ap ON rs.snap_arrival_airport = arr_ap.airport_id
+        LEFT JOIN airline al ON LEFT(rs.snap_flight_number, 2) = al.airline_id
+        WHERE rs.reservation_id = #{reservationId}
         ORDER BY segment_order ASC
     </select>
 
