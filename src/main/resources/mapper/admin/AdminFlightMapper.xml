@@ -4,7 +4,7 @@
 
 <mapper namespace="com.flyway.admin.mapper.AdminFlightMapper">
 
-    <resultMap id="FlightResultMap" type="com.flyway.search.domain.Flight">
+    <resultMap id="AdminFlightResultMap" type="com.flyway.admin.dto.AdminFlightDto">
         <id property="flightId" column="flight_id"/>
         <result property="departureAirport" column="departure_airport"/>
         <result property="arrivalAirport" column="arrival_airport"/>
@@ -13,8 +13,8 @@
         <result property="terminalNo" column="terminal_no"/>
         <result property="flightNumber" column="flight_number"/>
         <result property="routeType" column="route_type"/>
-        <result property="airlineId" column="airline_id"/> <!-- Added for management purpose -->
-        <result property="airlineName" column="airline_name"/> <!-- Added for management purpose -->
+        <result property="airlineId" column="airline_id"/>
+        <result property="airlineName" column="airline_name"/>
     </resultMap>
 
     <sql id="flightColumns">
@@ -36,32 +36,41 @@
         LEFT JOIN airline al ON fnac.airline_id = al.airline_id
     </sql>
 
-    <select id="selectFlightList" resultMap="FlightResultMap">
+    <select id="selectFlightList" resultMap="AdminFlightResultMap">
         SELECT
         <include refid="flightColumns"/>
         <include refid="flightJoins"/>
-        <where>
-            <if test="flightNumber != null and flightNumber != ''">
-                AND f.flight_number LIKE CONCAT('%', #{flightNumber}, '%')
-            </if>
-            <if test="departureAirport != null and departureAirport != ''">
-                AND f.departure_airport = #{departureAirport}
-            </if>
-            <if test="arrivalAirport != null and arrivalAirport != ''">
-                AND f.arrival_airport = #{arrivalAirport}
-            </if>
-        </where>
+        WHERE f.departure_time > NOW()
+        <if test="departureAirport != null and departureAirport != ''">
+            AND f.departure_airport = #{departureAirport}
+        </if>
+        <if test="arrivalAirport != null and arrivalAirport != ''">
+            AND f.arrival_airport = #{arrivalAirport}
+        </if>
         ORDER BY f.departure_time ASC
+        LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <select id="selectFlightById" resultMap="FlightResultMap">
+    <select id="countFlights" resultType="int">
+        SELECT COUNT(*)
+        FROM flight f
+        WHERE f.departure_time > NOW()
+        <if test="departureAirport != null and departureAirport != ''">
+            AND f.departure_airport = #{departureAirport}
+        </if>
+        <if test="arrivalAirport != null and arrivalAirport != ''">
+            AND f.arrival_airport = #{arrivalAirport}
+        </if>
+    </select>
+
+    <select id="selectFlightById" resultMap="AdminFlightResultMap">
         SELECT
         <include refid="flightColumns"/>
         <include refid="flightJoins"/>
         WHERE f.flight_id = #{flightId}
     </select>
 
-    <insert id="insertFlight" parameterType="com.flyway.search.domain.Flight">
+    <insert id="insertFlight" parameterType="com.flyway.admin.dto.AdminFlightDto">
         INSERT INTO flight (
             flight_id, departure_airport, arrival_airport, departure_time,
             arrival_time, terminal_no, flight_number, route_type
@@ -71,7 +80,7 @@
                  )
     </insert>
 
-    <update id="updateFlight" parameterType="com.flyway.search.domain.Flight">
+    <update id="updateFlight" parameterType="com.flyway.admin.dto.AdminFlightDto">
         UPDATE flight
         SET
             departure_airport = #{departureAirport},

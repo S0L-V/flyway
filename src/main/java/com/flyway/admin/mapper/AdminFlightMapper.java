@@ -1,38 +1,49 @@
 package com.flyway.admin.mapper;
 
-import java.util.List;
-
+import com.flyway.admin.dto.AdminFlightDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.flyway.search.domain.Flight;
+import java.util.List;
 
 @Mapper
 public interface AdminFlightMapper {
 
 	/**
-	 * 항공편 목록을 조회 (필터 기능)
-	 * @param filter 필터 조건 (flightNumber, departureAirport, arrivalAirport)
+	 * 항공편 목록을 조회합니다 (필터 가능, 페이징).
 	 */
-	List<Flight> selectFlightList(Flight filter);
+	List<AdminFlightDto> selectFlightList(
+		@Param("departureAirport") String departureAirport,
+		@Param("arrivalAirport") String arrivalAirport,
+		@Param("offset") int offset,
+		@Param("limit") int limit
+	);
 
 	/**
-	 * ID로 항공편을 조회
+	 * 항공편 총 건수를 조회합니다 (필터 적용).
 	 */
-	Flight selectFlightById(@Param("flightId") String flightId);
+	int countFlights(
+		@Param("departureAirport") String departureAirport,
+		@Param("arrivalAirport") String arrivalAirport
+	);
 
 	/**
-	 * 새로운 항공편을 등록
+	 * ID로 항공편을 조회합니다.
 	 */
-	int insertFlight(Flight flight);
+	AdminFlightDto selectFlightById(@Param("flightId") String flightId);
 
 	/**
-	 * 기존 항공편 정보를 수정
+	 * 새로운 항공편을 등록합니다.
 	 */
-	int updateFlight(Flight flight);
+	int insertFlight(AdminFlightDto flight);
 
 	/**
-	 * 항공편을 삭제
+	 * 기존 항공편 정보를 수정합니다.
+	 */
+	int updateFlight(AdminFlightDto flight);
+
+	/**
+	 * 항공편을 삭제합니다.
 	 */
 	int deleteFlight(@Param("flightId") String flightId);
 }
