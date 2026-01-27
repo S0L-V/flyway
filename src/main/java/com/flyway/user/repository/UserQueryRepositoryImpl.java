@@ -22,8 +22,14 @@ public class UserQueryRepositoryImpl implements UserQueryRepository {
     }
 
     @Override
-    public List<UserFullJoinRow> findAll(AuthStatus status) {
+    public List<UserFullJoinRow> findAll(AuthStatus status, int limit, int offset) {
         String statusParam = (status == null) ? null : status.name();
-        return userQueryMapper.findFullJoinAll(statusParam);
+        return userQueryMapper.findFullJoinAll(statusParam, limit, offset);
+    }
+
+    @Override
+    public long countUsers(AuthStatus status) {
+        String statusParam = (status == null) ? null : status.name();
+        return userQueryMapper.countUsers(statusParam);
     }
 }

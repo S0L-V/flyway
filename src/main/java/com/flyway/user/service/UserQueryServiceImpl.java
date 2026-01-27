@@ -2,6 +2,8 @@
 package com.flyway.user.service;
 
 import com.flyway.auth.domain.AuthStatus;
+import com.flyway.template.common.PageInfo;
+import com.flyway.template.common.PageResult;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.dto.UserFullJoinRow;
@@ -26,7 +28,11 @@ public class UserQueryServiceImpl implements UserQueryService {
     }
 
     @Override
-    public List<UserFullJoinRow> getUsers(AuthStatus status) {
-        return userQueryRepository.findAll(status);
+    public PageResult<UserFullJoinRow> getUsers(AuthStatus status, int page, int size) {
+        int offset = Math.max(0, (page - 1) * size);
+        List<UserFullJoinRow> users = userQueryRepository.findAll(status, size, offset);
+        long totalElements = userQueryRepository.countUsers(status);
+        PageInfo pageInfo = PageInfo.of(page, size, totalElements);
+        return new PageResult<>(users, pageInfo);
     }
 }
