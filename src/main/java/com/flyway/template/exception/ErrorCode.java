@@ -59,6 +59,14 @@ public enum ErrorCode {
 	// ==================== 결제 통계 관련 (P) ====================
 	PAYMENT_STATUS_FETCH_FAILED(400, "P001", "결제 통계 조회 중 오류가 발생했습니다."),
 	PAYMENT_LIST_FETCH_FAILED(400, "P002", "결제 내역 조회 중 오류가 발생했습니다."),
+
+	// ==================== 프로모션 관련 (PROMO) ====================
+	PROMO_LIST_FETCH_FAILED(500, "PROMO001", "프로모션 목록 조회 중 오류가 발생했습니다."),
+	PROMO_NOT_FOUND(404, "PROMO002", "프로모션을 찾을 수 없습니다."),
+	PROMO_CREATION_FAILED(500, "PROMO003", "프로모션 생성에 실패했습니다."),
+	PROMO_UPDATE_FAILED(500, "PROMO004", "프로모션 수정에 실패했습니다."),
+	PROMO_DELETE_FAILED(500, "PROMO005", "프롬모션 삭제에 실패했습니다."),
+	PROMO_TOGGLE_FAILED(500, "PROMO006", "프로모션 상태 변경에 실패했습니다."),
 	;
 
 	private final int status;
