@@ -12,6 +12,11 @@ public interface UserIdentityRepository {
     void save(UserIdentity identity);
 
     /**
+     * userId로 조회
+     */
+    UserIdentity findByUserId(String userId);
+
+    /**
      * (인증 제공자, 제공자 유저 ID)로 조회
      * (OAuth 재로그인 시 기존 사용자 식별)
      */
@@ -28,5 +33,5 @@ public interface UserIdentityRepository {
     /**
      * EMAIL 가입자의 provider_user_id(이메일) 익명화
      */
-    int anonymizeEmailProviderUserIdIfWithdrawn(String userId, String anonymizedEmail);
+    int anonymizeProviderUserIdIfWithdrawn(String userId, AuthProvider provider, String anonymizedEmail);
 }
