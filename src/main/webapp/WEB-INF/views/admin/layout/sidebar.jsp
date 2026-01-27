@@ -34,10 +34,6 @@
         <div>
             <p class="text-[10px] font-bold text-slate-500 tracking-wider mb-4 px-2 uppercase">시스템</p>
             <div class="space-y-1">
-                <a href="javascript:void(0)" onclick="alert('준비 중입니다.')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-white/5 hover:text-white">
-                    <i data-lucide="scroll-text" class="w-5 h-5"></i>
-                    <span class="text-sm font-medium">활동 로그</span>
-                </a>
                 <form id="logout-form" action="${pageContext.request.contextPath}/admin/logout" method="POST" style="display: inline;">
                     <button type="submit" class="flex items-center gap-3 px-3 py-3 text-sm text-slate-400 hover:text-white rounded-xl transition-all w-full text-left" onclick="return confirm('로그아웃 하시겠습니까?')">
                         <i data-lucide="log-out" class="w-5 h-5"></i>

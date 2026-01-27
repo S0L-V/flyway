@@ -1,18 +1,20 @@
 package com.flyway.admin.service;
 
-import java.util.List;
+import com.flyway.admin.dto.AdminFlightDto;
 
-import com.flyway.search.domain.Flight;
+import java.util.List;
 
 public interface AdminFlightService {
 
-	List<Flight> getFlightList(Flight filter);
+	List<AdminFlightDto> getFlightList(String departureAirport, String arrivalAirport, int page, int size);
 
-	Flight getFlightById(String flightId);
+	int getFlightCount(String departureAirport, String arrivalAirport);
 
-	String createFlight(Flight flight);
+	AdminFlightDto getFlightById(String flightId);
 
-	boolean updateFlight(Flight flight);
+	String createFlight(AdminFlightDto flight);
+
+	boolean updateFlight(AdminFlightDto flight);
 
 	boolean deleteFlight(String flightId);
 }

@@ -1,17 +1,15 @@
 package com.flyway.admin.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
+import com.flyway.admin.dto.AdminFlightDto;
+import com.flyway.admin.repository.AdminFlightRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.flyway.admin.repository.AdminFlightRepository;
-import com.flyway.search.domain.Flight;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -22,18 +20,30 @@ public class AdminFlightServiceImpl implements AdminFlightService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Flight> getFlightList(Flight filter) {
+	public List<AdminFlightDto> getFlightList(String departureAirport, String arrivalAirport, int page, int size) {
 		try {
-			return adminFlightRepository.findFlightList(filter);
+			int offset = (page - 1) * size;
+			return adminFlightRepository.findFlightList(departureAirport, arrivalAirport, offset, size);
 		} catch (Exception e) {
-			log.error("Failed to get flight list with filter: {}", filter, e);
+			log.error("Failed to get flight list - departure: {}, arrival: {}", departureAirport, arrivalAirport, e);
 			return Collections.emptyList();
 		}
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Flight getFlightById(String flightId) {
+	public int getFlightCount(String departureAirport, String arrivalAirport) {
+		try {
+			return adminFlightRepository.countFlights(departureAirport, arrivalAirport);
+		} catch (Exception e) {
+			log.error("Failed to count flights - departure: {}, arrival: {}", departureAirport, arrivalAirport, e);
+			return 0;
+		}
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public AdminFlightDto getFlightById(String flightId) {
 		try {
 			return adminFlightRepository.findFlightById(flightId);
 		} catch (Exception e) {
@@ -43,33 +53,33 @@ public class AdminFlightServiceImpl implements AdminFlightService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public String createFlight(Flight flight) {
+	@Transactional
+	public String createFlight(AdminFlightDto flight) {
 		try {
 			String flightId = UUID.randomUUID().toString();
 			flight.setFlightId(flightId);
 			int result = adminFlightRepository.saveFlight(flight);
 			if (result > 0) {
-				log.info("Flight created: {}", flight);
+				log.info("Flight created: {}", flightId);
 				return flightId;
 			}
 			return null;
 		} catch (Exception e) {
-			log.error("Failed to crate flight: {}", flight, e);
+			log.error("Failed to create flight: {}", flight, e);
 			return null;
 		}
 	}
 
 	@Override
 	@Transactional
-	public boolean updateFlight(Flight flight) {
+	public boolean updateFlight(AdminFlightDto flight) {
 		try {
 			int result = adminFlightRepository.updateFlight(flight);
 			if (result > 0) {
 				log.info("Flight updated: {}", flight.getFlightId());
 				return true;
 			}
-			return true;
+			return false;
 		} catch (Exception e) {
 			log.error("Failed to update flight: {}", flight, e);
 			return false;
