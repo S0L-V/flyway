@@ -89,7 +89,11 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
             return;
         }
 
-        kakaoUnlinkClient.unlinkByKakaoUserId(kakaoUserId);
+        try {
+            kakaoUnlinkClient.unlinkByKakaoUserId(kakaoUserId);
+        } catch (Exception e) {
+            log.warn("kakao unlink failed; continuing withdrawal. userId={}", userId, e);
+        }
     }
 
     private String maskName(String name) {

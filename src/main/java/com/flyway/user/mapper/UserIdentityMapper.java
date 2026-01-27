@@ -21,7 +21,7 @@ public interface UserIdentityMapper {
     /**
      * userId로 인증 정보 조회
      */
-    UserIdentity findByUserId(String email);
+    UserIdentity findByUserId(@Param("userId") String userId);
 
     /**
      * provider + providerUserId로 인증 정보 조회 (OAuth 재로그인 시 기존 사용자 찾기)
