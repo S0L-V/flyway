@@ -220,7 +220,7 @@ function formatPrice(price) {
     return Number(price).toLocaleString('ko-KR');
 }
 
-document.getElementById("resultList").addEventListener("click", (e) => {
+document.getElementById("resultList").addEventListener("click", async (e) => {
     if (e.target.closest(".action-button") || e.target.closest("button")) {
         return;
     }
@@ -228,11 +228,48 @@ document.getElementById("resultList").addEventListener("click", (e) => {
     const card = e.target.closest(".flight-card");
     if (!card) return;
 
+    const outId = card.dataset.outId;
+    const inId = card.dataset.inId || null; // 편도일 경우 null
+    let priceData = null;
+
+    try {
+        const params = new URLSearchParams({
+            outFlightId: outId,
+            inFlightId: inId || null,
+            cabinClassCode: state.cabin
+        });
+
+        const response = await fetch(`/api/public/flights/prices?${params}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("가격 못 불러옴");
+        }
+        priceData = await response.json();
+    } catch (error) {
+        console.log("가격조회 실패", error);
+        return;
+    }
+
+    const outFlight = priceData.find(p => p.flightId == outId);
+    const inFlight = inId ? priceData.find(p => p.flightId == inId) : null;
+
+    if(!outFlight) {
+        alert("항공편 정보 x");
+        return;
+    }
+
     // hidden 폼에 값 설정
     document.getElementById("hiddenOutFlightId").value = card.dataset.outId;
     document.getElementById("hiddenInFlightId").value = card.dataset.inId || "";
     document.getElementById("hiddenPassengerCount").value = state.passengers;
     document.getElementById("hiddenCabinClassCode").value = state.cabin;
+    document.getElementById("hiddenOutPrice").value = outFlight.flightPrice;
+    document.getElementById("hiddenInPrice").value = inFlight ? inFlight.flightPrice : 0;
 
     // 폼 제출 → /reservations/draft → 동의 페이지로 redirect
     document.getElementById("reservationForm").submit();

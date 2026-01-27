@@ -6,6 +6,7 @@ import com.flyway.search.domain.Flight;
 import com.flyway.search.dto.FlightDetailDto;
 import com.flyway.search.dto.FlightSearchRequest;
 import com.flyway.search.dto.FlightSearchResponse;
+import com.flyway.search.dto.LastPriceDto;
 import com.flyway.search.mapper.FlightMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -36,4 +37,8 @@ public class FlightRepositoryImpl implements FlightRepository {
     }
 
     public FlightDetailDto findDetails(String cabinClass, String routeType) { return mapper.details(cabinClass, routeType); }
+
+    public List<LastPriceDto> findPrice(String outFlightId, String inFlightId, String cabinClassCode) {
+        return mapper.findPrice(outFlightId, inFlightId, cabinClassCode);
+    }
 }
