@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.admin.mapper.AdminFlightMapper">
+
+    <resultMap id="FlightResultMap" type="com.flyway.search.domain.Flight">
+        <id property="flightId" column="flight_id"/>
+        <result property="departureAirport" column="departure_airport"/>
+        <result property="arrivalAirport" column="arrival_airport"/>
+        <result property="departureTime" column="departure_time"/>
+        <result property="arrivalTime" column="arrival_time"/>
+        <result property="terminalNo" column="terminal_no"/>
+        <result property="flightNumber" column="flight_number"/>
+        <result property="routeType" column="route_type"/>
+        <result property="airlineId" column="airline_id"/> <!-- Added for management purpose -->
+        <result property="airlineName" column="airline_name"/> <!-- Added for management purpose -->
+    </resultMap>
+
+    <sql id="flightColumns">
+        f.flight_id,
+        f.departure_airport,
+        f.arrival_airport,
+        f.departure_time,
+        f.arrival_time,
+        f.terminal_no,
+        f.flight_number,
+        f.route_type,
+        al.airline_id,
+        al.airline_name
+    </sql>
+
+    <sql id="flightJoins">
+        FROM flight f
+        LEFT JOIN flight_number_aircraft_map fnac ON f.flight_number = fnac.flight_number
+        LEFT JOIN airline al ON fnac.airline_id = al.airline_id
+    </sql>
+
+    <select id="selectFlightList" resultMap="FlightResultMap">
+        SELECT
+        <include refid="flightColumns"/>
+        <include refid="flightJoins"/>
+        <where>
+            <if test="flightNumber != null and flightNumber != ''">
+                AND f.flight_number LIKE CONCAT('%', #{flightNumber}, '%')
+            </if>
+            <if test="departureAirport != null and departureAirport != ''">
+                AND f.departure_airport = #{departureAirport}
+            </if>
+            <if test="arrivalAirport != null and arrivalAirport != ''">
+                AND f.arrival_airport = #{arrivalAirport}
+            </if>
+        </where>
+        ORDER BY f.departure_time ASC
+    </select>
+
+    <select id="selectFlightById" resultMap="FlightResultMap">
+        SELECT
+        <include refid="flightColumns"/>
+        <include refid="flightJoins"/>
+        WHERE f.flight_id = #{flightId}
+    </select>
+
+    <insert id="insertFlight" parameterType="com.flyway.search.domain.Flight">
+        INSERT INTO flight (
+            flight_id, departure_airport, arrival_airport, departure_time,
+            arrival_time, terminal_no, flight_number, route_type
+        ) VALUES (
+                     #{flightId}, #{departureAirport}, #{arrivalAirport}, #{departureTime},
+                     #{arrivalTime}, #{terminalNo}, #{flightNumber}, #{routeType}
+                 )
+    </insert>
+
+    <update id="updateFlight" parameterType="com.flyway.search.domain.Flight">
+        UPDATE flight
+        SET
+            departure_airport = #{departureAirport},
+            arrival_airport = #{arrivalAirport},
+            departure_time = #{departureTime},
+            arrival_time = #{arrivalTime},
+            terminal_no = #{terminalNo},
+            flight_number = #{flightNumber},
+            route_type = #{routeType}
+        WHERE flight_id = #{flightId}
+    </update>
+
+    <delete id="deleteFlight">
+        DELETE FROM flight WHERE flight_id = #{flightId}
+    </delete>
+
+</mapper>
