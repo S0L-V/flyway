@@ -73,5 +73,5 @@ public interface AdminPromotionMapper {
 	/**
 	 * 활성화된 특가 항공권 목록 조회 (메인 페이지용)
 	 */
-	List<PromotionDto> selectActivePromotions(@Param("limit") String limit);
+	List<PromotionDto> selectActivePromotions(@Param("limit") int limit);
 }
