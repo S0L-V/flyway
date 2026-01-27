@@ -17,5 +17,11 @@ public interface UserQueryRepository {
      * 회원 정보 목록 조회
      * @param status 기준 필터링 (null: 전체 조회)
      */
-    List<UserFullJoinRow> findAll(AuthStatus status);
+    List<UserFullJoinRow> findAll(AuthStatus status, int limit, int offset);
+
+    /**
+     * 회원 수 조회
+     * @param status 기준 필터링 (null: 전체 조회)
+     */
+    long countUsers(AuthStatus status);
 }

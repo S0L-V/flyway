@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.flyway.auth.domain.AuthStatus;
+import com.flyway.template.common.PageInfo;
+import com.flyway.template.common.PageResult;
 import com.flyway.user.dto.UserFullJoinRow;
 import com.flyway.user.service.UserQueryService;
 import com.flyway.user.service.UserService;
@@ -49,7 +51,8 @@ class AdminUserApiControllerTest {
 	void getUsers_success_noStatus() throws Exception {
 		// given
 		List<UserFullJoinRow> users = List.of(buildUser("user-1", "user1@test.com", AuthStatus.ACTIVE));
-		given(userQueryService.getUsers(null)).willReturn(users);
+		PageResult<UserFullJoinRow> result = new PageResult<>(users, PageInfo.of(1, 20, 134));
+		given(userQueryService.getUsers(null, 1, 20)).willReturn(result);
 
 		// when & then
 		mockMvc.perform(get("/admin/api/users"))
@@ -57,9 +60,15 @@ class AdminUserApiControllerTest {
 			.andExpect(jsonPath("$.success").value(true))
 			.andExpect(jsonPath("$.data[0].userId").value("user-1"))
 			.andExpect(jsonPath("$.data[0].email").value("user1@test.com"))
-			.andExpect(jsonPath("$.data[0].status").value("ACTIVE"));
+			.andExpect(jsonPath("$.data[0].status").value("ACTIVE"))
+			.andExpect(jsonPath("$.page.page").value(1))
+			.andExpect(jsonPath("$.page.size").value(20))
+			.andExpect(jsonPath("$.page.totalElements").value(134))
+			.andExpect(jsonPath("$.page.totalPages").value(7))
+			.andExpect(jsonPath("$.page.hasNext").value(true))
+			.andExpect(jsonPath("$.page.hasPrevious").value(false));
 
-		then(userQueryService).should().getUsers(null);
+		then(userQueryService).should().getUsers(null, 1, 20);
 	}
 
 	@Test
@@ -67,16 +76,26 @@ class AdminUserApiControllerTest {
 	void getUsers_success_withStatus() throws Exception {
 		// given
 		List<UserFullJoinRow> users = List.of(buildUser("user-2", "user2@test.com", AuthStatus.BLOCKED));
-		given(userQueryService.getUsers(AuthStatus.BLOCKED)).willReturn(users);
+		PageResult<UserFullJoinRow> result = new PageResult<>(users, PageInfo.of(2, 5, 11));
+		given(userQueryService.getUsers(AuthStatus.BLOCKED, 2, 5)).willReturn(result);
 
 		// when & then
-		mockMvc.perform(get("/admin/api/users").param("status", "BLOCKED"))
+		mockMvc.perform(get("/admin/api/users")
+				.param("status", "BLOCKED")
+				.param("page", "2")
+				.param("size", "5"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.success").value(true))
 			.andExpect(jsonPath("$.data[0].userId").value("user-2"))
-			.andExpect(jsonPath("$.data[0].status").value("BLOCKED"));
+			.andExpect(jsonPath("$.data[0].status").value("BLOCKED"))
+			.andExpect(jsonPath("$.page.page").value(2))
+			.andExpect(jsonPath("$.page.size").value(5))
+			.andExpect(jsonPath("$.page.totalElements").value(11))
+			.andExpect(jsonPath("$.page.totalPages").value(3))
+			.andExpect(jsonPath("$.page.hasNext").value(true))
+			.andExpect(jsonPath("$.page.hasPrevious").value(true));
 
-		then(userQueryService).should().getUsers(AuthStatus.BLOCKED);
+		then(userQueryService).should().getUsers(AuthStatus.BLOCKED, 2, 5);
 	}
 
 	@Test

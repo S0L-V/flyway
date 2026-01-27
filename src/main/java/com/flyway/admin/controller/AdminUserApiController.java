@@ -2,6 +2,7 @@ package com.flyway.admin.controller;
 
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.template.common.ApiResponse;
+import com.flyway.template.common.PageResult;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.dto.UserFullJoinRow;
@@ -28,14 +29,24 @@ public class AdminUserApiController {
      * 회원 목록 조회
      * GET /admin/api/users
      * GET /admin/api/users?status=ACTIVE
+     * GET /admin/api/users?page=1&size=20
      */
     @GetMapping
     public ApiResponse<List<UserFullJoinRow>> getUsers(
-            @RequestParam(required = false) AuthStatus status
+            @RequestParam(required = false) AuthStatus status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size
     ) {
         try {
-            List<UserFullJoinRow> users = userQueryService.getUsers(status);
-            return ApiResponse.success(users);
+            if (page < 1 || size < 1 || size > 100) {
+                return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(),
+                        "page는 1 이상, size는 1~100 사이여야 합니다.");
+            }
+
+            PageResult<UserFullJoinRow> result = userQueryService.getUsers(status, page, size);
+            return ApiResponse.success(result.getData(), result.getPage());
+        } catch (BusinessException e) {
+            return ApiResponse.error(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
         } catch (Exception e) {
             log.error("Failed to get user list", e);
             return ApiResponse.error(ErrorCode.USER_INTERNAL_ERROR.getCode(), ErrorCode.USER_INTERNAL_ERROR.getMessage());
