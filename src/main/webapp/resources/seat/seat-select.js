@@ -1,12 +1,32 @@
 // 좌석 선택 페이지 (좌석 맵 조회 + 렌더링 + HOLD API 연동)
 
+// 응답을 JSON으로 읽고 HTTP 에러면 메시지 뽑아서 throw
 async function safeJson(res) {
     const ct = res.headers.get("content-type") || "";
     const text = await res.text();
+
     if (!ct.includes("application/json")) {
-        throw new Error(`JSON이 아닌 응답: ${ct} / 미리보기: ${text.slice(0, 80)}`);
+        throw new Error(`JSON이 아닌 응답: ${res.status} ${res.statusText} / ${ct} / 미리보기: ${text.slice(0, 80)}`);
     }
-    return JSON.parse(text);
+
+    let body;
+    try {
+        body = text ? JSON.parse(text) : null;
+    } catch (e) {
+        throw new Error(`JSON 파싱 실패: ${res.status} ${res.statusText} / 미리보기: ${text.slice(0, 80)}`);
+    }
+
+    // HTTP 에러면 여기서 예외로 올려서 상위에서 catch 가능하게
+    if (!res.ok) {
+        const msg =
+            body?.message ||
+            body?.error ||
+            body?.msg ||
+            `HTTP ${res.status} ${res.statusText}`;
+        throw new Error(msg);
+    }
+
+    return body;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const reservationId = seatGrid.dataset.rid;
     const segmentId = seatGrid.dataset.sid;
 
-    // HOLD에 필요한 passengerId (JSP에서 data-pid로 내려줘야 테스트 가능)
+    // HOLD에 필요한 passengerId
     const passengerId = seatGrid.dataset.pid;
 
     const cabinClassCode = seatGrid.dataset.cabin || null;
@@ -45,38 +65,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     let selectedSeatNo = null;
-    let isHolding = false; // [NEW] 중복 클릭 방지
+    let isHolding = false; // 중복 클릭 방지
 
     // 최초 로딩
-    refreshAndRender();
+    (async () => {
+        try {
+            await refreshAndRender();
+        } catch (err) {
+            console.error("초기 좌석 로딩 실패", err);
+            seatGrid.innerHTML = `
+        <p class="seat-grid__loading">
+          좌석 정보를 불러오지 못했습니다.<br/>
+          (${escapeHtml(err.message)})
+        </p>`;
+        }
+    })();
 
     // 좌석 클릭 → HOLD/RELEASE 연동
     seatGrid.addEventListener("click", async (e) => {
         const btn = e.target.closest("button.seat-item");
         if (!btn) return;
-        if (btn.disabled) return;
-        if (isHolding) return; // [NEW]
 
         const seatNo = btn.dataset.seatNo;
         if (!seatNo) return;
+
+        // HOLD 좌석이라도 내가 선택한 좌석이면 해제 클릭 허용
+        if (btn.disabled && !(selectedSeatNo && seatNo === selectedSeatNo)) return;
+
+        if (isHolding) return;
 
         try {
             isHolding = true;
 
             // 같은 좌석 다시 누르면 HOLD 해제
             if (selectedSeatNo === seatNo) {
-                // [NEW] RELEASE 먼저 호출
                 await releaseHold(ctx, reservationId, segmentId, passengerId);
                 selectedSeatNo = null;
 
-                await refreshAndRender(); // 서버 상태 반영해서 다시 그림
+                await refreshAndRender();
                 renderSelectedSummary(null);
                 return;
             }
 
-            // 다른 좌석을 누르면: 기존 HOLD 해제 후 새 HOLD
+            // 다른 좌석을 누르면 기존 HOLD 해제 후 새 HOLD
             if (selectedSeatNo) {
-                await releaseHold(ctx, reservationId, segmentId, passengerId); // [NEW]
+                await releaseHold(ctx, reservationId, segmentId, passengerId);
             }
 
             // HOLD 호출
@@ -92,8 +125,11 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             console.error("HOLD 처리 실패", err);
             alert(`좌석 처리 실패: ${err.message}`);
-            // 실패 시에도 서버 상태 기준으로 다시 로딩
-            await refreshAndRender();
+            try {
+                await refreshAndRender();
+            } catch (e2) {
+                console.error("실패 후 재로딩도 실패", e2);
+            }
         } finally {
             isHolding = false;
         }
@@ -115,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// 좌석 맵 조회: content-type 체크 + safeJson 사용
+// 좌석 맵 조회 content-type 체크 + safeJson 사용
 function fetchSeatMap(ctx, reservationId, segmentId) {
     const url =
         `${ctx}/api/public/reservations/` +
@@ -123,7 +159,7 @@ function fetchSeatMap(ctx, reservationId, segmentId) {
         `/segments/${encodeURIComponent(segmentId)}/seats`;
 
     return fetch(url)
-        .then((res) => safeJson(res))
+        .then((res) => safeJson(res)) // safeJson에서 res.ok 체크 후 에러면 throw
         .then((data) => data?.data ?? []);
 }
 
@@ -203,17 +239,21 @@ function renderSeatGrid(seats, selectedSeatNo) {
                 seatBtn.textContent = seat.seatNo;
                 seatBtn.dataset.seatNo = seat.seatNo;
 
+                // 상태별 클래스/클릭 가능 여부 결정
                 if (seat.seatStatus === "AVAILABLE") {
                     seatBtn.classList.add("seat-item--available");
                     seatBtn.disabled = false;
                 } else if (seat.seatStatus === "HOLD") {
                     seatBtn.classList.add("seat-item--hold");
-                    seatBtn.disabled = true;
+
+                    // HOLD라도 내가 선택한 좌석이면 해제 클릭 가능하게 열어둠
+                    seatBtn.disabled = !(selectedSeatNo && seat.seatNo === selectedSeatNo);
                 } else {
                     seatBtn.classList.add("seat-item--unavailable");
                     seatBtn.disabled = true;
                 }
 
+                // 내가 선택한 좌석 표시
                 if (selectedSeatNo && seat.seatNo === selectedSeatNo) {
                     seatBtn.classList.add("seat-item--selected");
                 }
