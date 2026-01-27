@@ -35,6 +35,14 @@ public class AdminPromotionController {
 	private final AdminPromotionService promotionService;
 
 	/**
+	 * 특가 항공편 관리 페이지 렌더링
+	 */
+	@GetMapping
+	public String promotionListPage() {
+		return "admin/promotions";
+	}
+
+	/**
 	 * 특가 항공권 목록 API (페이징, 필터링)
 	 * GET /admin/promotions/api/list
 	 */
