@@ -1,5 +1,6 @@
 package com.flyway.pricing.batch.h2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -37,6 +38,11 @@ public class BatchTestConfig {
         return jobBuilderFactory.get("repriceJob")
                 .start(repriceFlightsStep)
                 .build();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
     @Bean
