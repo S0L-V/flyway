@@ -98,7 +98,7 @@ public class RepriceWriterConfig {
                         "  :cabinClassCode, " +
                         "  :newPrice, " +
                         "  :currentPrice, " +
-                        "  'INIT', " +
+                        "  'BATCH', " +
                         "  :policyVersion, " +
                         "  NULL, " +             // 배치는 이벤트 트리거 ID 없음
                         "  :calcContextJson, " +
