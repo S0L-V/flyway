@@ -38,6 +38,7 @@ public class PromotionDto extends BaseEntity {
 	private String airlineName;
 	private LocalDateTime departureTime;
 	private LocalDateTime arrivalTime;
+	private String arrivalAirportImageUrl;
 
 	// 계산 필드
 	private long originalPrice; // 1인당 원가
