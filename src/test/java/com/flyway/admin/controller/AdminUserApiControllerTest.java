@@ -3,6 +3,7 @@ package com.flyway.admin.controller;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.user.dto.UserFullJoinRow;
 import com.flyway.user.service.UserQueryService;
+import com.flyway.user.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("관리자 회원 API 컨트롤러 테스트")
@@ -28,6 +30,9 @@ class AdminUserApiControllerTest {
 
 	@Mock
 	private UserQueryService userQueryService;
+
+	@Mock
+	private UserService userService;
 
 	@InjectMocks
 	private AdminUserApiController controller;
@@ -90,6 +95,40 @@ class AdminUserApiControllerTest {
 			.andExpect(jsonPath("$.data.status").value("ONBOARDING"));
 
 		then(userQueryService).should().getUserDetail("user-3");
+	}
+
+	@Test
+	@DisplayName("회원 차단 성공")
+	void blockUser_success() throws Exception {
+		// given
+		given(userService.blockUser("user-4")).willReturn(AuthStatus.BLOCKED);
+
+		// when & then
+		mockMvc.perform(post("/admin/api/users/{userId}/block", "user-4"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.success").value(true))
+			.andExpect(jsonPath("$.data.userId").value("user-4"))
+			.andExpect(jsonPath("$.data.status").value("BLOCKED"))
+			.andExpect(jsonPath("$.message").value("회원 차단 완료"));
+
+		then(userService).should().blockUser("user-4");
+	}
+
+	@Test
+	@DisplayName("회원 차단 해제 성공")
+	void unblockUser_success() throws Exception {
+		// given
+		given(userService.unblockUser("user-5")).willReturn(AuthStatus.ACTIVE);
+
+		// when & then
+		mockMvc.perform(post("/admin/api/users/{userId}/unblock", "user-5"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.success").value(true))
+			.andExpect(jsonPath("$.data.userId").value("user-5"))
+			.andExpect(jsonPath("$.data.status").value("ACTIVE"))
+			.andExpect(jsonPath("$.message").value("회원 차단 해제 완료"));
+
+		then(userService).should().unblockUser("user-5");
 	}
 
 	private UserFullJoinRow buildUser(String userId, String email, AuthStatus status) {
