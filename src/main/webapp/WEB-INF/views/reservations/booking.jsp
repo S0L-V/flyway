@@ -193,6 +193,12 @@
     import { fetchWithRefresh } from '/resources/common/authFetch.js';
     var reservationId = '${vm.reservationId}';
     var passengerSaved = ${vm.passengerSaved};
+    var passengerCount = ${vm.passengerCount};
+    var segments = [
+        <c:forEach var="s" items="${vm.segments}" varStatus="st">
+        { snapPrice: ${s.snapPrice != null ? s.snapPrice : 0} }<c:if test="${!st.last}">,</c:if>
+        </c:forEach>
+    ];
 
     // 좌석 팝업 (팀원 담당)
     function openSeatPopup() {
@@ -259,9 +265,17 @@
 
     // 페이지 로드 시 부가서비스 총액 조회
     document.addEventListener('DOMContentLoaded', function() {
+        var flightTotal = 0;
+        segments.forEach(function(seg) {
+            flightTotal += seg.snapPrice;
+        });
+        flightTotal *= passengerCount;
+        document.getElementById('flightPrice').textContent = '₩' + numberWithCommas(flightTotal);
+
         if (passengerSaved) {
             refreshServiceTotal();
         }
+        updateTotalPrice();
     });
     window.openSeatPopup = openSeatPopup;
     window.openServicePopup = openServicePopup;

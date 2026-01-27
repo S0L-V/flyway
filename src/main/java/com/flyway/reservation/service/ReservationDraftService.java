@@ -108,6 +108,7 @@ public class ReservationDraftService {
                         .snapArrivalTime(outSnap.getArrivalTime())
                         .snapFlightNumber(outSnap.getFlightNumber())
                         .snapCabinClassCode(req.getCabinClassCode())
+                        .snapPrice(req.getOutPrice())
                         .build()
         );
 
@@ -130,6 +131,7 @@ public class ReservationDraftService {
                             .snapArrivalTime(inSnap.getArrivalTime())
                             .snapFlightNumber(inSnap.getFlightNumber())
                             .snapCabinClassCode(req.getCabinClassCode())
+                            .snapPrice(req.getInPrice())
                             .build()
             );
         }

@@ -43,7 +43,8 @@
             snap_departure_time AS snapDepartureTime,
             snap_arrival_time AS snapArrivalTime,
             snap_flight_number AS snapFlightNumber,
-            snap_cabin_class_code AS snapCabinClassCode
+            snap_cabin_class_code AS snapCabinClassCode,
+            snap_price AS snapPrice
         FROM reservation_segment
         WHERE reservation_id = #{reservationId}
         ORDER BY segment_order ASC
