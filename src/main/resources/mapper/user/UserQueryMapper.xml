@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.flyway.user.mapper.UserQueryMapper">
+
+    <sql id="UserFullJoinColumns">
+        u.user_id      AS userId,
+        u.email        AS email,
+        u.status       AS status,
+        u.created_at   AS createdAt,
+        u.withdrawn_at AS withdrawnAt,
+
+        ui.provider    AS provider,
+
+        up.name        AS name,
+        up.first_name  AS firstName,
+        up.last_name   AS lastName,
+        up.passport_no AS passportNo,
+        up.gender      AS gender,
+        up.country     AS country
+    </sql>
+
+    <sql id="UserFullJoinFrom">
+        FROM users u
+        LEFT JOIN user_identity ui ON ui.user_id = u.user_id
+        LEFT JOIN user_profile up  ON up.user_id = u.user_id
+    </sql>
+
+    <!-- 회원 정보 단건 조회 -->
+    <select id="findFullJoinByUserId"
+            parameterType="string"
+            resultType="com.flyway.user.dto.UserFullJoinRow">
+        SELECT
+        <include refid="UserFullJoinColumns"/>
+        <include refid="UserFullJoinFrom"/>
+        WHERE u.user_id = #{userId}
+    </select>
+
+    <!-- 회원 정보 목록 조회: status 기준 필터 (null = 전체) -->
+    <select id="findFullJoinAll"
+            resultType="com.flyway.user.dto.UserFullJoinRow">
+        SELECT
+        <include refid="UserFullJoinColumns"/>
+        <include refid="UserFullJoinFrom"/>
+        <where>
+            <if test="status != null and status != ''">
+                u.status = #{status}
+            </if>
+        </where>
+        ORDER BY u.created_at DESC, u.user_id DESC
+    </select>
+
+</mapper>
