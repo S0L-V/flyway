@@ -88,8 +88,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     private boolean hasAnyUpdate(UserProfile profile) {
-        return profile.getName() != null
-                || profile.getPassportNo() != null
+        return profile.getPassportNo() != null
                 || profile.getCountry() != null
                 || profile.getGender() != null
                 || profile.getFirstName() != null
@@ -97,7 +96,6 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     private void applyUpdates(UserProfile target, UserProfile update) {
-        if (update.getName() != null) target.setName(update.getName());
         if (update.getPassportNo() != null) target.setPassportNo(update.getPassportNo());
         if (update.getCountry() != null) target.setCountry(update.getCountry());
         if (update.getGender() != null) target.setGender(update.getGender());
