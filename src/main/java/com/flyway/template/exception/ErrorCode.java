@@ -30,7 +30,7 @@ public enum ErrorCode {
 	USER_DB_ERROR(500, "U007", "회원 정보 저장 중 오류가 발생했습니다."),
 	USER_INVALID_SIGN_UP_ATTEMPT(400, "U008", "유효하지 않은 회원가입 요청입니다."),
 	USER_ALREADY_WITHDRAWN(409, "U009", "이미 탈퇴 처리된 사용자입니다."),
-	USER_NOT_WITHDRAWN(409, "U010","탈퇴 처리된 사용자만 익명화할 수 있습니다."),
+	USER_NOT_WITHDRAWN(409, "U010", "탈퇴 처리된 사용자만 익명화할 수 있습니다."),
 	USER_INTERNAL_ERROR(500, "U999", "회원 처리 중 알 수 없는 오류가 발생했습니다."),
 
 	// ==================== 인증 (AU) ====================
@@ -66,6 +66,13 @@ public enum ErrorCode {
 	PROMO_UPDATE_FAILED(500, "PROMO004", "프로모션 수정에 실패했습니다."),
 	PROMO_DELETE_FAILED(500, "PROMO005", "프롬모션 삭제에 실패했습니다."),
 	PROMO_TOGGLE_FAILED(500, "PROMO006", "프로모션 상태 변경에 실패했습니다."),
+
+	// ====================  항공편 (FLIGHT) ====================
+	FLIGHT_LIST_FETCH_FAILED(500, "FLIGHT001", "항공편 목록 조회 중 오류가 발생했습니다."),
+	FLIGHT_NOT_FOUND(404, "FLIGHT001", "항공편을 찾을 수 없습니다."),
+	FLIGHT_CREATION_FAILED(500, "FLIGHT003", "항공편 생성에 실패했습니다"),
+	FLIGHT_UPDATED_FAILED(500, "FLIGHT004", "항공편 수정에 실패했습니다"),
+	FLIGHT_DELETE_FAILED(500, "FLIGHT005", "항공편 삭제에 실패했습니다"),
 	;
 
 	private final int status;
