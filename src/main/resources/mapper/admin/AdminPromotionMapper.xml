@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.admin.mapper.AdminPromotionMapper">
+
+    <resultMap id="PromotionDtoResultMap" type="com.flyway.admin.dto.PromotionDto">
+        <id property="promotionId" column="promotion_id"/>
+        <result property="flightId" column="flight_id"/>
+        <result property="title" column="title"/>
+        <result property="passengerCount" column="passenger_count"/>
+        <result property="discountPercentage" column="discount_percentage"/>
+        <result property="cabinClassCode" column="cabin_class_code"/>
+        <result property="tags" column="tags"/>
+        <result property="isActive" column="is_active"/>
+        <result property="displayOrder" column="displayOrder"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="departureAirportName" column="departure_airport_name"/>
+        <result property="arrivalAirportName" column="arrival_airport_name"/>
+        <result property="airlineName" column="airline_name"/>
+        <result property="departureTime" column="departure_time"/>
+        <result property="arrivalTime" column="arrival_time"/>
+        <result property="currentPrice" column="current_price"/>
+    </resultMap>
+
+    <sql id="promotionColumns">
+        p.promotion_id,
+        p.flight_id,
+        p.title,
+        p.passenger_count,
+        p.discount_percentage,
+        p.cabinClassCode,
+        p.tags,
+        p.is_active,
+        p.display_order,
+        p.craeted_at,
+        p.updated_at,
+        p.created_by,
+        dep.city AS departure_airport_name,
+        arr.city AS arrival_airport_name,
+        al.airline_name,
+        f.departure_time,
+        f.arrival_time,
+        fsp.current_price
+    </sql>
+
+    <sql id="promotionJoins">
+        FROM promotion p
+        JOIN flight f ON p.flight_id = f.flight_id
+        LEFT JOIN airline_al ON f.airline_id = al.airline_id
+        LEFT JOIN airport dep ON f.departure_airport = dep.airport_id
+        LEFT JOIN airport arr ON f.arrival_airport = arr.airport_id
+        LEFT JOIN flight_seat_price fsp ON p.flight_id = fsp.flight_id AND p.cabin_class_code = fsp.cabin_class_code
+    </sql>
+
+    <select id="selectPromotionList" resultMap="PromotionDtoResultMap">
+        SELECT
+        <include refid="promotionColumns"/>
+        <include refid="promotionJoins"/>
+        <where>
+            <if test="isActive != null ans isActive != ''">
+                AND p.is_active = #{isActive}
+            </if>
+            <if test="searchKeyword != null ans searchKeyword != ''">
+                AND(
+                    p.title LIKE CONCAT('%', #{searchKeyword}, '%') OR
+                    f.flight_number LIKE CONCAT('%', #{searchKeyword}, '%')
+                    al.airline_name LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY p.display_order ASC, p.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countPromotions" resultType="int">
+        SELECT COUNT(p.promotion_id)
+        FROM promotion p
+        LEFT JOIN flight f ON p.flight_id = f.flight_id
+        LEFT JOIN airline al ON f.airline_id = al.airline_id
+        <where>
+            <if test="isActive != null and isActive != ''">
+                AND p.is_active = #{isActive}
+            </if>
+            <if test="searchKeyword != null ans searchKeyword != ''">
+                AND (
+                    p.title LIKE CONCAT('%', #{searchKeyword}, '%') OR
+                    f.flight_number LIKE CONCAT('%', #{searchKeyword}, '%') OR
+                    al.airline_name LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="selectPromotionById" resultMap="PromotionDtoResultMap">
+        SELECT
+        <include refid="promotionColumns"/>
+        <include refid="promotionJoins"/>
+        WHERE p.promotion_id = #{promotionId}
+    </select>
+
+    <insert id="insertPromotion" parameterType="com.flyway.admin.dto.PromotionDto">
+        INSERT INTO promotion(
+            promotion_id, flight_id, title, passenger_count, discount_percentage,
+            cabin_class_code, tags, is_active, display_order, created_by, creatd_at
+        ) VALUES (
+            #{promotionId}, #{flightId}, #{title}, #{passengerCount}, #{discountPercentage},
+            #{cabinClassCode}, #{tags}, #{isActive}, #{displayOrder}, #{createdBy}, NOW()
+        )
+    </insert>
+
+    <update id="updatePromotion" parameterType="com.flyway.admin.dto.PromotionDto">
+        UPDATE promotion
+        SET
+            flight_id = #{flight_id},
+            title = #{title},
+            passenger_count = #{passengerCcount},
+            discount_percentage = #{discountPercentage},
+            tags = #{tags},
+            is_active = #{isActive},
+            display_order = #{displayOrder}
+        WHERE promotion_id = #{promotionId}
+    </update>
+
+    <delete id="deletePromotion">
+        DELETE FROM promotion WHERE promotion_id = #{promotionId}
+    </delete>
+
+    <update id="updatePromotionStatus">
+        UPDATE promotion SET is_active = #{isActive} WHERE promotion_id = #{promotionId}
+    </update>
+
+    <update id="updateDisplayOrder">
+        UPDATE promotion SET display_order = #{displayOrder} WHERE promotion_id = #{promotionId}
+    </update>
+
+    <select id="selectActivePromotions" resultMap="PromotionDtoResultMap">
+        SELECT
+        <include refid="promotionColumns"/>
+        <include refid="promotionJoins"/>
+        WHERE p.is_active = 'Y'
+        ORDER BY p.display_order ASC, p.created_at DESC
+        LIMIT = #{limit}
+    </select>
+
+</mapper>
