@@ -237,17 +237,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         flights.forEach(f => {
             const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-50 transition-colors';
+            const flightNumber = escapeHtml(f.flightNumber);
+            const departureAirport = escapeHtml(f.departureAirport);
+            const arrivalAirport = escapeHtml(f.arrivalAirport);
+            const flightId = escapeHtml(f.flightId);
+            const flightInfo = escapeHtml(`${f.flightNumber} (${f.departureAirport} → ${f.arrivalAirport})`);
             row.innerHTML = `
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">${f.flightNumber}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${f.departureAirport} → ${f.arrivalAirport}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-900">${flightNumber}</td>
+                <td class="px-4 py-3 text-sm text-slate-500">${departureAirport} → ${arrivalAirport}</td>
                 <td class="px-4 py-3 text-sm text-slate-500">${formatDisplayDateTime(f.departureTime)}</td>
-                <td class="px-4 py-3 text-sm font-medium flex space-x-2">
-                    <button class="make-promo-btn px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full hover:bg-blue-200" data-flight-id="${f.flightId}" data-flight-info="${f.flightNumber} (${f.departureAirport} → ${f.arrivalAirport})">특가 만들기</button>
-                    <button class="edit-flight-btn px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full hover:bg-gray-200" data-id="${f.flightId}">수정</button>
-                    <button class="delete-flight-btn px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full hover:bg-red-200" data-id="${f.flightId}">삭제</button>
+                <td class="px-4 py-3 text-sm font-medium flex items-center space-x-2">
+                    <button class="make-promo-btn px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full hover:bg-blue-200" data-flight-id="${flightId}" data-flight-info="${flightInfo}">특가 만들기</button>
+                    <button class="edit-flight-btn px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full hover:bg-gray-200" data-id="${flightId}">수정</button>
+                    <button class="delete-flight-btn w-7 h-7 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-id="${flightId}" title="삭제">
+                        <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                    </button>
                 </td>`;
             flightListBody.appendChild(row);
         });
+        // Lucide 아이콘 재초기화
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     }
 
     function renderFlightPagination() {
@@ -321,9 +333,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const totalSalePrice = (p.totalSalePrice || 0).toLocaleString('ko-KR');
             const isActive = p.isActive === 'Y';
             row.innerHTML = `
-                <td class="px-2 py-3 text-center">
-                    <div class="drag-handle inline-flex items-center justify-center w-8 h-8 rounded hover:bg-slate-200 transition-colors" title="드래그하여 순서 변경">
+                <td class="px-2 py-3">
+                    <div class="drag-handle inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-200 transition-colors cursor-grab" title="드래그하여 순서 변경">
                         <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-400"></i>
+                        <span class="text-sm font-semibold text-slate-500">${index + 1}</span>
                     </div>
                 </td>
                 <td class="px-4 py-3 text-sm font-medium text-slate-900">${title}</td>
@@ -335,8 +348,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${isActive ? 'translate-x-6' : 'translate-x-1'}"></span>
                     </button>
                 </td>
-                <td class="px-4 py-3 text-sm font-medium">
-                    <button class="promo-delete-btn text-red-600 hover:text-red-800" data-id="${promotionId}">삭제</button>
+                <td class="px-4 py-3 text-center">
+                    <button class="promo-delete-btn w-7 h-7 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-id="${promotionId}" title="삭제">
+                        <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                    </button>
                 </td>`;
             promotionListBody.appendChild(row);
         });
@@ -376,6 +391,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const updates = [];
 
                 rows.forEach((row, index) => {
+                    // UI 순서 번호 즉시 업데이트
+                    const orderSpan = row.querySelector('.drag-handle span');
+                    if (orderSpan) {
+                        orderSpan.textContent = index + 1;
+                    }
+
                     updates.push({
                         promotionId: row.dataset.id,
                         displayOrder: index + 1
