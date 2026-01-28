@@ -83,12 +83,12 @@ public class AdminFlightController {
 			flight.setFlightId(id);
 			boolean success = adminFlightService.updateFlight(flight);
 			if (!success) {
-				return ApiResponse.error(ErrorCode.FLIGHT_UPDATED_FAILED.getCode(), ErrorCode.FLIGHT_UPDATED_FAILED.getMessage());
+				return ApiResponse.error(ErrorCode.FLIGHT_UPDATE_FAILED.getCode(), ErrorCode.FLIGHT_UPDATE_FAILED.getMessage());
 			}
 			return ApiResponse.success(null, "항공편이 성공적으로 수정되었습니다.");
 		} catch (Exception e) {
 			log.error("Failed to update flight: {}", flight, e);
-			return ApiResponse.error(ErrorCode.FLIGHT_UPDATED_FAILED.getCode(), ErrorCode.FLIGHT_UPDATED_FAILED.getMessage());
+			return ApiResponse.error(ErrorCode.FLIGHT_UPDATE_FAILED.getCode(), ErrorCode.FLIGHT_UPDATE_FAILED.getMessage());
 		}
 	}
 

@@ -71,9 +71,9 @@ public enum ErrorCode {
 	// ====================  항공편 (FLIGHT) ====================
 	FLIGHT_LIST_FETCH_FAILED(500, "FLIGHT001", "항공편 목록 조회 중 오류가 발생했습니다."),
 	FLIGHT_NOT_FOUND(404, "FLIGHT002", "항공편을 찾을 수 없습니다."),
-	FLIGHT_CREATION_FAILED(500, "FLIGHT003", "항공편 생성에 실패했습니다"),
-	FLIGHT_UPDATED_FAILED(500, "FLIGHT004", "항공편 수정에 실패했습니다"),
-	FLIGHT_DELETE_FAILED(500, "FLIGHT005", "항공편 삭제에 실패했습니다"),
+	FLIGHT_CREATION_FAILED(500, "FLIGHT003", "항공편 생성에 실패했습니다."),
+	FLIGHT_UPDATE_FAILED(500, "FLIGHT004", "항공편 수정에 실패했습니다."),
+	FLIGHT_DELETE_FAILED(500, "FLIGHT005", "항공편 삭제에 실패했습니다.")
 	;
 
 	private final int status;
