@@ -102,7 +102,7 @@ public class AdminPromotionController {
 		String adminId = (String)session.getAttribute("adminId");
 
 		String promotionId = promotionService.createPromotion(promotion, adminId);
-		if (promotion == null) {
+		if (promotionId == null) {
 			return ApiResponse.error(ErrorCode.PROMO_CREATION_FAILED.getCode(),
 				ErrorCode.PROMO_CREATION_FAILED.getMessage());
 		}
