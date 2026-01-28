@@ -152,4 +152,24 @@ public class AdminPromotionController {
 		}
 		return ApiResponse.success(newStatus, "상태가 변경되었습니다.");
 	}
+
+	/**
+	 * 특가 항공권 표시 순서 변경 API
+	 * PUT /admin/promotions/api/{id}/order
+	 */
+	@PutMapping("/api/{id}/order")
+	@ResponseBody
+	public ApiResponse<Void> updateDisplayOrder(@PathVariable String id, @RequestBody Map<String, Integer> body) {
+		Integer displayOrder = body.get("displayOrder");
+		if (displayOrder == null) {
+			return ApiResponse.error(ErrorCode.PROMO_INVALID_PARAM.getCode(),
+				ErrorCode.PROMO_INVALID_PARAM.getMessage());
+		}
+		boolean success = promotionService.updateDisplayOrder(id, displayOrder);
+		if (!success) {
+			return ApiResponse.error(ErrorCode.PROMO_ORDER_UPDATE_FAILED.getCode(),
+				ErrorCode.PROMO_UPDATE_FAILED.getMessage());
+		}
+		return ApiResponse.success(null);
+	}
 }

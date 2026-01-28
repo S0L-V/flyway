@@ -67,6 +67,8 @@ public enum ErrorCode {
 	PROMO_UPDATE_FAILED(500, "PROMO004", "프로모션 수정에 실패했습니다."),
 	PROMO_DELETE_FAILED(500, "PROMO005", "프로모션 삭제에 실패했습니다."),
 	PROMO_TOGGLE_FAILED(500, "PROMO006", "프로모션 상태 변경에 실패했습니다."),
+	PROMO_ORDER_UPDATE_FAILED(500, "PROMO007", "프로모션 순서 변경에 실패했습니다."),
+	PROMO_INVALID_PARAM(400, "PROMO008", "잘못된 파라미터입니다."),
 
 	// ====================  항공편 (FLIGHT) ====================
 	FLIGHT_LIST_FETCH_FAILED(500, "FLIGHT001", "항공편 목록 조회 중 오류가 발생했습니다."),
