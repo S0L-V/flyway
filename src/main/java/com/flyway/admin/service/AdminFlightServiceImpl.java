@@ -22,8 +22,10 @@ public class AdminFlightServiceImpl implements AdminFlightService {
 	@Transactional(readOnly = true)
 	public List<AdminFlightDto> getFlightList(String departureAirport, String arrivalAirport, int page, int size) {
 		try {
-			int offset = (page - 1) * size;
-			return adminFlightRepository.findFlightList(departureAirport, arrivalAirport, offset, size);
+			int safePage = Math.max(1, page);
+			int safeSize = Math.max(1, Math.min(size, 100));
+			int offset = (safePage - 1) * size;
+			return adminFlightRepository.findFlightList(departureAirport, arrivalAirport, offset, safeSize);
 		} catch (Exception e) {
 			log.error("Failed to get flight list - departure: {}, arrival: {}", departureAirport, arrivalAirport, e);
 			return Collections.emptyList();

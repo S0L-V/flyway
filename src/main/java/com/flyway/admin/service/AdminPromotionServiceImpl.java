@@ -25,8 +25,10 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
 	@Transactional(readOnly = true)
 	public List<PromotionDto> getPromotionList(int page, int size, String isActive, String searchKeyword) {
 		try {
-			int offset = (page - 1) * size;
-			List<PromotionDto> promotions = promotionRepository.findPromotionList(offset, size, isActive,
+			int safePage = Math.max(1, page);
+			int safeSize = Math.max(1, Math.min(size, 100));
+			int offset = (safeSize - 1) * safePage;
+			List<PromotionDto> promotions = promotionRepository.findPromotionList(offset, safeSize, isActive,
 				searchKeyword);
 			return promotions.stream()
 				.peek(p -> p.calculatePrices(p.getOriginalPrice()))
