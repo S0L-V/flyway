@@ -738,7 +738,7 @@
 </div>
 </div>
 <script type="module">
-    import { fetchWithRefresh } from '/resources/common/authFetch.js';
+    import { fetchWithRefresh } from '/resources/common/js/authFetch.js';
     var reservationId = '${vm.reservationId}';
     var passengerSaved = ${vm.passengerSaved};
     var passengerCount = ${vm.passengerCount};
@@ -808,8 +808,10 @@
             alert('탑승자 정보를 먼저 저장해주세요.');
             return;
         }
-        location.href = '/reservations/' + reservationId + '/payment';
+        // 결제 페이지로 이동 (PaymentController)
+        location.href = '/payments/' + reservationId;
     }
+
 
     // 페이지 로드 시 부가서비스 총액 조회
     document.addEventListener('DOMContentLoaded', function() {

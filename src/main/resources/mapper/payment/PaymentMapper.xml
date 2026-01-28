@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    PaymentMapper.xml
+
+    namespace: Java Mapper 인터페이스의 전체 경로
+    각 SQL의 id: Java 메서드 이름과 동일해야 함
+-->
+<mapper namespace="com.flyway.payment.mapper.PaymentMapper">
+
+    <!-- 결제 정보 저장 -->
+    <insert id="insertPayment" parameterType="com.flyway.payment.dto.PaymentViewDto">
+        INSERT INTO payment (
+            payment_id,
+            reservation_id,
+            payment_key,
+            order_id,
+            created_at,
+            paid_at,
+            amount,
+            payment_method,
+            status
+        ) VALUES (
+                     #{paymentId},
+                     #{reservationId},
+                     #{paymentKey},
+                     #{orderId},
+                     NOW(),
+                     NULL,
+                     #{amount},
+                     #{method},
+                     #{status}
+                 )
+    </insert>
+
+    <!-- 결제 ID로 조회 -->
+    <select id="selectByPaymentId" parameterType="string"
+            resultType="com.flyway.payment.dto.PaymentViewDto">
+        SELECT
+            payment_id      AS paymentId,
+            reservation_id  AS reservationId,
+            payment_key  AS paymentKey,
+            order_id        AS orderId,
+            amount          AS amount,
+            payment_method  AS method,
+            status          AS status,
+            paid_at         AS paidAt,
+            created_at      AS createdAt
+        FROM payment
+        WHERE payment_id = #{paymentId}
+    </select>
+
+    <!-- 주문 ID로 조회 -->
+    <select id="selectByOrderId" parameterType="string"
+            resultType="com.flyway.payment.dto.PaymentViewDto">
+        SELECT
+            payment_id      AS paymentId,
+            reservation_id  AS reservationId,
+            payment_key  AS paymentKey,
+            order_id        AS orderId,
+            amount          AS amount,
+            payment_method  AS method,
+            status          AS status,
+            paid_at         AS paidAt,
+            created_at      AS createdAt
+        FROM payment
+        WHERE order_id = #{orderId}
+    </select>
+
+    <!-- 예약 ID로 조회 -->
+    <select id="selectByReservationId" parameterType="string"
+            resultType="com.flyway.payment.dto.PaymentViewDto">
+        SELECT
+            payment_id      AS paymentId,
+            reservation_id  AS reservationId,
+            payment_key  AS paymentKey,
+            order_id        AS orderId,
+            amount          AS amount,
+            payment_method  AS method,
+            status          AS status,
+            paid_at         AS paidAt,
+            created_at      AS createdAt
+        FROM payment
+        WHERE reservation_id = #{reservationId}
+        ORDER BY created_at DESC
+            LIMIT 1
+    </select>
+
+    <!-- 결제 상태 업데이트 -->
+    <update id="updateStatus">
+        UPDATE payment
+        SET status = #{status}
+        WHERE payment_id = #{paymentId}
+    </update>
+
+    <!-- 토스 paymentKey 저장 -->
+    <update id="updatePaymentKey">
+        UPDATE payment
+        SET payment_key = #{paymentKey}
+        WHERE payment_id = #{paymentId}
+    </update>
+
+    <update id="updatePaymentComplete">
+        UPDATE payment
+        SET
+            status = #{status},
+            payment_method = #{method},
+            payment_key = #{paymentKey},
+            paid_at = NOW()
+        WHERE payment_id = #{paymentId}
+    </update>
+
+</mapper>
