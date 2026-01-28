@@ -148,7 +148,7 @@ public class AdminPromotionController {
 	public ApiResponse<String> togglePromotionStatus(@PathVariable String id) {
 		String newStatus = promotionService.togglePromotionStatus(id);
 		if (newStatus == null) {
-			ApiResponse.error(ErrorCode.PROMO_TOGGLE_FAILED.getCode(), ErrorCode.PROMO_TOGGLE_FAILED.getMessage());
+			return ApiResponse.error(ErrorCode.PROMO_TOGGLE_FAILED.getCode(), ErrorCode.PROMO_TOGGLE_FAILED.getMessage());
 		}
 		return ApiResponse.success(newStatus, "상태가 변경되었습니다.");
 	}
