@@ -15,39 +15,49 @@
         <mvc:argument-resolvers>
             <bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver"/>
         </mvc:argument-resolvers>
-        <mvc:message-converters register-defaults="true">
-            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-                <property name="objectMapper" ref="objectMapper"/>
-            </bean>
-        </mvc:message-converters>
     </mvc:annotation-driven>
 
     <context:property-placeholder
             location="classpath:config/application-dev.properties"
             ignore-unresolvable="true"/>
 
-    <!-- Controller만 스캔 -->
-    <context:component-scan base-package="com.flyway">
+    <context:component-scan base-package="com.flyway" use-default-filters="false">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
         <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
         <context:include-filter type="annotation" expression="org.springframework.context.annotation.Configuration"/>
     </context:component-scan>
 
-    <!-- ViewResolver -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**" />
+            <mvc:exclude-mapping path="/admin/login" />
+            <mvc:exclude-mapping path="/admin/api/auth/login" />
+            <mvc:exclude-mapping path="/admin/api/auth/validate" />
+            <mvc:exclude-mapping path="/admin/resources/**" />
+            <mvc:exclude-mapping path="/resources/**" />
+            <ref bean="adminAuthInterceptor" />
+        </mvc:interceptor>
+
+        <mvc:interceptor>
+            <mvc:mapping path="/**" />
+            <mvc:exclude-mapping path="/admin/**" />
+            <mvc:exclude-mapping path="/api/**" />
+            <mvc:exclude-mapping path="/resources/**" />
+            <mvc:exclude-mapping path="/favicon.ico" />
+            <mvc:exclude-mapping path="/error" />
+            <ref bean="visitorTrackingInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
+
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/views/"/>
-        <property name="suffix" value=".jsp"/>
+        <property name="prefix" value="/WEB-INF/views/" />
+        <property name="suffix" value=".jsp" />
     </bean>
 
-    <!-- 정적 리소스 매핑 - webapp 기준 절대 경로 -->
-    <mvc:resources mapping="/resources/**" location="/resources/" cache-period="31556926"/>
+    <mvc:resources mapping="/resources/**" location="/resources/" cache-period="31556926" />
+    <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
 
-    <!-- Swagger 2.9.2 리소스 매핑 (2.9.2 전용!) -->
-    <mvc:resources mapping="swagger-ui.html"
-                   location="classpath:/META-INF/resources/"/>
-    <mvc:resources mapping="/webjars/**"
-                   location="classpath:/META-INF/resources/webjars/"/>
-
-    <mvc:default-servlet-handler/>
+    <mvc:default-servlet-handler />
 
 </beans>

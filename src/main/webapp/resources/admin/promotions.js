@@ -366,8 +366,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 라디오 버튼 값 설정 헬퍼
     const setRadioValue = (name, value) => {
-        const radio = flightForm.querySelector(`input[name="${name}"][value="${value || ''}"]`);
-        if (radio) radio.checked = true;
+        const targetValue = value || '';
+        // 1. name 속성으로 해당 그룹의 라디오 버튼들을 모두 가져옵니다.
+        const radios = flightForm.querySelectorAll(`input[name="${name}"]`);
+
+        // 2. 요소를 순회하며 value 프로퍼티가 일치하는 것을 찾습니다.
+        // 값을 셀렉터 문자열에 넣지 않으므로 특수문자 오류로부터 안전합니다.
+        radios.forEach(radio => {
+            if (radio.value === targetValue) {
+                radio.checked = true;
+            }
+        });
     };
 
     addFlightBtn.addEventListener('click', () => {

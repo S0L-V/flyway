@@ -29,10 +29,10 @@ public class AdminDashboardScheduler {
 	private final ObjectMapper objectMapper;
 
 	/**
-	 * 통계 브로드캐스트 (5초마다)
+	 * 통계 브로드캐스트 (15초마다)
 	 * 연결된 세션이 있을 때만 실행
 	 */
-	@Scheduled(fixedRate = 5000)
+	@Scheduled(fixedRate = 15000)
 	public void broadcastStats() {
 		if (!sessionManager.hasActiveSessions()) {
 			return;
@@ -52,10 +52,10 @@ public class AdminDashboardScheduler {
 	}
 
 	/**
-	 * 최근 활동 브로드캐스트 (10초마다)
+	 * 최근 활동 브로드캐스트 (15초마다)
 	 * 연결된 세션이 있을 때만 실행
 	 */
-	@Scheduled(fixedRate = 10000)
+	@Scheduled(fixedRate = 15000)
 	public void broadcastActivities() {
 		if (!sessionManager.hasActiveSessions()) {
 			return;
