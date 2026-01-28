@@ -30,4 +30,7 @@ public interface ReservationBookingMapper {
     // 탑승자 저장
     int insertPassenger(PassengerUpsertDTO dto);
     int updatePassenger(PassengerUpsertDTO dto);
+
+    int updateReservationStatus(@Param("reservationId") String reservationId,
+                                @Param("status") String status);
 }

@@ -153,5 +153,11 @@
         WHERE passenger_id = #{passengerId}
           AND reservation_id = #{reservationId}
     </update>
+    <update id="updateReservationStatus">
+        UPDATE reservation
+        SET status = #{status}
+        WHERE reservation_id = #{reservationId}
+    </update>
+
 
 </mapper>

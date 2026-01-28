@@ -21,4 +21,6 @@ public interface ReservationBookingRepository {
     int insertPassenger(PassengerUpsertDTO dto);
 
     int updatePassenger(PassengerUpsertDTO dto);
+
+    int updateReservationStatus(String reservationId, String status);
 }
