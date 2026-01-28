@@ -59,14 +59,14 @@ public class AdminPaymentController {
 			List<PaymentListDto> list = adminPaymentService.getPaymentList(status, page, size);
 			long totalCount = adminPaymentService.countPayments(status);
 
-			Map<String, Object> responseDate = new HashMap<>();
-			responseDate.put("list", list);
-			responseDate.put("totalCount", totalCount);
-			responseDate.put("currentPage", page);
-			responseDate.put("pageSize", size);
-			responseDate.put("totalPages", (totalCount + size - 1) / size);
+			Map<String, Object> responseData = new HashMap<>();
+			responseData.put("list", list);
+			responseData.put("totalCount", totalCount);
+			responseData.put("currentPage", page);
+			responseData.put("pageSize", size);
+			responseData.put("totalPages", (totalCount + size - 1) / size);
 
-			return ApiResponse.success(responseDate);
+			return ApiResponse.success(responseData);
 		} catch (Exception e) {
 			log.error("Failed to get payment list", e);
 			return ApiResponse.error("PAY002", "결제 내역 조회 중 오류가 발생했습니다.");
