@@ -27,7 +27,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
 		try {
 			int safePage = Math.max(1, page);
 			int safeSize = Math.max(1, Math.min(size, 100));
-			int offset = (safeSize - 1) * safePage;
+			int offset = (safePage - 1) * safeSize;
 			List<PromotionDto> promotions = promotionRepository.findPromotionList(offset, safeSize, isActive,
 				searchKeyword);
 			return promotions.stream()
