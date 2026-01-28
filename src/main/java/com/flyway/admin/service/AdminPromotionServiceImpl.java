@@ -100,7 +100,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
 			}
 			return false;
 		} catch (Exception e) {
-			log.error("Failed to update promotion: {}", promotion.getPromotionId());
+			log.error("Failed to update promotion: {}", promotion.getPromotionId(), e);
 			return false;
 		}
 	}
