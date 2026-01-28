@@ -125,8 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <ul>
                     ${list.map(a => `
                         <li class="airport-item px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
-                            data-code="${a.airportId}" data-name="${a.city}">
-                            ${a.city} (${a.airportId})
+                            data-code="${escapeHtml(a.airportId)}" data-name="${escapeHtml(a.city)}">
+                            ${escapeHtml(a.city)} (${escapeHtml(a.airportId)})
                         </li>
                     `).join('')}
                 </ul>
@@ -237,14 +237,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         flights.forEach(f => {
             const row = document.createElement('tr');
+            // 변수에 escapeHtml 적용
             row.innerHTML = `
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">${f.flightNumber}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${f.departureAirport} → ${f.arrivalAirport}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-900">${escapeHtml(f.flightNumber)}</td>
+                <td class="px-4 py-3 text-sm text-slate-500">${escapeHtml(f.departureAirport)} → ${escapeHtml(f.arrivalAirport)}</td>
                 <td class="px-4 py-3 text-sm text-slate-500">${formatDisplayDateTime(f.departureTime)}</td>
                 <td class="px-4 py-3 text-sm font-medium flex space-x-2">
-                    <button class="make-promo-btn px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full hover:bg-blue-200" data-flight-id="${f.flightId}" data-flight-info="${f.flightNumber} (${f.departureAirport} → ${f.arrivalAirport})">특가 만들기</button>
-                    <button class="edit-flight-btn px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full hover:bg-gray-200" data-id="${f.flightId}">수정</button>
-                    <button class="delete-flight-btn px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full hover:bg-red-200" data-id="${f.flightId}">삭제</button>
+                    <button class="make-promo-btn px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full hover:bg-blue-200" 
+                        data-flight-id="${escapeHtml(f.flightId)}" 
+                        data-flight-info="${escapeHtml(f.flightNumber)} (${escapeHtml(f.departureAirport)} → ${escapeHtml(f.arrivalAirport)})">특가 만들기</button>
+                    <button class="edit-flight-btn px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full hover:bg-gray-200" 
+                        data-id="${escapeHtml(f.flightId)}">수정</button>
+                    <button class="delete-flight-btn px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full hover:bg-red-200" 
+                        data-id="${escapeHtml(f.flightId)}">삭제</button>
                 </td>`;
             flightListBody.appendChild(row);
         });
@@ -312,13 +317,15 @@ document.addEventListener('DOMContentLoaded', function() {
         promotions.forEach(p => {
             const row = document.createElement('tr');
             const totalSalePrice = (p.totalSalePrice || 0).toLocaleString('ko-KR');
+
+            // 변수에 escapeHtml 적용
             row.innerHTML = `
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">${p.title}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${p.departureAirportName || ''} → ${p.arrivalAirportName || ''}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${p.passengerCount}명</td>
-                <td class="px-4 py-3 text-sm text-slate-800 font-semibold">₩${totalSalePrice}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-900">${escapeHtml(p.title)}</td>
+                <td class="px-4 py-3 text-sm text-slate-500">${escapeHtml(p.departureAirportName || '')} → ${escapeHtml(p.arrivalAirportName || '')}</td>
+                <td class="px-4 py-3 text-sm text-slate-500">${escapeHtml(p.passengerCount)}명</td>
+                <td class="px-4 py-3 text-sm text-slate-800 font-semibold">₩${escapeHtml(totalSalePrice)}</td>
                 <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs font-medium rounded-full ${p.isActive === 'Y' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${p.isActive === 'Y' ? '활성' : '비활성'}</span></td>
-                <td class="px-4 py-3 text-sm font-medium"><button class="promo-delete-btn text-red-600 hover:text-red-800" data-id="${p.promotionId}">삭제</button></td>`;
+                <td class="px-4 py-3 text-sm font-medium"><button class="promo-delete-btn text-red-600 hover:text-red-800" data-id="${escapeHtml(p.promotionId)}">삭제</button></td>`;
             promotionListBody.appendChild(row);
         });
     }
