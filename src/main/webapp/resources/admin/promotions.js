@@ -27,6 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const flightForm = document.getElementById('flight-form');
 
     // --- Utility Functions ---
+    // XSS 방지용 HTML 이스케이프
+    const escapeHtml = (str) => {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    };
+
     const handleFetchError = (targetBody, colspan) => (err) => {
         console.error("Failed to fetch data:", err);
         targetBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-10 text-red-500">데이터를 불러오는 데 실패했습니다.</td></tr>`;
@@ -172,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchPromotions();
         } catch (err) {
             console.error("Failed to initialize page data:", err);
-            flightListBody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500">페이지 초기화 실패: ${err.message}</td></tr>`;
+            flightListBody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500">페이지 초기화 실패: ${escapeHtml(err.message)}</td></tr>`;
         }
     }
 
