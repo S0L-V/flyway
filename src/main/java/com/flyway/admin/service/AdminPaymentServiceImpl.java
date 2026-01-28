@@ -31,7 +31,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<PaymentListDto> getPaymentList(String status, int page, int size) {
-		int offset = page * size;
+		int offset = (page - 1) * size;
 		return adminPaymentRepository.selectPaymentList(status, offset, size);
 	}
 
