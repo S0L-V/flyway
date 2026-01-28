@@ -44,7 +44,7 @@
                 <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-tight">${sessionScope.role != null ? sessionScope.role : 'ADMIN'}</p>
             </div>
             <div class="w-9 h-9 bg-slate-200 rounded-xl overflow-hidden border-2 border-slate-100">
-                <img src="https://picsum.photos/100" alt="profile" class="w-full h-full object-cover">
+                <img src="https://picsum.photos/id/64/100" alt="profile" class="w-full h-full object-cover">
             </div>
         </div>
     </div>
