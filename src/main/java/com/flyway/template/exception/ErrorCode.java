@@ -65,7 +65,7 @@ public enum ErrorCode {
 	PROMO_NOT_FOUND(404, "PROMO002", "프로모션을 찾을 수 없습니다."),
 	PROMO_CREATION_FAILED(500, "PROMO003", "프로모션 생성에 실패했습니다."),
 	PROMO_UPDATE_FAILED(500, "PROMO004", "프로모션 수정에 실패했습니다."),
-	PROMO_DELETE_FAILED(500, "PROMO005", "프롬모션 삭제에 실패했습니다."),
+	PROMO_DELETE_FAILED(500, "PROMO005", "프로모션 삭제에 실패했습니다."),
 	PROMO_TOGGLE_FAILED(500, "PROMO006", "프로모션 상태 변경에 실패했습니다."),
 	;
 
