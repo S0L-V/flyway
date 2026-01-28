@@ -7,7 +7,14 @@
     /* Add styles for the dropdown similar to search.jsp */
     .filter-dropdown .dropdown-panel { display: none; }
     .filter-dropdown.open .dropdown-panel { display: block; }
+
+    /* Drag and drop styles */
+    .drag-handle { cursor: grab; }
+    .drag-handle:active { cursor: grabbing; }
+    .sortable-ghost { opacity: 0.4; background: #e0f2fe; }
+    .sortable-chosen { background: #f0f9ff; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <main class="pl-64 pt-16 min-h-screen">
     <div class="p-8 max-w-[1600px] mx-auto space-y-8">
@@ -71,17 +78,23 @@
 
         <!-- Bottom Panel: Promotion Management -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <div class="p-6 border-b border-slate-100"><h2 class="text-lg font-bold text-slate-800">생성된 특가 상품 목록</h2></div>
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">생성된 특가 상품 목록</h2>
+                    <p class="text-sm text-slate-500 mt-1">드래그하여 메인페이지 표시 순서를 변경하세요. 상위 항목이 먼저 표시됩니다.</p>
+                </div>
+            </div>
             <div class="p-6">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                         <tr>
+                            <th class="px-2 py-3 text-center text-xs font-semibold text-slate-500 uppercase w-12">순서</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">제목</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">항공편</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">인원</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">할인가(총)</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">상태</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">메인 노출</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">관리</th>
                         </tr>
                         </thead>
