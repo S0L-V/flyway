@@ -37,18 +37,17 @@
     </sql>
 
     <select id="selectFlightList" resultMap="AdminFlightResultMap">
-        SELECT
-        <include refid="flightColumns"/>
-        <include refid="flightJoins"/>
-        WHERE f.departure_time > NOW()
-        <if test="departureAirport != null and departureAirport != ''">
-            AND f.departure_airport = #{departureAirport}
-        </if>
-        <if test="arrivalAirport != null and arrivalAirport != ''">
-            AND f.arrival_airport = #{arrivalAirport}
-        </if>
-        ORDER BY f.departure_time ASC
-        LIMIT #{limit} OFFSET #{offset}
+        SELECT f.*, al.airline_id, al.airline_name
+        FROM (
+        SELECT flight_id, flight_number, departure_airport, arrival_airport,
+        departure_time, arrival_time, terminal_no, route_type
+        FROM flight
+        WHERE departure_time > NOW()
+        ORDER BY departure_time ASC
+        LIMIT 10 OFFSET 0
+        ) f
+        LEFT JOIN flight_number_aircraft_map fnac ON f.flight_number = fnac.flight_number
+        LEFT JOIN airline al ON fnac.airline_id = al.airline_id
     </select>
 
     <!-- 최신 200개까지만 카운트 (성능 최적화) -->
