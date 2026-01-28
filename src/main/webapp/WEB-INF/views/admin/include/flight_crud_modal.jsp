@@ -18,6 +18,8 @@
                         </div>
                     </div>
                     <button type="button" class="modal-close-btn p-2 hover:bg-slate-100 rounded-lg transition-colors">
+<%--                    <button type="button" class="modal-close-btn p-2 hover:bg-slate-100 rounded-lg transition-colors">--%>
+                    <button type="button" class="modal-close-btn p-2 hover:bg-slate-100 rounded-lg transition-colors" aria-label="닫기" title="닫기">
                         <i data-lucide="x" class="w-5 h-5 text-slate-500"></i>
                     </button>
                 </div>
