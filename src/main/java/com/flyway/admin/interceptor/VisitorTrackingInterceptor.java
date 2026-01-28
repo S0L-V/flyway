@@ -53,9 +53,10 @@ public class VisitorTrackingInterceptor implements HandlerInterceptor {
 		HttpServletResponse response,
 		Object handler) throws Exception {
 
+		log.info("--- VisitorTrackingInterceptor PREHANDLE START for path: {}", request.getRequestURI());
+
 		try {
 			// 세션 가져오기
-			log.info("--- VisitorTrackingInterceptor PREHANDLE START for path: {}", request.getRequestURI());
 			HttpSession session = request.getSession(true);
 			String sessionId = session.getId();
 

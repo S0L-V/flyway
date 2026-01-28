@@ -8,8 +8,8 @@
                    class="w-full bg-slate-50 border-none rounded-md py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none">
         </div>
 
-        <!-- 연결 상태 -->
-        <div id="connection-status" class="flex items-center gap-1.5">
+        <!-- 연결 상태 (대시보드에서만 표시) -->
+        <div id="connection-status" class="hidden items-center gap-1.5">
             <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
             <span class="text-slate-400 text-xs">연결 중...</span>
         </div>
@@ -44,7 +44,7 @@
                 <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-tight">${sessionScope.role != null ? sessionScope.role : 'ADMIN'}</p>
             </div>
             <div class="w-9 h-9 bg-slate-200 rounded-xl overflow-hidden border-2 border-slate-100">
-                <img src="https://picsum.photos/100" alt="profile" class="w-full h-full object-cover">
+                <img src="https://picsum.photos/id/64/100" alt="profile" class="w-full h-full object-cover">
             </div>
         </div>
     </div>
