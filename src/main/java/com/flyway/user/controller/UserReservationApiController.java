@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -23,16 +25,16 @@ public class UserReservationApiController {
     private final ReservationQueryService reservationQueryService;
 
     @GetMapping("/reservations")
-    public ApiResponse<PageResult<ReservationSummaryDto>> myReservations(
+    public ApiResponse<List<ReservationSummaryDto>> myReservations(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
         try {
-            PageResult<ReservationSummaryDto> data = reservationQueryService.getUserReservationHistories(
+            PageResult<ReservationSummaryDto> result = reservationQueryService.getUserReservationHistories(
                     principal.getUserId(), page, size
             );
-            return ApiResponse.success(data);
+            return ApiResponse.success(result.getData(), result.getPage());
         }  catch (Exception e) {
             log.error("Failed to get reservation list", e);
             return ApiResponse.error(ErrorCode.RESERVATION_INTERNAL_ERROR.getCode(), ErrorCode.RESERVATION_INTERNAL_ERROR.getMessage());

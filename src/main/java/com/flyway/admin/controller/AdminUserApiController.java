@@ -34,15 +34,10 @@ public class AdminUserApiController {
     @GetMapping
     public ApiResponse<List<UserFullJoinRow>> getUsers(
             @RequestParam(required = false) AuthStatus status,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
     ) {
         try {
-            if (page < 1 || size < 1 || size > 100) {
-                return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(),
-                        "page는 1 이상, size는 1~100 사이여야 합니다.");
-            }
-
             PageResult<UserFullJoinRow> result = userQueryService.getUsers(status, page, size);
             return ApiResponse.success(result.getData(), result.getPage());
         } catch (BusinessException e) {

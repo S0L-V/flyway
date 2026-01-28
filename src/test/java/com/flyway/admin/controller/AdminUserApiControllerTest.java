@@ -52,7 +52,7 @@ class AdminUserApiControllerTest {
 		// given
 		List<UserFullJoinRow> users = List.of(buildUser("user-1", "user1@test.com", AuthStatus.ACTIVE));
 		PageResult<UserFullJoinRow> result = new PageResult<>(users, PageInfo.of(1, 20, 134));
-		given(userQueryService.getUsers(null, 1, 20)).willReturn(result);
+		given(userQueryService.getUsers(null, null, null)).willReturn(result);
 
 		// when & then
 		mockMvc.perform(get("/admin/api/users"))
@@ -68,7 +68,7 @@ class AdminUserApiControllerTest {
 			.andExpect(jsonPath("$.page.hasNext").value(true))
 			.andExpect(jsonPath("$.page.hasPrevious").value(false));
 
-		then(userQueryService).should().getUsers(null, 1, 20);
+		then(userQueryService).should().getUsers(null, null, null);
 	}
 
 	@Test

@@ -15,5 +15,5 @@ public interface UserQueryService {
      * 회원 목록 조회
      * @param status 기준 필터랑 (null: 전체 조회)
      */
-    PageResult<UserFullJoinRow> getUsers(AuthStatus status, int page, int size);
+    PageResult<UserFullJoinRow> getUsers(AuthStatus status, Integer page, Integer size);
 }
