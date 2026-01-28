@@ -21,9 +21,13 @@ public class PageInfo {
     }
 
     public static PageInfo of(int page, int size, long totalElements) {
-        int totalPages = (size <= 0) ? 0 : (int) Math.ceil((double) totalElements / (double) size);
-        boolean hasPrevious = page > 1 && totalPages > 0;
-        boolean hasNext = page < totalPages;
-        return new PageInfo(page, size, totalElements, totalPages, hasNext, hasPrevious);
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.max(size, 1);
+
+        int totalPages = (int) Math.ceil((double) totalElements / (double) safeSize);
+        boolean hasPrevious = safePage > 1 && totalPages > 0;
+        boolean hasNext = safePage < totalPages;
+
+        return new PageInfo(safePage, safeSize, totalElements, totalPages, hasNext, hasPrevious);
     }
 }

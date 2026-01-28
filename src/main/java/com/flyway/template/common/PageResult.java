@@ -13,4 +13,8 @@ public class PageResult<T> {
         this.data = data;
         this.page = page;
     }
+
+    public static <T> PageResult<T> of(List<T> items, PageInfo pageInfo) {
+        return new PageResult<>(items, pageInfo);
+    }
 }
