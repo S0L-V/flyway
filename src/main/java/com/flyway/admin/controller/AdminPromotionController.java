@@ -68,7 +68,7 @@ public class AdminPromotionController {
 			return ApiResponse.success(responseData);
 		} catch (Exception e) {
 			log.error("Failed to get promotion list", e);
-			return ApiResponse.error(ErrorCode.PROMO_LIST_FETCH_FAILED.getCode(), ErrorCode.PROMO_UPDATE_FAILED.getMessage());
+			return ApiResponse.error(ErrorCode.PROMO_LIST_FETCH_FAILED.getCode(), ErrorCode.PROMO_LIST_FETCH_FAILED.getMessage());
 		}
 	}
 
