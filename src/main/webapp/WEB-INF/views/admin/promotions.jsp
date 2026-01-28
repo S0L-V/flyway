@@ -95,7 +95,7 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">인원</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">할인가(총)</th>
                             <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">메인 노출</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">관리</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase w-16">삭제</th>
                         </tr>
                         </thead>
                         <tbody id="promotion-list-body"></tbody>
