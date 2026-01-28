@@ -125,8 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <ul>
                     ${list.map(a => `
                         <li class="airport-item px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
-                            data-code="${escapeHtml(a.airportId)}" data-name="${escapeHtml(a.city)}">
-                            ${escapeHtml(a.city)} (${escapeHtml(a.airportId)})
+                            data-code="${a.airportId}" data-name="${a.city}">
+                            ${a.city} (${a.airportId})
                         </li>
                     `).join('')}
                 </ul>
@@ -237,19 +237,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         flights.forEach(f => {
             const row = document.createElement('tr');
-            // 변수에 escapeHtml 적용
             row.innerHTML = `
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">${escapeHtml(f.flightNumber)}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${escapeHtml(f.departureAirport)} → ${escapeHtml(f.arrivalAirport)}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-900">${f.flightNumber}</td>
+                <td class="px-4 py-3 text-sm text-slate-500">${f.departureAirport} → ${f.arrivalAirport}</td>
                 <td class="px-4 py-3 text-sm text-slate-500">${formatDisplayDateTime(f.departureTime)}</td>
                 <td class="px-4 py-3 text-sm font-medium flex space-x-2">
-                    <button class="make-promo-btn px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full hover:bg-blue-200" 
-                        data-flight-id="${escapeHtml(f.flightId)}" 
-                        data-flight-info="${escapeHtml(f.flightNumber)} (${escapeHtml(f.departureAirport)} → ${escapeHtml(f.arrivalAirport)})">특가 만들기</button>
-                    <button class="edit-flight-btn px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full hover:bg-gray-200" 
-                        data-id="${escapeHtml(f.flightId)}">수정</button>
-                    <button class="delete-flight-btn px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full hover:bg-red-200" 
-                        data-id="${escapeHtml(f.flightId)}">삭제</button>
+                    <button class="make-promo-btn px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full hover:bg-blue-200" data-flight-id="${f.flightId}" data-flight-info="${f.flightNumber} (${f.departureAirport} → ${f.arrivalAirport})">특가 만들기</button>
+                    <button class="edit-flight-btn px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full hover:bg-gray-200" data-id="${f.flightId}">수정</button>
+                    <button class="delete-flight-btn px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full hover:bg-red-200" data-id="${f.flightId}">삭제</button>
                 </td>`;
             flightListBody.appendChild(row);
         });
@@ -311,23 +306,107 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderPromotionTable(promotions) {
         promotionListBody.innerHTML = '';
         if (!promotions || promotions.length === 0) {
-            promotionListBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500">생성된 특가 상품이 없습니다.</td></tr>`;
+            promotionListBody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-slate-500">생성된 특가 상품이 없습니다.</td></tr>`;
             return;
         }
-        promotions.forEach(p => {
+        promotions.forEach((p, index) => {
             const row = document.createElement('tr');
+            row.dataset.id = p.promotionId;
+            row.className = 'hover:bg-slate-50 transition-colors';
+            const title = escapeHtml(p.title);
+            const departureAirportName = escapeHtml(p.departureAirportName || '');
+            const arrivalAirportName = escapeHtml(p.arrivalAirportName || '');
+            const promotionId = escapeHtml(p.promotionId);
+            const passengerCount = parseInt(p.passengerCount, 10) || 0;
             const totalSalePrice = (p.totalSalePrice || 0).toLocaleString('ko-KR');
-
-            // 변수에 escapeHtml 적용
+            const isActive = p.isActive === 'Y';
             row.innerHTML = `
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">${escapeHtml(p.title)}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${escapeHtml(p.departureAirportName || '')} → ${escapeHtml(p.arrivalAirportName || '')}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${escapeHtml(p.passengerCount)}명</td>
-                <td class="px-4 py-3 text-sm text-slate-800 font-semibold">₩${escapeHtml(totalSalePrice)}</td>
-                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs font-medium rounded-full ${p.isActive === 'Y' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${p.isActive === 'Y' ? '활성' : '비활성'}</span></td>
-                <td class="px-4 py-3 text-sm font-medium"><button class="promo-delete-btn text-red-600 hover:text-red-800" data-id="${escapeHtml(p.promotionId)}">삭제</button></td>`;
+                <td class="px-2 py-3 text-center">
+                    <div class="drag-handle inline-flex items-center justify-center w-8 h-8 rounded hover:bg-slate-200 transition-colors" title="드래그하여 순서 변경">
+                        <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                </td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-900">${title}</td>
+                <td class="px-4 py-3 text-sm text-slate-500">${departureAirportName} → ${arrivalAirportName}</td>
+                <td class="px-4 py-3 text-sm text-slate-500">${passengerCount}명</td>
+                <td class="px-4 py-3 text-sm text-slate-800 font-semibold">₩${totalSalePrice}</td>
+                <td class="px-4 py-3 text-center">
+                    <button class="promo-toggle-btn relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isActive ? 'bg-green-500' : 'bg-slate-300'}" data-id="${promotionId}" data-active="${isActive ? 'Y' : 'N'}" title="${isActive ? '클릭하여 비활성화' : '클릭하여 활성화'}">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${isActive ? 'translate-x-6' : 'translate-x-1'}"></span>
+                    </button>
+                </td>
+                <td class="px-4 py-3 text-sm font-medium">
+                    <button class="promo-delete-btn text-red-600 hover:text-red-800" data-id="${promotionId}">삭제</button>
+                </td>`;
             promotionListBody.appendChild(row);
         });
+
+        // Lucide 아이콘 재초기화
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // SortableJS 초기화
+        initSortable();
+    }
+
+    // --- Sortable (드래그 앤 드롭) ---
+    let sortableInstance = null;
+
+    function initSortable() {
+        if (sortableInstance) {
+            sortableInstance.destroy();
+        }
+
+        if (typeof Sortable === 'undefined') {
+            console.warn('SortableJS not loaded');
+            return;
+        }
+
+        sortableInstance = new Sortable(promotionListBody, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function(evt) {
+                if (evt.oldIndex === evt.newIndex) return;
+
+                // 새로운 순서로 displayOrder 업데이트
+                const rows = promotionListBody.querySelectorAll('tr[data-id]');
+                const updates = [];
+
+                rows.forEach((row, index) => {
+                    updates.push({
+                        promotionId: row.dataset.id,
+                        displayOrder: index + 1
+                    });
+                });
+
+                // 서버에 순서 업데이트 요청
+                updateDisplayOrders(updates);
+            }
+        });
+    }
+
+    function updateDisplayOrders(updates) {
+        // 각 항목의 displayOrder를 개별적으로 업데이트
+        const promises = updates.map(item =>
+            fetch(`${window.CONTEXT_PATH}/admin/promotions/api/${item.promotionId}/order`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ displayOrder: item.displayOrder })
+            })
+        );
+
+        Promise.all(promises)
+            .then(() => {
+                console.log('Display order updated');
+            })
+            .catch(err => {
+                console.error('Failed to update display order:', err);
+                alert('순서 변경에 실패했습니다.');
+                fetchPromotions(); // 실패 시 다시 로드
+            });
     }
 
     // --- Event Listeners & Form Handlers ---
@@ -366,17 +445,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 라디오 버튼 값 설정 헬퍼
     const setRadioValue = (name, value) => {
-        const targetValue = value || '';
-        // 1. name 속성으로 해당 그룹의 라디오 버튼들을 모두 가져옵니다.
-        const radios = flightForm.querySelectorAll(`input[name="${name}"]`);
-
-        // 2. 요소를 순회하며 value 프로퍼티가 일치하는 것을 찾습니다.
-        // 값을 셀렉터 문자열에 넣지 않으므로 특수문자 오류로부터 안전합니다.
-        radios.forEach(radio => {
-            if (radio.value === targetValue) {
-                radio.checked = true;
-            }
-        });
+        const radio = flightForm.querySelector(`input[name="${name}"][value="${value || ''}"]`);
+        if (radio) radio.checked = true;
     };
 
     addFlightBtn.addEventListener('click', () => {
@@ -435,8 +505,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     promotionListBody.addEventListener('click', e => {
-        if (e.target.classList.contains('promo-delete-btn')) {
-            const id = e.target.dataset.id;
+        const target = e.target.closest('.promo-toggle-btn, .promo-delete-btn');
+        if (!target) return;
+
+        const id = target.dataset.id;
+
+        // 토글 버튼 클릭
+        if (target.classList.contains('promo-toggle-btn')) {
+            const currentActive = target.dataset.active === 'Y';
+            const newActive = !currentActive;
+
+            // UI 즉시 업데이트 (낙관적 업데이트)
+            target.dataset.active = newActive ? 'Y' : 'N';
+            target.className = `promo-toggle-btn relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${newActive ? 'bg-green-500' : 'bg-slate-300'}`;
+            target.title = newActive ? '클릭하여 비활성화' : '클릭하여 활성화';
+            target.querySelector('span').className = `inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${newActive ? 'translate-x-6' : 'translate-x-1'}`;
+
+            // 서버에 상태 변경 요청
+            fetch(`${window.CONTEXT_PATH}/admin/promotions/api/${id}/toggle`, { method: 'POST' })
+                .then(res => res.json())
+                .then(res => {
+                    if (!res.success) {
+                        // 실패 시 롤백
+                        alert('상태 변경 실패: ' + res.message);
+                        fetchPromotions();
+                    }
+                })
+                .catch(err => {
+                    console.error('Toggle failed:', err);
+                    fetchPromotions();
+                });
+        }
+
+        // 삭제 버튼 클릭
+        if (target.classList.contains('promo-delete-btn')) {
             if (confirm('정말 이 특가 상품을 삭제하시겠습니까?')) {
                 fetch(`${window.CONTEXT_PATH}/admin/promotions/api/${id}`, { method: 'DELETE' }).then(res => res.json()).then(res => {
                     if (res.success) {
