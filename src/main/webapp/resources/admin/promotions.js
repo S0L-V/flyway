@@ -313,9 +313,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Event Listeners & Form Handlers ---
+    // 모달 닫기 함수
+    const closeModal = (modal) => {
+        if (modal) modal.classList.add('hidden');
+    };
+
+    // 모달 닫기 버튼 (모달 ID로 직접 찾기)
     document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', (e) => {
-        e.target.closest('.fixed').classList.add('hidden');
+        e.preventDefault();
+        e.stopPropagation();
+        const modal = e.currentTarget.closest('#flight-crud-modal, #promotion-modal');
+        closeModal(modal);
     }));
+
+    // 모달 배경 클릭 시 닫기
+    [promotionModal, flightCrudModal].forEach(modal => {
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        }
+    });
 
     flightFilterSearchBtn.addEventListener('click', () => fetchFlights(1));
 
