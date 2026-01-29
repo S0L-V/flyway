@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.flyway.rank.mapper.RankMapper">
+    <insert id="insertSearchStats">
+        INSERT INTO airport_search_stats (airport_id, std_date, search_count)
+        VALUES (#{arrAirport}, DATE_FORMAT(NOW(), '%Y%m%d'), 1)
+        ON DUPLICATE KEY UPDATE
+            search_count = search_count + 1
+    </insert>
+
+    <select id="findLast7DaysCount" resultType="AirportRankDto">
+        SELECT
+            airport_id AS airportId,
+            SUM(search_count) AS searchCount
+        FROM airport_search_stats
+        WHERE std_date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 7 DAYS), '%Y%m%d')
+        GROUP BY airport_id
+    </select>
+
+    <delete id="deleteOldStats" >
+        DELETE FROM airport_search_stats
+        WHERE DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 7 DAYS), '%Y%m%d') > std_date
+    </delete>
 </mapper>
