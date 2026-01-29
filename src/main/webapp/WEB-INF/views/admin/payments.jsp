@@ -70,9 +70,8 @@
                     <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                         <tr>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">결제 ID</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">회원 정보</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">금액</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-64">회원 정보</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">금액</th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">결제 수단</th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">상태</th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">대상 항공편</th>
@@ -80,7 +79,7 @@
                         </tr>
                         </thead>
                         <tbody id="payment-list-body" class="bg-white divide-y divide-slate-100">
-                        <tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역을 불러오는 중...</td></tr>
+                        <tr><td colspan="6" class="text-center py-12 text-slate-500">결제 내역을 불러오는 중...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -159,7 +158,7 @@
         }
 
         function fetchPaymentList() {
-            elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>결제 내역을 불러오는 중...</p></td></tr>';
+            elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>결제 내역을 불러오는 중...</p></td></tr>';
             lucide.createIcons(); // 로딩 아이콘 렌더링
 
             const url = new URL(window.CONTEXT_PATH + '/admin/payments/api/list', window.location.origin);
@@ -177,13 +176,13 @@
                         renderPagination(data.data.totalCount, data.data.currentPage, data.data.pageSize, data.data.totalPages);
                     } else {
                         console.error('Failed to fetch payment list:', data.message);
-                        elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류') + '</td></tr>';
+                        elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">결제 내역 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류') + '</td></tr>';
                     }
                     lucide.createIcons(); // 상태 아이콘 렌더링
                 })
                 .catch(error => {
                     console.error('Error fetching payment list:', error);
-                    elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-red-500">결제 내역 조회 중 네트워크 오류가 발생했습니다.</td></tr>';
+                    elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-red-500">결제 내역 조회 중 네트워크 오류가 발생했습니다.</td></tr>';
                     lucide.createIcons(); // 에러 아이콘 렌더링
                 });
         }
@@ -191,7 +190,7 @@
         function renderPaymentList(payments) {
             elements.paymentListBody.innerHTML = ''; // 기존 내용 지우기
             if (payments.length === 0) {
-                elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역이 없습니다.</td></tr>';
+                elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">결제 내역이 없습니다.</td></tr>';
                 return;
             }
 
@@ -199,12 +198,11 @@
                 var row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50';
                 row.innerHTML =
-                    '<td class="px-4 py-3 text-sm text-slate-800 font-medium">' + escapeHtml(payment.paymentId) + '</td>' +
-                    '<td class="px-4 py-3 text-sm text-slate-600">' +
-                    '<div class="font-medium">' + escapeHtml(payment.userName || '비회원') + '</div>' +
+                    '<td class="px-4 py-3 text-sm text-slate-600 w-64">' +
+                    '<div class="font-medium">' + escapeHtml(payment.userName || '이름 미입력') + '</div>' +
                     '<div class="text-xs text-slate-500">' + escapeHtml(payment.userEmail || '-') + '</div>' +
                     '</td>' +
-                    '<td class="px-4 py-3 text-sm text-slate-800 font-semibold">' + formatCurrency(payment.amount) + '</td>' +
+                    '<td class="px-4 py-3 text-sm text-slate-800 font-semibold text-right">' + formatCurrency(payment.amount) + '</td>' +
                     '<td class="px-4 py-3 text-sm text-slate-600">' + escapeHtml(payment.paymentMethodDisplay) + '</td>' +
                     '<td class="px-4 py-3 text-sm">' +
                     '<span class="px-2 py-1 text-xs font-medium rounded-full ' + payment.statusBadgeClass + '">' + escapeHtml(payment.statusDisplay) + '</span>' +
