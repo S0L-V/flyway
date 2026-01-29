@@ -31,7 +31,7 @@ function renderHotSix(list) {
             </div>
             <div class="trend-info">
                 <div class="trend-city">${item.city}</div>
-                <span class="trend-tags">#${item.tag}</span>
+                <div class="trend-tags">${renderTags(item.tag)}</div>
             </div>
             <div class="diff ${getDiffClass(item)}">
                 ${renderDiff(item)}
@@ -65,4 +65,23 @@ function getRankClass(rank) {
         return "bottom";
     }
     return "";
+}
+
+function parseTags(tagString) {
+    if(!tagString) {
+        return [];
+    }
+
+    return tagString
+        .split('#')
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+}
+
+function renderTags(tagString) {
+    const tags = parseTags(tagString);
+
+    return tags
+        .map(tag => `<span class="tag-badge">#${tag}</span>`)
+        .join('');
 }

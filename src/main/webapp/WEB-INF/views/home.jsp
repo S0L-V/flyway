@@ -120,7 +120,7 @@
         <section class="special-offers-section">
             <h2 class="section-title">✨ 지금 떠나면 이 가격! 특가 항공권</h2>
 
-            <div class="slider-wrapper">
+            <div class="slider-wrapper" id="slider-wrapper">
                 <button class="nav-btn prev" id="offerPrev">&lt;</button>
                 <button class="nav-btn next" id="offerNext">&gt;</button>
 
