@@ -66,10 +66,10 @@
             AND f.arrival_airport = #{arrivalAirport}
         </if>
         ORDER BY f.departure_time ASC
-        LIMIT 200
+        LIMIT 100
         ) AS limited
         ),
-        200
+        100
         )
     </select>
 
