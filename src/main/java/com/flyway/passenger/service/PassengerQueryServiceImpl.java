@@ -17,14 +17,17 @@ public class PassengerQueryServiceImpl implements PassengerQueryService {
     private final PassengerQueryRepository passengerQueryRepository;
 
     @Override
-    public ReservationPassengersResponseDto getReservationPassengers(String reservationId) {
+    public ReservationPassengersResponseDto getReservationPassengers(String reservationId, String userId) {
         if (!StringUtils.hasText(reservationId)) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
+        if (!StringUtils.hasText(userId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
 
-        List<PassengerReservationDto> rows = passengerQueryRepository.findByReservationId(reservationId);
+        List<PassengerReservationDto> rows = passengerQueryRepository.findByReservationId(reservationId, userId);
         if (rows == null || rows.isEmpty()) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         return ReservationPassengersResponseDto.fromRows(rows);

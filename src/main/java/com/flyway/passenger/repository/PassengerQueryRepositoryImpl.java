@@ -14,7 +14,7 @@ public class PassengerQueryRepositoryImpl implements PassengerQueryRepository {
     private final PassengerQueryMapper passengerQueryMapper;
 
     @Override
-    public List<PassengerReservationDto> findByReservationId(String reservationId) {
-        return passengerQueryMapper.selectPassengersByReservationId(reservationId);
+    public List<PassengerReservationDto> findByReservationId(String reservationId, String userId) {
+        return passengerQueryMapper.selectPassengersByReservationId(reservationId, userId);
     }
 }

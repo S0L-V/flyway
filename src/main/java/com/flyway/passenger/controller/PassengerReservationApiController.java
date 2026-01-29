@@ -28,7 +28,11 @@ public class PassengerReservationApiController {
             @PathVariable String reservationId
     ) {
         try {
-            ReservationPassengersResponseDto response = passengerQueryService.getReservationPassengers(reservationId);
+            String userId = principal != null ? principal.getUserId() : null;
+            if (userId == null || userId.isBlank()) {
+                return ApiResponse.error(ErrorCode.UNAUTHORIZED.getCode(), ErrorCode.UNAUTHORIZED.getMessage());
+            }
+            ReservationPassengersResponseDto response = passengerQueryService.getReservationPassengers(reservationId, userId);
             return ApiResponse.success(response);
         } catch (BusinessException e) {
             return ApiResponse.error(e.getErrorCode().getCode(), e.getErrorCode().getMessage());

@@ -50,6 +50,8 @@
             ps.added_at                    AS addedAt
 
         FROM passenger p
+                 JOIN reservation r
+                      ON r.reservation_id = p.reservation_id
                  JOIN reservation_segment rs
                       ON rs.reservation_id = p.reservation_id
 
@@ -62,6 +64,7 @@
                                AND ps.reservation_segment_id = rs.reservation_segment_id
 
         WHERE p.reservation_id = #{reservationId}
+          AND r.user_id = #{userId}
 
         ORDER BY
             p.passenger_id,
