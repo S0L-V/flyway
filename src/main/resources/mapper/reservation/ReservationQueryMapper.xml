@@ -193,7 +193,7 @@
     <select id="countReservationHistoriesByUserId" resultType="int">
         SELECT COUNT(*)
         FROM reservation r
-        WHERE r.user_id = #{userId}
+        WHERE r.user_id = #{userId} AND r.status = 'CONFIRMED'
     </select>
 
 </mapper>

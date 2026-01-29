@@ -7,8 +7,11 @@ import com.flyway.reservation.dto.ReservationPaymentResponseDto.Fare;
 import com.flyway.reservation.dto.ReservationPaymentResponseDto.FareSegment;
 import com.flyway.reservation.dto.ReservationPaymentResponseDto.ServiceItem;
 import com.flyway.reservation.repository.ReservationPaymentQueryRepository;
+import com.flyway.template.exception.BusinessException;
+import com.flyway.template.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +24,12 @@ public class ReservationPaymentQueryServiceImpl implements ReservationPaymentQue
 
     @Override
     public ReservationPaymentResponseDto getReservationPaymentDetail(String reservationId) {
+        if (!StringUtils.hasText(reservationId)) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
         ReservationPaymentDetailDto row = reservationPaymentQueryRepository
                 .findReservationPaymentDetail(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("예약 결제 상세를 찾을 수 없습니다. reservationId=" + reservationId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
 
         FareSegment outbound = FareSegment.builder()
                 .flightNumber(row.getOutFlightNumber())
