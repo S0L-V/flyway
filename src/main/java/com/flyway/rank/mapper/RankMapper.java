@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface RankMapper {
     // 공항 검색 수 삽입
-    void insertSearchStats(@Param("arrAirport") String arrAirport);
+    void insertSearchStats(@Param("airportId") String airportId, @Param("count") Integer count);
 
     // 공항 순위 조회
     List<AirportCountDto> findLast7DaysCount();
