@@ -4,37 +4,32 @@
 
 <mapper namespace="com.flyway.admin.mapper.AdminPaymentMapper">
 
-    <!-- 결제 성공 건수 (PAID) -->
     <select id="countPaidPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment
         WHERE status = 'PAID'
     </select>
 
-    <!-- 승인 대기 건수 (PENDING) -->
     <select id="countPendingPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment
         WHERE status = 'PENDING'
     </select>
 
-    <!-- 환불 요청 건수 (REFUNDED + CANCELLED) -->
     <select id="countRefundedPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment
         WHERE status IN ('REFUNDED', 'CANCELLED')
     </select>
 
-    <!-- 이번 달 매출 -->
     <select id="sumMonthlyRevenue" resultType="long">
         SELECT COALESCE(SUM(amount), 0)
         FROM payment
         WHERE status = 'PAID'
             AND YEAR(paid_at) = YEAR(CURDATE())
-            AND MONTH(paid_at) = MONTH(CURDATE())
+          AND MONTH(paid_at) = MONTH(CURDATE())
     </select>
 
-    <!-- 결제 내역 ResultMap -->
     <resultMap id="paymentListResultMap" type="com.flyway.admin.dto.PaymentListDto">
         <result property="paymentId" column="payment_id"/>
         <result property="reservationId" column="reservation_id"/>
@@ -51,7 +46,6 @@
         <result property="route" column="route"/>
     </resultMap>
 
-    <!-- 결제 내역 목록 조회 -->
     <select id="selectPaymentList" resultMap="paymentListResultMap">
         SELECT
         p.payment_id,
@@ -63,10 +57,20 @@
         p.created_at,
         p.paid_at,
         u.user_id,
-        CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, '')) AS user_name,
+
+        -- [수정] 이름/성이 둘 다 없으면 " " 공백이 아닌 NULL 반환
+        NULLIF(CONCAT_WS(' ', up.first_name, up.last_name), '') AS user_name,
+
         u.email AS user_email,
         f.flight_number,
-        CONCAT(dep.airport_id, ' → ', arr.airport_id) AS route
+
+        -- [수정] 출발/도착 공항 중 하나라도 없으면 이상한 화살표 대신 NULL 반환
+        CASE
+        WHEN dep.airport_id IS NOT NULL AND arr.airport_id IS NOT NULL
+        THEN CONCAT(dep.airport_id, ' → ', arr.airport_id)
+        ELSE NULL
+        END AS route
+
         FROM payment p
         LEFT JOIN reservation r ON p.reservation_id = r.reservation_id
         LEFT JOIN users u ON r.user_id = u.user_id
@@ -77,20 +81,19 @@
         LEFT JOIN airport arr ON f.arrival_airport = arr.airport_id
         <where>
             <if test="status != null and status != ''">
-                p.status = #{status}
+                AND p.status = #{status}
             </if>
         </where>
         ORDER BY p.paid_at DESC, p.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <!-- 결제 내역 총 건수 -->
     <select id="countPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment p
         <where>
             <if test="status != null and status != ''">
-                p.status = #{status}
+                AND p.status = #{status}
             </if>
         </where>
     </select>
