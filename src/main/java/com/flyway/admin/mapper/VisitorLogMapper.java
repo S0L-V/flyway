@@ -46,4 +46,21 @@ public interface VisitorLogMapper {
 	 * @return 방문자 상세 목록
 	 */
 	List<VisitorDetailDto> selectTodayVisitors(@Param("limit") int limit);
+
+	/**
+	 * 비회원 방문 기록에 user_id 업데이트 (로그인 시)
+	 * @param sessionId 세션 ID
+	 * @param userId 로그인한 사용자 ID
+	 * @return 업데이트된 행 수
+	 */
+	int updateUserIdBySessionId(@Param("sessionId") String sessionId, @Param("userId") String userId);
+
+	/**
+	 * 비회원 방문 기록에 user_id 업데이트 (로그인 시) - IP 주소 기반
+	 * Spring Security 로그인 시 세션이 재생성되므로 IP 기반으로 매칭
+	 * @param ipAddress 클라이언트 IP 주소
+	 * @param userId
+	 * @return
+	 */
+	int updateUserIdByIpAddress(@Param("ipAddress") String ipAddress, @Param("userId") String userId);
 }
