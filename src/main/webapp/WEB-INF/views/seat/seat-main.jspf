@@ -1,0 +1,121 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
+<div class="segment-tabs" id="segment-tabs"
+     data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
+     data-rid="${fn:escapeXml(reservationId)}">
+    <c:forEach var="seg" items="${segments}">
+        <button type="button"
+                class="segment-tab ${seg.reservationSegmentId == reservationSegmentId ? 'segment-tab--active' : ''}"
+                data-segment-id="${fn:escapeXml(seg.reservationSegmentId)}"
+                data-dep="${fn:escapeXml(seg.depAirportCode)}"
+                data-arr="${fn:escapeXml(seg.arrAirportCode)}"
+                data-deptime="${fn:escapeXml(seg.depTimeText)}">
+            <div class="segment-tab__route">
+                <c:out value="${seg.depAirportCode}"/> → <c:out value="${seg.arrAirportCode}"/>
+            </div>
+            <div class="segment-tab__datetime">
+                <c:out value="${seg.depTimeText}"/>
+            </div>
+        </button>
+    </c:forEach>
+</div>
+
+<!-- seat-content를 3컬럼(미니맵 / 좌석배치 / 우측패널)로 구성 -->
+<div class="seat-content">
+
+    <!-- 왼쪽 미니맵 -->
+    <div class="minimap-col">
+        <div class="minimap" id="seat-minimap">
+            <div class="minimap__plane">
+                <div class="minimap__cockpit"></div>
+
+                <div class="minimap__seats" aria-hidden="true">
+                    <c:forEach var="i" begin="1" end="60">
+                        <span class="minimap__seat"></span>
+                    </c:forEach>
+                </div>
+
+                <button type="button"
+                        class="minimap__zone minimap__zone--front is-active"
+                        data-zone="front" aria-label="앞쪽 구역 보기"></button>
+
+                <button type="button"
+                        class="minimap__zone minimap__zone--mid"
+                        data-zone="mid" aria-label="중간 구역 보기"></button>
+
+                <button type="button"
+                        class="minimap__zone minimap__zone--rear"
+                        data-zone="rear" aria-label="뒤쪽 구역 보기"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 가운데 좌석 배치도 -->
+    <div class="seat-map-area">
+        <div class="seat-map-container">
+            <%-- JS가 승객 목록/이름을 읽기 위한 데이터 소스 --%>
+            <div id="passenger-source" style="display:none;">
+                <c:forEach var="p" items="${passengers}" varStatus="st">
+                    <span class="passenger-source"
+                          data-passenger-id="${fn:escapeXml(p.passengerId)}"
+                          data-passenger-name="${fn:escapeXml(p.krLastName)}${fn:escapeXml(p.krFirstName)}"
+                          data-is-default="${st.first ? 'true' : 'false'}"></span>
+                </c:forEach>
+            </div>
+
+            <div id="seat-grid"
+                 class="seat-grid seat-grid--front"
+                 data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
+                 data-rid="${fn:escapeXml(reservationId)}"
+                 data-sid="${fn:escapeXml(reservationSegmentId)}"
+                 data-pid="${fn:escapeXml(passengerId)}">
+                <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
+            </div>
+
+            <div class="seat-legend">
+                <div class="seat-legend__item">
+                    <span class="seat-legend__icon seat-legend__icon--available"></span>
+                    <span class="seat-legend__label">선택 가능</span>
+                </div>
+                <div class="seat-legend__item">
+                    <span class="seat-legend__icon seat-legend__icon--selected"></span>
+                    <span class="seat-legend__label">선택됨</span>
+                </div>
+                <div class="seat-legend__item">
+                    <span class="seat-legend__icon seat-legend__icon--unavailable"></span>
+                    <span class="seat-legend__label">선택 불가</span>
+                </div>
+                <div class="seat-legend__item">
+                    <span class="seat-legend__icon seat-legend__icon--hold"></span>
+                    <span class="seat-legend__label">예약 대기</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 오른쪽 좌석 선택 내역 -->
+    <aside class="selection-panel">
+        <div class="selection-panel__content">
+            <h2 class="selection-panel__title">좌석 선택 내역</h2>
+
+            <!-- 좌석 선택 내역 카드 UI -->
+            <div id="selected-summary" class="selected-summary selected-summary--cards">
+                <div class="selected-summary__empty">
+                    <p>선택된 좌석이 없습니다.</p>
+                </div>
+            </div>
+
+            <!-- 좌석 선택 액션(별도 카드) -->
+            <div id="seat-action" class="seat-action"></div>
+            <div class="selection-total"></div>
+        </div>
+
+        <div class="selection-actions">
+            <button type="button" class="btn btn--secondary" id="btn-cancel">취소</button>
+            <button type="button" class="btn btn--primary" id="btn-confirm">완료</button>
+        </div>
+    </aside>
+</div>
