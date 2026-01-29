@@ -34,6 +34,10 @@ public enum ErrorCode {
 	USER_NOT_FOUND(404, "U011", "사용자를 찾을 수 없습니다."),
 	USER_INTERNAL_ERROR(500, "U999", "회원 처리 중 알 수 없는 오류가 발생했습니다."),
 
+	// ==================== 예약 (R) ====================
+	RESERVATION_NOT_FOUND(404, "R001", "예약을 찾을 수 없습니다."),
+	RESERVATION_INTERNAL_ERROR(500, "R999", "예약 처리 중 알 수 없는 오류가 발생했습니다."),
+
 	// ==================== 인증 (AU) ====================
 	AUTH_REFRESH_TOKEN_MISSING(401, "AU001", "리프레시 토큰이 존재하지 않습니다."),
 	AUTH_REFRESH_TOKEN_INVALID(401, "AU002", "유효하지 않은 리프레시 토큰입니다."),

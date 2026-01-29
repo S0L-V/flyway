@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.reservation.mapper.ReservationQueryMapper">
+
+    <!-- 회원 예약 내역 목록 조회  -->
+    <select id="findReservationHistoriesByUserId"
+            resultType="com.flyway.reservation.dto.ReservationSummaryDto">
+
+        SELECT
+            r.reservation_id                           AS reservationId,
+            r.status                                   AS reservationStatus,
+            r.reserved_at                              AS reservedAt,
+
+            pay.amount                                 AS paidAmount,
+
+            -- 가는 편 (segment_order = 1)
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.flight_id END)        AS outFlightId,
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.departure_airport END) AS outDepartureAirport,
+            MAX(CASE WHEN rs.segment_order = 1 THEN dep.city END)            AS outDepartureCity,
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.arrival_airport END)   AS outArrivalAirport,
+            MAX(CASE WHEN rs.segment_order = 1 THEN arr.city END)            AS outArrivalCity,
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.departure_time END)    AS outDepartureTime,
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.arrival_time END)      AS outArrivalTime,
+
+            -- 오는 편 (segment_order = 2)
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.flight_id END)        AS inFlightId,
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.departure_airport END) AS inDepartureAirport,
+            MAX(CASE WHEN rs.segment_order = 2 THEN dep.city END)            AS inDepartureCity,
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.arrival_airport END)   AS inArrivalAirport,
+            MAX(CASE WHEN rs.segment_order = 2 THEN arr.city END)            AS inArrivalCity,
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.departure_time END)    AS inDepartureTime,
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.arrival_time END)      AS inArrivalTime
+
+        FROM reservation r
+                 JOIN reservation_segment rs
+                      ON rs.reservation_id = r.reservation_id
+                 JOIN flight f
+                      ON f.flight_id = rs.flight_id
+                 JOIN airport dep
+                      ON dep.airport_id = f.departure_airport
+                 JOIN airport arr
+                      ON arr.airport_id = f.arrival_airport
+
+                 LEFT JOIN (
+            -- 예약별 최신 'PAID' 결제 1건
+            -- 동일 paid_at 시 payment_id로 tie-break
+            SELECT reservation_id, amount
+            FROM (
+                SELECT
+                    p1.reservation_id,
+                    p1.amount,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY p1.reservation_id
+                        ORDER BY p1.paid_at DESC, p1.payment_id DESC
+                    ) AS rn
+                FROM payment p1
+                WHERE p1.status = 'PAID'
+            ) ranked
+            WHERE ranked.rn = 1
+        ) pay
+                           ON pay.reservation_id = r.reservation_id
+
+        WHERE r.user_id = #{userId}
+
+        GROUP BY
+            r.reservation_id,
+            r.status,
+            r.reserved_at,
+            pay.amount
+
+        ORDER BY r.reserved_at, r.reservation_id
+        LIMIT #{limit} OFFSET #{offset}
+
+    </select>
+
+    <!-- 회원 예약 상세 조회 -->
+    <select id="findReservationDetail"
+            parameterType="map"
+            resultType="com.flyway.reservation.dto.ReservationDetailDto">
+
+        SELECT
+            r.reservation_id                                           AS reservationId,
+            r.user_id                                                  AS userId,
+            r.status                                                   AS reservationStatus,
+            r.reserved_at                                              AS reservedAt,
+            r.passenger_count                                          AS passengerCount,
+            r.trip_type                                                AS tripType,
+
+            pay.amount                                                 AS paidAmount,
+            pay.payment_method                                         AS paymentMethod,
+            pay.status                                                 AS paymentStatus,
+            pay.paid_at                                                AS paidAt,
+
+            -- 가는 편 (segment_order = 1)
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.flight_id END)              AS outFlightId,
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_flight_number END)     AS outFlightNumber,
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_cabin_class_code END)  AS outCabinClassCode,
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_price END)             AS outPricePerPerson,
+
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_departure_airport END) AS outDepartureAirportId,
+            MAX(CASE WHEN rs.segment_order = 1 THEN dep.city END)                  AS outDepartureCity,
+            MAX(CASE WHEN rs.segment_order = 1 THEN dep.country END)               AS outDepartureCountry,
+
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_arrival_airport END)   AS outArrivalAirportId,
+            MAX(CASE WHEN rs.segment_order = 1 THEN arr.city END)                  AS outArrivalCity,
+            MAX(CASE WHEN rs.segment_order = 1 THEN arr.country END)               AS outArrivalCountry,
+
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_departure_time END)    AS outDepartureTime,
+            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_arrival_time END)      AS outArrivalTime,
+
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.terminal_no END)             AS outTerminalNo,
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.duration_minutes END)        AS outDurationMinutes,
+
+            -- 오는 편 (segment_order = 2)
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.flight_id END)              AS inFlightId,
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_flight_number END)     AS inFlightNumber,
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_cabin_class_code END)  AS inCabinClassCode,
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_price END)             AS inPricePerPerson,
+
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_departure_airport END) AS inDepartureAirportId,
+            MAX(CASE WHEN rs.segment_order = 2 THEN dep.city END)                  AS inDepartureCity,
+            MAX(CASE WHEN rs.segment_order = 2 THEN dep.country END)               AS inDepartureCountry,
+
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_arrival_airport END)   AS inArrivalAirportId,
+            MAX(CASE WHEN rs.segment_order = 2 THEN arr.city END)                  AS inArrivalCity,
+            MAX(CASE WHEN rs.segment_order = 2 THEN arr.country END)               AS inArrivalCountry,
+
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_departure_time END)    AS inDepartureTime,
+            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_arrival_time END)      AS inArrivalTime,
+
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.terminal_no END)             AS inTerminalNo,
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.duration_minutes END)        AS inDurationMinutes
+
+        FROM reservation r
+                 JOIN reservation_segment rs
+                      ON rs.reservation_id = r.reservation_id
+
+                 JOIN flight f
+                      ON f.flight_id = rs.flight_id
+
+                 JOIN airport dep
+                      ON dep.airport_id = rs.snap_departure_airport
+                 JOIN airport arr
+                      ON arr.airport_id = rs.snap_arrival_airport
+
+                 LEFT JOIN (
+            SELECT
+                reservation_id,
+                amount,
+                payment_method,
+                status,
+                paid_at
+            FROM (
+                SELECT
+                    p1.reservation_id,
+                    p1.amount,
+                    p1.payment_method,
+                    p1.status,
+                    p1.paid_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY p1.reservation_id
+                        ORDER BY p1.paid_at DESC, p1.payment_id DESC
+                    ) AS rn
+                FROM payment p1
+                WHERE p1.status = 'PAID'
+            ) ranked
+            WHERE ranked.rn = 1
+        ) pay
+                           ON pay.reservation_id = r.reservation_id
+
+        WHERE r.user_id = #{userId}
+          AND r.reservation_id = #{reservationId}
+
+        GROUP BY
+            r.reservation_id,
+            r.user_id,
+            r.status,
+            r.reserved_at,
+            r.passenger_count,
+            r.trip_type,
+            pay.amount,
+            pay.payment_method,
+            pay.status,
+            pay.paid_at
+
+    </select>
+
+    <!-- 회원 예약 내역 전체 건수 조회  -->
+    <select id="countReservationHistoriesByUserId" resultType="int">
+        SELECT COUNT(*)
+        FROM reservation r
+        WHERE r.user_id = #{userId}
+    </select>
+
+</mapper>

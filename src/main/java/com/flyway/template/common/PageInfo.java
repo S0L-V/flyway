@@ -1,5 +1,6 @@
 package com.flyway.template.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
 @Getter
@@ -21,9 +22,17 @@ public class PageInfo {
     }
 
     public static PageInfo of(int page, int size, long totalElements) {
-        int totalPages = (size <= 0) ? 0 : (int) Math.ceil((double) totalElements / (double) size);
-        boolean hasPrevious = page > 1 && totalPages > 0;
-        boolean hasNext = page < totalPages;
-        return new PageInfo(page, size, totalElements, totalPages, hasNext, hasPrevious);
+        int safeSize = Math.max(size, 1);
+        int totalPages = (int) Math.ceil((double) totalElements / (double) safeSize);
+        int safePage = Math.max(1, Math.min(page, totalPages == 0 ? 1 : totalPages));
+        boolean hasPrevious = safePage > 1 && totalPages > 0;
+        boolean hasNext = safePage < totalPages;
+
+        return new PageInfo(safePage, safeSize, totalElements, totalPages, hasNext, hasPrevious);
+    }
+
+    @JsonIgnore
+    public int getOffset() {
+        return (page - 1) * size;
     }
 }

@@ -1,7 +1,9 @@
-// src/main/java/com/flyway/user/repository/UserQueryRepositoryImpl.java
 package com.flyway.user.repository;
 
 import com.flyway.auth.domain.AuthStatus;
+import com.flyway.template.common.PageInfo;
+import com.flyway.template.common.PageResult;
+import com.flyway.template.common.Paging;
 import com.flyway.user.dto.UserFullJoinRow;
 import com.flyway.user.mapper.UserQueryMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,18 @@ public class UserQueryRepositoryImpl implements UserQueryRepository {
     }
 
     @Override
-    public List<UserFullJoinRow> findAll(AuthStatus status, int limit, int offset) {
+    public PageResult<UserFullJoinRow> findAll(AuthStatus status, Paging paging) {
         String statusParam = (status == null) ? null : status.name();
-        return userQueryMapper.findFullJoinAll(statusParam, limit, offset);
+        long totalCount = userQueryMapper.countUsers(statusParam);
+
+        PageInfo pageInfo = PageInfo.of(paging.getPage(), paging.getSize(), totalCount);
+        List<UserFullJoinRow> items = userQueryMapper.findFullJoinAll(
+                statusParam,
+                pageInfo.getSize(),
+                pageInfo.getOffset()
+        );
+
+        return PageResult.of(items, pageInfo);
     }
 
     @Override
