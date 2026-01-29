@@ -99,6 +99,41 @@
         ORDER BY passenger_id ASC
     </select>
 
+    <!-- 구간별 탑승자 좌석 조회 -->
+    <select id="selectPassengerSeatsBySegment" parameterType="string"
+            resultType="com.flyway.reservation.dto.PassengerSeatInfo">
+        SELECT
+            p.passenger_id AS passengerId,
+            CONCAT(p.kr_last_name, p.kr_first_name) AS passengerName,
+            aseat.seat_no AS seatNo
+        FROM passenger_seat ps
+                 JOIN passenger p ON ps.passenger_id = p.passenger_id
+                 JOIN flight_seat fs ON ps.flight_seat_id = fs.flight_seat_id
+                 JOIN aircraft_seat aseat ON fs.aircraft_seat_id = aseat.airplane_seat_id
+        WHERE ps.reservation_segment_id = #{reservationSegmentId}
+        ORDER BY aseat.row_no, aseat.col_no
+    </select>
+
+    <!-- 구간별 탑승자 부가서비스 조회 (수하물 + 기내식) -->
+    <select id="selectPassengerServicesBySegment" parameterType="string"
+            resultType="com.flyway.reservation.dto.PassengerServiceInfo">
+        SELECT
+            p.passenger_id AS passengerId,
+            CONCAT(p.kr_last_name, p.kr_first_name) AS passengerName,
+            ps.service_type AS serviceType,
+            CASE
+                WHEN ps.service_type = '1' THEN mo.meal_name
+                ELSE CONCAT('추가 수하물 ', ps.quantity, '개')
+                END AS serviceName,
+            ps.quantity AS quantity,
+            ps.total_price AS totalPrice
+        FROM passenger_service ps
+                 JOIN passenger p ON ps.passenger_id = p.passenger_id
+                 LEFT JOIN meal_option mo ON ps.meal_id = mo.meal_id
+        WHERE ps.reservation_segment_id = #{reservationSegmentId}
+        ORDER BY ps.service_type, p.passenger_id
+    </select>
+
     <!-- insert -->
     <insert id="insertPassenger" parameterType="com.flyway.reservation.dto.PassengerUpsertDTO">
         INSERT INTO passenger (
@@ -153,5 +188,11 @@
         WHERE passenger_id = #{passengerId}
           AND reservation_id = #{reservationId}
     </update>
+    <update id="updateReservationStatus">
+        UPDATE reservation
+        SET status = #{status}
+        WHERE reservation_id = #{reservationId}
+    </update>
+
 
 </mapper>

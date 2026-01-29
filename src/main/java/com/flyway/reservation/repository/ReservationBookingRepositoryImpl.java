@@ -53,4 +53,18 @@ public class ReservationBookingRepositoryImpl implements ReservationBookingRepos
     public int updatePassenger(PassengerUpsertDTO dto) {
         return bookingMapper.updatePassenger(dto);
     }
+
+    @Override
+    public int updateReservationStatus(String reservationId, String status) {
+        return bookingMapper.updateReservationStatus(reservationId, status);
+    }
+    @Override
+    public List<PassengerSeatInfo> findPassengerSeatsBySegment(String reservationSegmentId) {
+        return bookingMapper.selectPassengerSeatsBySegment(reservationSegmentId);
+    }
+
+    @Override
+    public List<PassengerServiceInfo> findPassengerServicesBySegment(String reservationSegmentId) {
+        return bookingMapper.selectPassengerServicesBySegment(reservationSegmentId);
+    }
 }
