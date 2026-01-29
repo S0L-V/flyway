@@ -12,7 +12,7 @@ import java.util.List;
 public class RankRepositoryImpl implements RankRepository {
     private final RankMapper mapper;
     // 공항 검색 수 삽입
-    public void insertSearchStats(String arrAirport){ mapper.insertSearchStats(arrAirport);}
+    public void insertSearchStats(String airportId, Integer count){ mapper.insertSearchStats(airportId, count);}
 
     // 공항 순위 조회
     public List<AirportCountDto> findLast7DaysCount() { return mapper.findLast7DaysCount(); }

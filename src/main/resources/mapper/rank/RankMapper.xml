@@ -3,17 +3,17 @@
 <mapper namespace="com.flyway.rank.mapper.RankMapper">
     <insert id="insertSearchStats">
         INSERT INTO airport_search_stats (airport_id, std_date, search_count)
-        VALUES (#{arrAirport}, DATE_FORMAT(NOW(), '%Y%m%d'), 1)
+        VALUES (#{airportId}, DATE_FORMAT(NOW(), '%Y%m%d'), #{count})
         ON DUPLICATE KEY UPDATE
-            search_count = search_count + 1
+            search_count = search_count + #{count}
     </insert>
 
-    <select id="findLast7DaysCount" resultType="AirportRankDto">
+    <select id="findLast7DaysCount" resultType="AirportCountDto">
         SELECT
             airport_id AS airportId,
             SUM(search_count) AS searchCount
         FROM airport_search_stats
-        WHERE std_date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 7 DAYS), '%Y%m%d')
+        WHERE std_date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 7 DAY), '%Y%m%d')
         GROUP BY airport_id
     </select>
 

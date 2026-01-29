@@ -151,4 +151,24 @@ public class RankServiceImpl implements RankService {
     public List<RankItemDto> getCurrentRank() {
         return currentRankCache;
     }
+
+    @Scheduled(cron = "0 40 15 * * *")
+    public synchronized void flushDailyStats() {
+        // 캐시 -> DB
+        realTimeCount.forEach((airportId, count) -> {
+            rankRepository.insertSearchStats(airportId, count);
+        });
+
+        // 오래된 데이터 삭제
+        rankRepository.deleteOldStats();
+
+        // 캐시 초기화
+        realTimeCount.clear();
+
+        // 기준 데이터 다시 로드
+        loadBase7DaysCount();
+
+        // 랭킹 재계산
+        calculateRank();
+    }
 }

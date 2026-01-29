@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface RankRepository {
     // 공항 검색 수 삽입
-    void insertSearchStats(String arrAirport);
+    void insertSearchStats(String airportId, Integer count);
 
     // 공항 순위 조회
     List<AirportCountDto> findLast7DaysCount();
