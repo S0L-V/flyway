@@ -85,6 +85,7 @@ public class RankServiceImpl implements RankService {
         );
 
         return merged.entrySet().stream()
+                .filter(entry -> airportInfoCache.containsKey(entry.getKey()))
                 .map((entry) -> {
                     Airport airport = airportInfoCache.get(entry.getKey());
 
@@ -167,6 +168,7 @@ public class RankServiceImpl implements RankService {
         loadBase7DaysCount();
 
         // 랭킹 재계산
-        calculateRank();
+        List<RankItemDto> newRank = calculateRank();
+        forceApplyRank(newRank);
     }
 }
