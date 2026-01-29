@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,8 +50,8 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
         /* Refresh Token 폐기 */
         authTokenService.revokeAllRefreshTokens(userId, now);
 
-        /* Kakao OAuth 회원의 경우 카카오 연동 해제 */
-        tryKakaoUnlink(userId);
+        /* Kakao OAuth 회원의 경우 카카오 연동 해제 (after commit) */
+        runAfterCommit(() -> tryKakaoUnlink(userId));
 
         /* 개인정보 익명화 처리 */
         anonymizeWithdrawnUser(userId);
@@ -101,5 +103,18 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
         if (name.length() == 1) return "*";
         if (name.length() == 2) return name.charAt(0) + "*";
         return name.charAt(0) + "*".repeat(name.length() - 2) + name.charAt(name.length() - 1);
+    }
+
+    private void runAfterCommit(Runnable action) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    action.run();
+                }
+            });
+        } else {
+            action.run();
+        }
     }
 }
