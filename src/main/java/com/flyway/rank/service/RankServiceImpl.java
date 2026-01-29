@@ -18,13 +18,13 @@ public class RankServiceImpl implements RankService {
     private final RankRepository rankRepository;
     private final FlightRepository flightRepository;
     // 7일 데이터 db에서 가져와서 저장
-    Map<String, Integer> base7DaysCount = new HashMap<>();
+    volatile Map<String, Integer> base7DaysCount = new HashMap<>();
 
     // 실시간 데이터
     Map<String, Integer> realTimeCount = new ConcurrentHashMap<>();
 
     // 공항
-    Map<String, Airport> airportInfoCache = new HashMap<>();
+    volatile Map<String, Airport> airportInfoCache = new HashMap<>();
 
     // 전, 현순위 캐시
     volatile List<RankItemDto> currentRankCache = new ArrayList<>();
@@ -63,11 +63,12 @@ public class RankServiceImpl implements RankService {
     }
 
     private void loadBase7DaysCount() {
-        base7DaysCount.clear();
+        Map<String, Integer> newMap = new HashMap<>();
         rankRepository.findLast7DaysCount()
                 .forEach(dto ->
-                        base7DaysCount.put(dto.getAirportId(), dto.getSearchCount())
-                );
+                newMap.put(dto.getAirportId(), dto.getSearchCount())
+                        );
+        base7DaysCount = newMap;
     }
 
     @Override
@@ -156,13 +157,13 @@ public class RankServiceImpl implements RankService {
     @Scheduled(cron = "0 40 15 * * *")
     public synchronized void flushDailyStats() {
         // 캐시 -> DB
-        realTimeCount.forEach(rankRepository::insertSearchStats);
+        Map<String, Integer> toFlush = realTimeCount;
+        realTimeCount = new ConcurrentHashMap<>();
+
+        toFlush.forEach(rankRepository::insertSearchStats);
 
         // 오래된 데이터 삭제
         rankRepository.deleteOldStats();
-
-        // 캐시 초기화
-        realTimeCount.clear();
 
         // 기준 데이터 다시 로드
         loadBase7DaysCount();
