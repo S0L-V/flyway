@@ -21,7 +21,7 @@ public class RankServiceImpl implements RankService {
     volatile Map<String, Integer> base7DaysCount = new HashMap<>();
 
     // 실시간 데이터
-    Map<String, Integer> realTimeCount = new ConcurrentHashMap<>();
+    volatile Map<String, Integer> realTimeCount = new ConcurrentHashMap<>();
 
     // 공항
     volatile Map<String, Airport> airportInfoCache = new HashMap<>();
@@ -121,19 +121,23 @@ public class RankServiceImpl implements RankService {
             }
         }
 
-        if (!changed) return;
-
         Map<String, Integer> newIndex = new HashMap<>();
         for(int i = 0; i < newRank.size(); i++) {
             RankItemDto dto = newRank.get(i);
             dto.setRank(i + 1);
 
             Integer prev = previousRankIndex.get(dto.getAirportId());
-            if (prev == null || prev > 6) {
-                dto.setDiff(0);
-                dto.setNew(true);
+
+            if (changed) {
+                if (prev == null || prev > 6) {
+                    dto.setDiff(0);
+                    dto.setNew(true);
+                } else {
+                    dto.setDiff(prev - (i + 1));
+                    dto.setNew(false);
+                }
             } else {
-                dto.setDiff(prev - (i + 1));
+                dto.setDiff(0);
                 dto.setNew(false);
             }
 
