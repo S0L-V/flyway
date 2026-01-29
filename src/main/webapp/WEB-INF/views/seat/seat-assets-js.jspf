@@ -1,0 +1,3 @@
+<script src="${pageContext.request.contextPath}/resources/seat/js/seatapi.js?v=<%= System.currentTimeMillis() %>"></script>
+<script src="${pageContext.request.contextPath}/resources/seat/js/seatgrid.js?v=<%= System.currentTimeMillis() %>"></script>
+<script src="${pageContext.request.contextPath}/resources/seat/js/seat-select.js?v=<%= System.currentTimeMillis() %>"></script>

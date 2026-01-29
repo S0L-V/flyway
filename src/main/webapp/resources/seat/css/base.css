@@ -1,0 +1,120 @@
+/* ==================== Header ==================== */
+.seat-header {
+    background-color: var(--color-white);
+    border-bottom: 1px solid var(--color-bg-gray);
+    padding: 15px 0;
+}
+
+.seat-header__content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+}
+
+.seat-header__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.seat-header__logo-icon {
+    width: 61px;
+    height: 42px;
+}
+
+.seat-header__logo-text {
+    font-family: var(--font-family-logo);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-tertiary);
+}
+
+.seat-header__title {
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-seat);
+    margin: 0;
+}
+
+/* ==================== Container ==================== */
+.seat-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* ==================== Main Content Layout ==================== */
+/* 3컬럼(미니맵 / 좌석배치 / 우측패널) 레이아웃 */
+.seat-content {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start; /* 상단 정렬 */
+}
+
+/* 왼쪽 미니맵 */
+.minimap-col {
+    flex: 0 0 170px; /* 미니맵 영역 폭 */
+    align-self: flex-start;
+}
+
+/* 미니맵은 독립 박스로 보이게 + 스크롤 시 따라오게  */
+.minimap-col .minimap {
+    display: flex;
+    flex-direction: column;
+
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-card);
+
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+
+    z-index: 5;
+}
+
+/* 가운데 좌석 배치도 컬럼 */
+.seat-map-area {
+    flex: 1;
+    display: block;
+}
+
+/* 좌석 배치도 큰 박스로 묶기 */
+.seat-map-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+
+    align-self: flex-start;
+}
+
+.seat-map-container .seat-grid {
+    align-self: center;
+    transform: scale(0.92);
+    transform-origin: top center;
+}
+
+/* 오른쪽 패널 - 좌석 선택 내역 */
+.selection-panel {
+    flex: 0 0 265px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+}

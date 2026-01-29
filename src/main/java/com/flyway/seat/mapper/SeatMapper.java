@@ -1,7 +1,9 @@
 package com.flyway.seat.mapper;
 
+import com.flyway.seat.dto.PassengerDTO;
 import com.flyway.seat.dto.SeatDTO;
 import com.flyway.seat.dto.SeatLockRow;
+import com.flyway.seat.dto.SegmentCardDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -91,6 +93,12 @@ public interface SeatMapper {
     );
     // 좌석 팝업에서 HOLD 테스트용 해당 승객 1명 passenger_id 조회
     String selectFirstPassengerIdByReservationId(@Param("reservationId")
-            String reservationId);
+                                                 String reservationId);
+
+    // reservationId 기준 구간 카드용 정보 조회 (출발/도착/출발시간)
+    List<SegmentCardDTO> selectSegmentCardsByReservationId(@Param("reservationId") String reservationId);
+
+    // 예약(reservationId) 기준 탑승자 목록 조회 (좌석 팝업 다인원 탭용)
+    List<PassengerDTO> selectPassengersByReservationId(@Param("reservationId") String reservationId);
 
 }

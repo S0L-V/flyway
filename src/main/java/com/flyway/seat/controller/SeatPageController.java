@@ -1,11 +1,14 @@
 package com.flyway.seat.controller;
 
+import com.flyway.seat.dto.SegmentCardDTO;
 import com.flyway.seat.service.SeatService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/reservations")
@@ -22,13 +25,17 @@ public class SeatPageController {
                                  @PathVariable("segmentId") String reservationSegmentId,
                                  Model model) {
 
-        // 실제 DB에서 passenger 1명 조회
         String passengerId = seatService.findFirstPassengerId(reservationId);
+        List<SegmentCardDTO> segments = seatService.getSegmentCards(reservationId);
 
         model.addAttribute("reservationId", reservationId);
         model.addAttribute("reservationSegmentId", reservationSegmentId);
         model.addAttribute("passengerId", passengerId);
+        model.addAttribute("segments", segments);
 
-        return "seat/seat-select"; // JSP 경로 유지
+        // 다인원용
+        model.addAttribute("passengers", seatService.findPassengers(reservationId));
+
+        return "seat/seat-select";
     }
 }
