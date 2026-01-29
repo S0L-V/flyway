@@ -46,17 +46,21 @@
                       ON arr.airport_id = f.arrival_airport
 
                  LEFT JOIN (
-            -- 예약별 최신 'PAID' 결제 1건 (없는 경우 NULL)
-            SELECT p1.reservation_id, p1.amount
-            FROM payment p1
-                     JOIN (
-                SELECT reservation_id, MAX(paid_at) AS max_paid_at
-                FROM payment
-                WHERE status = 'PAID'
-                GROUP BY reservation_id
-            ) pm
-                          ON pm.reservation_id = p1.reservation_id
-                              AND pm.max_paid_at = p1.paid_at
+            -- 예약별 최신 'PAID' 결제 1건
+            -- 동일 paid_at 시 payment_id로 tie-break
+            SELECT reservation_id, amount
+            FROM (
+                SELECT
+                    p1.reservation_id,
+                    p1.amount,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY p1.reservation_id
+                        ORDER BY p1.paid_at DESC, p1.payment_id DESC
+                    ) AS rn
+                FROM payment p1
+                WHERE p1.status = 'PAID'
+            ) ranked
+            WHERE ranked.rn = 1
         ) pay
                            ON pay.reservation_id = r.reservation_id
 
@@ -69,6 +73,8 @@
             pay.amount
 
         ORDER BY r.reserved_at
+        LIMIT #{limit} OFFSET #{offset}
+
     </select>
 
     <!-- 회원 예약 상세 조회 -->
@@ -143,20 +149,26 @@
 
                  LEFT JOIN (
             SELECT
-                p1.reservation_id,
-                p1.amount,
-                p1.payment_method,
-                p1.status,
-                p1.paid_at
-            FROM payment p1
-                     JOIN (
-                SELECT reservation_id, MAX(paid_at) AS max_paid_at
-                FROM payment
-                WHERE status = 'PAID'
-                GROUP BY reservation_id
-            ) pm
-                          ON pm.reservation_id = p1.reservation_id
-                              AND pm.max_paid_at = p1.paid_at
+                reservation_id,
+                amount,
+                payment_method,
+                status,
+                paid_at
+            FROM (
+                SELECT
+                    p1.reservation_id,
+                    p1.amount,
+                    p1.payment_method,
+                    p1.status,
+                    p1.paid_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY p1.reservation_id
+                        ORDER BY p1.paid_at DESC, p1.payment_id DESC
+                    ) AS rn
+                FROM payment p1
+                WHERE p1.status = 'PAID'
+            ) ranked
+            WHERE ranked.rn = 1
         ) pay
                            ON pay.reservation_id = r.reservation_id
 
@@ -172,6 +184,7 @@
             r.trip_type,
             pay.amount,
             pay.payment_method,
+            pay.status,
             pay.paid_at
 
     </select>
