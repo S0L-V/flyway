@@ -1,8 +1,8 @@
-package com.flyway.reservation.controller;
+package com.flyway.passenger.controller;
 
-import com.flyway.reservation.domain.BaggageSaveRequest;
+import com.flyway.passenger.dto.BaggageSaveRequest;
 import com.flyway.reservation.dto.*;
-import com.flyway.reservation.service.PassengerServiceService;
+import com.flyway.passenger.service.PassengerServiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

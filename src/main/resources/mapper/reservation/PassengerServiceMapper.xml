@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.flyway.reservation.mapper.PassengerServiceMapper">
+<mapper namespace="com.flyway.passenger.mapper.PassengerServiceMapper">
 
     <!-- 수하물 정책 -->
     <select id="selectBaggagePolicy" resultType="com.flyway.reservation.dto.BaggagePolicyView">
@@ -47,7 +47,7 @@
         WHERE rs.reservation_segment_id = #{reservationSegmentId}
     </select>
     <!-- 탑승자 부가서비스 (구간별)-->
-    <select id="selectByPassengerAndSegment" resultType="com.flyway.reservation.dto.PassengerServiceView">
+    <select id="selectByPassengerAndSegment" resultType="com.flyway.passenger.dto.PassengerServiceView">
         SELECT
             ps.ps_id                    AS psId,
             ps.passenger_id             AS passengerId,
@@ -76,7 +76,7 @@
     </select>
 
     <!-- insert -->
-    <insert id="insertPassengerService" parameterType="com.flyway.reservation.dto.PassengerServiceInsertDTO">
+    <insert id="insertPassengerService" parameterType="com.flyway.passenger.dto.PassengerServiceInsertDTO">
     INSERT INTO passenger_service (
     ps_id,
     passenger_id,

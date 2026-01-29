@@ -1,4 +1,4 @@
-package com.flyway.reservation.dto;
+package com.flyway.passenger.dto;
 
 import lombok.*;
 

@@ -1,7 +1,7 @@
 package com.flyway.reservation.controller;
 
 import com.flyway.reservation.dto.BookingViewModel;
-import com.flyway.reservation.dto.PassengerSaveForm;
+import com.flyway.passenger.dto.PassengerSaveForm;
 import com.flyway.reservation.service.ReservationBookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

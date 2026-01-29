@@ -1,5 +1,6 @@
 package com.flyway.reservation.dto;
 
+import com.flyway.passenger.dto.PassengerServiceView;
 import lombok.*;
 
 import java.time.LocalDateTime;

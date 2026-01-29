@@ -79,7 +79,7 @@
 
     <!-- 탑승자 조회 -->
     <select id="selectPassengers" parameterType="string"
-            resultType="com.flyway.reservation.dto.PassengerView">
+            resultType="com.flyway.passenger.dto.PassengerView">
         SELECT
             passenger_id AS passengerId,
             kr_first_name AS krFirstName,
@@ -135,7 +135,7 @@
     </select>
 
     <!-- insert -->
-    <insert id="insertPassenger" parameterType="com.flyway.reservation.dto.PassengerUpsertDTO">
+    <insert id="insertPassenger" parameterType="com.flyway.passenger.dto.PassengerUpsertDTO">
         INSERT INTO passenger (
             passenger_id,
             reservation_id,
@@ -170,7 +170,7 @@
     </insert>
 
     <!-- update -->
-    <update id="updatePassenger" parameterType="com.flyway.reservation.dto.PassengerUpsertDTO">
+    <update id="updatePassenger" parameterType="com.flyway.passenger.dto.PassengerUpsertDTO">
         UPDATE passenger
         SET
             kr_first_name = #{krFirstName},

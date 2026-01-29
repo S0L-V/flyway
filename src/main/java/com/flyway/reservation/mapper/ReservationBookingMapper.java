@@ -1,5 +1,7 @@
 package com.flyway.reservation.mapper;
 
+import com.flyway.passenger.dto.PassengerUpsertDTO;
+import com.flyway.passenger.dto.PassengerView;
 import com.flyway.reservation.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

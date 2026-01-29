@@ -1,28 +1,26 @@
-package com.flyway.reservation.dto;
+package com.flyway.passenger.dto;
 
 import lombok.*;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PassengerView {
+public class PassengerSaveRow {
 
-    private String passengerId;
+    private String passengerId; // hidden (있으면 update, 없으면 insert)
     private String krFirstName;
     private String krLastName;
     private String firstName;
     private String lastName;
-    private LocalDate birth;     // DATE
-    private String gender;       // M/F
+    private String birth;   // yyyy-MM-dd (문자열 -> 서비스에서 LocalDate )
+    private String gender;  // M/F
     private String email;
     private String phoneNumber;
 
     private String passportNo;
     private String country;
-    private LocalDate passportExpiryDate;
+    private String passportExpiryDate;     // yyyy-MM-dd
     private String passportIssueCountry;
 }
