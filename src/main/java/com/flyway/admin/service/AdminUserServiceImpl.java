@@ -52,7 +52,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 		try {
 			return adminUserRepository.findUserById(userId);
 		} catch (Exception e) {
-			log.error("Failed to get user by id: {}", userId);
+			log.error("Failed to get user by id: {}", userId, e);
 			return null;
 		}
 	}
