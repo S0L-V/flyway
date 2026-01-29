@@ -1,6 +1,5 @@
 package com.flyway.search.service;
 
-import com.flyway.rank.repository.RankRepository;
 import com.flyway.rank.service.RankService;
 import com.flyway.search.domain.*;
 import com.flyway.search.dto.*;

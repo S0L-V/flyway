@@ -18,5 +18,5 @@ public class RankRepositoryImpl implements RankRepository {
     public List<AirportCountDto> findLast7DaysCount() { return mapper.findLast7DaysCount(); }
 
     // 7일 전 데이터 삭제
-    public void deleteOldStats() {};
+    public void deleteOldStats() { mapper.deleteOldStats(); };
 }
