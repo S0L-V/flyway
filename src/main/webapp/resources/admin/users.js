@@ -319,7 +319,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch(window.CONTEXT_PATH + '/admin/users/api/' + userId + '/status', {
+        // [보안 수정] encodeURIComponent 적용
+        fetch(window.CONTEXT_PATH + '/admin/users/api/' + encodeURIComponent(userId) + '/status', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
