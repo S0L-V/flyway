@@ -21,13 +21,12 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
     public PageResult<ReservationSummaryDto> findUserReservationHistories(String userId, Paging paging) {
         long totalCount = reservationQueryMapper.countReservationHistoriesByUserId(userId);
 
+        PageInfo pageInfo = PageInfo.of(paging.getPage(), paging.getSize(), totalCount);
         List<ReservationSummaryDto> items = reservationQueryMapper.findReservationHistoriesByUserId(
                 userId,
-                paging.getOffset(),
-                paging.getSize()
+                pageInfo.getOffset(),
+                pageInfo.getSize()
         );
-
-        PageInfo pageInfo = PageInfo.of(paging.getPage(), paging.getSize(), totalCount);
         return PageResult.of(items, pageInfo);
     }
 

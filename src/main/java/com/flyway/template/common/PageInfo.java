@@ -1,5 +1,6 @@
 package com.flyway.template.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
 @Getter
@@ -28,5 +29,10 @@ public class PageInfo {
         boolean hasNext = safePage < totalPages;
 
         return new PageInfo(safePage, safeSize, totalElements, totalPages, hasNext, hasPrevious);
+    }
+
+    @JsonIgnore
+    public int getOffset() {
+        return (page - 1) * size;
     }
 }
