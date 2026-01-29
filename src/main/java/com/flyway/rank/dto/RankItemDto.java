@@ -1,5 +1,6 @@
 package com.flyway.rank.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -12,5 +13,7 @@ public class RankItemDto {
     private int searchCount;  // 7일 + 실시간 합계
     private int rank;
     private int diff;  // 순위 변동
+
+    @JsonProperty("new")
     private boolean isNew; // 새로운건지 판별
 }
