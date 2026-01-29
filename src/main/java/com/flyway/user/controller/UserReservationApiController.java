@@ -39,7 +39,9 @@ public class UserReservationApiController {
                     principal.getUserId(), page, size
             );
             return ApiResponse.success(result.getData(), result.getPage());
-        }  catch (Exception e) {
+        } catch (BusinessException e) {
+            return ApiResponse.error(e.getErrorCode().getCode(), e.getErrorCode().getMessage());
+        } catch (Exception e) {
             log.error("Failed to get reservation list", e);
             return ApiResponse.error(ErrorCode.RESERVATION_INTERNAL_ERROR.getCode(), ErrorCode.RESERVATION_INTERNAL_ERROR.getMessage());
         }
