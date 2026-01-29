@@ -56,11 +56,13 @@ public interface VisitorLogMapper {
 	int updateUserIdBySessionId(@Param("sessionId") String sessionId, @Param("userId") String userId);
 
 	/**
-	 * 비회원 방문 기록에 user_id 업데이트 (로그인 시) - IP 주소 기반
-	 * Spring Security 로그인 시 세션이 재생성되므로 IP 기반으로 매칭
-	 * @param ipAddress 클라이언트 IP 주소
-	 * @param userId
-	 * @return
+	 * 비회원 방문 기록에 user_id 업데이트 (로그인 시) - IP 주소 + 세션 ID 기반 (보안 강화)
+	 * 단순 IP 매칭은 타인의 로그까지 가져올 위험이 있어 세션 ID 조건 추가
+	 * * @param ipAddress 클라이언트 IP 주소
+	 * @param userId    업데이트할 사용자 ID
+	 * @param sessionId 현재 사용자의 세션 ID (필수 추가)
+	 * @return 업데이트된 행의 수
 	 */
-	int updateUserIdByIpAddress(@Param("ipAddress") String ipAddress, @Param("userId") String userId);
+	int updateUserIdByIpAddress(@Param("ipAddress") String ipAddress, @Param("userId") String userId,
+		@Param("sessionId") String sessionId);
 }
