@@ -47,6 +47,7 @@ public class KakaoUnlinkClient {
 
             if (!res.getStatusCode().is2xxSuccessful()) {
                 log.warn("kakao unlink failed. status={}, body={}", res.getStatusCode(), res.getBody());
+                return;
             }
 
             log.info("kakao unlink success. kakaoUserId={}", kakaoUserId);
