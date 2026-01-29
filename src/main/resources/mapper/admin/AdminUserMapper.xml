@@ -61,14 +61,14 @@
         (SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.user_id) AS reservation_count
         <include refid="userJoins"/>
         <include refid="userFilters"/>
-        ORDER BY u.creatd_at DESC
+        ORDER BY u.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <!-- 회원 수 조회 -->
     <select id="countUsers" resultType="int">
         SELECT COUNT(u.user_id)
-        FROM user u
+        FROM users u
         LEFT JOIN user_profile up ON u.user_id = up.user_id
         <include refid="userFilters"/>
     </select>
