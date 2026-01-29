@@ -19,6 +19,6 @@
 
     <delete id="deleteOldStats" >
         DELETE FROM airport_search_stats
-        WHERE DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 7 DAYS), '%Y%m%d') > std_date
+        WHERE DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 7 DAY), '%Y%m%d') > std_date
     </delete>
 </mapper>
