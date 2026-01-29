@@ -155,9 +155,7 @@ public class RankServiceImpl implements RankService {
     @Scheduled(cron = "0 40 15 * * *")
     public synchronized void flushDailyStats() {
         // 캐시 -> DB
-        realTimeCount.forEach((airportId, count) -> {
-            rankRepository.insertSearchStats(airportId, count);
-        });
+        realTimeCount.forEach(rankRepository::insertSearchStats);
 
         // 오래된 데이터 삭제
         rankRepository.deleteOldStats();
