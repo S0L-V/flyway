@@ -33,7 +33,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 	 * @return LoginResponse (JWT 토큰 포함)
 	 */
 	@Override
-	@Transactional
+	@Transactional(noRollbackFor = BusinessException.class)
 	public LoginResponse login(LoginRequest req, String ipAddress) {
 
 		// 1. 이메일로 관리자 조회
