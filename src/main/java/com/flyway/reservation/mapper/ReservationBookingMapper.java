@@ -30,4 +30,17 @@ public interface ReservationBookingMapper {
     // 탑승자 저장
     int insertPassenger(PassengerUpsertDTO dto);
     int updatePassenger(PassengerUpsertDTO dto);
+
+    int updateReservationStatus(@Param("reservationId") String reservationId,
+                                @Param("status") String status);
+
+    // 구간별 탑승자 좌석 조회
+    List<PassengerSeatInfo> selectPassengerSeatsBySegment(
+            @Param("reservationSegmentId") String reservationSegmentId
+    );
+
+    // 구간별 탑승자 부가서비스 조회 (수하물 + 기내식)
+    List<PassengerServiceInfo> selectPassengerServicesBySegment(
+            @Param("reservationSegmentId") String reservationSegmentId
+    );
 }

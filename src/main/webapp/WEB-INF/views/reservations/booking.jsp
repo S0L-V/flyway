@@ -537,6 +537,7 @@
                         <div class="flight-row__airport">${s.snapArrivalCity}(${s.snapArrivalAirport})</div>
                     </div>
                 </div>
+
             </div>
         </c:forEach>
         <c:if test="${empty vm.segments}">
@@ -715,14 +716,61 @@
         <span class="price-label">항공 운임</span>
         <span class="price-value" id="flightPrice">₩0</span>
     </div>
-    <div class="price-row">
-        <span class="price-label">좌석 추가금</span>
-        <span class="price-value" id="seatPrice">₩0</span>
-    </div>
+
+    <!-- 좌석 상세 -->
+    <c:forEach var="s" items="${vm.segments}">
+        <c:if test="${not empty s.passengerSeats}">
+            <div class="price-row" style="padding-left: 20px; font-size: 13px; color: #666;">
+                  <span class="price-label">${s.segmentOrder == 1 ? '가는편' : '오는편'}:
+                      <c:forEach var="seat" items="${s.passengerSeats}" varStatus="st">
+                          ${seat.passengerName} ${seat.seatNo}<c:if test="${!st.last}">, </c:if>
+                      </c:forEach>
+                  </span>
+            </div>
+        </c:if>
+    </c:forEach>
+
     <div class="price-row">
         <span class="price-label">부가서비스</span>
         <span class="price-value" id="servicePrice">₩0</span>
     </div>
+    <!-- 부가서비스 상세 (수하물) -->
+    <c:forEach var="s" items="${vm.segments}">
+        <c:set var="hasBaggage" value="false"/>
+        <c:forEach var="svc" items="${s.passengerServices}">
+            <c:if test="${svc.serviceType == '0'}"><c:set var="hasBaggage" value="true"/></c:if>
+        </c:forEach>
+        <c:if test="${hasBaggage}">
+            <div class="price-row" style="padding-left: 20px; font-size: 13px; color: #666;">
+                  <span class="price-label">${s.segmentOrder == 1 ? '가는편' : '오는편'} 수하물:
+                      <c:forEach var="svc" items="${s.passengerServices}" varStatus="st">
+                          <c:if test="${svc.serviceType == '0'}">
+                              ${svc.passengerName} ${svc.serviceName}<c:if test="${!st.last}">, </c:if>
+                          </c:if>
+                      </c:forEach>
+                  </span>
+            </div>
+        </c:if>
+    </c:forEach>
+    <!-- 부가서비스 상세 (기내식) -->
+    <c:forEach var="s" items="${vm.segments}">
+        <c:set var="hasMeal" value="false"/>
+        <c:forEach var="svc" items="${s.passengerServices}">
+            <c:if test="${svc.serviceType == '1'}"><c:set var="hasMeal" value="true"/></c:if>
+        </c:forEach>
+        <c:if test="${hasMeal}">
+            <div class="price-row" style="padding-left: 20px; font-size: 13px; color: #666;">
+                  <span class="price-label">${s.segmentOrder == 1 ? '가는편' : '오는편'} 기내식:
+                      <c:forEach var="svc" items="${s.passengerServices}" varStatus="st">
+                          <c:if test="${svc.serviceType == '1'}">
+                              ${svc.passengerName} ${svc.serviceName}<c:if test="${!st.last}">, </c:if>
+                          </c:if>
+                      </c:forEach>
+                  </span>
+            </div>
+        </c:if>
+    </c:forEach>
+
     <div class="price-row total">
         <span class="price-label">총 결제 금액</span>
         <span class="price-value" id="totalPrice">₩0</span>
@@ -738,7 +786,7 @@
 </div>
 </div>
 <script type="module">
-    import { fetchWithRefresh } from '/resources/common/authFetch.js';
+    import { fetchWithRefresh } from '/resources/common/js/authFetch.js';
     var reservationId = '${vm.reservationId}';
     var passengerSaved = ${vm.passengerSaved};
     var passengerCount = ${vm.passengerCount};
@@ -786,9 +834,8 @@
     // 총 금액 업데이트
     function updateTotalPrice() {
         var flight = parsePrice(document.getElementById('flightPrice').textContent);
-        var seat = parsePrice(document.getElementById('seatPrice').textContent);
         var service = parsePrice(document.getElementById('servicePrice').textContent);
-        var total = flight + seat + service;
+        var total = flight + service;
         document.getElementById('totalPrice').textContent = '₩' + numberWithCommas(total);
     }
 
@@ -808,8 +855,10 @@
             alert('탑승자 정보를 먼저 저장해주세요.');
             return;
         }
-        location.href = '/reservations/' + reservationId + '/payment';
+        // 결제 페이지로 이동 (PaymentController)
+        location.href = '/payments/' + reservationId;
     }
+
 
     // 페이지 로드 시 부가서비스 총액 조회
     document.addEventListener('DOMContentLoaded', function() {
@@ -840,7 +889,6 @@
             const passengerIdEl = document.querySelector('input[name="passengers[' + index + '].passengerId"]');
             if (!passengerIdEl) break;
 
-            // ✅ [CHANGED] 성별을 select가 아니라 radio(checked)에서 읽는다
             const genderEl = document.querySelector(
                 'input[name="passengers[' + index + '].gender"]:checked'
             );
@@ -853,7 +901,7 @@
                 firstName: document.querySelector('input[name="passengers[' + index + '].firstName"]').value,
                 birth: document.querySelector('input[name="passengers[' + index + '].birth"]').value,
 
-                // ✅ [CHANGED]
+
                 gender: genderEl ? genderEl.value : '',
 
                 email: document.querySelector('input[name="passengers[' + index + '].email"]').value,
