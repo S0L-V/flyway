@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/search.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/details.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/flights.css?v=<%= System.currentTimeMillis() %>">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/main.css?v=<%= System.currentTimeMillis() %>">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/main/css/main.css?v=<%= System.currentTimeMillis() %>">
 </head>
 <body>
 <!-- Header -->
@@ -196,83 +196,6 @@
             <p style="color: #666; margin-top:-15px; margin-bottom: 20px; font-size: 14px;">"지금 이 순간, 가장 많이 검색되는 도시들"</p>
 
             <div class="trending-grid">
-                <div class="trend-item">
-                    <div class="rank-num">1</div>
-                    <div class="trend-thumb" style="background-image: url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=100&q=80');"></div>
-                    <div class="trend-info">
-                        <div class="trend-city">도쿄</div>
-                        <span class="trend-tags">#벚꽃 개화 시기</span>
-                    </div>
-                    <div class="trend-score">
-                        <span class="score-label">Score</span>
-                        <div class="score-val">98</div>
-                    </div>
-                </div>
-
-                <div class="trend-item">
-                    <div class="rank-num">2</div>
-                    <div class="trend-thumb" style="background-image: url('https://images.unsplash.com/photo-1559592413-7cec430aa33f?auto=format&fit=crop&w=100&q=80');"></div>
-                    <div class="trend-info">
-                        <div class="trend-city">다낭</div>
-                        <span class="trend-tags">#가성비 리조트</span>
-                    </div>
-                    <div class="trend-score">
-                        <span class="score-label">Score</span>
-                        <div class="score-val">92</div>
-                    </div>
-                </div>
-
-                <div class="trend-item">
-                    <div class="rank-num">3</div>
-                    <div class="trend-thumb" style="background-image: url('https://images.unsplash.com/photo-1590559899731-a38283956c8c?auto=format&fit=crop&w=100&q=80');"></div>
-                    <div class="trend-info">
-                        <div class="trend-city">오사카</div>
-                        <span class="trend-tags">#유니버셜 스튜디오</span>
-                    </div>
-                    <div class="trend-score">
-                        <span class="score-label">Score</span>
-                        <div class="score-val">89</div>
-                    </div>
-                </div>
-
-                <div class="trend-item">
-                    <div class="rank-num down">4</div>
-                    <div class="trend-thumb" style="background-image: url('https://images.unsplash.com/photo-1565624765373-c1f0383d7350?auto=format&fit=crop&w=100&q=80');"></div>
-                    <div class="trend-info">
-                        <div class="trend-city">나트랑</div>
-                        <span class="trend-tags">#가족 여행</span>
-                    </div>
-                    <div class="trend-score">
-                        <span class="score-label">Score</span>
-                        <div class="score-val down">85</div>
-                    </div>
-                </div>
-
-                <div class="trend-item">
-                    <div class="rank-num down">5</div>
-                    <div class="trend-thumb" style="background-image: url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=100&q=80');"></div>
-                    <div class="trend-info">
-                        <div class="trend-city">푸꾸옥</div>
-                        <span class="trend-tags">#직항 신규 취항</span>
-                    </div>
-                    <div class="trend-score">
-                        <span class="score-label">Score</span>
-                        <div class="score-val down">78</div>
-                    </div>
-                </div>
-
-                <div class="trend-item">
-                    <div class="rank-num down">6</div>
-                    <div class="trend-thumb" style="background-image: url('https://images.unsplash.com/photo-1598971861752-08637009c035?auto=format&fit=crop&w=100&q=80');"></div>
-                    <div class="trend-info">
-                        <div class="trend-city">치앙마이</div>
-                        <span class="trend-tags">#한달 살기</span>
-                    </div>
-                    <div class="trend-score">
-                        <span class="score-label">Score</span>
-                        <div class="score-val down">72</div>
-                    </div>
-                </div>
 
             </div>
         </section>
@@ -284,6 +207,7 @@
 </script>
 
 <script src="${pageContext.request.contextPath}/resources/search/js/search.js?v=<%= System.currentTimeMillis() %>"></script>
+<script src="${pageContext.request.contextPath}/resources/main/js/main.js?v=<%= System.currentTimeMillis() %>"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
