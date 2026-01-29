@@ -11,4 +11,5 @@ public class RankItemDto {
     private int searchCount;  // 7일 + 실시간 합계
     private int rank;
     private int diff;  // 순위 변동
+    private boolean isNew; // 새로운건지 판별
 }
