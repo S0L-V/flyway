@@ -16,7 +16,8 @@
         select airport_id AS airportId,
                country,
                city,
-               image_url AS imageUrl
+               image_url AS imageUrl,
+               tag
         from airport;
     </select>
 
