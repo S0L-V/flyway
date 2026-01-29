@@ -50,10 +50,20 @@ public class AdminUserDto {
 
 	public String getDisplayName() {
 		if (name != null && !name.isEmpty()) {
-			return name;
+			return name.trim();
 		}
-		if (firstName != null && lastName != null) {
-			return firstName + " " + lastName;
+
+		String fn = firstName != null ? firstName.trim() : "";
+		String ln = lastName != null ? lastName.trim() : "";
+		if (!fn.isEmpty() && !ln.isEmpty()) {
+			return fn + " " + ln;
+		}
+
+		if (!fn.isEmpty()) {
+			return fn;
+		}
+		if (!ln.isEmpty()) {
+			return ln;
 		}
 		return "-";
 	}
