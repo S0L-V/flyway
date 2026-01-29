@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.admin.mapper.AdminUserMapper">
+
+    <resultMap id="AdminUserResultMap" type="com.flyway.admin.dto.AdminUserDto">
+        <id property="userId" column="user_id"/>
+        <result property="email" column="email"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="withdrawnAt" column="withdrawn_at"/>
+        <result property="name" column="name"/>
+        <result property="firstName" column="first_name"/>
+        <result property="lastName" column="last_name"/>
+        <result property="gender" column="gender"/>
+        <result property="country" column="country"/>
+        <result property="provider" column="provider"/>
+        <result property="reservationCount" column="reservation_count"/>
+    </resultMap>
+
+    <sql id="userColumns">
+        u.user_id,
+        u.email,
+        u.status,
+        u.created_at,
+        u.withdrawn_at,
+        up.name,
+        up.first_name,
+        up.last_name,
+        up.gender,
+        up.country,
+        ui.provider
+    </sql>
+
+    <sql id="userJoins">
+        FROM users u
+        LEFT JOIN user_profile up ON u.user_id = up.user_id
+        LEFT JOIN user_identity ui ON u.user_id = ui.user_id
+    </sql>
+
+    <sql id="userFilters">
+        <where>
+            <if test="status != null and status != ''">
+                AND u.status = #{status}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+                AND (
+                    u.email LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR up.name LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR CONCAT_WS(' ', up.first_name, up.last_name) LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </if>
+        </where>
+    </sql>
+
+    <!-- 회원 목록 조회 -->
+    <select id="selectUserList" resultMap="AdminUserResultMap">
+        SELECT
+        <include refid="userColumns"/>,
+        (SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.user_id) AS reservation_count
+        <include refid="userJoins"/>
+        <include refid="userFilters"/>
+        ORDER BY u.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 회원 수 조회 -->
+    <select id="countUsers" resultType="int">
+        SELECT COUNT(u.user_id)
+        FROM users u
+        LEFT JOIN user_profile up ON u.user_id = up.user_id
+        <include refid="userFilters"/>
+    </select>
+
+    <!-- 회원 상세 조회 -->
+    <select id="selectUserById" resultMap="AdminUserResultMap">
+        SELECT
+        <include refid="userColumns"/>,
+        (SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.user_id) AS reservation_count
+        <include refid="userJoins"/>
+        WHERE u.user_id = #{userId}
+    </select>
+
+    <!-- 회원 상태 변경 -->
+    <update id="updateUserStatus">
+        UPDATE users
+        SET status = #{status}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 상태별 회원 수 통계 -->
+    <select id="countUsersByStatus" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE status = #{status}
+    </select>
+
+</mapper>

@@ -67,7 +67,7 @@
             vl.log_id,
             vl.session_id,
             vl.user_id,
-            COALESCE(NULLIF(TRIM(CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, ''))), ''), u.email) AS user_name,
+            NULLIF(TRIM(CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, ''))), '') AS user_name,
             u.email AS user_email,
             vl.ip_address,
             vl.user_agent,
@@ -86,5 +86,24 @@
         ORDER BY vl.visited_at DESC
         LIMIT #{limit}
     </select>
+
+    <!-- 세션의 user_id 업데이트 (비회원 -> 로그인 시) 세션 ID 기반-->
+    <update id="updateUserIdBySessionId">
+        UPDATE visitor_log
+        SET user_id = #{userId}
+        WHERE session_id = #{sessionId}
+            AND DATE(visited_at) = CURDATE()
+            AND user_id IS NULL
+    </update>
+
+    <!-- 세션의 user_id 업데이트 (비회원 -> 로그인 시) - IP 주소 기반 -->
+    <update id="updateUserIdByIpAddress">
+        UPDATE visitor_log
+        SET user_id = #{userId}
+        WHERE ip_address = #{ipAddress}
+            AND session_id = #{sessionId}
+            AND DATE(visited_at) = CURDATE()
+            AND user_id IS NULL
+    </update>
 
 </mapper>

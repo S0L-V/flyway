@@ -283,41 +283,21 @@
 
         function formatCurrency(amount) {
             if (amount === null || amount === undefined) return '₩ 0';
-            if (amount >= 100000000) {
-                return '₩ ' + (amount / 100000000).toFixed(1) + '억';
-            }
-            if (amount >= 10000) {
-                return '₩ ' + (amount / 10000).toFixed(0) + '만';
-            }
             return '₩ ' + new Intl.NumberFormat('ko-KR').format(amount);
         }
 
-        function formatDateTime(dateValue) {
-            if (!dateValue) return '';
-
-            // 1. Jackson 배열 형식 처리: [year, month, day, hour, minute, second]
-            if (Array.isArray(dateValue)) {
-                const [year, month, day, hour = 0, minute = 0, second = 0] = dateValue;
-                // 자바스크립트 Date의 월(Month)은 0부터 시작하므로 month - 1 필요
-                return new Date(year, month - 1, day, hour, minute, second)
-                    .toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-            }
-
-            // 2. 문자열 형식 처리
-            const dateString = String(dateValue);
-
-            // ISO 문자열("2023-01-01T12:00:00")을 처리하기 위해 T를 공백으로 치환 (구형 브라우저 호환성)
-            let date = new Date(dateString.replace('T', ' '));
-
-            // 변환 실패 시 일반 Date 생성 시도
+        function formatDateTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString.replace('T', ' ')); // "2023-01-01T12:30:00" -> "2023-01-01 12:30:00"
             if (isNaN(date.getTime())) {
-                date = new Date(dateString);
-            }
-
-            if (isNaN(date.getTime())) {
+                // Jackson의 숫자 배열 형식 처리 [year, month, day, hour, minute, second]
+                const dateParts = dateString.split(/[-\s:T]/).map(Number);
+                if (dateParts.length >= 6) {
+                    return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], dateParts[3], dateParts[4], dateParts[5])
+                        .toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                }
                 return '잘못된 날짜';
             }
-
             return date.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
         }
 
