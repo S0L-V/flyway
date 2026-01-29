@@ -41,7 +41,7 @@
 
     <sql id="userFilters">
         <where>
-            <if test="status != null and status ! ''">
+            <if test="status != null and status != ''">
                 AND u.status = #{status}
             </if>
             <if test="searchKeyword != null and searchKeyword != ''">
