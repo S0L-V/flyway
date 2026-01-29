@@ -39,7 +39,7 @@
             pst.flight_seat_id             AS flightSeatId,
 
             -- 부가서비스
-            ps.ps_id                       AS passengerServiceId,
+            ps.ps_id                       AS psId,
             ps.service_type                AS serviceType,
             ps.trip_type                   AS tripType,
             ps.quantity                    AS quantity,
