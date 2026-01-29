@@ -58,7 +58,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public boolean updateUserStatus(String userId, String status) {
 		try {
 			if (!isValidStatus(status)) {
