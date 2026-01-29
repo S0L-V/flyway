@@ -1,8 +1,12 @@
 /**
  * 관리자 회원 관리 페이지 JavaScript
+ * (수정됨: XSS 방지를 위해 Inline onclick 제거 및 이벤트 위임 적용)
  */
 document.addEventListener('DOMContentLoaded', function() {
-    lucide.createIcons();
+    // Lucide 아이콘 초기화 안전 체크
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 
     let currentPage = 1;
     const pageSize = 10;
@@ -32,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchUserStats();
     fetchUserList();
 
-    // 이벤트 리스너
+    // --- 기본 UI 이벤트 리스너 ---
     elements.refreshButton.addEventListener('click', function() {
         currentPage = 1;
         fetchUserStats();
@@ -68,6 +72,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // --- [보안 수정] 이벤트 위임 (Event Delegation) ---
+    // 목록 테이블 내 버튼 클릭 처리
+    elements.userListBody.addEventListener('click', function(e) {
+        // 클릭된 요소가 버튼이거나 버튼 내부의 아이콘일 경우 가장 가까운 button을 찾음
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const userId = btn.dataset.userId;
+
+        if (!action || !userId) return;
+
+        if (action === 'detail') {
+            showUserDetail(userId);
+        } else if (action === 'block') {
+            changeUserStatus(userId, 'BLOCKED');
+        } else if (action === 'unblock') {
+            changeUserStatus(userId, 'ACTIVE');
+        }
+    });
+
+    // 모달 내부 버튼 클릭 처리
+    elements.modalContent.addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const userId = btn.dataset.userId;
+
+        if (!action || !userId) return;
+
+        if (action === 'block') {
+            changeUserStatus(userId, 'BLOCKED');
+            closeModal();
+        } else if (action === 'unblock') {
+            changeUserStatus(userId, 'ACTIVE');
+            closeModal();
+        }
+    });
+
+
+    // --- API 호출 함수 ---
+
     function fetchUserStats() {
         fetch(window.CONTEXT_PATH + '/admin/users/api/stats')
             .then(function(response) { return response.json(); })
@@ -89,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchUserList() {
         elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>회원 목록을 불러오는 중...</p></td></tr>';
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         var url = new URL(window.CONTEXT_PATH + '/admin/users/api/list', window.location.origin);
         url.searchParams.append('page', currentPage);
@@ -111,13 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Failed to fetch user list:', data.message);
                     elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">회원 목록 조회에 실패했습니다.</td></tr>';
                 }
-                lucide.createIcons();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             })
             .catch(function(error) {
                 console.error('Error fetching user list:', error);
                 elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-red-500">회원 목록 조회 중 오류가 발생했습니다.</td></tr>';
             });
     }
+
+    // --- 렌더링 함수 ---
 
     function renderUserList(users) {
         elements.userListBody.innerHTML = '';
@@ -129,6 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
         users.forEach(function(user) {
             var row = document.createElement('tr');
             row.className = 'hover:bg-slate-50';
+
+            // [보안 수정] onclick 제거하고 data- 속성 사용
             row.innerHTML =
                 '<td class="px-4 py-3">' +
                 '<div class="flex items-center gap-3">' +
@@ -155,15 +206,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 '<td class="px-4 py-3 text-sm text-slate-600">' + formatDate(user.createdAt) + '</td>' +
                 '<td class="px-4 py-3 text-center">' +
                 '<div class="flex items-center justify-center gap-2">' +
-                '<button onclick="showUserDetail(\'' + escapeHtml(user.userId) + '\')" class="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="상세보기">' +
+                // 상세보기 버튼: data-action="detail"
+                '<button data-action="detail" data-user-id="' + escapeHtml(user.userId) + '" class="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="상세보기">' +
                 '<i data-lucide="eye" class="w-4 h-4 text-slate-500"></i>' +
                 '</button>' +
                 (user.status === 'ACTIVE' ?
-                    '<button onclick="changeUserStatus(\'' + escapeHtml(user.userId) + '\', \'BLOCKED\')" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="차단하기">' +
+                    // 차단하기 버튼: data-action="block"
+                    '<button data-action="block" data-user-id="' + escapeHtml(user.userId) + '" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="차단하기">' +
                     '<i data-lucide="ban" class="w-4 h-4 text-red-500"></i>' +
                     '</button>' :
                     user.status === 'BLOCKED' ?
-                        '<button onclick="changeUserStatus(\'' + escapeHtml(user.userId) + '\', \'ACTIVE\')" class="p-2 hover:bg-green-50 rounded-lg transition-colors" title="차단해제">' +
+                        // 차단해제 버튼: data-action="unblock"
+                        '<button data-action="unblock" data-user-id="' + escapeHtml(user.userId) + '" class="p-2 hover:bg-green-50 rounded-lg transition-colors" title="차단해제">' +
                         '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' +
                         '</button>' : '') +
                 '</div>' +
@@ -184,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var ul = document.createElement('ul');
         ul.className = 'flex items-center space-x-1';
 
-        // 이전 페이지 버튼
+        // 이전 페이지
         var prevLi = document.createElement('li');
         var prevButton = document.createElement('button');
         prevButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
@@ -199,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         prevLi.appendChild(prevButton);
         ul.appendChild(prevLi);
 
-        // 페이지 번호 (최대 5개 표시)
+        // 페이지 번호
         var startPage = Math.max(1, curPage - 2);
         var endPage = Math.min(totalPages, startPage + 4);
         if (endPage - startPage < 4) {
@@ -221,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ul.appendChild(li);
         }
 
-        // 다음 페이지 버튼
+        // 다음 페이지
         var nextLi = document.createElement('li');
         var nextButton = document.createElement('button');
         nextButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
@@ -237,11 +291,12 @@ document.addEventListener('DOMContentLoaded', function() {
         ul.appendChild(nextLi);
 
         elements.paginationControls.appendChild(ul);
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // 전역 함수로 노출
-    window.showUserDetail = function(userId) {
+    // --- 비즈니스 로직 함수 (window 스코프 제거 후 로컬 함수로 변경) ---
+
+    function showUserDetail(userId) {
         fetch(window.CONTEXT_PATH + '/admin/users/api/' + userId)
             .then(function(response) { return response.json(); })
             .then(function(data) {
@@ -256,9 +311,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error fetching user detail:', error);
                 alert('회원 정보를 불러오는 중 오류가 발생했습니다.');
             });
-    };
+    }
 
-    window.changeUserStatus = function(userId, newStatus) {
+    function changeUserStatus(userId, newStatus) {
         var statusText = newStatus === 'BLOCKED' ? '차단' : '차단해제';
         if (!confirm('해당 회원을 ' + statusText + '하시겠습니까?')) {
             return;
@@ -285,9 +340,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error changing user status:', error);
                 alert('상태 변경 중 오류가 발생했습니다.');
             });
-    };
+    }
 
     function renderUserDetailModal(user) {
+        // [보안 수정] onclick 제거하고 data- 속성 사용
         elements.modalContent.innerHTML =
             '<div class="space-y-4">' +
             '<div class="flex items-center gap-4 pb-4 border-b border-slate-100">' +
@@ -341,21 +397,22 @@ document.addEventListener('DOMContentLoaded', function() {
             (user.status === 'ACTIVE' || user.status === 'BLOCKED' ?
                 '<div class="pt-4 border-t border-slate-100">' +
                 (user.status === 'ACTIVE' ?
-                    '<button onclick="changeUserStatus(\'' + escapeHtml(user.userId) + '\', \'BLOCKED\'); closeModal();" class="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">' +
+                    // 차단하기: data-action="block"
+                    '<button data-action="block" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">' +
                     '<i data-lucide="ban" class="w-4 h-4 inline-block mr-2"></i>차단하기' +
                     '</button>' :
-                    '<button onclick="changeUserStatus(\'' + escapeHtml(user.userId) + '\', \'ACTIVE\'); closeModal();" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">' +
+                    // 차단해제: data-action="unblock"
+                    '<button data-action="unblock" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">' +
                     '<i data-lucide="check-circle" class="w-4 h-4 inline-block mr-2"></i>차단해제' +
                     '</button>') +
                 '</div>' : '') +
             '</div>';
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function closeModal() {
         elements.modal.classList.add('hidden');
     }
-    window.closeModal = closeModal;
 
     // 유틸리티 함수들
     function formatNumber(num) {
@@ -365,7 +422,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function formatDate(dateString) {
         if (!dateString) return '-';
-        // LocalDateTime 배열 형식 처리: [2026, 1, 15, 10, 30, 0]
         if (Array.isArray(dateString)) {
             var d = new Date(dateString[0], dateString[1] - 1, dateString[2]);
             return d.toLocaleDateString('ko-KR');

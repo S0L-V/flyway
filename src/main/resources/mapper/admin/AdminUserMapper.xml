@@ -45,7 +45,7 @@
                 AND u.status = #{status}
             </if>
             <if test="searchKeyword != null and searchKeyword != ''">
-                AND(
+                AND (
                     u.email LIKE CONCAT('%', #{searchKeyword}, '%')
                     OR up.name LIKE CONCAT('%', #{searchKeyword}, '%')
                     OR CONCAT(up.first_name, ' ', up.last_name) LIKE CONCAT('%', #{searchKeyword}, '%')
