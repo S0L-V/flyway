@@ -1,5 +1,7 @@
 package com.flyway.search.service;
 
+import com.flyway.rank.repository.RankRepository;
+import com.flyway.rank.service.RankService;
 import com.flyway.search.domain.*;
 import com.flyway.search.dto.*;
 import com.flyway.search.repository.FlightRepository;
@@ -17,6 +19,8 @@ import java.util.List;
 public class FlightServiceImpl implements FlightService{
 
     private final FlightRepository flightRepository;
+
+    private final RankService rankService;
 
     @Override
     public List<Flight> list(Flight vo) {
@@ -48,6 +52,10 @@ public class FlightServiceImpl implements FlightService{
     @Override
     public SearchResultDto search(FlightSearchRequest dto) {
         List<FlightSearchResponse> outbounds = flightRepository.findOutboundFlights(dto);
+
+        String arrAirport = dto.getTo();
+
+        rankService.increaseRealtime(arrAirport);
 
         SearchResultDto result = new SearchResultDto();
         List<FlightOptionDto> options = new ArrayList<>();

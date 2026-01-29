@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class FlightRepositoryImpl implements FlightRepository {
-    private final FlightMapper mapper; // Mapper는 여기서만 씁니다!
+    private final FlightMapper mapper;
 
     public List<Flight> findAll(Flight vo) {
         return mapper.list(vo);
