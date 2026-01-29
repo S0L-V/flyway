@@ -15,12 +15,15 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
     private final PaymentQueryRepository paymentQueryRepository;
 
     @Override
-    public PaymentDto getLatestPaidByReservationId(String reservationId) {
+    public PaymentDto getLatestPaidByReservationIdAndUserId(String reservationId, String userId) {
         if (!StringUtils.hasText(reservationId)) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
+        if (!StringUtils.hasText(userId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
 
-        return paymentQueryRepository.findLatestPaidByReservationId(reservationId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_LIST_FETCH_FAILED));
+        return paymentQueryRepository.findLatestPaidByReservationIdAndUserId(reservationId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHORIZED));
     }
 }

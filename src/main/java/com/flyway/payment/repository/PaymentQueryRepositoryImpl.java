@@ -13,9 +13,9 @@ public class PaymentQueryRepositoryImpl implements PaymentQueryRepository {
     private final PaymentQueryMapper paymentQueryMapper;
 
     @Override
-    public Optional<PaymentDto> findLatestPaidByReservationId(String reservationId) {
+    public Optional<PaymentDto> findLatestPaidByReservationIdAndUserId(String reservationId, String userId) {
         return Optional.ofNullable(
-                paymentQueryMapper.findLatestPaidByReservationId(reservationId)
+                paymentQueryMapper.findLatestPaidByReservationIdAndUserId(reservationId, userId)
         );
     }
 }

@@ -7,5 +7,5 @@ public interface PaymentQueryService {
     /**
      * 예약별 결제 조회 (최근 PAID)
      */
-    PaymentDto getLatestPaidByReservationId(String reservationId);
+    PaymentDto getLatestPaidByReservationIdAndUserId(String reservationId, String userId);
 }

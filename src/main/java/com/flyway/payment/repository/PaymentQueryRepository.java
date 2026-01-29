@@ -8,5 +8,5 @@ public interface PaymentQueryRepository {
     /**
      * 예약별 결제 조회 (최근 PAID)
      */
-    Optional<PaymentDto> findLatestPaidByReservationId(String reservationId);
+    Optional<PaymentDto> findLatestPaidByReservationIdAndUserId(String reservationId, String userId);
 }

@@ -31,7 +31,7 @@ public class ReservationPaymentApiController {
             if (principal == null || principal.getUserId() == null || principal.getUserId().isBlank()) {
                 return ApiResponse.error(ErrorCode.UNAUTHORIZED.getCode(), ErrorCode.UNAUTHORIZED.getMessage());
             }
-            PaymentDto payment = paymentQueryService.getLatestPaidByReservationId(reservationId);
+            PaymentDto payment = paymentQueryService.getLatestPaidByReservationIdAndUserId(reservationId, principal.getUserId());
             return ApiResponse.success(payment);
         } catch (BusinessException e) {
             return ApiResponse.error(e.getErrorCode().getCode(), e.getErrorCode().getMessage());

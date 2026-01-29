@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class PassportInfo {
     private String passportNo;
+    private String country;
     private String issueCountry;
     private LocalDate expiryDate;
     private String status;

@@ -10,7 +10,8 @@ public interface PaymentQueryMapper {
     /**
      * 예약별 결제 조회 (최근 PAID)
      */
-    PaymentDto findLatestPaidByReservationId(
-            @Param("reservationId") String reservationId
+    PaymentDto findLatestPaidByReservationIdAndUserId(
+            @Param("reservationId") String reservationId,
+            @Param("userId") String userId
     );
 }
