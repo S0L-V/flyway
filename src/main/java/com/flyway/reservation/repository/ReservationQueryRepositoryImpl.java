@@ -1,5 +1,6 @@
 package com.flyway.reservation.repository;
 
+import com.flyway.reservation.dto.ReservationDetailDto;
 import com.flyway.reservation.dto.ReservationSummaryDto;
 import com.flyway.reservation.mapper.ReservationQueryMapper;
 import com.flyway.template.common.PageInfo;
@@ -30,5 +31,10 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
 
         PageInfo pageInfo = PageInfo.of(safePaging.getPage(), safePaging.getSize(), totalCount);
         return PageResult.of(items, pageInfo);
+    }
+
+    @Override
+    public ReservationDetailDto findUserReservationDetail(String userId, String reservationId) {
+        return reservationQueryMapper.findReservationDetail(userId, reservationId);
     }
 }
