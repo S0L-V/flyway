@@ -41,10 +41,10 @@
 
     <sql id="userFilters">
         <where>
-            <if test="status != null ans status ! ''">
+            <if test="status != null and status ! ''">
                 AND u.status = #{status}
             </if>
-            <if test="searchKeyword != null ans searchKeyword != ''">
+            <if test="searchKeyword != null and searchKeyword != ''">
                 AND(
                     u.email LIKE CONCAT('%', #{searchKeyword}, '%')
                     OR up.name LIKE CONCAT('%', #{searchKeyword}, '%')
