@@ -24,6 +24,6 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
         }
 
         return paymentQueryRepository.findLatestPaidByReservationIdAndUserId(reservationId, userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHORIZED));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

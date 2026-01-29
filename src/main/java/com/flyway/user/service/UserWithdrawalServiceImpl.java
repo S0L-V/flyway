@@ -51,7 +51,8 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
         authTokenService.revokeAllRefreshTokens(userId, now);
 
         /* Kakao OAuth 회원의 경우 카카오 연동 해제 (after commit) */
-        runAfterCommit(() -> tryKakaoUnlink(userId));
+        String kakaoUserId = resolveKakaoUserId(userId);
+        runAfterCommit(() -> tryKakaoUnlink(userId, kakaoUserId));
 
         /* 개인정보 익명화 처리 */
         anonymizeWithdrawnUser(userId);
@@ -72,20 +73,15 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
             throw new BusinessException(ErrorCode.USER_NOT_WITHDRAWN);
         }
 
-        String userName = userProfileRepository.findByUserId(userId).getName();
+        var profile = userProfileRepository.findByUserId(userId);
+        String userName = profile != null ? profile.getName() : null;
 
         /* 이름, provider_user_id 익명화  */
         userIdentityRepository.anonymizeProviderUserIdIfWithdrawn(userId, provider, anonymizedProviderUserId);
         userProfileRepository.nullifyProfileIfWithdrawn(userId, maskName(userName));
     }
 
-    private void tryKakaoUnlink(String userId) {
-        UserIdentity identity = userIdentityRepository.findByUserId(userId);
-        if (identity == null) return;
-
-        if (identity.getProvider() != AuthProvider.KAKAO) return;
-
-        String kakaoUserId = identity.getProviderUserId();
+    private void tryKakaoUnlink(String userId, String kakaoUserId) {
         if (kakaoUserId == null || kakaoUserId.isBlank()) {
             log.warn("kakao unlink skipped: providerUserId missing. userId={}", userId);
             return;
@@ -96,6 +92,13 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
         } catch (Exception e) {
             log.warn("kakao unlink failed; continuing withdrawal. userId={}", userId, e);
         }
+    }
+
+    private String resolveKakaoUserId(String userId) {
+        UserIdentity identity = userIdentityRepository.findByUserId(userId);
+        if (identity == null) return null;
+        if (identity.getProvider() != AuthProvider.KAKAO) return null;
+        return identity.getProviderUserId();
     }
 
     private String maskName(String name) {
