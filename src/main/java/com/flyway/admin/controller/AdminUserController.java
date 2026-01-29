@@ -18,8 +18,6 @@ import com.flyway.admin.service.AdminUserService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.ErrorCode;
 
-import io.swagger.annotations.Api;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,6 +64,11 @@ public class AdminUserController {
 		@RequestParam(required = false) String searchKeyword
 	) {
 		try {
+			if(page < 1 || size < 1){
+				return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(),
+					ErrorCode.INVALID_INPUT_VALUE.getMessage());
+			}
+
 			List<AdminUserDto> list = adminUserService.getUserList(status, searchKeyword, page, size);
 			int totalCount = adminUserService.getUserCount(status, searchKeyword);
 
