@@ -5,6 +5,7 @@ import com.flyway.payment.mapper.PaymentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -52,5 +53,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public void updatePaymentComplete(String paymentId, String paymentKey, String status, String method) {
         paymentMapper.updatePaymentComplete(paymentId,paymentKey, status, method);
+    }
+    @Override
+    public List<PaymentViewDto> findByUserId(String userId) {
+        return paymentMapper.selectByUserId(userId);
     }
 }

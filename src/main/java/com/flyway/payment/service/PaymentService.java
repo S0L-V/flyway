@@ -2,6 +2,7 @@ package com.flyway.payment.service;
 import com.flyway.payment.domain.*;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.client.TossPaymentsClient;
+import com.flyway.payment.mapper.RefundMapper;
 import com.flyway.payment.repository.PaymentRepository;
 import com.flyway.reservation.dto.ReservationCoreView;
 import com.flyway.reservation.dto.ReservationSegmentView;
@@ -14,7 +15,9 @@ import com.flyway.reservation.repository.PassengerServiceRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import com.flyway.payment.dto.RefundSegmentDto;
 
 @Slf4j
 @Service
@@ -25,6 +28,7 @@ public class PaymentService {
     private final ReservationBookingRepository reservationBookingRepository;
     private final TossPaymentsClient tossClient;
     private final PassengerServiceRepository passengerServiceRepository;
+    private final RefundMapper refundMapper;
 
     /**
      * 결제 처리 메인 로직 (개선된 3단계 설계)
@@ -141,7 +145,28 @@ public class PaymentService {
         paymentRepository.updateStatus(paymentId, newStatus);
 
         // 예약 상태 → CANCELLED
+        String reservationId = payment.getReservationId();
         reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CANCELLED");
+        // 잔여석 복구
+        int passengerCount = refundMapper.selectPassengerCountByReservationId(reservationId);
+        List<RefundSegmentDto> segments = refundMapper.selectSegmentsByReservationId(reservationId);
+
+        for (RefundSegmentDto segment : segments) {
+            refundMapper.incrementSeat(segment.getFlightId(), segment.getCabinClass(), passengerCount);
+        }
+
+
+        // refund 테이블 INSERT
+        refundMapper.insertRefund(
+                UUID.randomUUID().toString(),
+                reservationId,
+                paymentId,
+                "DEFAULT_RF_ID",  // TODO: 실제 refund_policy 조회 후 설정
+                payment.getAmount(),
+                payment.getAmount(),
+                request.getCancelReason(),
+                null
+        );
 
         return paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
@@ -159,6 +184,12 @@ public class PaymentService {
     public PaymentViewDto findByReservationId(String reservationId) {
         return paymentRepository.findByReservationId(reservationId).orElse(null);
     }
+    //환불에서 조회
+    @Transactional(readOnly = true)
+    public List<PaymentViewDto> findPaymentsByUserId(String userId) {
+        return paymentRepository.findByUserId(userId);
+    }
+
 
     /**
      * 결제 조회 (Controller용)

@@ -151,4 +151,24 @@ public class PaymentController {
 
         return "payment/complete";
     }
+    @GetMapping("/refund-test")
+    public String refundTestPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
+        log.info("[환불 테스트 페이지] 진입 - userId: {}", user.getUserId());
+
+        // 사용자 결제 내역 조회
+        List<PaymentViewDto> userPayments = paymentService.findPaymentsByUserId(user.getUserId());
+
+        // Debugging: Log payment IDs before sending to JSP
+        if (userPayments != null && !userPayments.isEmpty()) {
+            userPayments.forEach(payment -> {
+                log.info("Payment fetched for user {}: paymentId = {}", user.getUserId(), payment.getPaymentId());
+            });
+        } else {
+            log.info("No payments found for user {}", user.getUserId());
+        }
+
+        model.addAttribute("userPayments", userPayments);
+
+        return "payment/refund-test"; // payment/refund-test.jsp
+    }
 }

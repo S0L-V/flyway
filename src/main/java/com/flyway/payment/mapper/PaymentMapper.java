@@ -4,6 +4,8 @@ import com.flyway.payment.dto.PaymentViewDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface PaymentMapper {
 
@@ -29,6 +31,6 @@ public interface PaymentMapper {
                               @Param("paymentKey") String paymentKey,
                               @Param("status") String status,
                               @Param("method") String method);
-
+    List<PaymentViewDto> selectByUserId(@Param("userId") String userId);
 
 }

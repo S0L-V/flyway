@@ -2,6 +2,7 @@ package com.flyway.payment.repository;
 
 import com.flyway.payment.dto.PaymentViewDto;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -44,4 +45,10 @@ public interface PaymentRepository {
     void updatePaymentKey(String paymentId, String paymentKey);
 
     void updatePaymentComplete(String paymentId, String paymentKey,String status, String method);
+
+    /**
+     * 사용자 ID로 결제 목록 조회
+     */
+    List<PaymentViewDto> findByUserId(String userId);
+
 }

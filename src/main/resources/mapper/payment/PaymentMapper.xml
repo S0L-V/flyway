@@ -88,7 +88,24 @@
         ORDER BY created_at DESC
             LIMIT 1
     </select>
+    <!-- 사용자 ID로 결제 내역 조회 -->
+    <select id="selectByUserId" parameterType="string" resultType="com.flyway.payment.dto.PaymentViewDto">
+        SELECT
+            p.payment_id      AS paymentId,
+            p.reservation_id  AS reservationId,
+            p.payment_key     AS paymentKey,
+            p.order_id        AS orderId,
+            p.amount          AS amount,
+            p.payment_method  AS method,
+            p.status          AS status,
+            p.paid_at         AS paidAt,
+            p.created_at      AS createdAt
+        FROM payment p
+                 JOIN reservation r ON p.reservation_id = r.reservation_id
+        WHERE r.user_id = #{userId}
+        ORDER BY p.created_at DESC
 
+    </select>
     <!-- 결제 상태 업데이트 -->
     <update id="updateStatus">
         UPDATE payment
