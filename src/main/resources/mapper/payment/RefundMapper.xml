@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE mapper
+          PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.flyway.payment.mapper.RefundMapper">
+
+      <!-- 환불 정보 저장 -->
+      <insert id="insertRefund">
+          INSERT INTO refund (
+              refund_id,
+              reservation_id,
+              payment_id,
+              RF_ID,
+              refund_amount,
+              net_refund_amount,
+              refund_reason,
+              refund_status,
+              requested_at,
+              requested_by,
+              processed_at
+          ) VALUES (
+              #{refundId},
+              #{reservationId},
+              #{paymentId},
+              #{rfId},
+              #{refundAmount},
+              #{netRefundAmount},
+              #{refundReason},
+              'APPROVED',
+              NOW(),
+              #{requestedBy},
+              NOW()
+          )
+      </insert>
+
+      <!-- 예약 ID로 segment 정보 조회 -->
+      <select id="selectSegmentsByReservationId" resultType="com.flyway.payment.dto.RefundSegmentDto">
+          SELECT
+              flight_id AS flightId,
+              snap_cabin_class_code AS cabinClass
+          FROM reservation_segment
+          WHERE reservation_id = #{reservationId}
+      </select>
+
+      <!-- 예약의 승객 수 조회 -->
+      <select id="selectPassengerCountByReservationId" resultType="int">
+          SELECT COUNT(*)
+          FROM passenger
+          WHERE reservation_id = #{reservationId}
+      </select>
+
+      <!-- 잔여석 복구 -->
+      <update id="incrementSeat">
+          UPDATE flight_info
+          SET
+          <choose>
+              <when test="cabinClass == 'FST'">first_class_seat = first_class_seat + #{count}</when>
+              <when test="cabinClass == 'BIZ'">business_class_seat = business_class_seat + #{count}</when>
+              <when test="cabinClass == 'ECO'">economy_class_seat = economy_class_seat + #{count}</when>
+          </choose>
+          WHERE flight_id = #{flightId}
+      </update>
+
+  </mapper>

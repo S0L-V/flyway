@@ -54,7 +54,7 @@ public class PaymentApiController {
      * @param request cancelReason, cancelAmount(선택)
      */
     @PostMapping("/{paymentId}/refund")
-    public ResponseEntity<Map<String, Object>> refund(
+    public ResponseEntity<Map<String, Object>> processRefund(
             @PathVariable String paymentId,
             @RequestBody RefundRequest request) {
 

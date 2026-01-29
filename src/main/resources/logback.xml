@@ -7,9 +7,9 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="WARN"/>
-    <logger name="org.springframework.web" level="ERROR"/>
-    <logger name="org.springframework.web.servlet" level="ERROR"/>
+    <logger name="org.springframework" level="INFO"/>                                                               │
+    <logger name="org.springframework.web" level="INFO"/>                                                           │
+    <logger name="org.springframework.web.servlet" level="DEBUG"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <logger name="springfox" level="WARN"/>
     <logger name="io.springfox" level="WARN"/>
