@@ -30,7 +30,7 @@ public enum ErrorCode {
 	USER_DB_ERROR(500, "U007", "회원 정보 저장 중 오류가 발생했습니다."),
 	USER_INVALID_SIGN_UP_ATTEMPT(400, "U008", "유효하지 않은 회원가입 요청입니다."),
 	USER_ALREADY_WITHDRAWN(409, "U009", "이미 탈퇴 처리된 사용자입니다."),
-	USER_NOT_WITHDRAWN(409, "U010","탈퇴 처리된 사용자만 익명화할 수 있습니다."),
+	USER_NOT_WITHDRAWN(409, "U010", "탈퇴 처리된 사용자만 익명화할 수 있습니다."),
 	USER_NOT_FOUND(404, "U011", "사용자를 찾을 수 없습니다."),
 	USER_INTERNAL_ERROR(500, "U999", "회원 처리 중 알 수 없는 오류가 발생했습니다."),
 
@@ -54,7 +54,28 @@ public enum ErrorCode {
 	ADMIN_INVALID_TOKEN(401, "A005", "유효하지 않은 토큰입니다."),
 	ADMIN_TOKEN_EXPIRED(401, "A006", "만료된 토큰입니다."),
 	ADMIN_INSUFFICIENT_PERMISSION(403, "A007", "권한이 없습니다."),
-	ADMIN_DUPLICATE_EMAIL(400, "A008", "이미 사용 중인 이메일입니다.")
+	ADMIN_DUPLICATE_EMAIL(400, "A008", "이미 사용 중인 이메일입니다."),
+
+	// ==================== 결제 통계 관련 (P) ====================
+	PAYMENT_STATUS_FETCH_FAILED(400, "P001", "결제 통계 조회 중 오류가 발생했습니다."),
+	PAYMENT_LIST_FETCH_FAILED(400, "P002", "결제 내역 조회 중 오류가 발생했습니다."),
+
+	// ==================== 프로모션 관련 (PROMO) ====================
+	PROMO_LIST_FETCH_FAILED(500, "PROMO001", "프로모션 목록 조회 중 오류가 발생했습니다."),
+	PROMO_NOT_FOUND(404, "PROMO002", "프로모션을 찾을 수 없습니다."),
+	PROMO_CREATION_FAILED(500, "PROMO003", "프로모션 생성에 실패했습니다."),
+	PROMO_UPDATE_FAILED(500, "PROMO004", "프로모션 수정에 실패했습니다."),
+	PROMO_DELETE_FAILED(500, "PROMO005", "프로모션 삭제에 실패했습니다."),
+	PROMO_TOGGLE_FAILED(500, "PROMO006", "프로모션 상태 변경에 실패했습니다."),
+	PROMO_ORDER_UPDATE_FAILED(500, "PROMO007", "프로모션 순서 변경에 실패했습니다."),
+	PROMO_INVALID_PARAM(400, "PROMO008", "잘못된 파라미터입니다."),
+
+	// ====================  항공편 (FLIGHT) ====================
+	FLIGHT_LIST_FETCH_FAILED(500, "FLIGHT001", "항공편 목록 조회 중 오류가 발생했습니다."),
+	FLIGHT_NOT_FOUND(404, "FLIGHT002", "항공편을 찾을 수 없습니다."),
+	FLIGHT_CREATION_FAILED(500, "FLIGHT003", "항공편 생성에 실패했습니다."),
+	FLIGHT_UPDATE_FAILED(500, "FLIGHT004", "항공편 수정에 실패했습니다."),
+	FLIGHT_DELETE_FAILED(500, "FLIGHT005", "항공편 삭제에 실패했습니다.")
 	;
 
 	private final int status;

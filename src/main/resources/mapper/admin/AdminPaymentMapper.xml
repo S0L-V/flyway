@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.admin.mapper.AdminPaymentMapper">
+
+    <!-- 결제 성공 건수 (PAID) -->
+    <select id="countPaidPayments" resultType="long">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE status = 'PAID'
+    </select>
+
+    <!-- 승인 대기 건수 (PENDING) -->
+    <select id="countPendingPayments" resultType="long">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE status = 'PENDING'
+    </select>
+
+    <!-- 환불 요청 건수 (REFUNDED + CANCELLED) -->
+    <select id="countRefundedPayments" resultType="long">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE status IN ('REFUNDED', 'CANCELLED')
+    </select>
+
+    <!-- 이번 달 매출 -->
+    <select id="sumMonthlyRevenue" resultType="long">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payment
+        WHERE status = 'PAID'
+            AND YEAR(paid_at) = YEAR(CURDATE())
+            AND MONTH(paid_at) = MONTH(CURDATE())
+    </select>
+
+    <!-- 결제 내역 ResultMap -->
+    <resultMap id="paymentListResultMap" type="com.flyway.admin.dto.PaymentListDto">
+        <result property="paymentId" column="payment_id"/>
+        <result property="reservationId" column="reservation_id"/>
+        <result property="transactionId" column="transaction_id"/>
+        <result property="amount" column="amount"/>
+        <result property="paymentMethod" column="payment_method"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="paidAt" column="paid_at"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="flightNumber" column="flight_number"/>
+        <result property="route" column="route"/>
+    </resultMap>
+
+    <!-- 결제 내역 목록 조회 -->
+    <select id="selectPaymentList" resultMap="paymentListResultMap">
+        SELECT
+            p.payment_id,
+           p.reservation_id,
+           p.transaction_id,
+           p.amount,
+           p.payment_method,
+           p.status,
+           p.created_at,
+           p.paid_at,
+           u.user_id,
+           CONCAT(COALESCE(up.first_name, ''), ' ', COALESCE(up.last_name, '')) AS user_name,
+           u.email AS user_email,
+           f.flight_number,
+           CONCAT(dep.airport_id, ' → ', arr.airport_id) AS route
+        FROM payment p
+        JOIN reservation r ON p.reservation_id = r.reservation_id
+        JOIN users u ON r.user_id = u.user_id
+        LEFT JOIN user_profile up ON u.user_id = up.user_id
+        LEFT JOIN reservation_segment rs ON r.reservation_id = rs.reservation_id AND rs.segment_order = 1
+        LEFT JOIN flight f ON rs.flight_id = f.flight_id
+        LEFT JOIN airport dep ON f.departure_airport = dep.airport_id
+        LEFT JOIN airport arr ON f.arrival_airport = arr.airport_id
+        <where>
+            <if test="status != null and status != ''">
+                p.status = #{status}
+            </if>
+        </where>
+        ORDER BY p.paid_at DESC, p.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 결제 내역 총 건수 -->
+    <select id="countPayments" resultType="long">
+        SELECT COUNT(*)
+        FROM payment p
+        <where>
+            <if test="status != null and status != ''">
+                p.status = #{status}
+            </if>
+        </where>
+    </select>
+
+</mapper>
