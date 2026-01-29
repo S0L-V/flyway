@@ -803,7 +803,9 @@
     function openSeatPopup(segmentId) {
         if (!passengerSaved) { alert('탑승자 정보를 먼저 저장해주세요.'); return; }
 
-        const popupUrl = '/reservations/' + reservationId + '/segments/' + segmentId + '/seats';
+        if (!segmentId) { alert('구간 정보를 찾을 수 없습니다.'); return; }
+        const popupUrl = '/reservations/' + encodeURIComponent(reservationId)
+            + '/segments/' + encodeURIComponent(segmentId) + '/seats';
         window.open(popupUrl, 'seatPopup', 'width=1100,height=800,scrollbars=yes,resizable=yes');
     }
 
