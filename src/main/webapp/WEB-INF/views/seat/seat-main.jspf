@@ -1,18 +1,23 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <div class="segment-tabs" id="segment-tabs"
-     data-ctx="${pageContext.request.contextPath}"
-     data-rid="${reservationId}">
+     data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
+     data-rid="${fn:escapeXml(reservationId)}">
     <c:forEach var="seg" items="${segments}">
         <button type="button"
                 class="segment-tab ${seg.reservationSegmentId == reservationSegmentId ? 'segment-tab--active' : ''}"
-                data-segment-id="${seg.reservationSegmentId}"
-                data-dep="${seg.depAirportCode}"
-                data-arr="${seg.arrAirportCode}"
-                data-deptime="${seg.depTimeText}">
-            <div class="segment-tab__route">${seg.depAirportCode} → ${seg.arrAirportCode}</div>
-            <div class="segment-tab__datetime">${seg.depTimeText}</div>
+                data-segment-id="${fn:escapeXml(seg.reservationSegmentId)}"
+                data-dep="${fn:escapeXml(seg.depAirportCode)}"
+                data-arr="${fn:escapeXml(seg.arrAirportCode)}"
+                data-deptime="${fn:escapeXml(seg.depTimeText)}">
+            <div class="segment-tab__route">
+                <c:out value="${seg.depAirportCode}"/> → <c:out value="${seg.arrAirportCode}"/>
+            </div>
+            <div class="segment-tab__datetime">
+                <c:out value="${seg.depTimeText}"/>
+            </div>
         </button>
     </c:forEach>
 </div>
@@ -54,18 +59,18 @@
             <div id="passenger-source" style="display:none;">
                 <c:forEach var="p" items="${passengers}" varStatus="st">
                     <span class="passenger-source"
-                          data-passenger-id="${p.passengerId}"
-                          data-passenger-name="${p.krLastName}${p.krFirstName}"
+                          data-passenger-id="${fn:escapeXml(p.passengerId)}"
+                          data-passenger-name="${fn:escapeXml(p.krLastName)}${fn:escapeXml(p.krFirstName)}"
                           data-is-default="${st.first ? 'true' : 'false'}"></span>
                 </c:forEach>
             </div>
 
             <div id="seat-grid"
                  class="seat-grid seat-grid--front"
-                 data-ctx="${pageContext.request.contextPath}"
-                 data-rid="${reservationId}"
-                 data-sid="${reservationSegmentId}"
-                 data-pid="${passengerId}">
+                 data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
+                 data-rid="${fn:escapeXml(reservationId)}"
+                 data-sid="${fn:escapeXml(reservationSegmentId)}"
+                 data-pid="${fn:escapeXml(passengerId)}">
                 <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
             </div>
 
