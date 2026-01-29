@@ -7,4 +7,5 @@ public class Airport {
     private String airportId;
     private String country;
     private String city;
+    private String imageUrl;
 }
