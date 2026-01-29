@@ -79,10 +79,9 @@ function parseTags(tagString) {
 }
 
 function renderTags(tagString) {
-    return parseTags(tagString).map(tag => {
-        const span = document.createElement("span");
-        span.className = "tag-badge";
-        span.textContent = `#${tag}`;
-        return span;
-    });
+    const tags = parseTags(tagString);
+
+    return tags
+        .map(tag => `<span class="tag-badge">#${tag}</span>`)
+        .join('');
 }
