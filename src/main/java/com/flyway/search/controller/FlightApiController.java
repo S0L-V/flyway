@@ -51,7 +51,7 @@ public class FlightApiController {
     }
 
     @GetMapping("/api/public/flights/prices")
-    public List<LastPriceDto> prices(@RequestParam String outFlightId, @RequestParam String inFlightId, @RequestParam String cabinClassCode) {
+    public List<LastPriceDto> prices(@RequestParam String outFlightId, @RequestParam(required = false) String inFlightId, @RequestParam String cabinClassCode) {
         return service.findPrice(outFlightId, inFlightId, cabinClassCode);
     }
 
