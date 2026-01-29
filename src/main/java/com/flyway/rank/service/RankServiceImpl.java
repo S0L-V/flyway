@@ -57,9 +57,10 @@ public class RankServiceImpl implements RankService {
     }
 
     private void loadAirportInfo(Airport vo) {
-        airportInfoCache.clear();
+        Map<String, Airport> newMap = new HashMap<>();
         flightRepository.findDepAirports(vo)
-                .forEach(a -> airportInfoCache.put(a.getAirportId(), a));
+                .forEach(a -> newMap.put(a.getAirportId(), a));
+        airportInfoCache = newMap;
     }
 
     private void loadBase7DaysCount() {
