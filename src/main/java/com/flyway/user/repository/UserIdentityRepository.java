@@ -2,7 +2,6 @@ package com.flyway.user.repository;
 
 import com.flyway.auth.domain.AuthProvider;
 import com.flyway.user.domain.UserIdentity;
-import org.apache.ibatis.annotations.Param;
 
 public interface UserIdentityRepository {
 
@@ -10,6 +9,11 @@ public interface UserIdentityRepository {
      * 인증 정보 생성
      */
     void save(UserIdentity identity);
+
+    /**
+     * userId로 조회
+     */
+    UserIdentity findByUserId(String userId);
 
     /**
      * (인증 제공자, 제공자 유저 ID)로 조회
@@ -28,5 +32,5 @@ public interface UserIdentityRepository {
     /**
      * EMAIL 가입자의 provider_user_id(이메일) 익명화
      */
-    int anonymizeEmailProviderUserIdIfWithdrawn(String userId, String anonymizedEmail);
+    int anonymizeProviderUserIdIfWithdrawn(String userId, AuthProvider provider, String anonymizedEmail);
 }

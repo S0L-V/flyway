@@ -18,6 +18,11 @@ public class UserIdentityRepositoryImpl implements UserIdentityRepository {
     }
 
     @Override
+    public UserIdentity findByUserId(String userId) {
+        return userIdentityMapper.findByUserId(userId);
+    }
+
+    @Override
     public UserIdentity findByProviderUserId(AuthProvider provider, String providerUserId) {
         return userIdentityMapper.findByProviderUserId(provider, providerUserId);
     }
@@ -28,7 +33,7 @@ public class UserIdentityRepositoryImpl implements UserIdentityRepository {
     }
 
     @Override
-    public int anonymizeEmailProviderUserIdIfWithdrawn(String userId, String anonymizedEmail) {
-        return userIdentityMapper.anonymizeEmailProviderUserIdIfWithdrawn(userId, anonymizedEmail);
+    public int anonymizeProviderUserIdIfWithdrawn(String userId, AuthProvider provider, String anonymizedProviderUserId) {
+        return userIdentityMapper.anonymizeProviderUserIdIfWithdrawn(userId, provider.toString(), anonymizedProviderUserId);
     }
 }
