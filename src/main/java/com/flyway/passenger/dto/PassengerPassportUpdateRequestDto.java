@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PassengerPassportUpdateRequest {
+public class PassengerPassportUpdateRequestDto {
     private String passportNo;
     private String issueCountry;
     private LocalDate expiryDate;
