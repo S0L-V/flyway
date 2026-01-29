@@ -1,0 +1,271 @@
+/* ===== Design Tokens ===== */
+:root {
+    /* Colors */
+    --color-primary-blue: #2f93f7;
+    --color-text-primary: #111111;
+    --color-text-secondary: #767676;
+    --color-bg-white: #ffffff; /* 완전 흰색 */
+
+    /* Layout */
+    --card-width: 280px;
+    --card-gap: 24px;
+    --radius-card: 20px;
+}
+
+/* ===== Base Styles ===== */
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0; padding: 0;
+    font-family: 'Pretendard Variable', sans-serif;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-white); /* 전체 배경 흰색 */
+    overflow-x: hidden;
+}
+
+/* ===== Layout Structure ===== */
+.hero-banner {
+    background: #e0eef7;
+    height: 162px;
+    width: 100%;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    padding-top: 40px;
+    padding-bottom: 100px;
+}
+
+/* ===== Typography ===== */
+.section-title {
+    font-size: 24px; font-weight: 700;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--color-text-primary);
+}
+
+.badge-live {
+    background-color: #ff4d4f; color: white;
+    font-size: 12px; padding: 2px 6px;
+    border-radius: 4px; vertical-align: middle; font-weight: 600;
+}
+
+/* =========================================
+   [SECTION 1] 특가 항공권 슬라이더 (Center Mode)
+   ========================================= */
+.special-offers-section {
+    position: relative;
+    width: 100%;
+    margin-top: 60px;
+    margin-bottom: 100px;
+    background-color: #ffffff; /* 섹션 배경 흰색 고정 */
+}
+
+/* 슬라이더 컨테이너 */
+.slider-wrapper {
+    background-color: #ffffff;
+    position: relative;
+    width: 100%;
+    /* max-width 제거 또는 넓게 잡아서 그라데이션 영역 확보 */
+    max-width: 100%;
+    height: 480px; /* 카드+그림자 공간 충분히 확보 */
+    display: flex;
+    align-items: center;
+    /* justify-content: center;  <- JS로 위치 계산하므로 제거 */
+    overflow: hidden;
+    padding: 20px 0;
+}
+
+/* --- 양쪽 사이드 화이트 그라데이션 (Pure White) --- */
+.slider-wrapper::before,
+.slider-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 20%; /* 너비를 넓혀서 자연스럽게 흐리게 */
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* 왼쪽 그라데이션 (흰색 -> 투명) */
+.slider-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, #ffffff 30%, rgba(255,255,255,0) 100%);
+}
+
+/* 오른쪽 그라데이션 (흰색 -> 투명) */
+.slider-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, #ffffff 30%, rgba(255,255,255,0) 100%);
+}
+
+/* 트랙 */
+.main-slider-track {
+    display: flex;
+    gap: var(--card-gap);
+    padding: 0;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+    align-items: center;
+    height: 100%;
+}
+
+/* 개별 카드 */
+.offer-card {
+    flex: 0 0 var(--card-width);
+    height: 360px;
+    border-radius: var(--radius-card);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #ffffff;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+/* 활성화(가운데)된 카드 강조 효과 (선택 사항) */
+.offer-card.active {
+    transform: scale(1.05); /* 가운데 오면 약간 커짐 */
+    z-index: 5;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.offer-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    z-index: 6;
+}
+
+/* 오버레이 */
+.offer-overlay {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 75%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    color: white; padding: 24px 20px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+}
+
+/* 배지 & 텍스트 */
+.card-badges { position: absolute; top: 20px; left: 20px; display: flex; gap: 6px; }
+.card-badge { background: rgba(255,255,255,0.95); color: #333; padding: 5px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+.card-badge.blue { background: var(--color-primary-blue); color: white; }
+
+.offer-airline { font-size: 13px; opacity: 0.9; margin-bottom: 5px; }
+.offer-city { font-size: 28px; font-weight: 800; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+.offer-date { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
+.offer-price-area { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; }
+.offer-original-price { font-size: 13px; text-decoration: line-through; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+.offer-price { font-size: 24px; font-weight: 800; color: #87CEFA; }
+
+/* 네비게이션 버튼 (화이트 그라데이션 위에 뜸) */
+.nav-btn {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    font-size: 20px; color: #333;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s;
+}
+.nav-btn:hover { background: var(--color-primary-blue); color: white; border-color: var(--color-primary-blue); }
+
+/* 버튼 위치 조정 (화면 안쪽으로) */
+.nav-btn.prev { left: 10%; }
+.nav-btn.next { right: 10%; }
+
+/* =========================================
+  실시간 인기
+   ========================================= */
+.trending-section { position: relative; }
+.trending-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
+.view-all-link { font-size: 14px; color: var(--color-primary-blue); text-decoration: none; font-weight: 600; margin-bottom: 24px; }
+.trending-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.trend-item {
+    background: #f8f9fa; /* 여기는 약간 회색 유지 (구분감) */
+    border-radius: 16px; padding: 20px;
+    display: flex; align-items: center;
+    transition: background 0.2s, transform 0.2s; cursor: pointer;
+}
+.trend-item:hover { background: #eef2f6; transform: translateY(-2px); }
+.rank-num { font-size: 28px; font-weight: 900; font-style: italic; color: var(--color-primary-blue); width: 40px; text-align: center; margin-right: 16px; flex-shrink: 0; }
+.rank-num.bottom { color: #949494; }
+.trend-thumb { width: 64px; height: 64px; border-radius: 10px; background-color: #ddd; background-size: cover; background-position: center; margin-right: 16px; flex-shrink: 0; }
+.trend-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.trend-city { font-size: 17px; font-weight: 700; }
+.trend-score { text-align: right; margin-left: 10px; flex-shrink: 0; }
+.score-label { font-size: 11px; color: #949494; display: block; margin-bottom: 2px; }
+.score-val { font-size: 20px; font-weight: 800; color: var(--color-primary-blue); }
+.score-val.bottom { color: #949494; }
+
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.tag-badge {
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 999px;
+    background: #f1f6ff;
+    color: #2f6cf7;
+    white-space: nowrap;
+}
+
+.diff.up {
+    color: #e53935;
+}
+
+.diff.down {
+    color: #1e88e5;
+}
+
+.diff.new {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: #ff9800;
+    font-weight: bold;
+    background: moccasin;
+    border-radius: 10px;
+    vertical-align: middle;
+}
+
+.trending-desc {
+    color: #666;
+    margin-top: -15px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+@media (max-width: 1400px) {
+    .container { padding: 0 100px; }
+    .nav-btn.prev { left: 20px; }
+    .nav-btn.next { right: 20px; }
+    .trending-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .container { padding: 0 20px; }
+    .trending-grid { grid-template-columns: 1fr; }
+    .nav-btn { display: none; }
+    .slider-wrapper { overflow-x: auto; padding-left: 20px; }
+    .slider-wrapper::before, .slider-wrapper::after { display: none; }
+}

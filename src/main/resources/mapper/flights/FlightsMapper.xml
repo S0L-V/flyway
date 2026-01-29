@@ -15,7 +15,9 @@
     <select id="depAirport" parameterType="com.flyway.search.domain.Airport" resultType="com.flyway.search.domain.Airport">
         select airport_id AS airportId,
                country,
-               city
+               city,
+               image_url AS imageUrl,
+               tag
         from airport;
     </select>
 

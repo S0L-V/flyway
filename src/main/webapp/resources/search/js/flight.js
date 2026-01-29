@@ -235,9 +235,11 @@ document.getElementById("resultList").addEventListener("click", async (e) => {
     try {
         const params = new URLSearchParams({
             outFlightId: outId,
-            inFlightId: inId || null,
             cabinClassCode: state.cabin
         });
+        if (inId) {
+            params.set("inFlightId", inId);
+        }
 
         const response = await fetch(`/api/public/flights/prices?${params}`, {
             method: 'GET',
