@@ -31,7 +31,7 @@ function renderHotSix(list) {
             </div>
             <div class="trend-info">
                 <div class="trend-city">${item.city}</div>
-                <span class="trend-tags">#유니버셜 스튜디오</span>
+                <span class="trend-tags">#${item.tag}</span>
             </div>
             <div class="diff ${getDiffClass(item)}">
                 ${renderDiff(item)}
