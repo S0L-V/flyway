@@ -1,7 +1,7 @@
 package com.flyway.reservation.dto;
 
 import lombok.*;
-
+import java.util.List;
 import java.time.LocalDateTime;
 
 @Getter
@@ -25,4 +25,8 @@ public class ReservationSegmentView {
     private String snapDepartureCity;   // 출발 도시명 (인천)
     private String snapArrivalCity;     // 도착 도시명 (나리타)
     private String snapAirlineName;     // 항공사명
+
+    private List<PassengerSeatInfo> passengerSeats;
+
+    private List<PassengerServiceInfo> passengerServices;
 }

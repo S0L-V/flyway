@@ -42,6 +42,19 @@ public class ReservationBookingService {
 
         List<ReservationSegmentView> segments = bookingRepository.findSegments(reservationId);
 
+        for (ReservationSegmentView segment : segments) {
+            List<PassengerSeatInfo> seats = bookingRepository.findPassengerSeatsBySegment(
+                    segment.getReservationSegmentId()
+            );
+            segment.setPassengerSeats(seats);
+            // 부가서비스 (수하물 + 기내식)
+            List<PassengerServiceInfo> services = bookingRepository.findPassengerServicesBySegment(
+                    segment.getReservationSegmentId()
+            );
+            segment.setPassengerServices(services);
+        }
+
+
         int savedPassengerCount = bookingRepository.countPassengers(reservationId);
         boolean passengerSaved = (savedPassengerCount == header.getPassengerCount());
 
@@ -162,4 +175,6 @@ public class ReservationBookingService {
     private String emptyToNull(String v) {
         return isBlank(v) ? null : v.trim();
     }
+
+
 }

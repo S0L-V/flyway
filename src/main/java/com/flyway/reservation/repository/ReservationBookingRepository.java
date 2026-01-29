@@ -23,4 +23,8 @@ public interface ReservationBookingRepository {
     int updatePassenger(PassengerUpsertDTO dto);
 
     int updateReservationStatus(String reservationId, String status);
+
+    List<PassengerSeatInfo> findPassengerSeatsBySegment(String reservationSegmentId);
+
+    List<PassengerServiceInfo> findPassengerServicesBySegment(String reservationSegmentId);
 }
