@@ -71,7 +71,7 @@
             r.reserved_at,
             pay.amount
 
-        ORDER BY r.reserved_at
+        ORDER BY r.reserved_at, r.reservation_id
         LIMIT #{limit} OFFSET #{offset}
 
     </select>
