@@ -1,0 +1,10 @@
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/variables.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/global.css">
+
+<%-- css --%>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/base.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/component.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/minimap.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/seatgrid.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/responsive.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/toggle.css">

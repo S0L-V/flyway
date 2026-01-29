@@ -1,0 +1,70 @@
+/* ==================== Mini Map (CSS) ==================== */
+.minimap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.minimap__plane {
+    position: relative;
+    width: 130px;
+    height: 300px;
+    border: 4px solid #1b3a66;
+    border-radius: 20px;
+    background: #fff7ea;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.minimap__cockpit {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 20px;
+    border-radius: 10px;
+    background: rgba(27, 58, 102, 0.18);
+}
+
+/* 장식용 좌석 점들 */
+.minimap__seats {
+    position: absolute;
+    top: 46px;
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    align-content: start;
+}
+
+.minimap__seat {
+    width: 100%;
+    height: 11px;
+    border-radius: 6px;
+    background: rgba(42, 116, 227, 0.22);
+    border: 2px solid rgba(27, 58, 102, 0.55);
+}
+
+/* 3구역 클릭 오버레이 */
+.minimap__zone {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.minimap__zone--front { top: 0; height: 33.33%; }
+.minimap__zone--mid   { top: 33.33%; height: 33.33%; }
+.minimap__zone--rear  { top: 66.66%; height: 33.34%; }
+
+.minimap__zone.is-active {
+    background: rgba(42, 116, 227, 0.18);
+    outline: 2px solid rgba(42, 116, 227, 0.55);
+    outline-offset: -2px;
+}

@@ -1,0 +1,155 @@
+/* ==================== Seat Grid ==================== */
+/* 기본 좌석 그리드 레이아웃 */
+.seat-grid {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+/* 좌석 행 */
+.seat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* 가운데 통로 간격(기존 8px → 12px) */
+}
+
+/* 컬럼 헤더 (A~F) */
+.seat-row--header {
+    margin-bottom: 6px;
+}
+
+/* 좌/우 컬럼 텍스트 묶음(헤더용) */
+.seat-row__cols {
+    display: flex;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.seat-col {
+    width: 63px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-subtle);
+}
+
+/* 가운데 행 번호(통로 중앙) */
+.seat-row__number--mid {
+    width: 48px; /* 가운데 번호 폭 */
+    text-align: center;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-subtle);
+    flex: 0 0 auto;
+}
+
+/* (호환용) 예전 클래스가 남아있어도 깨지지 않게 */
+.seat-row__number {
+    width: 63px;
+    text-align: center;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-subtle);
+}
+
+/* 좌/우 좌석 묶음 */
+.seat-row__seats {
+    display: flex;
+    gap: 8px;
+    flex: 0 0 auto; /* 기존 flex:1 제거 (중앙 배치 위해) */
+}
+
+.seat-row__seats--left,
+.seat-row__seats--right {
+    display: flex;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+/* 좌석 버튼 기본 */
+.seat-item {
+    width: 63px;
+    height: 51px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family-primary);
+    font-size: 17px;
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* 좌석 상태 */
+.seat-item--available {
+    background-color: var(--color-seat-available);
+    color: var(--color-seat-text-white);
+}
+
+.seat-item--available:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(42, 116, 227, 0.3);
+}
+
+.seat-item--selected {
+    background-color: var(--color-seat-selected);
+    color: var(--color-seat-text-white);
+}
+
+.seat-item--hold {
+    background-color: #ffa500;
+    color: var(--color-seat-text-white);
+    cursor: not-allowed;
+}
+
+.seat-item--unavailable {
+    background-color: var(--color-seat-unavailable);
+    color: var(--color-seat-text-white);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.seat-item--empty {
+    background: transparent;
+    cursor: default;
+}
+
+/* ==================== 좌석 섹션 3개 front/mid/rear ==================== */
+
+/* 기본: 전부 숨김 (모드 클래스가 켜진 구역만 보여줌) */
+.seat-row[data-section="front"],
+.seat-row[data-section="mid"],
+.seat-row[data-section="rear"] {
+    display: none;
+}
+
+/* 헤더는 항상 표시 */
+.seat-row.seat-row--header {
+    display: flex;
+}
+
+/* FRONT 모드 */
+.seat-grid--front .seat-row[data-section="front"] {
+    display: flex;
+}
+
+/* MID 모드 */
+.seat-grid--mid .seat-row[data-section="mid"] {
+    display: flex;
+}
+
+/* REAR 모드 */
+.seat-grid--rear .seat-row[data-section="rear"] {
+    display: flex;
+}
+

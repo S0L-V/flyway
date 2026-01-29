@@ -149,6 +149,41 @@
             LIMIT 1
     </select>
 
+    <!-- 예약(reservationId) 기준 구간 카드용 정보 조회 (flight 기준) -->
+    <select id="selectSegmentCardsByReservationId"
+            parameterType="string"
+            resultType="com.flyway.seat.dto.SegmentCardDTO">
+        SELECT
+            rs.reservation_segment_id AS reservationSegmentId,
+            f.departure_airport       AS depAirportCode,
+            f.arrival_airport         AS arrAirportCode,
+            f.departure_time          AS depTime
+        FROM reservation_segment rs
+                 JOIN flight f
+                      ON f.flight_id = rs.flight_id
+        WHERE rs.reservation_id = #{reservationId}
+        ORDER BY rs.segment_order ASC
+    </select>
+
+    <!-- 예약(reservationId) 기준 탑승자 목록 조회 (좌석 팝업 다인원 탭용) -->
+    <select id="selectPassengersByReservationId"
+            parameterType="string"
+            resultType="com.flyway.seat.dto.PassengerDTO">
+        SELECT
+            p.passenger_id   AS passengerId,
+            p.reservation_id AS reservationId,
+            p.kr_first_name  AS krFirstName,
+            p.kr_last_name   AS krLastName,
+            p.first_name     AS firstName,
+            p.last_name      AS lastName
+        FROM passenger p
+        WHERE p.reservation_id = #{reservationId}
+        ORDER BY p.passenger_id
+    </select>
+
+
+
+
 
     <!-- flight_seat가 없으면 HOLD row를 생성 (UNIQUE(flight_id, aircraft_seat_id) 기반) -->
     <insert id="insertFlightSeatHold">

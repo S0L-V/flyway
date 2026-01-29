@@ -1,0 +1,43 @@
+/* ==================== Responsive ==================== */
+
+/* 팝업/데스크탑에서 3단 유지되게 900px */
+@media (max-width: 900px) {
+    /* 좁아지면 3단 → 세로 스택 */
+    .seat-content {
+        flex-direction: column;
+    }
+
+    /* minimap-col도 세로 스택으로 */
+    .minimap-col {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+
+    .selection-panel {
+        flex: 1 1 auto;
+        position: static;
+        top: auto;
+    }
+}
+
+/* 모바일만큼 작은 화면에서만 sticky 해제 */
+@media (max-width: 640px) {
+    .minimap-col .minimap {
+        position: static;
+        top: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .segment-tabs {
+        flex-direction: column;
+    }
+
+    .segment-tab {
+        width: 100%;
+    }
+
+    .selection-actions {
+        flex-direction: column;
+    }
+}
