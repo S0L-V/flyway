@@ -5,6 +5,7 @@ import com.flyway.search.domain.*;
 import com.flyway.search.dto.*;
 import com.flyway.search.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Primary
 @RequiredArgsConstructor
@@ -54,7 +56,11 @@ public class FlightServiceImpl implements FlightService{
 
         String arrAirport = dto.getTo();
 
-        rankService.increaseRealtime(arrAirport);
+        try {
+            rankService.increaseRealtime(arrAirport);
+        } catch (Exception e) {
+            log.error("Failed to update realtime ranking for airport: {}", arrAirport, e);
+        }
 
         SearchResultDto result = new SearchResultDto();
         List<FlightOptionDto> options = new ArrayList<>();

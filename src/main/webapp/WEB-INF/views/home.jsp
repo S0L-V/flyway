@@ -184,16 +184,13 @@
         </section>
 
         <section class="trending-section">
-        </section>
-
-        <section class="trending-section">
             <div class="trending-header">
                 <h2 class="section-title">
-                    실시간 인기 급상승 <span class="badge-live">LIVE</span>
+                    여행지 인기 급상승 <span class="badge-live">LIVE</span>
                 </h2>
                 <a href="#" class="view-all-link">실시간 데이터 상세 보기 →</a>
             </div>
-            <p style="color: #666; margin-top:-15px; margin-bottom: 20px; font-size: 14px;">"지금 이 순간, 가장 많이 검색되는 도시들"</p>
+            <p class="trending-desc">"최근 일주일, 가장 많이 검색된 도시들"</p>
 
             <div class="trending-grid">
 
@@ -212,7 +209,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const track = document.getElementById('offerTrack');
-        const wrapper = document.getElementById('sliderWrapper');
+        const wrapper = document.getElementById('slider-wrapper');
         const prevBtn = document.getElementById('offerPrev');
         const nextBtn = document.getElementById('offerNext');
         const cards = document.querySelectorAll('.offer-card');

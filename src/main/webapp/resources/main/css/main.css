@@ -233,6 +233,13 @@ html, body {
     vertical-align: middle;
 }
 
+.trending-desc {
+    color: #666;
+    margin-top: -15px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
 @media (max-width: 1400px) {
     .container { padding: 0 100px; }
     .nav-btn.prev { left: 20px; }
