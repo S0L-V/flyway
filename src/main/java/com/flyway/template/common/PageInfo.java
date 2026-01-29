@@ -21,10 +21,9 @@ public class PageInfo {
     }
 
     public static PageInfo of(int page, int size, long totalElements) {
-        int safePage = Math.max(page, 1);
         int safeSize = Math.max(size, 1);
-
         int totalPages = (int) Math.ceil((double) totalElements / (double) safeSize);
+        int safePage = Math.max(1, Math.min(page, totalPages == 0 ? 1 : totalPages));
         boolean hasPrevious = safePage > 1 && totalPages > 0;
         boolean hasNext = safePage < totalPages;
 

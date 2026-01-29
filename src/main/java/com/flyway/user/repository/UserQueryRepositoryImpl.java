@@ -28,10 +28,9 @@ public class UserQueryRepositoryImpl implements UserQueryRepository {
         String statusParam = (status == null) ? null : status.name();
         long totalCount = userQueryMapper.countUsers(statusParam);
 
-        Paging safePaging = paging.safe();
-        PageInfo pageInfo = PageInfo.of(safePaging.getPage(), safePaging.getSize(), totalCount);
+        PageInfo pageInfo = PageInfo.of(paging.getPage(), paging.getSize(), totalCount);
 
-        List<UserFullJoinRow> items = userQueryMapper.findFullJoinAll(statusParam, safePaging.getSize(), safePaging.getOffset());
+        List<UserFullJoinRow> items = userQueryMapper.findFullJoinAll(statusParam, paging.getSize(), paging.getOffset());
 
         return PageResult.of(items, pageInfo);
     }

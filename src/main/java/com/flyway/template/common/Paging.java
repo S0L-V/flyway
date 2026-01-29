@@ -20,10 +20,4 @@ public class Paging {
         int s = Math.min(sRaw, maxSize);
         return new Paging(p, s);
     }
-
-    public Paging safe() {
-        int safePage = Math.max(this.page, 1);
-        int safeSize = Math.max(this.size, 1);
-        return new Paging(safePage, safeSize);
-    }
 }

@@ -19,17 +19,15 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
 
     @Override
     public PageResult<ReservationSummaryDto> findUserReservationHistories(String userId, Paging paging) {
-        Paging safePaging = paging.safe();
-
         long totalCount = reservationQueryMapper.countReservationHistoriesByUserId(userId);
 
         List<ReservationSummaryDto> items = reservationQueryMapper.findReservationHistoriesByUserId(
                 userId,
-                safePaging.getOffset(),
-                safePaging.getSize()
+                paging.getOffset(),
+                paging.getSize()
         );
 
-        PageInfo pageInfo = PageInfo.of(safePaging.getPage(), safePaging.getSize(), totalCount);
+        PageInfo pageInfo = PageInfo.of(paging.getPage(), paging.getSize(), totalCount);
         return PageResult.of(items, pageInfo);
     }
 
