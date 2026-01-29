@@ -100,7 +100,7 @@
     <update id="updateUserIdByIpAddress">
         UPDATE visitor_log
         SET user_id = #{userId}
-        WHERE ip_address = {ipAddress}
+        WHERE ip_address = #{ipAddress}
             AND DATE(visited_at) = CURDATE()
             AND user_id IS NULL
     </update>
