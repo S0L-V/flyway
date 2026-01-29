@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.reservation.mapper.ReservationPaymentQueryMapper">
+
+    <select id="findReservationPaymentDetail"
+            parameterType="string"
+            resultType="com.flyway.reservation.dto.ReservationPaymentDetailDto">
+        SELECT
+            r.reservation_id                                      AS reservationId,
+            r.user_id                                             AS userId,
+            r.trip_type                                           AS tripType,
+            r.passenger_count                                     AS passengerCount,
+            r.status                                              AS reservationStatus,
+            r.reserved_at                                         AS reservedAt,
+
+            /* 가는 편 운임 정보 (segment_order = 1) */
+            out_rs.snap_flight_number                             AS outFlightNumber,
+            out_cc.cabin_class_name                               AS outCabinClass,
+            out_rs.snap_cabin_class_code                          AS outCabinClassCode,
+            out_rs.snap_price                                     AS outPricePerPerson,
+            (out_rs.snap_price * r.passenger_count)               AS outTotal,
+
+            /* 오는 편 운임 정보 (segment_order = 2, 없을 수 있음) */
+            in_rs.snap_flight_number                              AS inFlightNumber,
+            in_cc.cabin_class_name                                AS inCabinClass,
+            in_rs.snap_cabin_class_code                           AS inCabinClassCode,
+            in_rs.snap_price                                      AS inPricePerPerson,
+            (in_rs.snap_price * r.passenger_count)                AS inTotal,
+
+            /* 부가 서비스 요금 합계 (서비스 타입별 합산) */
+            COALESCE(svc.baggageTotal, 0)                         AS baggageTotal,
+            COALESCE(svc.mealTotal, 0)                            AS mealTotal,
+            COALESCE(svc.serviceTotal, 0)                         AS serviceTotal,
+
+            /* 최종 결제 금액 (운임 + 부가 서비스) */
+            (
+                COALESCE(out_rs.snap_price, 0) * r.passenger_count
+                    + COALESCE(in_rs.snap_price, 0) * r.passenger_count
+                    + COALESCE(svc.serviceTotal, 0)
+                )                                                 AS totalAmount
+
+        FROM reservation r
+
+                 /* 가는 편 예약 구간 스냅샷 조인 */
+                 LEFT JOIN reservation_segment out_rs
+                           ON out_rs.reservation_id = r.reservation_id
+                               AND out_rs.segment_order = 1
+                 LEFT JOIN cabin_class out_cc
+                           ON out_cc.cabin_class_code = out_rs.snap_cabin_class_code
+
+            /* 오는 편 예약 구간 스냅샷 조인 */
+                 LEFT JOIN reservation_segment in_rs
+                           ON in_rs.reservation_id = r.reservation_id
+                               AND in_rs.segment_order = 2
+                 LEFT JOIN cabin_class in_cc
+                           ON in_cc.cabin_class_code = in_rs.snap_cabin_class_code
+
+            /* 부가 서비스 집계 서브쿼리 */
+                 LEFT JOIN (
+            SELECT
+                rs.reservation_id,
+                SUM(CASE WHEN ps.service_type = '0' THEN ps.total_price ELSE 0 END) AS baggageTotal,
+                SUM(CASE WHEN ps.service_type = '1' THEN ps.total_price ELSE 0 END) AS mealTotal,
+                SUM(ps.total_price) AS serviceTotal
+            FROM reservation_segment rs
+                     JOIN passenger_service ps
+                          ON ps.reservation_segment_id = rs.reservation_segment_id
+            WHERE rs.reservation_id = #{reservationId}
+            GROUP BY rs.reservation_id
+        ) svc
+                           ON svc.reservation_id = r.reservation_id
+
+        WHERE r.reservation_id = #{reservationId}
+    </select>
+
+</mapper>
