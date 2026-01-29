@@ -48,7 +48,7 @@
                 AND (
                     u.email LIKE CONCAT('%', #{searchKeyword}, '%')
                     OR up.name LIKE CONCAT('%', #{searchKeyword}, '%')
-                    OR CONCAT(up.first_name, ' ', up.last_name) LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR CONCAT_WS(' ', up.first_name, up.last_name) LIKE CONCAT('%', #{searchKeyword}, '%')
                 )
             </if>
         </where>
