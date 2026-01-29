@@ -34,7 +34,7 @@
     </sql>
 
     <sql id="userJoins">
-        FROM user u
+        FROM users u
         LEFT JOIN user_profile up ON u.user_id = up.user_id
         LEFT JOIN user_identity ui ON u.user_id = ui.user_id
     </sql>
