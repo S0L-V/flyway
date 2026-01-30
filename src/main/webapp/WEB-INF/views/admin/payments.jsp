@@ -3,7 +3,7 @@
 <%@ include file="layout/sidebar.jsp" %>
 <%@ include file="layout/topbar.jsp" %>
 
-<main class="pl-64 pt-16 min-h-screen">
+<main class="pl-0 lg:pl-[72px] pt-16 min-h-screen transition-all duration-300">
     <div class="p-8 max-w-[1600px] mx-auto space-y-8">
         <div class="flex items-center justify-between">
             <div>

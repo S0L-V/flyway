@@ -27,7 +27,7 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
-<main class="pl-64 pt-16 min-h-screen">
+<main class="pl-0 lg:pl-[72px] pt-16 min-h-screen transition-all duration-300">
     <div class="p-8 max-w-[1600px] mx-auto space-y-8">
         <!-- Header -->
         <div class="flex items-center justify-between">

@@ -1,8 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 fixed top-0 left-64 right-0 z-40">
-    <div class="flex items-center gap-6">
-        <!-- 검색 -->
-        <div class="flex items-center w-80 relative">
+<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 fixed top-0 left-0 lg:left-[72px] right-0 z-40 transition-all duration-300">
+    <div class="flex items-center gap-4 lg:gap-6">
+        <!-- 모바일 햄버거 메뉴 -->
+        <button id="sidebar-toggle" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg" onclick="toggleSidebar()">
+            <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
+        </button>
+
+        <!-- 검색 (모바일에서 숨김) -->
+        <div class="hidden sm:flex items-center w-80 relative">
             <i data-lucide="search" class="absolute left-3 text-slate-400 w-4 h-4"></i>
             <input type="text" placeholder="검색어를 입력하세요..."
                    class="w-full bg-slate-50 border-none rounded-md py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none">
