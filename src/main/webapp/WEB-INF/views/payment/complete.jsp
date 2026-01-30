@@ -130,6 +130,9 @@
             color: #c62828;
         }
     </style>
+    <!-- Confetti 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
 </head>
 <body>
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
@@ -205,6 +208,34 @@
     </c:choose>
 
 </div>
+<c:if test="${success}">
+    <script>
+        // 페이지 로드 시 폭죽 효과
+        document.addEventListener('DOMContentLoaded', function() {
+            // 첫 번째 폭죽 - 왼쪽
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { x: 0.2, y: 0.6 }
+            });
 
+            // 두 번째 폭죽 - 오른쪽
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { x: 0.8, y: 0.6 }
+            });
+
+            // 0.3초 후 중앙에서 한 번 더
+            setTimeout(function() {
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { x: 0.5, y: 0.5 }
+                });
+            }, 300);
+        });
+    </script>
+</c:if>
 </body>
 </html>
