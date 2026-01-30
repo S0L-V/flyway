@@ -33,4 +33,9 @@ public interface SeatService {
 
     String findFirstPassengerId(String reservationId);
 
+    // 예약(reservationId) 기준 구간 카드용 정보 조회 (출발/도착/출발시간)
+    List<SegmentCardDTO> getSegmentCards(String reservationId);
+
+    // 예약(reservationId) 기준 탑승자 목록(다인원 탭용)
+    List<PassengerDTO> findPassengers(String reservationId);
 }

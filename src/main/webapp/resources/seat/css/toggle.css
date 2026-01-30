@@ -1,0 +1,191 @@
+/* ==================== Notices + Terms (Scoped) ==================== */
+/* JSP 기준: <section class="seat-notices"> 안에서만 적용되게 스코프 걸어 충돌 방지 */
+
+/* ---------- Notices Section ---------- */
+.seat-notices {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 28px;
+}
+
+.seat-notices__title {
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+/* 유의사항 컨텐츠 박스 (스크린샷처럼 카드 느낌) */
+.seat-notices__content {
+    background: var(--color-white);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 18px 22px;
+}
+
+/* 지금 JSP가 p로 되어 있으니, p를 "불릿처럼" 보이게 보정 */
+.seat-notices__content p {
+    position: relative;
+    margin: 0;
+    padding-left: 14px;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    line-height: 22px;
+}
+
+/* 문장 사이 간격 */
+.seat-notices__content p + p {
+    margin-top: 8px;
+}
+
+/* 앞에 점/표시 (※ 유지하면서도 리스트 감성) */
+.seat-notices__content p::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #999;
+}
+
+/* ---------- Terms Section (Accordion + Checkbox) ---------- */
+.seat-notices .seat-terms {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+/* 헤더(체크박스 + 타이틀 + 화살표) */
+.seat-notices .seat-terms__header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    background: #fff;
+    cursor: pointer; /* 헤더 전체 클릭 가능한 느낌 */
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.seat-notices .seat-terms__header-wrapper:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 체크박스: 기본 체크박스 스타일 활용 (최소 침투) */
+.seat-notices .terms-hidden-check {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--color-primary-seat, #2a74e3);
+    flex: 0 0 auto;
+}
+
+/* 제목 라벨 */
+.seat-notices .seat-terms__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-family-primary);
+    font-size: 16px;
+    font-weight: 700;
+    color: #2c2c2c;
+    margin: 0;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+/* [필수] 강조 */
+.seat-notices .seat-terms__title .color-blue {
+    color: var(--color-primary-seat, #2a74e3);
+}
+
+/* 오른쪽 토글 버튼 */
+.seat-notices .seat-terms__toggle-btn {
+    margin-left: auto;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* chevron (span.chevron-arrow) */
+.seat-notices .chevron-arrow {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid #9b9b9b;
+    border-bottom: 2px solid #9b9b9b;
+    transform: rotate(45deg);
+    transition: transform 0.25s ease;
+}
+
+/* content 영역 */
+.seat-notices .seat-terms__content {
+    padding: 0 22px 20px 58px; /* 체크박스 시작선 맞추기 */
+    background: #fff;
+    font-family: var(--font-family-primary);
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
+    color: #666;
+    line-height: 1.7;
+}
+
+/* hidden 속성일 때 자연스럽게 (JS로 hidden 토글할 예정) */
+.seat-notices .seat-terms__content[hidden] {
+    display: none !important;
+}
+
+/* 리스트 스타일 */
+.seat-notices .terms-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.seat-notices .terms-list > li + li {
+    margin-top: 14px;
+}
+
+.seat-notices .terms-list strong {
+    display: block;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+/* 내부 ul */
+.seat-notices .terms-list ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.seat-notices .terms-list ul li {
+    list-style: disc;
+    margin: 0 0 6px 0;
+}
+
+/* 마지막 li 간격 정리 */
+.seat-notices .terms-list ul li:last-child {
+    margin-bottom: 0;
+}
+
+/* ---------- Expanded State (JS에서 header에 클래스 토글 추천) ---------- */
+/* JS에서 #terms-header(좋음) 또는 .seat-terms__header-wrapper에 이 클래스 붙이면 됨 */
+.seat-notices .seat-terms__header-wrapper.seat-terms__header--expanded .chevron-arrow {
+    transform: rotate(-135deg);
+}
+
+/* 체크박스 체크 시 약간 강조 (선택사항) */
+.seat-notices .terms-hidden-check:checked + .seat-terms__title {
+    color: var(--color-primary-seat, #2a74e3);
+}

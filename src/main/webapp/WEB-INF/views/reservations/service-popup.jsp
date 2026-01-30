@@ -173,7 +173,7 @@
 </div>
 
 <script type="module">
-    import { fetchWithRefresh } from '/resources/common/authFetch.js';
+    import { fetchWithRefresh } from '/resources/common/js/authFetch.js';
     var reservationId = '${vm.reservationId}';
     var overweightFeePerKg = ${vm.baggagePolicy != null ? vm.baggagePolicy.overweightFeePerKg : 0};
     var extraBagFee = ${vm.baggagePolicy != null ? vm.baggagePolicy.extraBagFee : 0};

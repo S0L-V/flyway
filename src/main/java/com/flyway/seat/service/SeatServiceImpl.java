@@ -51,6 +51,15 @@ public class SeatServiceImpl implements SeatService {
         return passengerId;
     }
 
+    // 예약(reservationId) 기준 구간 카드용 정보 조회 (출발/도착/출발시간)
+    @Override
+    public List<SegmentCardDTO> getSegmentCards(String reservationId) {
+        if (reservationId == null || reservationId.isBlank()) {
+            throw new IllegalArgumentException("reservationId는 필수입니다.");
+        }
+        return seatMapper.selectSegmentCardsByReservationId(reservationId);
+    }
+
     @Override
     @Transactional
     public SeatHoldResponse holdSeat(String reservationId, String reservationSegmentId, SeatHoldRequest request) {
@@ -239,6 +248,12 @@ public class SeatServiceImpl implements SeatService {
                 .serverTime(now)
                 .build();
     }
+
+    @Override
+    public List<PassengerDTO> findPassengers(String reservationId) {
+        return seatMapper.selectPassengersByReservationId(reservationId);
+    }
+
 
     // 중복 코드 제거용
     private LocalDateTime getExpiredAtOrThrow(String reservationId, LocalDateTime now) {

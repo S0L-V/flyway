@@ -697,10 +697,13 @@
         탑승자 정보 저장 후 선택 가능합니다. (현재: ${vm.passengerSaved ? '저장 완료' : '미저장'})
     </div>
 
-    <button class="btn" ${vm.passengerSaved ? "" : "disabled"}
-            onclick="openSeatPopup()">
-        좌석 선택
-    </button>
+    <c:forEach var="s" items="${vm.segments}">
+        <button class="btn" ${vm.passengerSaved ? "" : "disabled"}
+                onclick="openSeatPopup('${s.reservationSegmentId}')">
+            좌석 선택 (구간 ${s.segmentOrder})
+        </button>
+    </c:forEach>
+
 
     <button class="btn" ${vm.passengerSaved ? "" : "disabled"}
             onclick="openServicePopup()">
@@ -796,14 +799,14 @@
         </c:forEach>
     ];
 
-    // 좌석 팝업 (팀원 담당)
-    function openSeatPopup() {
-        if (!passengerSaved) {
-            alert('탑승자 정보를 먼저 저장해주세요.');
-            return;
-        }
-        // TODO: 좌석 팝업 URL (팀원이 구현)
-        alert('좌석 팝업 - 팀원 담당');
+    // 좌석 팝업
+    function openSeatPopup(segmentId) {
+        if (!passengerSaved) { alert('탑승자 정보를 먼저 저장해주세요.'); return; }
+
+        if (!segmentId) { alert('구간 정보를 찾을 수 없습니다.'); return; }
+        const popupUrl = '/reservations/' + encodeURIComponent(reservationId)
+            + '/segments/' + encodeURIComponent(segmentId) + '/seats';
+        window.open(popupUrl, 'seatPopup', 'width=1100,height=800,scrollbars=yes,resizable=yes');
     }
 
     // 부가서비스 팝업 열기

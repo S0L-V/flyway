@@ -17,7 +17,7 @@ public class SeatController {
     }
 
     // 항공편별 좌석 맵 조회
-    @GetMapping("/api/flights/{flightId}/seats")
+    @GetMapping("/api/public/flights/{flightId}/seats")
     public ApiResponse<List<SeatDTO>> getSeatMap(@PathVariable String flightId) {
         return ApiResponse.success(seatService.getSeatMap(flightId));
     }
