@@ -1,0 +1,292 @@
+/*!* --- (ii) 팬아웃 키프레임 (부채꼴로 펴지기) --- *!*/
+@keyframes fanOutCard {
+    0% {
+        opacity: 0;
+        transform: translateX(-50px) rotateY(30deg) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg) scale(1);
+    }
+}
+
+/* ===== Section ===== */
+.special-offers-section {
+    padding: 48px 0;
+    background: #fff;
+    overflow: hidden;
+}
+
+/* ===== Slider Wrapper ===== */
+.slider-wrapper {
+    margin-top: 100px;
+    position: relative;
+    perspective: 1200px;
+}
+
+/* 좌우 페이드 마스크 */
+.slider-wrapper::before,
+.slider-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 120px;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+    backdrop-filter: blur(6px);
+}
+
+.slider-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, #fff 20%, transparent);
+}
+
+.slider-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, #fff 20%, transparent);
+}
+
+.main-slider-track.is-entering .offer-card {
+    transform:
+            translateX(-50%)
+            translateZ(-200px)
+            scale(0.85)
+            rotateY(0deg);
+    opacity: 0;
+}
+
+/* ===== Hover Interaction ===== */
+.offer-card:hover {
+    transform: translateY(-8px) scale(1.07);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    z-index: 7;
+}
+
+/* ===== Overlay ===== */
+/*.offer-overlay {*/
+/*    position: absolute;*/
+/*    bottom: 0;*/
+/*    width: 100%;*/
+/*    padding: 16px;*/
+/*    background: linear-gradient(to top, rgba(0,0,0,.75), transparent);*/
+/*    border-radius: inherit;*/
+/*    color: #fff;*/
+/*}*/
+.offer-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem 1.8rem; /* 좌우 여백 살짝 늘림 */
+    background: linear-gradient(to top, rgba(0,0,0,.75), transparent);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 간격 조정 */
+    border-bottom-left-radius: 2rem;
+    border-bottom-right-radius: 2rem;
+}
+
+.offer-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.offer-airline {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #94a3b8; /* 연한 회색 */
+    letter-spacing: 0.05em;
+}
+
+.offer-title {
+    font-size: 1.8rem; /* 크고 강조 */
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 0; /* 기본 마진 제거 */
+    letter-spacing: -0.03em;
+}
+/* 도시 이름은 제목보다 약간 작게 보조 */
+.offer-city {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 4px;
+}
+
+/* 2. 날짜 영역 */
+.offer-date-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 14px 0; /* 상하 여백 증가 */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.offer-date {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.offer-person {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.icon-only {
+    filter: invert(1) brightness(2);
+}
+
+/* 3. 가격 영역 (좌우 배치) */
+.offer-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; /* 바닥 기준 정렬 */
+}
+
+/* 왼쪽: 설명 텍스트 + 원가(취소선) */
+.price-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.price-label {
+    font-size: 0.7rem;
+    color: #94a3b8; /* 회색 텍스트 */
+    font-weight: 500;
+}
+.original-price {
+    font-size: 0.9rem;
+    color: #ef4444; /* 붉은색 */
+    text-decoration: line-through; /* 취소선 */
+    font-weight: 600;
+    opacity: 0.8;
+
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    text-decoration-color: #ef4444;
+}
+
+/* 오른쪽: 최종 가격 */
+.final-price {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #60a5fa; /* 밝은 파란색 (이미지와 유사) */
+    font-style: italic; /* 이탤릭체 포인트 */
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+
+/* Badge */
+.card-badge.blue {
+    background: #2f93f7;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+/* Nav Buttons */
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.9);
+    cursor: pointer;
+}
+
+.nav-btn.prev { left: 16px; }
+.nav-btn.next { right: 16px; }
+
+
+.main-slider-track {
+    position: relative;
+    height: 560px;
+    perspective: 1200px;
+}
+
+.offer-card {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 300px;
+    height: 400px;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    border-radius: 22px;
+    background-size: cover;
+    background-position: center;
+    transition:
+            transform 0.6s cubic-bezier(.22,.61,.36,1),
+            opacity 0.4s ease;
+
+}
+
+/* ===== Positions ===== */
+.offer-card.center {
+    transform:
+            translateX(-50%)
+            translateZ(180px)
+            rotateY(0deg)
+            scale(1.05);
+    z-index: 5;
+    opacity: 1;
+}
+
+:root {
+    --carousel-gap: 280px;   /* ← 이 값만 조절 */
+    --carousel-gap-2: 550px;
+}
+
+.offer-card.left {
+    transform:
+            translateX(calc(-50% - var(--carousel-gap)))
+            rotateY(-30deg)
+            scale(1.06)
+            translateZ(80px);
+    opacity: 0.6;
+    z-index: 3;
+}
+
+.offer-card.right {
+    transform:
+            translateX(calc(-50% + var(--carousel-gap)))
+            rotateY(30deg)
+            scale(1.06)
+            translateZ(80px);
+    opacity: 0.6;
+    z-index: 3;
+}
+
+.offer-card.left2 {
+    transform:
+            translateX(calc(-50% - var(--carousel-gap-2)))
+            rotateY(-40deg)
+            scale(0.92)
+            translateZ(0);
+    opacity: 0.25;
+}
+
+.offer-card.right2 {
+    transform:
+            translateX(calc(-50% + var(--carousel-gap-2)))
+            rotateY(40deg)
+            scale(0.92)
+            translateZ(0);
+    opacity: 0.25;
+}
+
+.offer-card.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
