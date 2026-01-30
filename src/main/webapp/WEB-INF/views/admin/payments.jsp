@@ -137,23 +137,30 @@
         });
 
 
+        // [수정됨] 통계 데이터 가져오기 + 애니메이션 적용
         function fetchPaymentStats() {
             fetch(window.CONTEXT_PATH + '/admin/payments/api/stats')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
-                        elements.stats.paidCount.textContent = formatNumber(data.data.paidCount);
-                        elements.stats.pendingCount.textContent = formatNumber(data.data.pendingCount);
-                        elements.stats.refundedCount.textContent = formatNumber(data.data.refundedCount);
-                        elements.stats.monthlyRevenue.textContent = formatCurrency(data.data.monthlyRevenue);
+                        // 기존 textContent 대입 방식을 animateValue 함수 호출로 변경
+
+                        // 1. 건수 (단순 숫자)
+                        animateValue(elements.stats.paidCount, data.data.paidCount);
+                        animateValue(elements.stats.pendingCount, data.data.pendingCount);
+                        animateValue(elements.stats.refundedCount, data.data.refundedCount);
+
+                        // 2. 매출 (원화 표시 옵션 추가)
+                        animateValue(elements.stats.monthlyRevenue, data.data.monthlyRevenue, {
+                            prefix: '₩ ',   // 앞에 원화 기호 붙이기
+                        });
+
                     } else {
                         console.error('Failed to fetch payment stats:', data.message);
-                        alert('결제 통계 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching payment stats:', error);
-                    alert('결제 통계 조회 중 네트워크 오류가 발생했습니다.');
                 });
         }
 
@@ -283,6 +290,31 @@
             lucide.createIcons(); // 페이지네이션 아이콘 렌더링
         }
 
+        function animateValue(element, endValue, customOptions) {
+            // 값이 없으면 0으로 처리
+            if (endValue === null || endValue === undefined) endValue = 0;
+
+            // 기본 옵션 (2초 동안 실행, 천단위 콤마)
+            const defaultOptions = {
+                duration: 2,
+                separator: ',',
+            };
+
+            // 옵션 합치기
+            const options = { ...defaultOptions, ...customOptions };
+
+            // CountUp 인스턴스 생성 (element는 DOM 요소 자체여야 함)
+            const anim = new countUp.CountUp(element, endValue, options);
+
+            if (!anim.error) {
+                anim.start();
+            } else {
+                console.error(anim.error);
+                // 에러 발생 시 애니메이션 없이 그냥 값만 보여줌 (백업)
+                element.textContent = (options.prefix || '') + new Intl.NumberFormat('ko-KR').format(endValue);
+            }
+        }
+
         // 유틸리티 함수 (dashboard.js에서 복사)
         function formatNumber(num) {
             if (num === null || num === undefined) return '0';
@@ -319,5 +351,7 @@
 
     });
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"></script>
 </body>
 </html>
