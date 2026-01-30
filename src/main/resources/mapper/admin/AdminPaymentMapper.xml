@@ -59,7 +59,7 @@
         u.user_id,
 
         -- [수정] up.name을 우선 사용하고, 없으면 first/last_name 조합
-        COALESCE(up.name, NULLIF(CONCAT_WS(' ', up.first_name, up.last_name), '')) AS user_name,
+        COALESCE(NULLIF(up.name, ''), NULLIF(CONCAT_WS(' ', up.first_name, up.last_name), '')) AS user_name,
 
         u.email AS user_email,
         f.flight_number,
