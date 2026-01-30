@@ -83,7 +83,7 @@
                         </tbody>
                     </table>
                 </div>
-                <nav id="pagination-controls" class="flex items-center justify-between pt-4">
+                <nav id="pagination-controls" class="flex items-center justify-end pt-4">
                     <!-- 페이지네이션 컨트롤이 여기에 렌더링됩니다. -->
                 </nav>
             </div>
@@ -172,6 +172,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
+                        console.log(data.data); // 디버깅용 로그 추가
                         renderPaymentList(data.data.list);
                         renderPagination(data.data.totalCount, data.data.currentPage, data.data.pageSize, data.data.totalPages);
                     } else {
@@ -218,6 +219,15 @@
 
         function renderPagination(totalCount, curPage, pageSize, totalPages) {
             elements.paginationControls.innerHTML = ''; // 기존 내용 지우기
+
+            // [수정 1] 총 건수 표시는 페이지 수와 상관없이 항상 실행되어야 하므로 맨 위로 올림
+            var totalInfo = document.createElement('span');
+            totalInfo.className = 'mr-4 text-sm text-slate-500';
+            // formatNumber 함수를 사용하여 1,000 단위 콤마 적용 (선택 사항)
+            totalInfo.textContent = '총 ' + formatNumber(totalCount) + '건';
+            elements.paginationControls.appendChild(totalInfo);
+
+            // [수정 2] 페이지가 1개 이하이면 버튼을 그리지 않고 여기서 종료 (총 건수는 이미 그려짐)
             if (totalPages <= 1) return;
 
             var ul = document.createElement('ul');
@@ -238,7 +248,7 @@
             prevLi.appendChild(prevButton);
             ul.appendChild(prevLi);
 
-            // 페이지 번호
+            // 페이지 번호 (너무 많으면 생략하는 로직 없이 단순 반복문인 상태)
             for (var i = 0; i < totalPages; i++) {
                 var li = document.createElement('li');
                 var button = document.createElement('button');
