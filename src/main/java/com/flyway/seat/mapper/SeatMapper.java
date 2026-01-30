@@ -101,4 +101,19 @@ public interface SeatMapper {
     // 예약(reservationId) 기준 탑승자 목록 조회 (좌석 팝업 다인원 탭용)
     List<PassengerDTO> selectPassengersByReservationId(@Param("reservationId") String reservationId);
 
+    // 결제 확정 (reservationId 기준 유효한 HOLD 좌석 수 카운트 함)
+    int countActiveHoldSeatsByReservation(
+            @Param("reservationId") String reservationId,
+            @Param("now") LocalDateTime now
+    );
+
+    // reservationId가 잡고 있던 HOLD 좌석들을 BOOKED로 확정
+    int bookHoldSeatsByReservation(
+            @Param("reservationId") String reservationId,
+            @Param("now") LocalDateTime now
+    );
+
+    int releaseBookedSeatsByReservation(
+            @Param("reservationId") String reservationId);
+
 }

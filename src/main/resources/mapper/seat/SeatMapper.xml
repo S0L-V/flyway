@@ -181,6 +181,20 @@
         ORDER BY p.passenger_id
     </select>
 
+    <!-- 결제 확정용 (reservationId 기준 유효한 HOLD 좌석 개수) -->
+    <select id="countActiveHoldSeatsByReservation" resultType="int">
+        SELECT COUNT(*)
+        FROM passenger_seat ps
+            JOIN reservation_segment rs
+                ON rs.reservation_segment_id = ps.reservation_segment_id
+            JOIN flight_seat fs
+                ON fs.flight_seat_id = ps.flight_seat_id
+        WHERE rs.reservation_id = #{reservationId}
+            AND fs.seat_status = 'HOLD'
+            AND fs.hold_reservation_segment_id = rs.reservation_segment_id
+            AND fs.hold_expires_at IS NOT NULL
+            AND fs.hold_expires_at &gt;= #{now}
+    </select>
 
 
 
@@ -229,6 +243,39 @@
           AND hold_reservation_segment_id = #{reservationSegmentId}
     </update>
 
+    <update id="bookHoldSeatsByReservation">
+        UPDATE flight_seat fs
+            JOIN passenger_seat ps
+                ON ps.flight_seat_id = fs.flight_seat_id
+            JOIN reservation_segment rs
+                ON rs.reservation_segment_id = ps.reservation_segment_id
+        SET fs.seat_status = 'BOOKED',
+            fs.booked_at = NOW(),
+            fs.hold_reservation_segment_id = NULL,
+            fs.hold_expires_at = NULL
+        WHERE rs.reservation_id = #{reservationId}
+            AND fs.seat_status = 'HOLD'
+            AND fs.hold_reservation_segment_id = rs.reservation_segment_id
+            AND fs.hold_expires_at IS NOT NULL
+            AND fs.hold_expires_at &gt;= #{now}
+    </update>
+
+    <!-- 환불/취소용 reservationId가 BOOKED로 확정했던 좌석들을 AVAILABLE로 되돌림 -->
+    <update id="releaseBookedSeatsByReservation">
+        UPDATE flight_seat fs
+            JOIN passenger_seat ps
+        ON ps.flight_seat_id = fs.flight_seat_id
+            JOIN reservation_segment rs
+            ON rs.reservation_segment_id = ps.reservation_segment_id
+            SET fs.seat_status = 'AVAILABLE',
+                fs.booked_at = NULL
+        WHERE rs.reservation_id = #{reservationId}
+          AND fs.seat_status = 'BOOKED'
+    </update>
+
+
+
+
     <!-- passenger_seat upsert -->
     <insert id="upsertPassengerSeat">
         INSERT INTO passenger_seat (
@@ -254,5 +301,4 @@
         WHERE reservation_segment_id = #{reservationSegmentId}
           AND passenger_id = #{passengerId}
     </delete>
-
 </mapper>
