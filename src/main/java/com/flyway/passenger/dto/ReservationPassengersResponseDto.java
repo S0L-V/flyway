@@ -83,6 +83,7 @@ public class ReservationPassengersResponseDto {
     public static class SeatInfo {
         private String passengerSeatId;
         private String flightSeatId;
+        private String seatNo;
     }
 
     @Getter
@@ -165,6 +166,7 @@ public class ReservationPassengersResponseDto {
             this.seat = SeatInfo.builder()
                     .passengerSeatId(row.getPassengerSeatId())
                     .flightSeatId(row.getFlightSeatId())
+                    .seatNo(row.getSeatNo())
                     .build();
         }
 

@@ -38,6 +38,7 @@ public class PassengerReservationDto {
     /* 좌석 */
     private String passengerSeatId;
     private String flightSeatId;
+    private String seatNo;
 
     /* 부가 서비스 */
     private String psId;            // passenger service id
