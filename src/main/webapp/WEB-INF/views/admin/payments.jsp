@@ -179,7 +179,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
-                        console.log(data.data); // 디버깅용 로그 추가
                         renderPaymentList(data.data.list);
                         renderPagination(data.data.totalCount, data.data.currentPage, data.data.pageSize, data.data.totalPages);
                     } else {
@@ -303,6 +302,13 @@
             // 옵션 합치기
             const options = { ...defaultOptions, ...customOptions };
 
+            // CountUp 라이브러리 존재 여부 확인 (로딩 순서 문제 방어)
+            if (typeof countUp === 'undefined' || typeof countUp.CountUp !== 'function') {
+                // CountUp이 없으면 애니메이션 없이 값만 표시
+                element.textContent = (options.prefix || '') + new Intl.NumberFormat('ko-KR').format(endValue);
+                return;
+            }
+
             // CountUp 인스턴스 생성 (element는 DOM 요소 자체여야 함)
             const anim = new countUp.CountUp(element, endValue, options);
 
@@ -352,6 +358,9 @@
     });
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"
+        integrity="sha512-P2o5sNDlmlusPGmJPBdJozBBbpfWMgQ+QbW0TjSVhobSQBqOvb+L5q/wMNAcHFGObWWDJD56S96URPgpJ+gi0g=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
 </body>
 </html>
