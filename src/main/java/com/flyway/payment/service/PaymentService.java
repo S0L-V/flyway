@@ -7,6 +7,7 @@ import com.flyway.payment.repository.PaymentRepository;
 import com.flyway.reservation.dto.ReservationCoreView;
 import com.flyway.reservation.dto.ReservationSegmentView;
 import com.flyway.reservation.repository.ReservationBookingRepository;
+import com.flyway.seat.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class PaymentService {
     private final RefundMapper refundMapper;
     private final SmsService smsService;
     private final SmsMapper smsMapper;
+    private final SeatService seatService;
 
     /**
      * 결제 처리 메인 로직 (개선된 3단계 설계)
@@ -111,6 +113,12 @@ public class PaymentService {
         // 예약 상태 변경: PAYING → CONFIRMED
         PaymentViewDto payment = paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
+
+        String reservationId = payment.getReservationId();
+
+        // 좌석 HOLD -> BOOKED
+        seatService.bookHoldSeats(reservationId);
+
         reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
 
         // SMS 발송 (여기에 추가)
@@ -159,6 +167,9 @@ public class PaymentService {
         // 예약 상태 → CANCELLED
         String reservationId = payment.getReservationId();
         reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CANCELLED");
+
+        // 좌석 BOOKED -> AVAILABLE
+        seatService.releaseBookedSeats(reservationId);
         // 잔여석 복구
         int passengerCount = refundMapper.selectPassengerCountByReservationId(reservationId);
         List<RefundSegmentDto> segments = refundMapper.selectSegmentsByReservationId(reservationId);

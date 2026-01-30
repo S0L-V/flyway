@@ -38,4 +38,9 @@ public interface SeatService {
 
     // 예약(reservationId) 기준 탑승자 목록(다인원 탭용)
     List<PassengerDTO> findPassengers(String reservationId);
+
+    void bookHoldSeats(String reservationId);
+
+    void releaseBookedSeats(String reservationId);
+
 }

@@ -266,4 +266,38 @@ public class SeatServiceImpl implements SeatService {
         }
         return expiredAt;
     }
+
+    @Override
+    @Transactional
+    public void bookHoldSeats(String reservationId) {
+        if (reservationId == null || reservationId.isBlank()) {
+            throw new IllegalArgumentException("reservationId는 필수입니다.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 예약 만료 체크
+        getExpiredAtOrThrow(reservationId, now);
+
+        // 예약 확정 대상 좌석 수
+        int expected = seatMapper.countActiveHoldSeatsByReservation(reservationId, now);
+        if (expected <= 0) {
+            throw new IllegalStateException("확정할 좌석이 없습니다.");
+        }
+
+        // HOLD -> BOOKED
+        int updated = seatMapper.bookHoldSeatsByReservation(reservationId, now);
+
+        // 부분 확정 방지
+        if (updated != expected) {
+            throw new IllegalStateException("좌석 확정 실패");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void releaseBookedSeats(String reservationId) {
+        int updated = seatMapper.releaseBookedSeatsByReservation(reservationId);
+    }
+
 }
