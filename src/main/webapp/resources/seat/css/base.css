@@ -21,7 +21,7 @@
     --font-family-logo: var(--font-family-primary);
 
     /* 공통엔 xl(24px)까지만 있어서 확장 */
-    --font-size-2xl: 24px;
+    --font-size-2xl: 26px;
     --font-size-3xl: 28px;  /* 로고/타이틀용 */
 }
 
