@@ -79,6 +79,18 @@ function renderPromotionCard(list) {
     const track = document.querySelector(".main-slider-track");
     track.innerHTML = "";
 
+    const nextBtn = document.getElementById("offerNext");
+    const prevBtn = document.getElementById("offerPrev");
+
+    if (!Array.isArray(list) || list.length === 0) {
+        stopAutoSlide();
+        if (nextBtn) nextBtn.disabled = true;
+        if (prevBtn) prevBtn.disabled = true;
+        return;
+    }
+    if (nextBtn) nextBtn.disabled = false;
+    if (prevBtn) prevBtn.disabled = false;
+
     list.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "offer-card";
@@ -93,27 +105,35 @@ function renderPromotionCard(list) {
             goToBooking(item);
         });
 
+        const safeAirline = escapeHtml(item.airlineName);
+        const safeTitle = escapeHtml(item.title);
+        const safeArrival = escapeHtml(item.arrivalAirportName);
+        const safeDate = escapeHtml(renderDate(item.departureTime));
+        const safePax = escapeHtml(item.passengerCount);
+        const safeOriginal = escapeHtml(formatSalePrice(item.originalPrice));
+        const safeSale = escapeHtml(formatSalePrice(item.salePrice));
+
         div.innerHTML = `
             <div class="card-badges">${renderTag(item.tags)}</div>
             <div class="offer-overlay">
                 <div class="offer-header">
-                    <div class="offer-airline">${item.airlineName}</div>
-                    <h3 class="offer-title">${item.title}</h3>
-                    <div class="offer-city">${item.arrivalAirportName}</div>
+                    <div class="offer-airline">${safeAirline}</div>
+                    <h3 class="offer-title">${safeTitle}</h3>
+                    <div class="offer-city">${safeArrival}</div>
                 </div>
         
                 <div class="offer-date-row">
-                    <span class="offer-date">📅 ${renderDate(item.departureTime)}</span>
-                    <span class="offer-person"><span class="icon-only">👤</span> ${item.passengerCount}명</span>
+                    <span class="offer-date">📅 ${safeDate}</span>
+                    <span class="offer-person"><span class="icon-only">👤</span> ${safePax}명</span>
                 </div>
         
                 <div class="offer-footer">
                     <div class="price-info-left">
                         <span class="price-label">성인 1인 편도</span>
-                        <span class="original-price">₩${formatSalePrice(item.originalPrice)}</span>
+                        <span class="original-price">₩${safeOriginal}</span>
                     </div>
                     <div class="price-info-right">
-                        <span class="final-price">₩${formatSalePrice(item.salePrice)}</span>
+                        <span class="final-price">₩${safeSale}</span>
                     </div>
                 </div>
             </div>
@@ -132,6 +152,15 @@ function renderPromotionCard(list) {
     });
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
 function renderTag(tagString) {
     if (!tagString) return '';
 
@@ -139,7 +168,7 @@ function renderTag(tagString) {
         .split(',')
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0)
-        .map(tag => `<span class="card-badge blue">${tag}</span>`)
+        .map(tag => `<span class="card-badge blue">${escapeHtml(tag)}</span>`)
         .join('')
 }
 
