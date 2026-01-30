@@ -112,6 +112,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // --- 모바일 컨테이너 이벤트 위임 ---
+    const userListMobileContainer = document.getElementById('user-list-mobile');
+    if (userListMobileContainer) {
+        userListMobileContainer.addEventListener('click', function(e) {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            const action = btn.dataset.action;
+            const userId = btn.dataset.userId;
+
+            if (!action || !userId) return;
+
+            if (action === 'detail') {
+                showUserDetail(userId);
+            } else if (action === 'block') {
+                changeUserStatus(userId, 'BLOCKED');
+            } else if (action === 'unblock') {
+                changeUserStatus(userId, 'ACTIVE');
+            }
+        });
+    }
 
     // --- API 호출 함수 ---
 
@@ -171,12 +192,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderUserList(users) {
         const userListMobile = document.getElementById('user-list-mobile');
         elements.userListBody.innerHTML = '';
-        userListMobile.innerHTML = ''; // Clear mobile list as well
+        if (userListMobile) {
+            userListMobile.innerHTML = ''; // Clear mobile list as well
+        }
 
         if (!users || users.length === 0) {
             const emptyHtml = '<tr><td colspan="6" class="text-center py-12 text-slate-500">회원이 없습니다.</td></tr>';
             elements.userListBody.innerHTML = emptyHtml;
-            userListMobile.innerHTML = '<div class="p-4 text-center text-slate-400">회원이 없습니다.</div>';
+            if (userListMobile) {
+                userListMobile.innerHTML = '<div class="p-4 text-center text-slate-400">회원이 없습니다.</div>';
+            }
             return;
         }
 
@@ -263,7 +288,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         elements.userListBody.innerHTML = tableRows.join('');
-        userListMobile.innerHTML = mobileCards.join('');
+        if (userListMobile) {
+            userListMobile.innerHTML = mobileCards.join('');
+        }
     }
 
     function renderPagination(totalCount, curPage, pageSize, totalPages) {
