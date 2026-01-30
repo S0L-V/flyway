@@ -11,7 +11,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.flyway.passenger.repository.PassengerServiceRepository;
+import com.flyway.sender.service.SmsService;
+import com.flyway.sender.mapper.SmsMapper;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +33,8 @@ public class PaymentService {
     private final TossPaymentsClient tossClient;
     private final PassengerServiceRepository passengerServiceRepository;
     private final RefundMapper refundMapper;
+    private final SmsService smsService;
+    private final SmsMapper smsMapper;
 
     /**
      * 결제 처리 메인 로직 (개선된 3단계 설계)
@@ -107,6 +113,12 @@ public class PaymentService {
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
         reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
 
+        // SMS 발송 (여기에 추가)
+        String phone = smsMapper.selectPhoneByReservationId(payment.getReservationId());
+        if (phone != null && !phone.isEmpty()) {
+            smsService.sendPaymentComplete(phone, payment.getReservationId(), payment.getAmount());
+        }
+
         return paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
     }
@@ -168,6 +180,11 @@ public class PaymentService {
                 null
         );
 
+        // SMS 발송
+        String phone = smsMapper.selectPhoneByReservationId(reservationId);
+        if (phone != null && !phone.isEmpty()) {
+            smsService.sendRefundComplete(phone, reservationId, payment.getAmount());
+        }
         return paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
     }
