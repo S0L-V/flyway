@@ -42,6 +42,74 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("Failed to fetch data:", err);
         targetBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-10 text-red-500">데이터를 불러오는 데 실패했습니다.</td></tr>`;
     };
+
+    // --- Skeleton UI Functions ---
+    // 항공편 목록 스켈레톤 (4열)
+    const renderFlightSkeleton = (count = 5) => {
+        let html = '';
+        for (let i = 0; i < count; i++) {
+            html += `
+                <tr class="border-b border-slate-100">
+                    <td class="px-4 py-4">
+                        <div class="h-4 skeleton-shimmer rounded w-20"></div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="h-4 skeleton-shimmer rounded w-28"></div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="h-4 skeleton-shimmer rounded w-32"></div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="h-6 skeleton-shimmer rounded-full w-16"></div>
+                            <div class="h-6 skeleton-shimmer rounded-full w-12"></div>
+                            <div class="h-7 w-7 skeleton-shimmer rounded-full"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+        flightListBody.innerHTML = html;
+    };
+
+    // 특가 상품 목록 스켈레톤 (7열)
+    const renderPromotionSkeleton = (count = 8) => {
+        let html = '';
+        for (let i = 0; i < count; i++) {
+            html += `
+                <tr class="border-b border-slate-100">
+                    <td class="px-2 py-4">
+                        <div class="flex items-center gap-1">
+                            <div class="h-4 w-4 skeleton-shimmer rounded"></div>
+                            <div class="h-4 w-6 skeleton-shimmer rounded"></div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="space-y-2">
+                            <div class="h-4 skeleton-shimmer rounded w-32"></div>
+                            <div class="h-3 skeleton-shimmer rounded w-24"></div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="h-4 skeleton-shimmer rounded w-28"></div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="h-4 skeleton-shimmer rounded w-12"></div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="h-4 skeleton-shimmer rounded w-20"></div>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <div class="h-6 w-11 skeleton-shimmer rounded-full mx-auto"></div>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <div class="h-7 w-7 skeleton-shimmer rounded-full mx-auto"></div>
+                    </td>
+                </tr>
+            `;
+        }
+        promotionListBody.innerHTML = html;
+    };
     // LocalDateTime이 배열([2026,2,1,9,0]) 또는 ISO 문자열로 올 수 있음
     const formatDisplayDateTime = (dateValue) => {
         if (!dateValue) return '';
@@ -198,7 +266,8 @@ document.addEventListener('DOMContentLoaded', function() {
             size: pagination.pageSize
         }).toString();
 
-        flightListBody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-slate-500">항공편을 조회 중입니다...</td></tr>`;
+        // 스켈레톤 UI 표시
+        renderFlightSkeleton(pagination.pageSize);
         fetch(`${window.CONTEXT_PATH}/admin/api/flights?${query}`)
             .then(res => res.json())
             .then(res => {
@@ -215,7 +284,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fetchPromotions() {
-        promotionListBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500">특가 상품을 조회 중입니다...</td></tr>`;
+        // 스켈레톤 UI 표시
+        renderPromotionSkeleton(8);
         fetch(`${window.CONTEXT_PATH}/admin/promotions/api/list`)
             .then(res => res.json())
             .then(res => {
