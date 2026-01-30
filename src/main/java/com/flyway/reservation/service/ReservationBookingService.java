@@ -1,5 +1,8 @@
 package com.flyway.reservation.service;
 
+import com.flyway.passenger.dto.PassengerSaveRow;
+import com.flyway.passenger.dto.PassengerUpsertDTO;
+import com.flyway.passenger.dto.PassengerView;
 import com.flyway.reservation.dto.*;
 import com.flyway.reservation.repository.ReservationBookingRepository;
 import lombok.RequiredArgsConstructor;

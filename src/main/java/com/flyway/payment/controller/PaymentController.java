@@ -5,7 +5,7 @@ import com.flyway.payment.domain.PaymentConfirmRequest;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.service.PaymentService;
 import com.flyway.reservation.dto.ReservationSegmentView;
-import com.flyway.reservation.repository.PassengerServiceRepository;
+import com.flyway.passenger.repository.PassengerServiceRepository;
 import com.flyway.reservation.repository.ReservationBookingRepository;
 import com.flyway.security.principal.CustomUserDetails;
 import lombok.RequiredArgsConstructor;

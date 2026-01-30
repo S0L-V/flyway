@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.passenger.mapper.PassengerQueryMapper">
+
+    <select id="selectPassengersByReservationId"
+            resultType="com.flyway.passenger.dto.PassengerReservationDto">
+
+        SELECT
+            -- 탑승객 정보
+            p.passenger_id                 AS passengerId,
+            p.reservation_id               AS reservationId,
+            p.kr_first_name                AS krFirstName,
+            p.kr_last_name                 AS krLastName,
+            p.first_name                   AS firstName,
+            p.last_name                    AS lastName,
+            p.birth                        AS birth,
+            p.gender                       AS gender,
+            p.email                        AS email,
+            p.phone_number                 AS phoneNumber,
+            p.checked_baggage_applied      AS checkedBaggageApplied,
+
+            -- 항공편
+            p.passport_no                  AS passportNo,
+            p.passport_issue_country       AS passportIssueCountry,
+            p.passport_expiry_date         AS passportExpiryDate,
+            p.passport_status              AS passportStatus,
+            p.passport_submitted_at        AS passportSubmittedAt,
+            p.passport_reminder_sent_at    AS passportReminderSentAt,
+
+            -- 예약 구간
+            rs.reservation_segment_id      AS reservationSegmentId,
+            rs.segment_order               AS segmentOrder,
+
+            -- 좌석
+            pst.passenger_seat_id          AS passengerSeatId,
+            pst.flight_seat_id             AS flightSeatId,
+
+            -- 부가서비스
+            ps.ps_id                       AS psId,
+            ps.service_type                AS serviceType,
+            ps.trip_type                   AS tripType,
+            ps.quantity                    AS quantity,
+            ps.total_price                 AS totalPrice,
+            ps.meal_id                     AS mealId,
+            ps.policy_id                   AS policyId,
+            ps.service_details             AS serviceDetails,
+            ps.added_at                    AS addedAt
+
+        FROM passenger p
+                 JOIN reservation r
+                      ON r.reservation_id = p.reservation_id
+                 JOIN reservation_segment rs
+                      ON rs.reservation_id = p.reservation_id
+
+                 LEFT JOIN passenger_seat pst
+                           ON pst.passenger_id = p.passenger_id
+                               AND pst.reservation_segment_id = rs.reservation_segment_id
+
+                 LEFT JOIN passenger_service ps
+                           ON ps.passenger_id = p.passenger_id
+                               AND ps.reservation_segment_id = rs.reservation_segment_id
+
+        WHERE p.reservation_id = #{reservationId}
+          AND r.user_id = #{userId}
+
+        ORDER BY
+            p.passenger_id,
+            rs.segment_order,
+            ps.added_at
+
+    </select>
+
+</mapper>

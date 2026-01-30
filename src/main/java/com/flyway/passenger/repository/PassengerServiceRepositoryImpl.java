@@ -1,9 +1,9 @@
-package com.flyway.reservation.repository;
+package com.flyway.passenger.repository;
 
 import com.flyway.reservation.dto.BaggagePolicyView;
-import com.flyway.reservation.dto.PassengerServiceInsertDTO;
-import com.flyway.reservation.dto.PassengerServiceView;
-import com.flyway.reservation.mapper.PassengerServiceMapper;
+import com.flyway.passenger.dto.PassengerServiceInsertDTO;
+import com.flyway.passenger.dto.PassengerServiceView;
+import com.flyway.passenger.mapper.PassengerServiceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import com.flyway.reservation.dto.MealOptionView;

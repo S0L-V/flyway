@@ -1,18 +1,18 @@
-package com.flyway.reservation.dto;
+package com.flyway.passenger.domain;
 
-import lombok.*;
+import com.flyway.passenger.dto.ReservationPassengersResponseDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PassengerUpsertDTO {
-
-    private String passengerId;
-    private String reservationId;
+public class PassengerProfile {
     private String krFirstName;
     private String krLastName;
     private String firstName;
@@ -21,8 +21,6 @@ public class PassengerUpsertDTO {
     private String gender;
     private String email;
     private String phoneNumber;
-    private String passportNo;
-    private String country;
-    private LocalDate passportExpiryDate;
-    private String passportIssueCountry;
+    private String checkedBaggageApplied;
+    private PassportInfo passport;
 }

@@ -1,10 +1,12 @@
-package com.flyway.reservation.service;
+package com.flyway.passenger.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flyway.reservation.domain.BaggageSaveRequest;
+import com.flyway.passenger.dto.BaggageSaveRequest;
+import com.flyway.passenger.dto.PassengerServiceInsertDTO;
+import com.flyway.passenger.dto.PassengerServiceView;
+import com.flyway.passenger.dto.PassengerView;
 import com.flyway.reservation.dto.*;
-import com.flyway.reservation.repository.PassengerServiceRepository;
-import com.flyway.reservation.repository.PassengerServiceRepositoryImpl;
+import com.flyway.passenger.repository.PassengerServiceRepository;
 import com.flyway.reservation.repository.ReservationBookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

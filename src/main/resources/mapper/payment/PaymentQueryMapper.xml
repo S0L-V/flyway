@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.payment.mapper.PaymentQueryMapper">
+
+    <!-- 예약별 결제 조회 (최근 PAID) -->
+    <select id="findLatestPaidByReservationIdAndUserId"
+            resultType="com.flyway.payment.dto.PaymentDto">
+
+        SELECT
+            p.payment_id       AS paymentId,
+            p.reservation_id   AS reservationId,
+            p.transaction_id   AS transactionId,
+            p.created_at       AS createdAt,
+            p.paid_at          AS paidAt,
+            p.amount           AS amount,
+            p.payment_method   AS paymentMethod,
+            p.status           AS status,
+            p.order_id         AS orderId,
+            p.payment_key      AS paymentKey
+        FROM payment p
+        JOIN reservation r ON r.reservation_id = p.reservation_id
+        WHERE p.reservation_id = #{reservationId}
+          AND r.user_id = #{userId}
+          AND p.status = 'PAID'
+        ORDER BY p.paid_at DESC
+        LIMIT 1
+
+    </select>
+
+</mapper>

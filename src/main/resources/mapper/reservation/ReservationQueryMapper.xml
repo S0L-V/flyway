@@ -63,7 +63,7 @@
         ) pay
                            ON pay.reservation_id = r.reservation_id
 
-        WHERE r.user_id = #{userId}
+        WHERE r.user_id = #{userId} AND r.status = 'CONFIRMED'
 
         GROUP BY
             r.reservation_id,
@@ -71,7 +71,7 @@
             r.reserved_at,
             pay.amount
 
-        ORDER BY r.reserved_at, r.reservation_id
+        ORDER BY r.reserved_at DESC, r.reservation_id
         LIMIT #{limit} OFFSET #{offset}
 
     </select>
@@ -173,6 +173,7 @@
 
         WHERE r.user_id = #{userId}
           AND r.reservation_id = #{reservationId}
+          AND r.status = 'CONFIRMED'
 
         GROUP BY
             r.reservation_id,
@@ -192,7 +193,7 @@
     <select id="countReservationHistoriesByUserId" resultType="int">
         SELECT COUNT(*)
         FROM reservation r
-        WHERE r.user_id = #{userId}
+        WHERE r.user_id = #{userId} AND r.status = 'CONFIRMED'
     </select>
 
 </mapper>

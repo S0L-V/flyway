@@ -27,6 +27,17 @@
           AND provider_user_id = #{email}
     </select>
 
+    <!-- userId로 Identity 조회 -->
+    <select id="findByUserId" parameterType="map" resultType="com.flyway.user.domain.UserIdentity">
+        SELECT user_identity_id,
+               user_id,
+               provider,
+               provider_user_id,
+               created_at
+        FROM user_identity
+        WHERE user_id = #{userId}
+    </select>
+
     <!-- provider + provider_user_id 로 Identity 조회 (OAuth 재로그인 시 기존 회원 조회) -->
     <select id="findByProviderUserId" parameterType="map" resultType="com.flyway.user.domain.UserIdentity">
         SELECT user_identity_id,
@@ -39,13 +50,13 @@
           AND provider_user_id = #{providerUserId}
     </select>
 
-    <!-- EMAIL 가입자의 provider_user_id(이메일) 익명화 -->
-    <update id="anonymizeEmailProviderUserIdIfWithdrawn">
+    <!-- provider_user_id 익명화 -->
+    <update id="anonymizeProviderUserIdIfWithdrawn">
         UPDATE user_identity ui
             JOIN users u ON u.user_id = ui.user_id
-        SET ui.provider_user_id = #{anonymizedEmail}
+        SET ui.provider_user_id = #{anonymizedProviderUserId}
         WHERE ui.user_id = #{userId}
-          AND ui.provider = 'EMAIL'
+          AND ui.provider = #{provider}
           AND u.status = 'WITHDRAWN'
     </update>
 

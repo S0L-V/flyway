@@ -11,9 +11,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.flyway.reservation.repository.PassengerServiceRepository;
+
+import com.flyway.passenger.repository.PassengerServiceRepository;
 import com.flyway.sender.service.SmsService;
 import com.flyway.sender.mapper.SmsMapper;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
