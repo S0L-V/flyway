@@ -13,7 +13,7 @@ public class ReservationSummaryDto {
 
     /* 예약 기본 정보 */
     private String reservationId;
-    private String status;
+    private String reservationStatus;
     private LocalDateTime reservedAt;
 
     /* 결제 정보 */

@@ -45,8 +45,6 @@
                       ON arr.airport_id = f.arrival_airport
 
                  LEFT JOIN (
-            -- 예약별 최신 'PAID' 결제 1건
-            -- 동일 paid_at 시 payment_id로 tie-break
             SELECT reservation_id, amount
             FROM (
                 SELECT
@@ -57,13 +55,13 @@
                         ORDER BY p1.paid_at DESC, p1.payment_id DESC
                     ) AS rn
                 FROM payment p1
-                WHERE p1.status = 'PAID'
+                WHERE p1.status = 'PAID' OR p1.status = 'CANCELLED'
             ) ranked
             WHERE ranked.rn = 1
         ) pay
                            ON pay.reservation_id = r.reservation_id
 
-        WHERE r.user_id = #{userId} AND r.status = 'CONFIRMED'
+        WHERE r.user_id = #{userId} AND r.status != 'EXPIRED' AND r.status != 'HELD'
 
         GROUP BY
             r.reservation_id,
@@ -165,7 +163,7 @@
                         ORDER BY p1.paid_at DESC, p1.payment_id DESC
                     ) AS rn
                 FROM payment p1
-                WHERE p1.status = 'PAID'
+                WHERE p1.status = 'PAID' OR p1.status = 'CANCELLED'
             ) ranked
             WHERE ranked.rn = 1
         ) pay
@@ -173,7 +171,7 @@
 
         WHERE r.user_id = #{userId}
           AND r.reservation_id = #{reservationId}
-          AND r.status = 'CONFIRMED'
+          AND r.status != 'EXPIRED' AND r.status != 'HELD'
 
         GROUP BY
             r.reservation_id,
@@ -193,7 +191,7 @@
     <select id="countReservationHistoriesByUserId" resultType="int">
         SELECT COUNT(*)
         FROM reservation r
-        WHERE r.user_id = #{userId} AND r.status = 'CONFIRMED'
+        WHERE r.user_id = #{userId} AND r.status != 'EXPIRED' AND r.status != 'HELD'
     </select>
 
 </mapper>
