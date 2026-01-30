@@ -278,29 +278,32 @@
         </div>
     </div>
 
-    <!-- Flight summary (임시 하드코딩: 나중에 모델값으로 교체) -->
+    <!-- Flight summary -->
     <div class="section card">
         <div class="subTitle">예약 항공편</div>
-        <div class="flightBox">
-            <div class="flightGrid">
-                <div class="flightCol">
-                    <strong>2026-01-01</strong>
-                    <div>김포(GMP) → 제주(CJU)</div>
-                </div>
-                <div class="flightCol">
-                    <strong>14:40</strong>
-                    <div><span class="pill">직항</span></div>
-                </div>
-                <div class="flightCol">
-                    <strong>1시간 15분</strong>
-                    <div>소요시간</div>
-                </div>
-                <div class="flightCol">
-                    <strong>23:25</strong>
-                    <div>도착</div>
+        <c:forEach var="seg" items="${segments}">
+            <div class="flightBox" style="margin-bottom: 10px;">
+                <div class="flightGrid">
+                    <div class="flightCol">
+                        <strong>${seg.snapDepartureTime.toLocalDate()}</strong>
+                        <div>${seg.snapDepartureCity}(${seg.snapDepartureAirport}) →
+                                ${seg.snapArrivalCity}(${seg.snapArrivalAirport})</div>
+                    </div>
+                    <div class="flightCol">
+                        <strong>${seg.snapDepartureTime.toLocalTime()}</strong>
+                        <div><span class="pill">직항</span></div>
+                    </div>
+                    <div class="flightCol">
+                        <strong>${seg.snapAirlineName}</strong>
+                        <div>${seg.snapFlightNumber}</div>
+                    </div>
+                    <div class="flightCol">
+                        <strong>${seg.snapArrivalTime.toLocalTime()}</strong>
+                        <div>도착</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </c:forEach>
     </div>
 
     <!-- Notices -->
