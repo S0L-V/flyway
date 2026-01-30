@@ -1,5 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadPromotionCard();
+
+    const sliderWrapper = document.getElementById("slider-wrapper");
+    if (sliderWrapper) {
+        sliderWrapper.addEventListener("mouseenter", stopAutoSlide);
+        sliderWrapper.addEventListener("mouseleave", startAutoSlide);
+    }
 });
 
 window.addEventListener("load", () => {
@@ -47,7 +53,7 @@ document.getElementById("offerPrev").onclick = () => {
 // >
 function movePrev() {
     const cards = document.querySelectorAll(".offer-card");
-    currentIndex = (currentIndex - 1) % cards.length;
+    currentIndex = (currentIndex - 1 + cards.length) % cards.length;
     updateCarousel(cards);
 }
 
