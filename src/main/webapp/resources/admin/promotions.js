@@ -16,6 +16,20 @@ document.addEventListener('DOMContentLoaded', function() {
         totalPages: 0
     };
 
+    // 클라이언트 사이드 페이지네이션용 상태
+    const loadState = {
+        flights: {
+            isLoading: false,
+            allData: null,       // 전체 데이터 (100개)
+            searchKey: null      // 현재 검색 조건 (출발|도착)
+        },
+        promotions: {
+            isLoading: false,
+            isLoaded: false,
+            cachedData: null
+        }
+    };
+
     // --- Element Selectors ---
     const promotionModal = document.getElementById('promotion-modal');
     const flightCrudModal = document.getElementById('flight-crud-modal');
@@ -255,35 +269,114 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function fetchFlights(page = 1) {
-        pagination.currentPage = page;
+    function fetchFlights(page = 1, forceRefresh = false) {
         const departureAirport = state.from ? state.from.code : '';
         const arrivalAirport = state.to ? state.to.code : '';
+        const searchKey = `${departureAirport}|${arrivalAirport}`;
+
+        console.log('[Flights] 조회 요청:', { page, searchKey, hasData: !!loadState.flights.allData, forceRefresh });
+
+        // 강제 새로고침 시 데이터 초기화
+        if (forceRefresh) {
+            loadState.flights.allData = null;
+            loadState.flights.searchKey = null;
+        }
+
+        // 검색 조건이 바뀌면 데이터 초기화
+        if (loadState.flights.searchKey !== searchKey) {
+            loadState.flights.allData = null;
+            loadState.flights.searchKey = searchKey;
+        }
+
+        // 이미 전체 데이터가 있으면 클라이언트에서 페이지네이션 (API 호출 안함!)
+        if (loadState.flights.allData) {
+            console.log('[Flights] 클라이언트 페이지네이션:', page);
+            pagination.currentPage = page;
+            renderFlightTableFromCache(page);
+            renderFlightPagination();
+            return;
+        }
+
+        // 로딩 중이면 스킵
+        if (loadState.flights.isLoading) {
+            console.log('[Flights] 이미 로딩 중, 스킵');
+            return;
+        }
+
+        console.log('[Flights] API에서 전체 데이터 로드');
+
+        // 전체 100개를 한 번에 로드
         const query = new URLSearchParams({
             departureAirport,
             arrivalAirport,
-            page: pagination.currentPage,
-            size: pagination.pageSize
+            page: 1,
+            size: 100  // 전체 로드
         }).toString();
 
-        // 스켈레톤 UI 표시
+        loadState.flights.isLoading = true;
         renderFlightSkeleton(pagination.pageSize);
+
         fetch(`${window.CONTEXT_PATH}/admin/api/flights?${query}`)
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    pagination.totalCount = res.data.totalCount;
-                    pagination.totalPages = res.data.totalPages;
-                    renderFlightTable(res.data.list);
+                    // 전체 데이터 저장
+                    loadState.flights.allData = res.data.list;
+                    loadState.flights.searchKey = searchKey;
+
+                    // 페이지네이션 정보 계산
+                    pagination.totalCount = res.data.list.length;
+                    pagination.totalPages = Math.ceil(res.data.list.length / pagination.pageSize);
+                    pagination.currentPage = page;
+
+                    // 현재 페이지 렌더링
+                    renderFlightTableFromCache(page);
                     renderFlightPagination();
                 } else {
                     throw new Error(res.message);
                 }
             })
-            .catch(handleFetchError(flightListBody, 4));
+            .catch(handleFetchError(flightListBody, 4))
+            .finally(() => {
+                loadState.flights.isLoading = false;
+            });
     }
 
-    function fetchPromotions() {
+    // 캐시된 전체 데이터에서 현재 페이지만 추출하여 렌더링
+    function renderFlightTableFromCache(page) {
+        const startIndex = (page - 1) * pagination.pageSize;
+        const endIndex = startIndex + pagination.pageSize;
+        const pageData = loadState.flights.allData.slice(startIndex, endIndex);
+        renderFlightTable(pageData);
+    }
+
+    function fetchPromotions(forceRefresh = false) {
+        console.log('[Promotions] 조회 요청:', { cached: !!loadState.promotions.cachedData, forceRefresh });
+
+        // 강제 새로고침 시 캐시 삭제
+        if (forceRefresh) {
+            loadState.promotions.cachedData = null;
+            loadState.promotions.isLoaded = false;
+        }
+
+        // 캐시에 데이터가 있으면 바로 렌더링
+        if (!forceRefresh && loadState.promotions.cachedData) {
+            console.log('[Promotions] 캐시에서 로드');
+            renderPromotionTable(loadState.promotions.cachedData);
+            return;
+        }
+
+        // 로딩 중이면 스킵
+        if (loadState.promotions.isLoading) {
+            console.log('[Promotions] 이미 로딩 중, 스킵');
+            return;
+        }
+
+        console.log('[Promotions] API 조회 실행');
+
+        // 로딩 상태 설정
+        loadState.promotions.isLoading = true;
+
         // 스켈레톤 UI 표시
         renderPromotionSkeleton(8);
         fetch(`${window.CONTEXT_PATH}/admin/promotions/api/list`)
@@ -291,11 +384,17 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(res => {
                 if (res.success) {
                     renderPromotionTable(res.data.list);
+                    // 캐시에 저장
+                    loadState.promotions.cachedData = res.data.list;
+                    loadState.promotions.isLoaded = true;
                 } else {
                     throw new Error(res.message);
                 }
             })
-            .catch(handleFetchError(promotionListBody, 6));
+            .catch(handleFetchError(promotionListBody, 6))
+            .finally(() => {
+                loadState.promotions.isLoading = false;
+            });
     }
 
     // --- Rendering ---
@@ -496,7 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => {
                 console.error('Failed to update display order:', err);
                 alert('순서 변경에 실패했습니다.');
-                fetchPromotions(); // 실패 시 다시 로드
+                fetchPromotions(true); // 실패 시 다시 로드
             });
     }
 
@@ -585,8 +684,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch(`${window.CONTEXT_PATH}/admin/api/flights/${flightId}`, { method: 'DELETE' }).then(res => res.json()).then(res => {
                     if (res.success) {
                         alert('항공편이 삭제되었습니다.');
-                        fetchFlights();
-                        fetchPromotions();
+                        fetchFlights(pagination.currentPage, true);
+                        fetchPromotions(true);
                     } else {
                         alert('항공편 삭제 실패: ' + res.message);
                     }
@@ -619,12 +718,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!res.success) {
                         // 실패 시 롤백
                         alert('상태 변경 실패: ' + res.message);
-                        fetchPromotions();
+                        fetchPromotions(true);
                     }
                 })
                 .catch(err => {
                     console.error('Toggle failed:', err);
-                    fetchPromotions();
+                    fetchPromotions(true);
                 });
         }
 
@@ -634,7 +733,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch(`${window.CONTEXT_PATH}/admin/promotions/api/${id}`, { method: 'DELETE' }).then(res => res.json()).then(res => {
                     if (res.success) {
                         alert('삭제되었습니다.');
-                        fetchPromotions();
+                        fetchPromotions(true);
                     } else {
                         alert('삭제 실패: ' + res.message);
                     }
@@ -657,7 +756,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (res.success) {
                 alert('특가 상품이 생성되었습니다.');
                 promotionModal.classList.add('hidden');
-                fetchPromotions();
+                fetchPromotions(true);
             } else {
                 alert('생성 실패: ' + res.message);
             }
@@ -679,7 +778,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (res.success) {
                 alert('항공편이 저장되었습니다.');
                 flightCrudModal.classList.add('hidden');
-                fetchFlights();
+                fetchFlights(pagination.currentPage, true);
             } else {
                 alert('저장 실패: ' + res.message);
             }

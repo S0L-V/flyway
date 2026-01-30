@@ -91,6 +91,9 @@
     </div>
 </main>
 
+<!-- CountUp 라이브러리 (애니메이션용) - 인라인 스크립트보다 먼저 로드 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
@@ -357,10 +360,5 @@
 
     });
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"
-        integrity="sha512-P2o5sNDlmlusPGmJPBdJozBBbpfWMgQ+QbW0TjSVhobSQBqOvb+L5q/wMNAcHFGObWWDJD56S96URPgpJ+gi0g=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
 </body>
 </html>
