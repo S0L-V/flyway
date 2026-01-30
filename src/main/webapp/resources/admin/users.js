@@ -112,6 +112,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // --- 모바일 컨테이너 이벤트 위임 ---
+    const userListMobileContainer = document.getElementById('user-list-mobile');
+    if (userListMobileContainer) {
+        userListMobileContainer.addEventListener('click', function(e) {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            const action = btn.dataset.action;
+            const userId = btn.dataset.userId;
+
+            if (!action || !userId) return;
+
+            if (action === 'detail') {
+                showUserDetail(userId);
+            } else if (action === 'block') {
+                changeUserStatus(userId, 'BLOCKED');
+            } else if (action === 'unblock') {
+                changeUserStatus(userId, 'ACTIVE');
+            }
+        });
+    }
 
     // --- API 호출 함수 ---
 
@@ -169,61 +190,107 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- 렌더링 함수 ---
 
     function renderUserList(users) {
+        const userListMobile = document.getElementById('user-list-mobile');
         elements.userListBody.innerHTML = '';
+        if (userListMobile) {
+            userListMobile.innerHTML = ''; // Clear mobile list as well
+        }
+
         if (!users || users.length === 0) {
-            elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">회원이 없습니다.</td></tr>';
+            const emptyHtml = '<tr><td colspan="6" class="text-center py-12 text-slate-500">회원이 없습니다.</td></tr>';
+            elements.userListBody.innerHTML = emptyHtml;
+            if (userListMobile) {
+                userListMobile.innerHTML = '<div class="p-4 text-center text-slate-400">회원이 없습니다.</div>';
+            }
             return;
         }
 
-        users.forEach(function(user) {
-            var row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50';
+        const tableRows = [];
+        const mobileCards = [];
 
-            // [보안 수정] onclick 제거하고 data- 속성 사용
-            row.innerHTML =
-                '<td class="px-4 py-3">' +
-                '<div class="flex items-center gap-3">' +
-                '<div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">' +
-                escapeHtml(getInitial(user.displayName || user.email)) +
-                '</div>' +
-                '<div>' +
-                '<div class="text-sm font-medium text-slate-800">' + escapeHtml(user.displayName || '-') + '</div>' +
-                '<div class="text-xs text-slate-500">' + escapeHtml(user.email) + '</div>' +
-                '</div>' +
-                '</div>' +
-                '</td>' +
-                '<td class="px-4 py-3 text-sm text-slate-600">' +
-                '<span class="px-2 py-1 text-xs font-medium rounded-full ' + getProviderBadgeClass(user.provider) + '">' +
-                escapeHtml(getProviderDisplayName(user.provider)) +
-                '</span>' +
-                '</td>' +
-                '<td class="px-4 py-3 text-sm text-slate-800 font-medium">' + formatNumber(user.reservationCount) + '건</td>' +
-                '<td class="px-4 py-3 text-sm">' +
-                '<span class="px-2 py-1 text-xs font-medium rounded-full ' + getStatusBadgeClass(user.status) + '">' +
-                escapeHtml(user.statusDisplayName) +
-                '</span>' +
-                '</td>' +
-                '<td class="px-4 py-3 text-sm text-slate-600">' + formatDate(user.createdAt) + '</td>' +
-                '<td class="px-4 py-3 text-center">' +
-                '<div class="flex items-center justify-center gap-2">' +
-                // 상세보기 버튼: data-action="detail"
-                '<button data-action="detail" data-user-id="' + escapeHtml(user.userId) + '" class="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="상세보기">' +
-                '<i data-lucide="eye" class="w-4 h-4 text-slate-500"></i>' +
-                '</button>' +
-                (user.status === 'ACTIVE' ?
-                    // 차단하기 버튼: data-action="block"
-                    '<button data-action="block" data-user-id="' + escapeHtml(user.userId) + '" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="차단하기">' +
-                    '<i data-lucide="ban" class="w-4 h-4 text-red-500"></i>' +
-                    '</button>' :
-                    user.status === 'BLOCKED' ?
-                        // 차단해제 버튼: data-action="unblock"
-                        '<button data-action="unblock" data-user-id="' + escapeHtml(user.userId) + '" class="p-2 hover:bg-green-50 rounded-lg transition-colors" title="차단해제">' +
-                        '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' +
-                        '</button>' : '') +
-                '</div>' +
-                '</td>';
-            elements.userListBody.appendChild(row);
+        users.forEach(function(user) {
+            // --- Common data preparation ---
+            const initial = escapeHtml(getInitial(user.displayName || user.email));
+            const displayName = escapeHtml(user.displayName || '-');
+            const email = escapeHtml(user.email);
+            const providerBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getProviderBadgeClass(user.provider)}">${escapeHtml(getProviderDisplayName(user.provider))}</span>`;
+            const reservationCount = formatNumber(user.reservationCount) + '건';
+            const statusBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(user.status)}">${escapeHtml(user.statusDisplayName)}</span>`;
+            const createdAt = formatDate(user.createdAt);
+            const userId = escapeHtml(user.userId);
+
+            const actionButtons = `
+                <div class="flex items-center justify-center gap-2">
+                    <button data-action="detail" data-user-id="${userId}" class="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="상세보기">
+                        <i data-lucide="eye" class="w-4 h-4 text-slate-500 pointer-events-none"></i>
+                    </button>
+                    ${user.status === 'ACTIVE' ? `
+                    <button data-action="block" data-user-id="${userId}" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="차단하기">
+                        <i data-lucide="ban" class="w-4 h-4 text-red-500 pointer-events-none"></i>
+                    </button>` : user.status === 'BLOCKED' ? `
+                    <button data-action="unblock" data-user-id="${userId}" class="p-2 hover:bg-green-50 rounded-lg transition-colors" title="차단해제">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-green-500 pointer-events-none"></i>
+                    </button>` : ''}
+                </div>`;
+
+            // --- Desktop Table Row HTML ---
+            tableRows.push(`
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">${initial}</div>
+                            <div>
+                                <div class="text-sm font-medium text-slate-800">${displayName}</div>
+                                <div class="text-xs text-slate-500">${email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-600">${providerBadge}</td>
+                    <td class="px-4 py-3 text-sm text-slate-800 font-medium">${reservationCount}</td>
+                    <td class="px-4 py-3 text-sm">${statusBadge}</td>
+                    <td class="px-4 py-3 text-sm text-slate-600">${createdAt}</td>
+                    <td class="px-4 py-3 text-center">${actionButtons}</td>
+                </tr>
+            `);
+
+            // --- Mobile Card HTML ---
+            mobileCards.push(`
+                <div class="p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">${initial}</div>
+                            <div>
+                                <div class="text-sm font-medium text-slate-800">${displayName}</div>
+                                <div class="text-xs text-slate-500">${email}</div>
+                            </div>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">가입 경로</p>
+                            ${providerBadge}
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">예약</p>
+                            <p class="font-medium">${reservationCount}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">가입일</p>
+                            <p>${createdAt}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        ${actionButtons}
+                    </div>
+                </div>
+            `);
         });
+
+        elements.userListBody.innerHTML = tableRows.join('');
+        if (userListMobile) {
+            userListMobile.innerHTML = mobileCards.join('');
+        }
     }
 
     function renderPagination(totalCount, curPage, pageSize, totalPages) {

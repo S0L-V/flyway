@@ -13,10 +13,21 @@
     .drag-handle:active { cursor: grabbing; }
     .sortable-ghost { opacity: 0.4; background: #e0f2fe; }
     .sortable-chosen { background: #f0f9ff; }
+
+    /* Skeleton shimmer effect */
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    .skeleton-shimmer {
+        background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite ease-in-out;
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
-<main class="pl-64 pt-16 min-h-screen">
+<main class="pl-0 lg:pl-[72px] pt-16 min-h-screen transition-all duration-300">
     <div class="p-8 max-w-[1600px] mx-auto space-y-8">
         <!-- Header -->
         <div class="flex items-center justify-between">

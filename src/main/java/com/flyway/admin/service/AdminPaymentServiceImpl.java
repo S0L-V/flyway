@@ -31,10 +31,10 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<PaymentListDto> getPaymentList(String status, int page, int size) {
-		int setPage = Math.max(1, page);
+		int safePage = Math.max(0, page);
 		int safeSize = Math.max(1, Math.min(size, 100));
-		int offset = (safeSize - 1) * size;
-		return adminPaymentRepository.selectPaymentList(status, offset, setPage);
+		int offset = safePage * safeSize;
+		return adminPaymentRepository.selectPaymentList(status, offset, safeSize);
 	}
 
 	@Override

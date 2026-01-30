@@ -164,7 +164,7 @@
         <result property="title" column="title"/>
         <result property="message" column="message"/>
         <result property="relatedResourceType" column="related_resource_type"/>
-        <result property="relatedResourceId" column="related_reource_id"/>
+        <result property="relatedResourceId" column="related_resource_id"/>
         <result property="priority" column="priority"/>
         <result property="isRead" column="is_read"/>
         <result property="readAt" column="read_at"/>
@@ -188,13 +188,13 @@
             title,
             message,
             related_resource_type,
-            related_reource_id,
+            related_resource_id,
             priority,
             is_read,
             read_at,
             created_at
         FROM admin_notification
-        WHERE (admin_id IS NULL OR admin_id = #{adminId})
+        WHERE (admin_id IS NULL OR admin_id = #{adminId}) AND is_read = 'N'
         ORDER BY created_at DESC
             LIMIT #{limit}
     </select>

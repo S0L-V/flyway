@@ -3,8 +3,6 @@ package com.flyway.admin.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.cglib.core.Local;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -81,11 +79,19 @@ public class WebSocketMessageDto<T> {
 			.build();
 	}
 
-	public static WebSocketMessageDto<String> error(String message) {
-		return WebSocketMessageDto.<String>builder()
+	public static WebSocketMessageDto<Void> error(String message) {
+		return WebSocketMessageDto.<Void>builder()
 			.type("ERROR")
 			.errorMessage(message)
 			.timestamp(LocalDateTime.now())
 			.build();
 	}
+
+	public static WebSocketMessageDto<Void> refreshAll() {
+		return WebSocketMessageDto.<Void>builder()
+			.type("REFRESH_ALL")
+			.timestamp(LocalDateTime.now())
+			.build();
+	}
+
 }

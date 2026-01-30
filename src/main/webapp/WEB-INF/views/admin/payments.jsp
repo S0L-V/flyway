@@ -3,7 +3,7 @@
 <%@ include file="layout/sidebar.jsp" %>
 <%@ include file="layout/topbar.jsp" %>
 
-<main class="pl-64 pt-16 min-h-screen">
+<main class="pl-0 lg:pl-[72px] pt-16 min-h-screen transition-all duration-300">
     <div class="p-8 max-w-[1600px] mx-auto space-y-8">
         <div class="flex items-center justify-between">
             <div>
@@ -70,9 +70,8 @@
                     <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                         <tr>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">결제 ID</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">회원 정보</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">금액</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-64">회원 정보</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">금액</th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">결제 수단</th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">상태</th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">대상 항공편</th>
@@ -80,17 +79,20 @@
                         </tr>
                         </thead>
                         <tbody id="payment-list-body" class="bg-white divide-y divide-slate-100">
-                        <tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역을 불러오는 중...</td></tr>
+                        <tr><td colspan="6" class="text-center py-12 text-slate-500">결제 내역을 불러오는 중...</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <nav id="pagination-controls" class="flex items-center justify-between pt-4">
+                <nav id="pagination-controls" class="flex items-center justify-end pt-4">
                     <!-- 페이지네이션 컨트롤이 여기에 렌더링됩니다. -->
                 </nav>
             </div>
         </div>
     </div>
 </main>
+
+<!-- CountUp 라이브러리 (애니메이션용) - 인라인 스크립트보다 먼저 로드 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -138,28 +140,35 @@
         });
 
 
+        // [수정됨] 통계 데이터 가져오기 + 애니메이션 적용
         function fetchPaymentStats() {
             fetch(window.CONTEXT_PATH + '/admin/payments/api/stats')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
-                        elements.stats.paidCount.textContent = formatNumber(data.data.paidCount);
-                        elements.stats.pendingCount.textContent = formatNumber(data.data.pendingCount);
-                        elements.stats.refundedCount.textContent = formatNumber(data.data.refundedCount);
-                        elements.stats.monthlyRevenue.textContent = formatCurrency(data.data.monthlyRevenue);
+                        // 기존 textContent 대입 방식을 animateValue 함수 호출로 변경
+
+                        // 1. 건수 (단순 숫자)
+                        animateValue(elements.stats.paidCount, data.data.paidCount);
+                        animateValue(elements.stats.pendingCount, data.data.pendingCount);
+                        animateValue(elements.stats.refundedCount, data.data.refundedCount);
+
+                        // 2. 매출 (원화 표시 옵션 추가)
+                        animateValue(elements.stats.monthlyRevenue, data.data.monthlyRevenue, {
+                            prefix: '₩ ',   // 앞에 원화 기호 붙이기
+                        });
+
                     } else {
                         console.error('Failed to fetch payment stats:', data.message);
-                        alert('결제 통계 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching payment stats:', error);
-                    alert('결제 통계 조회 중 네트워크 오류가 발생했습니다.');
                 });
         }
 
         function fetchPaymentList() {
-            elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>결제 내역을 불러오는 중...</p></td></tr>';
+            elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>결제 내역을 불러오는 중...</p></td></tr>';
             lucide.createIcons(); // 로딩 아이콘 렌더링
 
             const url = new URL(window.CONTEXT_PATH + '/admin/payments/api/list', window.location.origin);
@@ -177,13 +186,13 @@
                         renderPagination(data.data.totalCount, data.data.currentPage, data.data.pageSize, data.data.totalPages);
                     } else {
                         console.error('Failed to fetch payment list:', data.message);
-                        elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류') + '</td></tr>';
+                        elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">결제 내역 조회에 실패했습니다: ' + (data.message || '알 수 없는 오류') + '</td></tr>';
                     }
                     lucide.createIcons(); // 상태 아이콘 렌더링
                 })
                 .catch(error => {
                     console.error('Error fetching payment list:', error);
-                    elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-red-500">결제 내역 조회 중 네트워크 오류가 발생했습니다.</td></tr>';
+                    elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-red-500">결제 내역 조회 중 네트워크 오류가 발생했습니다.</td></tr>';
                     lucide.createIcons(); // 에러 아이콘 렌더링
                 });
         }
@@ -191,7 +200,7 @@
         function renderPaymentList(payments) {
             elements.paymentListBody.innerHTML = ''; // 기존 내용 지우기
             if (payments.length === 0) {
-                elements.paymentListBody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500">결제 내역이 없습니다.</td></tr>';
+                elements.paymentListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">결제 내역이 없습니다.</td></tr>';
                 return;
             }
 
@@ -199,12 +208,11 @@
                 var row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50';
                 row.innerHTML =
-                    '<td class="px-4 py-3 text-sm text-slate-800 font-medium">' + escapeHtml(payment.paymentId) + '</td>' +
-                    '<td class="px-4 py-3 text-sm text-slate-600">' +
-                    '<div class="font-medium">' + escapeHtml(payment.userName || '비회원') + '</div>' +
+                    '<td class="px-4 py-3 text-sm text-slate-600 w-64">' +
+                    '<div class="font-medium">' + escapeHtml(payment.userName || '이름 미입력') + '</div>' +
                     '<div class="text-xs text-slate-500">' + escapeHtml(payment.userEmail || '-') + '</div>' +
                     '</td>' +
-                    '<td class="px-4 py-3 text-sm text-slate-800 font-semibold">' + formatCurrency(payment.amount) + '</td>' +
+                    '<td class="px-4 py-3 text-sm text-slate-800 font-semibold text-right">' + formatCurrency(payment.amount) + '</td>' +
                     '<td class="px-4 py-3 text-sm text-slate-600">' + escapeHtml(payment.paymentMethodDisplay) + '</td>' +
                     '<td class="px-4 py-3 text-sm">' +
                     '<span class="px-2 py-1 text-xs font-medium rounded-full ' + payment.statusBadgeClass + '">' + escapeHtml(payment.statusDisplay) + '</span>' +
@@ -220,6 +228,15 @@
 
         function renderPagination(totalCount, curPage, pageSize, totalPages) {
             elements.paginationControls.innerHTML = ''; // 기존 내용 지우기
+
+            // [수정 1] 총 건수 표시는 페이지 수와 상관없이 항상 실행되어야 하므로 맨 위로 올림
+            var totalInfo = document.createElement('span');
+            totalInfo.className = 'mr-4 text-sm text-slate-500';
+            // formatNumber 함수를 사용하여 1,000 단위 콤마 적용 (선택 사항)
+            totalInfo.textContent = '총 ' + formatNumber(totalCount) + '건';
+            elements.paginationControls.appendChild(totalInfo);
+
+            // [수정 2] 페이지가 1개 이하이면 버튼을 그리지 않고 여기서 종료 (총 건수는 이미 그려짐)
             if (totalPages <= 1) return;
 
             var ul = document.createElement('ul');
@@ -240,7 +257,7 @@
             prevLi.appendChild(prevButton);
             ul.appendChild(prevLi);
 
-            // 페이지 번호
+            // 페이지 번호 (너무 많으면 생략하는 로직 없이 단순 반복문인 상태)
             for (var i = 0; i < totalPages; i++) {
                 var li = document.createElement('li');
                 var button = document.createElement('button');
@@ -273,6 +290,38 @@
 
             elements.paginationControls.appendChild(ul);
             lucide.createIcons(); // 페이지네이션 아이콘 렌더링
+        }
+
+        function animateValue(element, endValue, customOptions) {
+            // 값이 없으면 0으로 처리
+            if (endValue === null || endValue === undefined) endValue = 0;
+
+            // 기본 옵션 (2초 동안 실행, 천단위 콤마)
+            const defaultOptions = {
+                duration: 2,
+                separator: ',',
+            };
+
+            // 옵션 합치기
+            const options = { ...defaultOptions, ...customOptions };
+
+            // CountUp 라이브러리 존재 여부 확인 (로딩 순서 문제 방어)
+            if (typeof countUp === 'undefined' || typeof countUp.CountUp !== 'function') {
+                // CountUp이 없으면 애니메이션 없이 값만 표시
+                element.textContent = (options.prefix || '') + new Intl.NumberFormat('ko-KR').format(endValue);
+                return;
+            }
+
+            // CountUp 인스턴스 생성 (element는 DOM 요소 자체여야 함)
+            const anim = new countUp.CountUp(element, endValue, options);
+
+            if (!anim.error) {
+                anim.start();
+            } else {
+                console.error(anim.error);
+                // 에러 발생 시 애니메이션 없이 그냥 값만 보여줌 (백업)
+                element.textContent = (options.prefix || '') + new Intl.NumberFormat('ko-KR').format(endValue);
+            }
         }
 
         // 유틸리티 함수 (dashboard.js에서 복사)

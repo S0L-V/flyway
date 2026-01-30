@@ -58,8 +58,8 @@
         p.paid_at,
         u.user_id,
 
-        -- [수정] 이름/성이 둘 다 없으면 " " 공백이 아닌 NULL 반환
-        NULLIF(CONCAT_WS(' ', up.first_name, up.last_name), '') AS user_name,
+        -- [수정] up.name을 우선 사용하고, 없으면 first/last_name 조합
+        COALESCE(NULLIF(up.name, ''), NULLIF(CONCAT_WS(' ', up.first_name, up.last_name), '')) AS user_name,
 
         u.email AS user_email,
         f.flight_number,

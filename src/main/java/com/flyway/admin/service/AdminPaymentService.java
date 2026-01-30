@@ -15,7 +15,7 @@ public interface AdminPaymentService {
 	/**
 	 * 결제 내역 목록 조회 (페이징 포함)
 	 * @param status PAID, PENDING
-	 * @param page 페이지 번호 (1부터 시작)
+	 * @param page 페이지 번호 (0부터 시작)
 	 * @param size 페이지당 항목 수
 	 */
 	List<PaymentListDto> getPaymentList(String status, int page, int size);
