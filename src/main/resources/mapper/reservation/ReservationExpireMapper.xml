@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flyway.reservation.mapper.ReservationExpireMapper">
+
+    <!-- 만료된 HELD 예약 조회 (segment별로 조회) -->
+    <select id="selectExpiredHeldReservations"
+            resultType="com.flyway.reservation.dto.ExpiredReservationView">
+        SELECT
+            r.reservation_id AS reservationId,
+            r.passenger_count AS passengerCount,
+            rs.flight_id AS flightId,
+            rs.snap_cabin_class_code AS cabinClassCode
+        FROM reservation r
+                 JOIN reservation_segment rs ON r.reservation_id = rs.reservation_id
+        WHERE r.status = 'HELD'
+          AND r.expired_at &lt; NOW()
+    </select>
+
+    <!-- 잔여석 복구 -->
+    <update id="incrementSeat">
+        UPDATE flight_info
+        SET
+        <choose>
+            <when test="cabinClass == 'FST'">first_class_seat = first_class_seat + #{count}</when>
+            <when test="cabinClass == 'BIZ'">business_class_seat = business_class_seat + #{count}</when>
+            <when test="cabinClass == 'ECO'">economy_class_seat = economy_class_seat + #{count}</when>
+            <otherwise>flight_info_id = flight_info_id</otherwise>
+        </choose>
+        WHERE flight_id = #{flightId}
+    </update>
+
+    <!-- 예약 상태 변경 -->
+    <update id="updateReservationStatus">
+        UPDATE reservation
+        SET status = #{status}
+        WHERE reservation_id = #{reservationId}
+    </update>
+
+</mapper>
