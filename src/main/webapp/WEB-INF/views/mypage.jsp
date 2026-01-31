@@ -14,9 +14,10 @@
 <html lang="ko">
 <head>
   <title>마이페이지 - Flyway</title>
-  <jsp:include page="mypage/include/head.jsp" />
+  <jsp:include page="/WEB-INF/views/mypage/include/head.jsp" />
+
 </head>
-<body class="bg-slate-50 font-sans min-h-screen flex flex-col">
+<body class="custom-page bg-slate-50 font-sans min-h-screen flex flex-col">
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
 <div class="max-w-5xl w-full mx-auto px-6 py-10">
   <!-- Tab Navigation -->

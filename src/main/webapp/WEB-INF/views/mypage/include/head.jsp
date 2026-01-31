@@ -20,7 +20,9 @@
     }
   }
 </script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/layout.css?v=<%= System.currentTimeMillis() %>">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/mypage/css/styles.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/custom-page-header.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/static/pretendard.css" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
 <script src="https://unpkg.com/lucide@latest"></script>
