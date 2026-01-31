@@ -1,4 +1,4 @@
-import { $, textOrDash } from "./utils.js";
+import { $, textOrDash, getContextPath } from "./utils.js";
 import { fetchJson, fetchOk } from "./api.js";
 import { state } from "./state.js";
 import { updateDashboardProfile } from "./render/dashboard.js";
@@ -69,6 +69,7 @@ function normalizeCountryValue(value) {
 }
 
 let guardsBound = false;
+let profileSaveBound = false;
 
 export function initProfileInputGuards() {
     if (guardsBound) return;
@@ -79,7 +80,6 @@ export function initProfileInputGuards() {
 
 let withdrawBound = false;
 let withdrawInFlight = false;
-let profileSaveBound = false;
 
 async function handleWithdrawClick(event) {
     if (withdrawInFlight) return false;
@@ -102,7 +102,7 @@ async function handleWithdrawClick(event) {
     const withdrawButton = $("withdrawButton");
     try {
         if (withdrawButton) withdrawButton.disabled = true;
-        const base = state?.contextPath || "";
+        const base = getContextPath();
         const res = await fetchOk(`${base}/api/user/withdraw`, { method: "POST" });
         if (res && res.status === 204) {
             window.location.replace(window.APP?.contextPath || "/");
@@ -132,7 +132,6 @@ export function initProfileSave() {
         const firstName = $("profileFirstName")?.value?.trim();
         const gender = $("profileGender")?.value?.trim();
         const birth = $("profileBirth")?.value;
-        // phoneNumber is displayed in header only
         const country = $("profileCountry")?.value?.trim();
         const passportIssueCountry = $("profilePassportIssueCountry")?.value?.trim();
         const passportNo = $("profilePassportNo")?.value?.trim();
@@ -159,7 +158,7 @@ export function initProfileSave() {
         }
 
         try {
-            const base = state?.contextPath || "";
+            const base = getContextPath();
             const res = await fetchJson(`${base}/api/profile`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -187,6 +186,10 @@ export function initProfileSave() {
 export function initWithdrawHandler() {
     if (withdrawBound) return;
     withdrawBound = true;
+    const btn = $("withdrawButton");
+    if (btn) {
+        btn.addEventListener("click", handleWithdrawClick);
+    }
     window.handleWithdrawClick = handleWithdrawClick;
 }
 
