@@ -25,8 +25,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const hasQuery = loadStateFromQuery();
     if (hasQuery) {
+        // 출발 공항 값이 있으면 도착공항 재호출
+        if (state.from && state.from.code) {
+            await loadArrAirports(state.from.code);
+
+            // 가짜 입력 이벤트를 주어 도착공항 리스트를 다시 채움
+            const toDropdownInput = document.querySelector('.dropdown[data-field="to"] .dropdown-search');
+            if (toDropdownInput) {
+                toDropdownInput.dispatchEvent(new Event('input'));
+            }
+        }
+
         syncSearchBarFromState();
-        executeSearch(); // ← 검색 API 호출만 분리
+        await executeSearch();
     }
 });
 
