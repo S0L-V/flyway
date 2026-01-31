@@ -120,33 +120,69 @@
                 </div>
             </div>
 
-            <!-- 매출 그래프 (2/5) -->
-            <div class="xl:col-span-2 glass-section">
-                <div class="flex items-center justify-between p-6 border-b border-white/5">
-                    <div>
-                        <h2 class="text-lg font-bold text-glass-primary">매출 추이</h2>
-                        <p id="chart-period-label" class="text-sm text-glass-muted">최근 7일간 일별 매출</p>
+            <!-- 매출 그래프 + 예약 상태 (2/5) -->
+            <div class="xl:col-span-2 space-y-6">
+                <!-- 매출 그래프 -->
+                <div class="glass-section">
+                    <div class="flex items-center justify-between p-6 border-b border-white/5">
+                        <div>
+                            <h2 class="text-lg font-bold text-glass-primary">매출 추이</h2>
+                            <p id="chart-period-label" class="text-sm text-glass-muted">최근 7일간 일별 매출</p>
+                        </div>
+                        <div class="ios-segment-group small" id="chart-period-segment" data-active="0">
+                            <div class="ios-segment-slider" id="chart-segment-slider"></div>
+                            <button type="button" class="ios-segment-btn active" data-days="7" data-index="0">7일</button>
+                            <button type="button" class="ios-segment-btn" data-days="14" data-index="1">14일</button>
+                            <button type="button" class="ios-segment-btn" data-days="30" data-index="2">30일</button>
+                        </div>
                     </div>
-                    <div class="ios-segment-group small" id="chart-period-segment" data-active="0">
-                        <div class="ios-segment-slider" id="chart-segment-slider"></div>
-                        <button type="button" class="ios-segment-btn active" data-days="7" data-index="0">7일</button>
-                        <button type="button" class="ios-segment-btn" data-days="14" data-index="1">14일</button>
-                        <button type="button" class="ios-segment-btn" data-days="30" data-index="2">30일</button>
+                    <div class="p-6">
+                        <div id="revenue-chart-container" class="relative" style="height: 280px;">
+                            <canvas id="revenue-chart"></canvas>
+                        </div>
+                        <!-- 매출 요약 -->
+                        <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/5">
+                            <div class="text-center">
+                                <p class="text-xs text-glass-muted mb-1">기간 총 매출</p>
+                                <p id="chart-total-revenue" class="text-lg font-bold text-emerald-400">-</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs text-glass-muted mb-1">일 평균 매출</p>
+                                <p id="chart-avg-revenue" class="text-lg font-bold text-blue-400">-</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="p-6">
-                    <div id="revenue-chart-container" class="relative" style="height: 280px;">
-                        <canvas id="revenue-chart"></canvas>
-                    </div>
-                    <!-- 매출 요약 -->
-                    <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/5">
-                        <div class="text-center">
-                            <p class="text-xs text-glass-muted mb-1">기간 총 매출</p>
-                            <p id="chart-total-revenue" class="text-lg font-bold text-emerald-400">-</p>
+
+                <!-- 예약 상태 분포 (도넛 차트) -->
+                <div class="glass-section">
+                    <div class="flex items-center justify-between p-6 border-b border-white/5">
+                        <div>
+                            <h2 class="text-lg font-bold text-glass-primary">예약 상태 분포</h2>
+                            <p id="status-chart-label" class="text-sm text-glass-muted">최근 7일간 예약 현황</p>
                         </div>
-                        <div class="text-center">
-                            <p class="text-xs text-glass-muted mb-1">일 평균 매출</p>
-                            <p id="chart-avg-revenue" class="text-lg font-bold text-blue-400">-</p>
+                        <div class="ios-segment-group small" id="status-period-segment" data-active="0">
+                            <div class="ios-segment-slider"></div>
+                            <button type="button" class="ios-segment-btn active" data-days="7" data-index="0">7일</button>
+                            <button type="button" class="ios-segment-btn" data-days="14" data-index="1">14일</button>
+                            <button type="button" class="ios-segment-btn" data-days="30" data-index="2">30일</button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-6">
+                            <!-- 도넛 차트 -->
+                            <div id="status-chart-container" class="relative" style="width: 180px; height: 180px;">
+                                <canvas id="status-chart"></canvas>
+                                <!-- 중앙 텍스트 -->
+                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                    <p id="status-total-count" class="text-2xl font-bold text-glass-primary">-</p>
+                                    <p class="text-xs text-glass-muted">총 예약</p>
+                                </div>
+                            </div>
+                            <!-- 범례 -->
+                            <div id="status-legend" class="flex-1 space-y-2">
+                                <!-- JS에서 동적 생성 -->
+                            </div>
                         </div>
                     </div>
                 </div>

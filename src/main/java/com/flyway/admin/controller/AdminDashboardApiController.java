@@ -220,6 +220,27 @@ public class AdminDashboardApiController {
 		}
 	}
 
+	/**
+	 * 예약 상태별 분포 조회 (도넛 차트용)
+	 * GET /admin/api/dashboard/chart/reservation-status?days=7
+	 */
+	@GetMapping("/chart/reservation-status")
+	public ApiResponse<List<Map<String, Object>>> getReservationStatusDistribution(
+		@RequestParam(defaultValue = "7") int days) {
+
+		if (days <= 0 || days > 90) {
+			return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(), "조회 기간은 1일 이상 90일 이하이어야 합니다.");
+		}
+
+		try {
+			List<Map<String, Object>> distribution = dashboardService.getReservationStatusDistribution(days);
+			return ApiResponse.success(distribution);
+		} catch (Exception e) {
+			log.error("Failed to get reservation status distribution", e);
+			return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), "예약 상태 분포 조회 중 오류가 발생했습니다.");
+		}
+	}
+
 	@GetMapping("/visitors")
 	public ApiResponse<List<VisitorDetailDto>> getTodayVisitors(@RequestParam(defaultValue = "50") int limit) {
 		if (limit <= 0 || limit > 100) {

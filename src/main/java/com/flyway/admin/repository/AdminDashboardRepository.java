@@ -48,4 +48,6 @@ public interface AdminDashboardRepository {
 
 	// == 차트용 통계 ==
 	List<Map<String, Object>> findHourlyReservationDistribution(int days);
+
+	List<Map<String, Object>> findReservationStatusDistribution(int days);
 }

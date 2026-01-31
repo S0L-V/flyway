@@ -233,4 +233,15 @@
         ORDER BY hour
     </select>
 
+    <!-- 예약 상태별 분포 (최근 N일) -->
+    <select id="selectReservationStatusDistribution" resultType="java.util.HashMap">
+        SELECT
+            status,
+            COUNT(*) AS count
+        FROM reservation
+        WHERE reserved_at >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        GROUP BY status
+        ORDER BY count DESC
+    </select>
+
 </mapper>

@@ -58,4 +58,10 @@ public interface AdminDashboardService {
 	 */
 	List<Map<String, Object>> getHourlyReservationDistribution(int days);
 
+	/**
+	 * 예약 상태별 분포 조회 (차트용)
+	 * @param days 조회 기간 (일)
+	 * @return 상태별 예약 건수 리스트
+	 */
+	List<Map<String, Object>> getReservationStatusDistribution(int days);
 }

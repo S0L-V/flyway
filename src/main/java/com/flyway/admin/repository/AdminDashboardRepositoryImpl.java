@@ -110,4 +110,11 @@ public class AdminDashboardRepositoryImpl implements AdminDashboardRepository {
 		log.debug("Finding hourly reservation distribution for {} days", days);
 		return dashboardMapper.selectHourlyReservationDistribution(days);
 	}
+
+	@Override
+	public List<Map<String, Object>> findReservationStatusDistribution(int days) {
+		log.debug("Finding reservation status distribution for {} days", days);
+		return dashboardMapper.selectReservationStatusDistribution(days);
+	}
 }
+

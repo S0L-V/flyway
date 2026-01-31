@@ -113,4 +113,10 @@ public interface AdminDashboardMapper {
 	 */
 	List<java.util.Map<String, Object>> selectHourlyReservationDistribution(@Param("days") int days);
 
+	/**
+	 * 예약 상태별 분포 조회 (최근 N일)
+	 * @param days 조회 기간 (일)
+	 * @return 상태별 예약 건수 리스트
+	 */
+	List<java.util.Map<String, Object>> selectReservationStatusDistribution(@Param("days") int days);
 }

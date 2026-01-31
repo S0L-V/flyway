@@ -18,6 +18,8 @@ const AdminDashboard = (function() {
     let currentChartDays = 7;
     let hourlyChart = null;
     let currentHourlyDays = 7;
+    let statusChart = null;
+    let currentStatusDays = 7;
 
     // 컨텍스트 경로 저장
     let basePath = '';
@@ -67,6 +69,10 @@ const AdminDashboard = (function() {
         // 시간대별 예약 차트 초기화
         initHourlyChart();
         bindHourlyPeriodTabs();
+
+        // 예약 상태 도넛 차트 초기화
+        initStatusChart();
+        bindStatusPeriodTabs();
 
         console.log('[Dashboard] Initialized');
     }
@@ -1172,6 +1178,209 @@ const AdminDashboard = (function() {
         if (avgEl) {
             avgEl.textContent = avgCount + '건/시간';
         }
+    }
+
+    // === 예약 상태 도넛 차트 ===
+
+    // 상태별 색상 및 라벨 정의
+    var statusConfig = {
+        'CONFIRMED': { label: '결제완료', color: 'rgba(16, 185, 129, 1)', bgColor: 'rgba(16, 185, 129, 0.2)' },
+        'HELD': { label: '대기중', color: 'rgba(251, 191, 36, 1)', bgColor: 'rgba(251, 191, 36, 0.2)' },
+        'CANCELLED': { label: '취소됨', color: 'rgba(239, 68, 68, 1)', bgColor: 'rgba(239, 68, 68, 0.2)' },
+        'EXPIRED': { label: '만료됨', color: 'rgba(148, 163, 184, 1)', bgColor: 'rgba(148, 163, 184, 0.2)' },
+        'PENDING': { label: '처리중', color: 'rgba(59, 130, 246, 1)', bgColor: 'rgba(59, 130, 246, 0.2)' }
+    };
+
+    /**
+     * 예약 상태 도넛 차트 초기화
+     */
+    function initStatusChart() {
+        var canvas = document.getElementById('status-chart');
+        if (!canvas) return;
+
+        var ctx = canvas.getContext('2d');
+
+        if (typeof Chart === 'undefined') {
+            console.warn('[Dashboard] Chart.js not loaded');
+            return;
+        }
+
+        statusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [],
+                    borderColor: 'rgba(44, 44, 46, 1)',
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                var percentage = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
+                                return context.label + ': ' + context.parsed + '건 (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 초기 데이터 로드
+        fetchStatusChartData(currentStatusDays);
+    }
+
+    /**
+     * 예약 상태 차트 기간 탭 바인딩
+     */
+    function bindStatusPeriodTabs() {
+        var segment = document.getElementById('status-period-segment');
+        if (!segment) return;
+
+        var buttons = segment.querySelectorAll('.ios-segment-btn');
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var days = parseInt(this.getAttribute('data-days'));
+                var index = this.getAttribute('data-index');
+
+                console.log('[Dashboard] Status chart period changed to:', days, 'days');
+
+                // 활성 상태 업데이트
+                buttons.forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+
+                // 슬라이더 이동
+                segment.setAttribute('data-active', index);
+
+                // 라벨 업데이트
+                var label = document.getElementById('status-chart-label');
+                if (label) {
+                    label.textContent = '최근 ' + days + '일간 예약 현황';
+                }
+
+                // 데이터 로드
+                currentStatusDays = days;
+                fetchStatusChartData(days);
+            });
+        });
+    }
+
+    /**
+     * 예약 상태 데이터 로드
+     */
+    function fetchStatusChartData(days) {
+        console.log('[Dashboard] Fetching status chart data for', days, 'days');
+
+        fetch(basePath + '/admin/api/dashboard/chart/reservation-status?days=' + days, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                console.log('[Dashboard] Status chart data received:', data);
+                if (data.success && data.data) {
+                    updateStatusChart(data.data);
+                } else {
+                    console.warn('[Dashboard] No status chart data available');
+                    updateStatusChart([]);
+                }
+            })
+            .catch(function(error) {
+                console.error('[Dashboard] Failed to fetch status chart data:', error);
+            });
+    }
+
+    /**
+     * 예약 상태 도넛 차트 업데이트
+     */
+    function updateStatusChart(data) {
+        if (!statusChart) return;
+
+        var labels = [];
+        var counts = [];
+        var colors = [];
+        var totalCount = 0;
+
+        // 데이터 처리
+        data.forEach(function(item) {
+            var status = item.status;
+            var count = item.count || 0;
+            var config = statusConfig[status] || { label: status, color: 'rgba(148, 163, 184, 1)' };
+
+            labels.push(config.label);
+            counts.push(count);
+            colors.push(config.color);
+            totalCount += count;
+        });
+
+        // 차트 업데이트
+        statusChart.data.labels = labels;
+        statusChart.data.datasets[0].data = counts;
+        statusChart.data.datasets[0].backgroundColor = colors;
+        statusChart.update();
+
+        // 중앙 총 예약 수 업데이트
+        var totalEl = document.getElementById('status-total-count');
+        if (totalEl) {
+            totalEl.textContent = new Intl.NumberFormat('ko-KR').format(totalCount);
+        }
+
+        // 범례 업데이트
+        updateStatusLegend(data, totalCount);
+    }
+
+    /**
+     * 예약 상태 범례 업데이트
+     */
+    function updateStatusLegend(data, totalCount) {
+        var legendEl = document.getElementById('status-legend');
+        if (!legendEl) return;
+
+        if (data.length === 0) {
+            legendEl.innerHTML = '<p class="text-sm text-glass-muted">데이터가 없습니다.</p>';
+            return;
+        }
+
+        var html = '';
+        data.forEach(function(item) {
+            var status = item.status;
+            var count = item.count || 0;
+            var config = statusConfig[status] || { label: status, color: 'rgba(148, 163, 184, 1)', bgColor: 'rgba(148, 163, 184, 0.2)' };
+            var percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
+
+            html += '<div class="flex items-center justify-between py-1.5">';
+            html += '  <div class="flex items-center gap-2">';
+            html += '    <span class="w-3 h-3 rounded-full" style="background-color: ' + config.color + ';"></span>';
+            html += '    <span class="text-sm text-glass-secondary">' + config.label + '</span>';
+            html += '  </div>';
+            html += '  <div class="flex items-center gap-2">';
+            html += '    <span class="text-sm font-medium text-glass-primary">' + new Intl.NumberFormat('ko-KR').format(count) + '건</span>';
+            html += '    <span class="text-xs text-glass-muted">(' + percentage + '%)</span>';
+            html += '  </div>';
+            html += '</div>';
+        });
+
+        legendEl.innerHTML = html;
     }
 
     // === 유틸리티 함수 ===
