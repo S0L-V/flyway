@@ -21,6 +21,7 @@ public class ReservationSummaryDto {
 
     /* 가는 편 (OUTBOUND) */
     private String outFlightId;
+    private String outFlightNumber;
 
     private String outDepartureAirport;
     private String outDepartureCity;
@@ -30,9 +31,11 @@ public class ReservationSummaryDto {
 
     private LocalDateTime outDepartureTime;
     private LocalDateTime outArrivalTime;
+    private String outAirlineId;
 
     /* 오는 편 (INBOUND) */
     private String inFlightId;
+    private String inFlightNumber;
 
     private String inDepartureAirport;
     private String inDepartureCity;
@@ -42,5 +45,5 @@ public class ReservationSummaryDto {
 
     private LocalDateTime inDepartureTime;
     private LocalDateTime inArrivalTime;
+    private String inAirlineId;
 }
-

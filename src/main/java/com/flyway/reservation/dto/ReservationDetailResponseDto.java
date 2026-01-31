@@ -72,6 +72,7 @@ public class ReservationDetailResponseDto {
     public static class Segment {
         private String flightId;
         private String flightNumber;
+        private String airlineId;
         private String cabinClass;
         private Long pricePerPerson;
         private AirportInfo departure;
@@ -84,6 +85,7 @@ public class ReservationDetailResponseDto {
             return Segment.builder()
                     .flightId(detail.getOutFlightId())
                     .flightNumber(detail.getOutFlightNumber())
+                    .airlineId(detail.getOutAirlineId())
                     .cabinClass(detail.getOutCabinClassCode())
                     .pricePerPerson(detail.getOutPricePerPerson())
                     .departure(AirportInfo.outboundDeparture(detail))
@@ -98,6 +100,7 @@ public class ReservationDetailResponseDto {
             return Segment.builder()
                     .flightId(detail.getInFlightId())
                     .flightNumber(detail.getInFlightNumber())
+                    .airlineId(detail.getInAirlineId())
                     .cabinClass(detail.getInCabinClassCode())
                     .pricePerPerson(detail.getInPricePerPerson())
                     .departure(AirportInfo.inboundDeparture(detail))
