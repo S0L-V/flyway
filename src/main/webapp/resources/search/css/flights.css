@@ -68,7 +68,8 @@
 .flight-segment {
   padding: var(--spacing-xl);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   gap: var(--spacing-4xl);
 }
 
@@ -81,8 +82,8 @@
   /*align-items: center;*/
   display: flex;
   align-items: center;
-  gap: 10px; /* 로고와 텍스트 사이 간격 */
-  min-width: 150px; /* 너비 확보 */
+  gap: 10px;
+  min-width: 150px;
 }
 
 .airline-logo {

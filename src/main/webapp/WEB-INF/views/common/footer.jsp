@@ -10,10 +10,14 @@
 
             <!-- Links -->
             <div class="flex items-center gap-6 text-sm text-gray-500">
-                <a href="https://github.com/S0L-V/flyway" target="_blank" class="transition-opacity hover:opacity-70">
+                <a href="https://github.com/S0L-V/flyway" target="_blank"
+                   class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-200 bg-white/70 text-slate-500
+                          no-underline hover:text-[#2F93F7] hover:border-blue-200 transition-colors">
                     <i class="fa-brands fa-github text-lg"></i>
                 </a>
-                <a href="mailto:solv.developers@gmail.com" class="hover:text-blue-600 transition-colors">
+                <a href="mailto:solv.developers@gmail.com"
+                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/70 text-slate-500
+                          no-underline hover:text-[#2F93F7] hover:border-blue-200 transition-colors">
                     solv.developers@gmail.com
                 </a>
             </div>

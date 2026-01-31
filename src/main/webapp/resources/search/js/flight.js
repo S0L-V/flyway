@@ -59,9 +59,8 @@ function renderSegment(f) {
     const flightNumber = f.flightNumber ?? "-";
     const depAirport = f.departureAirport ?? "-";
     const arrAirport = f.arrivalAirport ?? "-";
-    const seatCount = f.seatCount ?? "-";
-    const depTime = formatDepTimeArray(f.departureTime);
-    const arrTime = formatArrTimeArray(f.departureTime, f.arrivalTime);
+    const depTime = formatDepTime(f.departureTime);
+    const arrTime = formatArrTime(f.departureTime, f.arrivalTime);
     const durationMinutes = Number.isFinite(f.durationMinutes) ? f.durationMinutes : null;
 
     // 시간 표시
@@ -110,7 +109,6 @@ function renderSegment(f) {
               <div class="time">${arrTime}</div>
               <div class="airport">${arrAirport}</div>
             </div>
-            <div class="seats-remaining">${seatCount}석 남음</div>
           </div>
         </div>
       </div>
@@ -120,6 +118,11 @@ function renderFooter(option, index) {
     const seatCount = option.totalSeats ?? "-";
     const totalPrice = option.totalPrice ?? "-";
 
+    let totalSeatCount = seatCount;
+
+    if (totalSeatCount !== "-" && totalSeatCount > 9) {
+        totalSeatCount = 9;
+    }
     const price = formatPrice(totalPrice);
 
     return `
@@ -132,7 +135,7 @@ function renderFooter(option, index) {
             <i data-lucide="info" class="icon-sm"></i> 여정 상세
           </button>
         </div>
-        <div class="seats-remaining">${seatCount}석 남음</div>
+        <div class="seats-remaining">${totalSeatCount}석 이상 남음</div>
         <div class="flight-price" tabindex="0">
           <span class="price">${price}원</span>
           <img src="${CONTEXT_PATH}/resources/search/img/arrow-right.svg" alt="" class="price-arrow" />
@@ -518,31 +521,39 @@ function renderByTripType(data) {
 }
 
 // departureTime: [2026,2,1,8,45] → "08:45"
-function formatDepTimeArray(arr) {
-    if (!Array.isArray(arr) || arr.length < 5) return "-";
-    const hh = String(arr[3]).padStart(2, "0");
-    const mm = String(arr[4]).padStart(2, "0");
+function formatDepTime(depTime) {
+    if (!depTime) return "-";
+
+    const date = new Date(depTime);
+    const hh = String(date.getHours()).padStart(2, "0");
+    const mm = String(date.getMinutes()).padStart(2, "0");
+
     return `${hh}:${mm}`;
 }
 
-function formatArrTimeArray(depArr, arrArr) {
-    if (!Array.isArray(arrArr) || arrArr.length < 5) return "-";
-    const hh = String(arrArr[3]).padStart(2, "0");
-    const mm = String(arrArr[4]).padStart(2, "0");
-    const day = isNextDay(depArr, arrArr);
+function formatArrTime(depTime, arrTime) {
+    if (!depTime || !arrTime) return "-";
 
-    if(day > 0) {
-        return `${hh}:${mm} +${day}일`;
-    } else if(day < 0) {
-        return `${hh}:${mm} ${day}일`;
+    const depDate = new Date(depTime);
+    const arrDate = new Date(arrTime);
+
+    const hh = String(arrDate.getHours()).padStart(2, "0");
+    const mm = String(arrDate.getMinutes()).padStart(2, "0");
+
+    const dayDiff = isNextDay(depDate, arrDate);
+
+    if (dayDiff > 0) {
+        return `${hh}:${mm} +${dayDiff}일`;
+    } else if (dayDiff < 0) {
+        return `${hh}:${mm} ${dayDiff}일`;
     } else {
         return `${hh}:${mm}`;
     }
 }
 
-function isNextDay(depArr, arrArr) {
-    const depDate = new Date(depArr[0], depArr[1] - 1, depArr[2]);
-    const arrDate = new Date(arrArr[0], arrArr[1] - 1, arrArr[2]);
+function isNextDay(depTime, arrTime) {
+    const depDate = new Date(depTime.getFullYear(), depTime.getMonth(), depTime.getDate());
+    const arrDate = new Date(arrTime.getFullYear(), arrTime.getMonth(), arrTime.getDate());
 
     const diffMs = arrDate - depDate;
     const oneDayMs = 24 * 60 * 60 * 1000;

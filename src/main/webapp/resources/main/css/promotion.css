@@ -12,10 +12,33 @@
 
 /* ===== Section ===== */
 .special-offers-section {
+    position: relative;
     padding: 30px 0 40px;
     background: transparent;
     overflow: visible;
     width: 100%;
+}
+
+.special-offers-section::before {
+    content: "";
+    position: absolute;
+    top: -90px;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background: linear-gradient(
+        to bottom,
+        #dbeafe 0%,
+        rgba(219, 234, 254, 0.65) 40%,
+        rgba(248, 250, 252, 0) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+.special-offers-section > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* Section Header - Modern Style */

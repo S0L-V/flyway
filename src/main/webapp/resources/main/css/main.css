@@ -80,6 +80,7 @@ html, body {
     /* justify-content: center;  <- JS로 위치 계산하므로 제거 */
     overflow: hidden;
     padding: 20px 0;
+    margin-top: 70px!important;
 }
 
 /* --- 양쪽 사이드 화이트 그라데이션 (Pure White) --- */

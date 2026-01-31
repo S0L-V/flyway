@@ -258,6 +258,26 @@ body.scrolled .glass-header-bg {
     transform: perspective(1000px);
 }
 
+/* Header auth buttons (login/signup) */
+.auth-text-btn {
+    min-width: auto;
+    height: 40px;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+    color: #64748B !important;
+    text-shadow: none !important;
+}
+
+.auth-text-btn::before,
+.auth-text-btn::after {
+    display: none !important;
+}
+
+.auth-text-btn:hover {
+    opacity: 0.7;
+}
+
 /* 버튼 텍스트 스타일 (Toss, Kakao 스타일) */
 .btn-text {
     font-family: 'Spoqa Han Sans Neo', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
