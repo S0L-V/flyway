@@ -8,7 +8,7 @@
             search_count = search_count + #{count}
     </insert>
 
-    <select id="findLast7DaysCount" resultType="AirportCountDto">
+    <select id="findLast7DaysCount" resultType="com.flyway.rank.dto.AirportCountDto">
         SELECT
             airport_id AS airportId,
             SUM(search_count) AS searchCount

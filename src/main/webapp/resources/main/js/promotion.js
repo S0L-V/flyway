@@ -203,7 +203,7 @@ let autoSlideTimer = null;
 function startAutoSlide() {
     stopAutoSlide(); // 중복 방지
     autoSlideTimer = setInterval(() => {
-        document.getElementById("offerNext").click();
+        moveNext();
     }, 3000);
 }
 
