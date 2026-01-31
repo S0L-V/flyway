@@ -48,8 +48,7 @@ public class PaymentApiController {
     /**
      * 환불 요청
      *
-     * 마이페이지에서 호출합니다.
-     *
+     * 마이페이지에서 호출
      * @param paymentId 결제 ID
      * @param request cancelReason, cancelAmount(선택)
      */

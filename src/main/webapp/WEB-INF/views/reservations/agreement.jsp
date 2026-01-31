@@ -285,20 +285,20 @@
             <div class="flightBox" style="margin-bottom: 10px;">
                 <div class="flightGrid">
                     <div class="flightCol">
-                        <strong>${seg.snapDepartureTime.toLocalDate()}</strong>
-                        <div>${seg.snapDepartureCity}(${seg.snapDepartureAirport}) →
-                                ${seg.snapArrivalCity}(${seg.snapArrivalAirport})</div>
+                        <strong><c:out value="${seg.snapDepartureTime.toLocalDate()}"/></strong>
+                        <div><c:out value="${seg.snapDepartureCity}"/>(<c:out value="${seg.snapDepartureAirport}"/>) →
+                            <c:out value="${seg.snapArrivalCity}"/>(<c:out value="${seg.snapArrivalAirport}"/>)</div>
                     </div>
                     <div class="flightCol">
-                        <strong>${seg.snapDepartureTime.toLocalTime()}</strong>
+                        <strong><c:out value="${seg.snapDepartureTime.toLocalTime()}"/></strong>
                         <div><span class="pill">직항</span></div>
                     </div>
                     <div class="flightCol">
-                        <strong>${seg.snapAirlineName}</strong>
-                        <div>${seg.snapFlightNumber}</div>
+                        <strong><c:out value="${seg.snapAirlineName}"/></strong>
+                        <div><c:out value="${seg.snapFlightNumber}"/></div>
                     </div>
                     <div class="flightCol">
-                        <strong>${seg.snapArrivalTime.toLocalTime()}</strong>
+                        <strong><c:out value="${seg.snapArrivalTime.toLocalTime()}"/></strong>
                         <div>도착</div>
                     </div>
                 </div>

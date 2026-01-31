@@ -313,7 +313,6 @@
                         if (bagsEl) bagsEl.value = parsed.extraBags || 0;
                     }
                 } catch (e) {
-                    console.error('Failed to parse serviceDetails', e);
                 }
             }
         });
