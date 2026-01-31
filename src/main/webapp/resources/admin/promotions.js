@@ -561,8 +561,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="px-4 py-3 text-sm text-glass-secondary">${passengerCount}명</td>
                 <td class="px-4 py-3 text-sm text-glass-primary font-semibold">₩${totalSalePrice}</td>
                 <td class="px-4 py-3 text-center">
-                    <button class="promo-toggle-btn relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isActive ? 'bg-emerald-500' : 'bg-white/20'}" data-id="${promotionId}" data-active="${isActive ? 'Y' : 'N'}" title="${isActive ? '클릭하여 비활성화' : '클릭하여 활성화'}">
-                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${isActive ? 'translate-x-6' : 'translate-x-1'}"></span>
+                    <button class="ios-toggle ${isActive ? 'active' : ''}" data-id="${promotionId}" data-active="${isActive ? 'Y' : 'N'}" title="${isActive ? '클릭하여 비활성화' : '클릭하여 활성화'}">
+                        <span class="ios-toggle-thumb"></span>
                     </button>
                 </td>
                 <td class="px-4 py-3 text-center">
@@ -743,21 +743,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     promotionListBody.addEventListener('click', e => {
-        const target = e.target.closest('.promo-toggle-btn, .promo-delete-btn');
+        const target = e.target.closest('.ios-toggle, .promo-delete-btn');
         if (!target) return;
 
         const id = target.dataset.id;
 
-        // 토글 버튼 클릭
-        if (target.classList.contains('promo-toggle-btn')) {
+        // iOS 토글 버튼 클릭
+        if (target.classList.contains('ios-toggle')) {
             const currentActive = target.dataset.active === 'Y';
             const newActive = !currentActive;
 
             // UI 즉시 업데이트 (낙관적 업데이트)
             target.dataset.active = newActive ? 'Y' : 'N';
-            target.className = `promo-toggle-btn relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${newActive ? 'bg-green-500' : 'bg-slate-300'}`;
+            target.classList.toggle('active', newActive);
             target.title = newActive ? '클릭하여 비활성화' : '클릭하여 활성화';
-            target.querySelector('span').className = `inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${newActive ? 'translate-x-6' : 'translate-x-1'}`;
 
             // 서버에 상태 변경 요청
             fetch(`${window.CONTEXT_PATH}/admin/promotions/api/${id}/toggle`, { method: 'POST' })

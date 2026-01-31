@@ -129,17 +129,17 @@ const AdminDashboard = (function() {
         // 현재 기간이 daily일 때만 WebSocket 데이터로 업데이트
         // 1행: 방문자, 결제 완료, 취소/환불, 매출
         if (currentPeriod === 'daily') {
-            updateElement(elements.visitors, formatNumber(stats.dailyVisitors));
-            updateElement(elements.payments, formatNumber(stats.dailyPayments));
-            updateElement(elements.cancellations, formatNumber(stats.dailyCancellations));
-            updateElement(elements.revenue, formatCurrency(stats.dailyRevenue));
+            animateValue(elements.visitors, stats.dailyVisitors);
+            animateValue(elements.payments, stats.dailyPayments);
+            animateValue(elements.cancellations, stats.dailyCancellations);
+            animateValue(elements.revenue, stats.dailyRevenue, { prefix: '₩ ' });
         }
 
         // 2행: 대기 중 예약, 총 회원 수, 신규 가입, 운항 예정 항공편 (기간에 관계없이 업데이트)
-        updateElement(elements.pendingReservations, formatNumber(stats.pendingReservations));
-        updateElement(elements.totalUsers, formatNumber(stats.totalUsers));
-        updateElement(elements.newUsers, formatNumber(stats.dailyNewUsers));
-        updateElement(elements.activeFlights, formatNumber(stats.activeFlights));
+        animateValue(elements.pendingReservations, stats.pendingReservations);
+        animateValue(elements.totalUsers, stats.totalUsers);
+        animateValue(elements.newUsers, stats.dailyNewUsers);
+        animateValue(elements.activeFlights, stats.activeFlights);
 
         // 알림 배지
         updateNotificationBadge(stats.unreadNotifications);
@@ -152,10 +152,10 @@ const AdminDashboard = (function() {
     function updatePeriodStats(stats) {
         console.log('[Dashboard] Updating period stats:', stats);
 
-        updateElement(elements.visitors, formatNumber(stats.activeUsers));
-        updateElement(elements.payments, formatNumber(stats.confirmedReservations));
-        updateElement(elements.cancellations, formatNumber(stats.cancelledReservations));
-        updateElement(elements.revenue, formatCurrency(stats.totalRevenue));
+        animateValue(elements.visitors, stats.activeUsers);
+        animateValue(elements.payments, stats.confirmedReservations);
+        animateValue(elements.cancellations, stats.cancelledReservations);
+        animateValue(elements.revenue, stats.totalRevenue, { prefix: '₩ ' });
     }
 
     /**
@@ -323,7 +323,7 @@ const AdminDashboard = (function() {
         const html = activities.map(activity => {
             const icon = getActivityIcon(activity.activityType);
             const statusBadge = getStatusBadgeGlass(activity.status);
-            const timeAgo = formatTimeAgo(activity.createdAt);
+            const timeBadge = getTimeBadge(activity.createdAt);
 
             return `
                 <div class="glass-activity-item flex items-start gap-3">
@@ -338,9 +338,9 @@ const AdminDashboard = (function() {
                         <div class="text-xs text-glass-muted mt-0.5 truncate">
                             ${escapeHtml(activity.userName)} · ${escapeHtml(activity.userEmail)}
                         </div>
-                        <div class="flex items-center justify-between mt-1">
-                            <span class="text-xs text-glass-muted/70">${timeAgo}</span>
-                            ${activity.amount ? `<span class="text-sm font-semibold text-emerald-400">${formatCurrency(activity.amount)}</span>` : ''}
+                        <div class="flex items-center justify-between mt-1.5">
+                            ${timeBadge}
+                            ${activity.amount ? `<span class="text-sm font-bold text-emerald-400">${formatCurrency(activity.amount)}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -708,13 +708,43 @@ const AdminDashboard = (function() {
 
     function formatCurrency(amount) {
         if (amount === null || amount === undefined) return '₩ 0';
-        if (amount >= 100000000) {
-            return '₩ ' + (amount / 100000000).toFixed(1) + '억';
-        }
-        if (amount >= 10000) {
-            return '₩ ' + (amount / 10000).toFixed(0) + '만';
-        }
         return '₩ ' + new Intl.NumberFormat('ko-KR').format(amount);
+    }
+
+    /**
+     * 숫자 애니메이션 (CountUp.js 사용)
+     */
+    function animateValue(element, endValue, customOptions) {
+        if (!element) return;
+
+        // 값이 없으면 0으로 처리
+        if (endValue === null || endValue === undefined) endValue = 0;
+
+        // 기본 옵션
+        var defaultOptions = {
+            duration: 1.5,
+            separator: ','
+        };
+
+        // 옵션 합치기
+        var options = Object.assign({}, defaultOptions, customOptions);
+
+        // CountUp 라이브러리 존재 여부 확인
+        if (typeof countUp === 'undefined' || typeof countUp.CountUp !== 'function') {
+            // CountUp이 없으면 애니메이션 없이 값만 표시
+            element.textContent = (options.prefix || '') + new Intl.NumberFormat('ko-KR').format(endValue);
+            return;
+        }
+
+        // CountUp 인스턴스 생성
+        var anim = new countUp.CountUp(element, endValue, options);
+
+        if (!anim.error) {
+            anim.start();
+        } else {
+            console.error(anim.error);
+            element.textContent = (options.prefix || '') + new Intl.NumberFormat('ko-KR').format(endValue);
+        }
     }
 
     function formatTimeAgo(dateInput) {
@@ -722,38 +752,62 @@ const AdminDashboard = (function() {
 
         let date;
         if (typeof dateInput === 'string') {
-            // ISO 문자열 형식 처리
             date = new Date(dateInput.replace('T', ' '));
         } else if (Array.isArray(dateInput)) {
-            // Jackson의 숫자 배열 형식 처리 [year, month, day, hour, minute, second]
-            // Javascript의 월은 0부터 시작하므로 월 값에서 1을 빼줍니다.
-            // 누락된 시간 요소에 대해 0으로 기본값 설정
             date = new Date(
-                dateInput[0],                  // year
-                (dateInput[1] || 1) - 1,       // month (0-indexed, default to Jan if missing or 0)
-                dateInput[2] || 1,             // day (default to 1 if missing or 0)
-                dateInput[3] || 0,             // hour (default to 0)
-                dateInput[4] || 0,             // minute (default to 0)
-                dateInput[5] || 0              // second (default to 0)
+                dateInput[0],
+                (dateInput[1] || 1) - 1,
+                dateInput[2] || 1,
+                dateInput[3] || 0,
+                dateInput[4] || 0,
+                dateInput[5] || 0
             );
         } else {
-            // 다른 타입에 대한 폴백 처리
             date = new Date(dateInput);
         }
 
         if (isNaN(date.getTime())) {
-            return '유효하지 않은 날짜';
+            return '';
         }
 
         const now = new Date();
         const diff = Math.floor((now - date) / 1000);
 
-        if (diff < 60) return '방금 전';
-        if (diff < 3600) return Math.floor(diff / 60) + '분 전';
-        if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
-        if (diff < 604800) return Math.floor(diff / 86400) + '일 전';
+        // 트렌디한 짧은 형식
+        if (diff < 30) return 'now';
+        if (diff < 60) return diff + 's';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+        if (diff < 604800) return Math.floor(diff / 86400) + 'd';
 
-        return date.toLocaleDateString('ko-KR');
+        return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+    }
+
+    /**
+     * 트렌디한 시간 배지 HTML 생성
+     */
+    function getTimeBadge(dateInput) {
+        const timeAgo = formatTimeAgo(dateInput);
+        if (!timeAgo) return '';
+
+        // "now"이면 초록색 펄스 도트
+        if (timeAgo === 'now') {
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-medium">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>now
+            </span>`;
+        }
+
+        // 1시간 이내면 파란색 배지
+        if (timeAgo.endsWith('s') || timeAgo.endsWith('m')) {
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium">
+                <i data-lucide="clock" class="w-3 h-3"></i>${timeAgo}
+            </span>`;
+        }
+
+        // 그 외는 기본 스타일
+        return `<span class="inline-flex items-center gap-1 text-xs text-glass-muted">
+            <i data-lucide="clock" class="w-3 h-3"></i>${timeAgo}
+        </span>`;
     }
 
     function escapeHtml(text) {
