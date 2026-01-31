@@ -147,4 +147,25 @@
         WHERE f.flight_id IN (#{outFlightId}, #{inFlightId})
     </select>
 
+    <select id="selectPriceHistoryPoints" parameterType="map" resultType="map">
+        SELECT
+        DATE_FORMAT(calculated_at, '%Y-%m-%dT%H:%i:%s') AS t,
+        current_price AS price,
+        update_type AS type
+        FROM price_history
+        WHERE flight_id = #{flightId}
+        AND cabin_class_code = #{cabinClassCode}
+        <if test="from != null and from != ''">
+            AND calculated_at <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null and to != ''">
+            AND calculated_at <![CDATA[<=]]> #{to}
+        </if>
+        ORDER BY calculated_at ASC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+
 </mapper>

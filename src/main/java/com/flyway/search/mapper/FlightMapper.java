@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface FlightMapper {
@@ -20,4 +21,6 @@ public interface FlightMapper {
     List<FlightSearchResponse> inbound(FlightSearchRequest dto);
     FlightDetailDto details(@Param("cabinClass") String cabinClass, @Param("routeType") String routeType);
     List<LastPriceDto> findPrice(@Param("outFlightId") String outFlightId, @Param("inFlightId") String inFlightId,@Param("cabinClassCode") String cabinClassCode);
+    List<Map<String, Object>> selectPriceHistoryPoints(@Param("flightId") String flightId, @Param("cabinClassCode") String cabinClassCode, @Param("from") String from, @Param("to") String to, @Param("limit") Integer limit);
+
 }
