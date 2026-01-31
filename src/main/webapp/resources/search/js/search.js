@@ -165,8 +165,7 @@ function initDropdowns() {
 
         if (!toggle || !panel) return;
 
-        // 드롭다운 토글 함수
-        const toggleDropdown = (e) => {
+        toggle.addEventListener("click", (e) => {
             e.preventDefault();
 
             if (!panel.hidden) {
@@ -181,17 +180,6 @@ function initDropdowns() {
 
             const search = dd.querySelector(".dropdown-search");
             if (search) search.focus();
-        };
-
-        // 클릭 이벤트
-        toggle.addEventListener("click", toggleDropdown);
-
-        // 키보드 접근성: Enter, Space 키로 드롭다운 열기
-        toggle.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggleDropdown(e);
-            }
         });
     });
 
