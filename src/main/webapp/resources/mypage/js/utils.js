@@ -17,6 +17,13 @@ export function textOrDash(value) {
     return value == null || value === "" ? "-" : String(value);
 }
 
+export function formatReservationId(value) {
+    if (!value) return "-";
+    const str = String(value);
+    if (str.length <= 12) return str;
+    return `${str.slice(0, 8)}…${str.slice(-4)}`;
+}
+
 export function splitKoreanName(name) {
     if (!name) return { last: "", first: "" };
     if (name.length === 1) return { last: name, first: "" };

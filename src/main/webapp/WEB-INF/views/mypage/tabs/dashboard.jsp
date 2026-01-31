@@ -53,7 +53,14 @@
               <span data-field="arrAirport">-</span>
               <span data-field="arrCity" class="text-slate-400 font-normal text-xs">-</span>
             </div>
-            <span data-field="outDepartAt" class="text-xs font-semibold text-slate-500">-</span>
+            <div class="flex items-center gap-3 text-xs text-slate-500 font-normal">
+              <div data-field="outAirlineBlock" class="flex items-center gap-2">
+                <img data-field="outAirlineLogo" class="w-4 h-4 object-contain hidden" alt="airline logo" />
+                <span data-field="outAirlineName" class="font-medium">-</span>
+                <span data-field="outFlightNumber">-</span>
+              </div>
+              <span data-field="outDepartAt" class="text-xs font-semibold text-slate-500">-</span>
+            </div>
           </div>
           <div data-field="inboundRow" class="flex items-center justify-between gap-4 font-semibold text-slate-800 hidden">
             <div class="flex items-center gap-2">
@@ -64,7 +71,14 @@
               <span data-field="inArrAirport">-</span>
               <span data-field="inArrCity" class="text-slate-400 font-normal text-xs">-</span>
             </div>
-            <span data-field="inDepartAt" class="text-xs font-semibold text-slate-500">-</span>
+            <div class="flex items-center gap-3 text-xs text-slate-500 font-normal">
+              <div data-field="inAirlineBlock" class="flex items-center gap-2">
+                <img data-field="inAirlineLogo" class="w-4 h-4 object-contain hidden" alt="airline logo" />
+                <span data-field="inAirlineName" class="font-medium">-</span>
+                <span data-field="inFlightNumber">-</span>
+              </div>
+              <span data-field="inDepartAt" class="text-xs font-semibold text-slate-500">-</span>
+            </div>
           </div>
         </div>
         <div class="pl-6 text-slate-300 group-hover:text-primary-500 transition-colors">

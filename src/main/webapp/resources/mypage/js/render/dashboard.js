@@ -7,6 +7,8 @@ import {
     getReservationStatus,
     applyStatusBadge,
     toMypageUrl,
+    formatReservationId,
+    getContextPath,
 } from "../utils.js";
 
 export function updateDashboardProfile(profile) {
@@ -43,7 +45,9 @@ export function renderRecentBookings(items) {
     }
     if (empty) empty.classList.add("hidden");
 
-    items.forEach((item) => {
+    const airlineMapPromise = getAirlineMap();
+
+    items.forEach(async (item) => {
         const node = template.content.cloneNode(true);
         const root = node.querySelector("div");
         if (root) {
@@ -55,7 +59,11 @@ export function renderRecentBookings(items) {
         const statusEl = node.querySelector('[data-field="status"]');
         applyStatusBadge(statusEl, getReservationStatus(item));
         const noEl = node.querySelector('[data-field="reservationNo"]');
-        if (noEl) noEl.textContent = `${item.reservationId}`;
+        if (noEl) {
+            const fullId = textOrDash(item.reservationId);
+            noEl.textContent = `${formatReservationId(fullId)}`;
+            noEl.setAttribute("title", fullId);
+        }
         const reservedAtEl = node.querySelector('[data-field="reservedAt"]');
         if (reservedAtEl) reservedAtEl.textContent = formatDate(item.reservedAt);
         const depAirport = node.querySelector('[data-field="depAirport"]');
@@ -68,6 +76,8 @@ export function renderRecentBookings(items) {
         if (arrCity) arrCity.textContent = textOrDash(item.outArrivalCity);
         const outDepartAt = node.querySelector('[data-field="outDepartAt"]');
         if (outDepartAt) outDepartAt.textContent = formatDateTime(item.outDepartureTime);
+        const airlineMap = await airlineMapPromise;
+        setAirlineInfo(node, "out", airlineMap, item.outAirlineId, item.outFlightNumber);
         const inboundRow = node.querySelector('[data-field="inboundRow"]');
         const hasInbound = !!item.inFlightId;
         if (inboundRow) {
@@ -85,10 +95,47 @@ export function renderRecentBookings(items) {
             if (inArrCity) inArrCity.textContent = textOrDash(item.inArrivalCity);
             const inDepartAt = node.querySelector('[data-field="inDepartAt"]');
             if (inDepartAt) inDepartAt.textContent = formatDateTime(item.inDepartureTime);
+            setAirlineInfo(node, "in", airlineMap, item.inAirlineId, item.inFlightNumber);
+            const inboundAirline = node.querySelector('[data-field="inAirlineBlock"]');
+            if (inboundAirline) inboundAirline.classList.remove("hidden");
         }
 
         container.appendChild(node);
     });
 
     if (window.lucide) window.lucide.createIcons();
+}
+
+function toAssetUrl(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    const base = getContextPath();
+    if (!base) return path;
+    return path.startsWith("/") ? `${base}${path}` : `${base}/${path}`;
+}
+
+function getAirlineMap() {
+    const url = `${getContextPath()}/resources/mypage/json/airline.json`;
+    return fetch(url, { headers: { Accept: "application/json" } })
+        .then((res) => (res.ok ? res.json() : {}))
+        .catch(() => ({}));
+}
+
+function setAirlineInfo(node, prefix, airlineMap, airlineId, flightNumber) {
+    const key = (airlineId || (flightNumber ? String(flightNumber).slice(0, 2) : "") || "").toUpperCase();
+    const info = key && airlineMap ? airlineMap[key] : null;
+    const logoEl = node.querySelector(`[data-field="${prefix}AirlineLogo"]`);
+    const nameEl = node.querySelector(`[data-field="${prefix}AirlineName"]`);
+    const flightEl = node.querySelector(`[data-field="${prefix}FlightNumber"]`);
+
+    if (logoEl) {
+        if (info?.image) {
+            logoEl.src = toAssetUrl(info.image);
+            logoEl.classList.remove("hidden");
+        } else {
+            logoEl.classList.add("hidden");
+        }
+    }
+    if (nameEl) nameEl.textContent = info?.name || (key || "-");
+    if (flightEl) flightEl.textContent = flightNumber || "-";
 }
