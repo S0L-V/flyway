@@ -57,10 +57,10 @@ function createDetail(f, details, type) {
     const depCity = f.departureCity ?? "-";
     const arrCity = f.arrivalCity ?? "-";
     const terminalNo = f.terminalNo ?? "-";
-    const depTime = formatTimeArray(f.departureTime);
-    const arrTime = formatTimeArray(f.arrivalTime);
-    const depDate = formatDateArray(f.departureTime);
-    const arrDate = formatDateArray(f.arrivalTime);
+    const depTime = formatTime(f.departureTime);
+    const arrTime = formatTime(f.arrivalTime);
+    const depDate = formatDate(f.departureTime);
+    const arrDate = formatDate(f.arrivalTime);
     const durationMinutes = Number.isFinite(f.durationMinutes) ? f.durationMinutes : null;
 
     const freeCheckedBags = details.freeCheckedBags ?? "-";
@@ -125,17 +125,22 @@ function createDetail(f, details, type) {
     `
 }
 
-function formatTimeArray(arr) {
-    if (!Array.isArray(arr) || arr.length < 5) return "-";
-    const hh = String(arr[3]).padStart(2, "0");
-    const mm = String(arr[4]).padStart(2, "0");
+function formatTime(dateTime) {
+    if (!dateTime) return "-";
+
+    const date = new Date(dateTime);
+    const hh = String(date.getHours()).padStart(2, "0");
+    const mm = String(date.getMinutes()).padStart(2, "0");
+
     return `${hh}:${mm}`;
 }
 
-function formatDateArray(arr) {
-    if (!Array.isArray(arr) || arr.length < 5) return "-";
-    const year = String(arr[0]);
-    const month = String(arr[1]).padStart(2, "0");
-    const day = String(arr[2]).padStart(2,"0");
+function formatDate(dateTime) {
+    if (!dateTime) return "-";
+
+    const date = new Date(dateTime);
+    const year = String(date.getFullYear());
+    const month = String(date.getMonth()).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2,"0");
     return `${year}-${month}-${day}`;
 }
