@@ -13,19 +13,36 @@
     const iconName = type === 'success' ? 'check-circle-2' : 'alert-circle';
 
     toast.className = "toast flex items-center shadow-lg border pointer-events-auto " + bgClass;
-    toast.innerHTML =
-        '<div class="p-1 rounded-full ' + iconBgClass + ' flex items-center justify-center shrink-0">' +
-            '<i data-lucide="' + iconName + '" class="text-white w-3.5 h-3.5"></i>' +
-        '</div>' +
-        '<span class="text-sm font-medium pt-0.5 whitespace-nowrap ml-3 ' + textClass + '" style="color: ' + textColor + ';">' +
-            message +
-        '</span>' +
-        '<button type="button" onclick="this.parentElement.remove()" class="ml-3 hover:opacity-70 flex items-center shrink-0 ' + closeBtnClass + '">' +
-            '<i data-lucide="x" class="w-4 h-4"></i>' +
-        '</button>';
+
+    const iconWrap = document.createElement('div');
+    iconWrap.className = "p-1 rounded-full " + iconBgClass + " flex items-center justify-center shrink-0";
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', iconName);
+    icon.className = "text-white w-3.5 h-3.5";
+    iconWrap.appendChild(icon);
+
+    const text = document.createElement('span');
+    text.className = "text-sm font-medium pt-0.5 whitespace-nowrap ml-3 " + textClass;
+    text.style.color = textColor;
+    text.textContent = message;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = "button";
+    closeBtn.className = "ml-3 hover:opacity-70 flex items-center shrink-0 " + closeBtnClass;
+    closeBtn.addEventListener('click', () => toast.remove());
+    const closeIcon = document.createElement('i');
+    closeIcon.setAttribute('data-lucide', 'x');
+    closeIcon.className = "w-4 h-4";
+    closeBtn.appendChild(closeIcon);
+
+    toast.appendChild(iconWrap);
+    toast.appendChild(text);
+    toast.appendChild(closeBtn);
 
     container.appendChild(toast);
-    lucide.createIcons({ root: toast });
+    if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+      lucide.createIcons({ root: toast });
+    }
 
     setTimeout(() => {
       toast.style.opacity = '0';

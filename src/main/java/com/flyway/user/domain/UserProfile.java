@@ -16,11 +16,17 @@ public class UserProfile {
     private String name; // 한글 이름 (full name)
     private String krFirstName;
     private String krLastName;
+    @ToString.Exclude
     private LocalDate birth;
+    @ToString.Exclude
     private String email;
+    @ToString.Exclude
     private String phoneNumber;
+    @ToString.Exclude
     private String passportNo;
+    @ToString.Exclude
     private LocalDate passportExpiryDate;
+    @ToString.Exclude
     private String passportIssueCountry;
     private String country; // 국적
     private String gender; // M | F

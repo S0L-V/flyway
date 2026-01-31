@@ -1,12 +1,13 @@
 import { fetchWithRefresh } from "../../common/js/authFetch.js";
 
 export async function fetchJson(url, options) {
+    const { headers: customHeaders, ...restOptions } = options || {};
     const res = await fetchWithRefresh(url, {
         headers: {
             Accept: "application/json",
-            ...options?.headers,
+            ...customHeaders,
         },
-        ...options,
+        ...restOptions,
     });
 
     if (!res.ok) {
@@ -30,12 +31,13 @@ export async function fetchJson(url, options) {
 }
 
 export async function fetchOk(url, options) {
+    const { headers: customHeaders, ...restOptions } = options || {};
     const res = await fetchWithRefresh(url, {
         headers: {
             Accept: "application/json",
-            ...options?.headers,
+            ...customHeaders,
         },
-        ...options,
+        ...restOptions,
     });
 
     if (!res.ok) {
