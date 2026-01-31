@@ -1,0 +1,400 @@
+/* flyway Global Design System */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+@import url('https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css');
+
+:root {
+    --brand-blue: #2563eb;
+    --brand-blue-hover: #1d4ed8;
+    /* 세련된 비행기 모양의 SVG 커서 */
+    --plane-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%232563eb'%3E%3Cpath d='M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z' transform='rotate(45 12 12)'/%3E%3C/svg%3E") 16 16, auto;
+    --plane-hover-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%231d4ed8'%3E%3Cpath d='M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z' transform='rotate(60 12 12) scale(1.1)'/%3E%3C/svg%3E") 16 16, auto;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: linear-gradient(to bottom, #dbeafe 0%, #eff6ff 50%, #ffffff 100%);
+    background-attachment: fixed;
+    cursor: var(--plane-cursor);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* 인터랙티브 요소 커서 변경 */
+a, button, input, select, .interactive {
+    cursor: var(--plane-hover-cursor) !important;
+}
+
+/* --- Glassmorphism Header --- */
+.glass-header {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 1280px;
+    z-index: 1000;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2.5rem;
+    overflow: visible;
+}
+
+.glass-header-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+            135deg,
+            rgba(15, 23, 42, 0.4) 0%,
+            rgba(30, 41, 59, 0.35) 50%,
+            rgba(15, 23, 42, 0.4) 100%
+    );
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2.5rem;
+    transition: all 0.5s ease;
+    box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.2),
+            0 4px 16px rgba(0, 0, 0, 0.1),
+            inset 0 1px 1px rgba(255, 255, 255, 0.1),
+            inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* 상단 하이라이트 효과 */
+.glass-header-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.2) 80%,
+    transparent 100%
+    );
+    border-radius: 2.5rem;
+}
+
+/* 스크롤 시 적용될 스타일 */
+body.scrolled .glass-header {
+    top: 0.5rem;
+}
+
+body.scrolled .glass-header-bg {
+    background: linear-gradient(
+            135deg,
+            rgba(15, 23, 42, 0.5) 0%,
+            rgba(30, 41, 59, 0.45) 50%,
+            rgba(15, 23, 42, 0.5) 100%
+    );
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow:
+            0 12px 40px rgba(31, 38, 135, 0.2),
+            0 6px 20px rgba(0, 0, 0, 0.1),
+            inset 0 2px 4px rgba(255, 255, 255, 0.7),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Glassmorphism Search Bar --- */
+.glass-search-box {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(60px) !important;
+    -webkit-backdrop-filter: blur(60px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 2rem !important;
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.7s ease;
+    position: relative;
+    overflow: visible !important;
+}
+
+.glass-search-box:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.glass-search-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+}
+
+/* --- Animations --- */
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-flyway {
+    animation: fadeInSlide 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* --- Destination Cards --- */
+.dest-card {
+    border-radius: 2rem;
+    overflow: hidden;
+    position: relative;
+    transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dest-card:hover {
+    transform: translateY(-1rem);
+}
+
+.dest-card img {
+    transition: transform 4s ease;
+}
+
+.dest-card:hover img {
+    transform: scale(1.1);
+}
+
+.dest-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2rem;
+}
+
+/* --- Glass Buttons --- */
+.glass-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+/* No underline helper */
+.no-underline {
+    text-decoration: none !important;
+}
+
+.glass-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.glass-btn:active {
+    transform: scale(0.95);
+}
+
+/* --- Logo 3D Text Style --- */
+.logo-3d {
+    position: relative;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.logo-3d:hover {
+    transform: scale(1.05);
+}
+
+.logo-text-3d {
+    position: relative;
+    /* 다중 drop-shadow로 3D 입체감 */
+    filter:
+        /* 메인 그림자 (깊이감) */
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.4))
+            drop-shadow(0 2px 1px rgba(0, 0, 0, 0.2))
+            drop-shadow(0 3px 2px rgba(0, 0, 0, 0.15))
+            drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1))
+            drop-shadow(0 6px 5px rgba(0, 0, 0, 0.08))
+                /* 부드러운 글로우 */
+            drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-3d:hover .logo-text-3d {
+    filter:
+        /* 호버 시 더 강한 입체감 */
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+            drop-shadow(0 2px 1px rgba(0, 0, 0, 0.25))
+            drop-shadow(0 4px 3px rgba(0, 0, 0, 0.2))
+            drop-shadow(0 6px 5px rgba(0, 0, 0, 0.15))
+            drop-shadow(0 8px 8px rgba(0, 0, 0, 0.1))
+                /* 더 강한 글로우 */
+            drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
+    transform: translateY(-2px);
+}
+
+/* --- Header Tilt Glass Buttons (Vanilla Tilt + Tailwind) --- */
+.tilt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    height: 40px;
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+}
+
+/* Header auth buttons (login/signup) */
+.auth-text-btn {
+    min-width: auto;
+    height: 40px;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+    color: #64748B !important;
+    text-shadow: none !important;
+}
+
+.auth-text-btn::before,
+.auth-text-btn::after {
+    display: none !important;
+}
+
+.auth-text-btn:hover {
+    opacity: 0.7;
+}
+
+/* 버튼 텍스트 스타일 (Toss, Kakao 스타일) */
+.btn-text {
+    font-family: 'Spoqa Han Sans Neo', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Vanilla Tilt glare 스타일 커스텀 */
+.tilt-btn .js-tilt-glare {
+    border-radius: inherit;
+}
+
+.tilt-btn .js-tilt-glare-inner {
+    border-radius: inherit;
+    background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(255, 255, 255, 0.4) 40%,
+            transparent 60%
+    ) !important;
+}
+
+/* 내부 하이라이트 효과 */
+.tilt-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.9) 30%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0.9) 70%,
+    transparent 100%
+    );
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+/* 하단 미세 그림자 라인 */
+.tilt-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 30%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.1) 70%,
+    transparent 100%
+    );
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+/* 버튼 내부 입체감 (inset shadow via box-shadow) */
+.tilt-btn {
+    box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.1),
+            0 8px 30px rgba(0, 0, 0, 0.08),
+            inset 0 1px 2px rgba(255, 255, 255, 0.9),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.tilt-btn:hover {
+    box-shadow:
+            0 6px 20px rgba(0, 0, 0, 0.12),
+            0 12px 40px rgba(0, 0, 0, 0.1),
+            inset 0 1px 2px rgba(255, 255, 255, 1),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Primary (Blue) 버튼 그림자 */
+.tilt-btn.shadow-blue-500\/30 {
+    box-shadow:
+            0 4px 15px rgba(59, 130, 246, 0.3),
+            0 8px 30px rgba(59, 130, 246, 0.2),
+            inset 0 1px 2px rgba(255, 255, 255, 0.4),
+            inset 0 -1px 2px rgba(30, 64, 175, 0.3) !important;
+}
+
+.tilt-btn.shadow-blue-500\/30:hover {
+    box-shadow:
+            0 6px 20px rgba(59, 130, 246, 0.4),
+            0 12px 40px rgba(59, 130, 246, 0.3),
+            inset 0 1px 2px rgba(255, 255, 255, 0.5),
+            inset 0 -1px 2px rgba(30, 64, 175, 0.3) !important;
+}
+
+/* --- Footer --- */
+.footer-bg-icon {
+    position: absolute;
+    bottom: -40px;
+    right: -40px;
+    opacity: 0.02;
+    pointer-events: none;
+    user-select: none;
+    font-size: 400px;
+    color: #111827;
+}
+
+/* 소셜 버튼 호버 효과 */
+.social-btn {
+    transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+    background: var(--brand-blue) !important;
+    color: white !important;
+    border-color: var(--brand-blue) !important;
+}
