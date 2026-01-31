@@ -22,20 +22,15 @@
     <div class="flex items-center space-x-3">
       <sec:authorize access="isAuthenticated()">
         <a href="${pageContext.request.contextPath}/mypage"
-           class="tilt-btn btn-text bg-white/70 backdrop-blur-xl border border-white/80
-                          px-5 py-2.5 text-blue-700 rounded-full
-                          no-underline shadow-lg hover:bg-white/90 transition-all duration-300
-                          hover:shadow-xl active:scale-95"
+           class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
+                          no-underline transition-all duration-300 active:scale-95"
            data-tilt data-tilt-glare data-tilt-max-glare="0.3"
            data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
-          나의 예약
+          마이페이지
         </a>
         <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="inline">
           <button type="submit"
-                  class="tilt-btn btn-text bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600
-                                   backdrop-blur-xl border border-blue-400/50
-                                   px-5 py-2.5 text-white rounded-full
-                                   shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40
+                  class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
                                    transition-all duration-300 active:scale-95"
                   data-tilt data-tilt-glare data-tilt-max-glare="0.4"
                   data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
@@ -46,20 +41,15 @@
 
       <sec:authorize access="isAnonymous()">
         <a href="${pageContext.request.contextPath}/login"
-           class="tilt-btn btn-text bg-white/70 backdrop-blur-xl border border-white/80
-                          px-5 py-2.5 text-blue-700 rounded-full
-                          no-underline shadow-lg hover:bg-white/90 transition-all duration-300
-                          hover:shadow-xl active:scale-95"
+           class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
+                          no-underline transition-all duration-300 active:scale-95"
            data-tilt data-tilt-glare data-tilt-max-glare="0.3"
            data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
           로그인
         </a>
         <a href="${pageContext.request.contextPath}/signup"
-           class="tilt-btn btn-text bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600
-                          backdrop-blur-xl border border-blue-400/50
-                          px-5 py-2.5 text-white rounded-full
-                          no-underline shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40
-                          transition-all duration-300 active:scale-95"
+           class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
+                          no-underline transition-all duration-300 active:scale-95"
            data-tilt data-tilt-glare data-tilt-max-glare="0.4"
            data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
           회원가입

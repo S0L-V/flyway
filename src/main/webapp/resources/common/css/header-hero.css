@@ -1,0 +1,60 @@
+/* Hero-style header overrides (shared) */
+body:has(.hero-section) .header-spacer {
+    display: none;
+}
+
+body:has(.hero-section) .glass-header-bg,
+body.hero-page .glass-header-bg {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(48, 147, 247, 0.12);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: none;
+}
+
+body:has(.hero-section) .glass-header-bg::before,
+body.hero-page .glass-header-bg::before {
+    display: none;
+}
+
+body:has(.hero-section).scrolled .glass-header-bg,
+body.hero-page.scrolled .glass-header-bg {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(48, 147, 247, 0.12);
+}
+
+body:has(.hero-section) .glass-header a,
+body:has(.hero-section) .glass-header button,
+body.hero-page .glass-header a,
+body.hero-page .glass-header button {
+    color: #1f3b5c;
+}
+
+body:has(.hero-section) .glass-header .tilt-btn,
+body.hero-page .glass-header .tilt-btn {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+body:has(.hero-section) .glass-header .logo-text-3d,
+body.hero-page .glass-header .logo-text-3d {
+    filter: none !important;
+    transition: none !important;
+}
+
+body:has(.hero-section) .glass-header .auth-text-btn,
+body.hero-page .glass-header .auth-text-btn {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    color: #64748B !important;
+}
+
+body:has(.hero-section) .glass-header .auth-text-btn:hover,
+body.hero-page .glass-header .auth-text-btn:hover {
+    background: transparent !important;
+    border-color: transparent !important;
+    opacity: 0.7;
+}
