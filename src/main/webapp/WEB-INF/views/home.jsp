@@ -295,6 +295,13 @@
 
                 const isOneWay = window.state && window.state.tripType === "OW";
 
+                const toYYYYMMDD = (date) => {
+                    if (!date) return '';
+                    return date.getFullYear() + '-' +
+                        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(date.getDate()).padStart(2, '0');
+                };
+
                 rangePicker = flatpickr(dateFieldWrap, {
                     locale: "ko",
                     mode: isOneWay ? "single" : "range",
@@ -314,43 +321,47 @@
 
                         if (isOW && selectedDates.length === 1) {
                             // 편도 - 단일 날짜 선택
-                            const start = formatDate(selectedDates[0]);
-                            dateRangeText.textContent = start;
+                            const startText = formatDate(selectedDates[0]);
+                            const start = toYYYYMMDD(selectedDates[0]);
+                            dateRangeText.textContent = startText;
                             dateRangeText.classList.remove('selecting');
 
                             if (window.state) {
-                                window.state.dateStart = selectedDates[0].toISOString().split('T')[0];
+                                window.state.dateStart = start;
                                 window.state.dateEnd = null;
                             }
-                            if (startInput) startInput.value = selectedDates[0].toISOString().split('T')[0];
+                            if (startInput) startInput.value = start;
                             if (endInput) endInput.value = '';
 
                         } else if (!isOW && selectedDates.length === 1) {
                             // 왕복 - 첫 번째 날짜 선택
-                            const start = formatDate(selectedDates[0]);
-                            dateRangeText.textContent = start + '  →  오는날 선택';
+                            const startText = formatDate(selectedDates[0]);
+                            const start = toYYYYMMDD(selectedDates[0]);
+                            dateRangeText.textContent = startText + '  →  오는날 선택';
                             dateRangeText.classList.add('selecting');
 
                             if (window.state) {
-                                window.state.dateStart = selectedDates[0].toISOString().split('T')[0];
+                                window.state.dateStart = start;
                                 window.state.dateEnd = null;
                             }
-                            if (startInput) startInput.value = selectedDates[0].toISOString().split('T')[0];
+                            if (startInput) startInput.value = start;
                             if (endInput) endInput.value = '';
 
                         } else if (selectedDates.length === 2) {
                             // 왕복 - 두 날짜 모두 선택
-                            const start = formatDate(selectedDates[0]);
-                            const end = formatDate(selectedDates[1]);
-                            dateRangeText.textContent = start + '  →  ' + end;
+                            const startText = formatDate(selectedDates[0]);
+                            const endText = formatDate(selectedDates[1]);
+                            const start = toYYYYMMDD(selectedDates[0]);
+                            const end = toYYYYMMDD(selectedDates[1]);
+                            dateRangeText.textContent = startText + '  →  ' + endText;
                             dateRangeText.classList.remove('selecting');
 
                             if (window.state) {
-                                window.state.dateStart = selectedDates[0].toISOString().split('T')[0];
-                                window.state.dateEnd = selectedDates[1].toISOString().split('T')[0];
+                                window.state.dateStart = start;
+                                window.state.dateEnd = end;
                             }
-                            if (startInput) startInput.value = selectedDates[0].toISOString().split('T')[0];
-                            if (endInput) endInput.value = selectedDates[1].toISOString().split('T')[0];
+                            if (startInput) startInput.value = start;
+                            if (endInput) endInput.value = end;
                         }
                     }
                 });
