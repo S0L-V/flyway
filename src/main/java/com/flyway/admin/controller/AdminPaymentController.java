@@ -52,12 +52,13 @@ public class AdminPaymentController {
 	@ResponseBody
 	public ApiResponse<Map<String, Object>> getPaymentList(
 		@RequestParam(required = false) String status,
+		@RequestParam(required = false) String keyword,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
 		try {
-			List<PaymentListDto> list = adminPaymentService.getPaymentList(status, page, size);
-			long totalCount = adminPaymentService.countPayments(status);
+			List<PaymentListDto> list = adminPaymentService.getPaymentList(status, keyword, page, size);
+			long totalCount = adminPaymentService.countPayments(status, keyword);
 
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("list", list);

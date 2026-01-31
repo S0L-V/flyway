@@ -35,6 +35,7 @@ public interface AdminPaymentMapper {
 	 */
 	List<PaymentListDto> selectPaymentList(
 		@Param("status") String status,
+		@Param("keyword") String keyword,
 		@Param("offset") int offset,
 		@Param("limit") int limit
 	);
@@ -42,5 +43,8 @@ public interface AdminPaymentMapper {
 	/**
 	 * 결제 내역 총 건수
 	 */
-	long countPayments(@Param("status") String status);
+	long countPayments(
+		@Param("status") String status,
+		@Param("keyword") String keyword
+	);
 }

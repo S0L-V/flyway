@@ -4,6 +4,21 @@
 <%@ include file="layout/topbar.jsp" %>
 
 <style>
+    /* 보기형 토글 (2버튼) */
+    #view-toggle .ios-segment-slider {
+        width: calc(50% - 2px);
+    }
+    #view-toggle[data-active="0"] .ios-segment-slider {
+        transform: translateX(0);
+    }
+    #view-toggle[data-active="1"] .ios-segment-slider {
+        transform: translateX(100%);
+    }
+    #view-toggle .ios-segment-btn {
+        min-width: 40px;
+        padding: 0.4rem 0.6rem;
+    }
+
     .payment-card {
         position: relative;
         overflow: hidden;
@@ -113,6 +128,16 @@
                         <option value="CANCELLED" class="bg-slate-800">취소됨</option>
                         <option value="REFUNDED" class="bg-slate-800">환불됨</option>
                     </select>
+                    <!-- 보기형 토글 (iOS 스타일) -->
+                    <div class="ios-segment-group" id="view-toggle">
+                        <div class="ios-segment-slider" id="view-slider"></div>
+                        <button type="button" class="ios-segment-btn active" data-view="card" data-index="0" title="카드형">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" class="ios-segment-btn" data-view="list" data-index="1" title="목록형">
+                            <i data-lucide="list" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="p-6">
@@ -123,6 +148,23 @@
                         <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-3"></i>
                         <p>결제 내역을 불러오는 중...</p>
                     </div>
+                </div>
+
+                <!-- 목록 테이블 (숨김 상태) -->
+                <div id="payment-list-table" class="hidden overflow-x-auto">
+                    <table class="min-w-full divide-y divide-white/5">
+                        <thead class="bg-white/5">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">사용자</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">금액</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">항공편</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">결제수단</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">상태</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">결제일시</th>
+                        </tr>
+                        </thead>
+                        <tbody id="payment-list-body" class="divide-y divide-white/5"></tbody>
+                    </table>
                 </div>
 
                 <!-- 페이지네이션 -->
@@ -144,6 +186,7 @@
         let currentPage = 0;
         const pageSize = 10;
         let currentFilterStatus = '';
+        let currentViewMode = 'card'; // 'card' or 'list'
 
         const elements = {
             stats: {
@@ -156,7 +199,10 @@
             searchKeyword: document.getElementById('search-keyword'),
             refreshButton: document.getElementById('refresh-button'),
             paymentCardGrid: document.getElementById('payment-card-grid'),
-            paginationControls: document.getElementById('pagination-controls')
+            paymentListTable: document.getElementById('payment-list-table'),
+            paymentListBody: document.getElementById('payment-list-body'),
+            paginationControls: document.getElementById('pagination-controls'),
+            viewToggle: document.getElementById('view-toggle')
         };
 
         // 초기 데이터 로딩
@@ -185,6 +231,38 @@
                 fetchPaymentList();
             }, 300);
         });
+
+        // 보기형 토글 이벤트
+        if (elements.viewToggle) {
+            elements.viewToggle.setAttribute('data-active', '0');
+            var viewBtns = elements.viewToggle.querySelectorAll('.ios-segment-btn');
+            viewBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var viewMode = this.getAttribute('data-view');
+                    var index = this.getAttribute('data-index');
+                    if (currentViewMode === viewMode) return;
+
+                    currentViewMode = viewMode;
+                    elements.viewToggle.setAttribute('data-active', index);
+
+                    // 버튼 활성 상태 업데이트
+                    viewBtns.forEach(function(b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+
+                    // 뷰 전환
+                    if (viewMode === 'card') {
+                        elements.paymentCardGrid.classList.remove('hidden');
+                        elements.paymentListTable.classList.add('hidden');
+                    } else {
+                        elements.paymentCardGrid.classList.add('hidden');
+                        elements.paymentListTable.classList.remove('hidden');
+                    }
+
+                    // 데이터 다시 렌더링
+                    fetchPaymentList();
+                });
+            });
+        }
 
 
         // [수정됨] 통계 데이터 가져오기 + 애니메이션 적용
@@ -215,11 +293,20 @@
         }
 
         function fetchPaymentList() {
-            elements.paymentCardGrid.innerHTML = `
-                <div class="col-span-full flex flex-col items-center justify-center py-16 text-glass-muted">
-                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-3"></i>
-                    <p>결제 내역을 불러오는 중...</p>
-                </div>`;
+            // 로딩 상태 표시
+            if (currentViewMode === 'card') {
+                elements.paymentCardGrid.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-16 text-glass-muted">
+                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-3"></i>
+                        <p>결제 내역을 불러오는 중...</p>
+                    </div>`;
+            } else {
+                elements.paymentListBody.innerHTML = `
+                    <tr><td colspan="6" class="text-center py-16 text-glass-muted">
+                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3"></i>
+                        <p>결제 내역을 불러오는 중...</p>
+                    </td></tr>`;
+            }
             lucide.createIcons();
 
             const url = new URL(window.CONTEXT_PATH + '/admin/payments/api/list', window.location.origin);
@@ -237,25 +324,41 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
-                        renderPaymentCards(data.data.list);
+                        if (currentViewMode === 'card') {
+                            renderPaymentCards(data.data.list);
+                        } else {
+                            renderPaymentListRows(data.data.list);
+                        }
                         renderPagination(data.data.totalCount, data.data.currentPage, data.data.pageSize, data.data.totalPages);
                     } else {
                         console.error('Failed to fetch payment list:', data.message);
-                        elements.paymentCardGrid.innerHTML = `
-                            <div class="col-span-full flex flex-col items-center justify-center py-16 text-glass-muted">
+                        var errorHtml = currentViewMode === 'card'
+                            ? `<div class="col-span-full flex flex-col items-center justify-center py-16 text-glass-muted">
                                 <i data-lucide="alert-circle" class="w-8 h-8 mb-3"></i>
                                 <p>결제 내역 조회에 실패했습니다</p>
-                            </div>`;
+                            </div>`
+                            : `<tr><td colspan="6" class="text-center py-16 text-glass-muted">결제 내역 조회에 실패했습니다</td></tr>`;
+                        if (currentViewMode === 'card') {
+                            elements.paymentCardGrid.innerHTML = errorHtml;
+                        } else {
+                            elements.paymentListBody.innerHTML = errorHtml;
+                        }
                     }
                     lucide.createIcons();
                 })
                 .catch(error => {
                     console.error('Error fetching payment list:', error);
-                    elements.paymentCardGrid.innerHTML = `
-                        <div class="col-span-full flex flex-col items-center justify-center py-16 text-rose-400">
+                    var errorHtml = currentViewMode === 'card'
+                        ? `<div class="col-span-full flex flex-col items-center justify-center py-16 text-rose-400">
                             <i data-lucide="wifi-off" class="w-8 h-8 mb-3"></i>
                             <p>네트워크 오류가 발생했습니다</p>
-                        </div>`;
+                        </div>`
+                        : `<tr><td colspan="6" class="text-center py-16 text-rose-400">네트워크 오류가 발생했습니다</td></tr>`;
+                    if (currentViewMode === 'card') {
+                        elements.paymentCardGrid.innerHTML = errorHtml;
+                    } else {
+                        elements.paymentListBody.innerHTML = errorHtml;
+                    }
                     lucide.createIcons();
                 });
         }
@@ -318,6 +421,60 @@
                 `;
 
                 elements.paymentCardGrid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function renderPaymentListRows(payments) {
+            elements.paymentListBody.innerHTML = '';
+
+            if (payments.length === 0) {
+                elements.paymentListBody.innerHTML = `
+                    <tr><td colspan="6" class="text-center py-16 text-glass-muted">
+                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3"></i>
+                        <p class="text-lg font-medium">결제 내역이 없습니다</p>
+                    </td></tr>`;
+                lucide.createIcons();
+                return;
+            }
+
+            payments.forEach(function(payment) {
+                var row = document.createElement('tr');
+                row.className = 'hover:bg-white/5 transition-colors';
+
+                var statusConfig = getStatusConfigGlass(payment.status);
+
+                row.innerHTML = `
+                    <td class="px-4 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xs">
+                                ` + escapeHtml((payment.userName || '?').charAt(0).toUpperCase()) + `
+                            </div>
+                            <div>
+                                <p class="font-medium text-glass-primary text-sm">` + escapeHtml(payment.userName || '이름 없음') + `</p>
+                                <p class="text-xs text-glass-muted">` + escapeHtml(payment.userEmail || '-') + `</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <span class="font-bold text-glass-primary">` + formatCurrency(payment.amount) + `</span>
+                    </td>
+                    <td class="px-4 py-4">
+                        <span class="text-glass-secondary text-sm">` + escapeHtml(payment.flightNumber || '-') + `</span>
+                        <span class="text-glass-muted text-xs ml-1">` + escapeHtml(payment.route || '') + `</span>
+                    </td>
+                    <td class="px-4 py-4 text-glass-secondary text-sm">` + escapeHtml(payment.paymentMethodDisplay || '-') + `</td>
+                    <td class="px-4 py-4">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full ` + statusConfig.class + `">
+                            <i data-lucide="` + statusConfig.icon + `" class="w-3 h-3"></i>
+                            ` + escapeHtml(payment.statusDisplay) + `
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-glass-muted text-xs">` + formatDateTime(payment.paidAt) + `</td>
+                `;
+
+                elements.paymentListBody.appendChild(row);
             });
 
             lucide.createIcons();
