@@ -1,7 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
   String tab = request.getParameter("tab");
-  if (tab == null) tab = "dashboard";
+  if (tab == null
+      || !("dashboard".equals(tab)
+          || "bookings".equals(tab)
+          || "booking_detail".equals(tab)
+          || "profile".equals(tab))) {
+    tab = "dashboard";
+  }
   request.setAttribute("activeTab", tab);
 %>
 <!DOCTYPE html>

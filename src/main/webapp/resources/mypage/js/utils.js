@@ -27,6 +27,12 @@ export function formatReservationId(value) {
 export function splitKoreanName(name) {
     if (!name) return { last: "", first: "" };
     if (name.length === 1) return { last: name, first: "" };
+    if (name.length <= 2) return { last: name, first: "" };
+    const compoundSurnames = ["남궁", "선우", "황보", "제갈", "사공", "독고", "동방"];
+    const prefix = name.substring(0, 2);
+    if (compoundSurnames.includes(prefix)) {
+        return { last: prefix, first: name.substring(2) };
+    }
     return { last: name.substring(0, 1), first: name.substring(1) };
 }
 
@@ -71,7 +77,7 @@ export function diffMinutes(start, end) {
     const s = new Date(start);
     const e = new Date(end);
     const diff = Math.round((e - s) / 60000);
-    return diff > 0 ? diff : null;
+    return diff >= 0 ? diff : null;
 }
 
 export function mapStatus(status) {
