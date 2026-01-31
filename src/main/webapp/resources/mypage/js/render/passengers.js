@@ -238,7 +238,6 @@ export function renderSeatSummary(passengers) {
     if (empty) empty.classList.add("hidden");
 
     passengers.forEach((p) => {
-        const node = template.content.cloneNode(true);
         const profile = p.profile || {};
         const name = profile.lastName || profile.firstName
             ? `${profile.lastName || ""} ${profile.firstName || ""}`.trim()
@@ -249,20 +248,28 @@ export function renderSeatSummary(passengers) {
 
         const segments = Array.isArray(p.segments) ? p.segments : [];
         const sorted = segments.slice().sort((a, b) => (a.segmentOrder || 0) - (b.segmentOrder || 0));
-        const firstSeg = sorted[0];
-        const seatValue = firstSeg?.seat?.seatNo || "-";
-        const segmentLabel = firstSeg?.segmentOrder === 2 ? "오는 편" : "가는 편";
+        const renderSegment = (segment) => {
+            const node = template.content.cloneNode(true);
+            const seatValue = segment?.seat?.seatNo || "-";
+            const segmentLabel = formatSegmentLabel(segment?.segmentOrder);
 
-        const elInitial = node.querySelector('[data-field="initial"]');
-        const elName = node.querySelector('[data-field="name"]');
-        const elSeat = node.querySelector('[data-field="seat"]');
-        const elSegmentLabel = node.querySelector('[data-field="segmentLabel"]');
-        if (elInitial) elInitial.textContent = initial || "-";
-        if (elName) elName.textContent = name || "-";
-        if (elSeat) elSeat.textContent = seatValue;
-        if (elSegmentLabel) elSegmentLabel.textContent = segmentLabel;
+            const elInitial = node.querySelector('[data-field="initial"]');
+            const elName = node.querySelector('[data-field="name"]');
+            const elSeat = node.querySelector('[data-field="seat"]');
+            const elSegmentLabel = node.querySelector('[data-field="segmentLabel"]');
+            if (elInitial) elInitial.textContent = initial || "-";
+            if (elName) elName.textContent = name || "-";
+            if (elSeat) elSeat.textContent = seatValue;
+            if (elSegmentLabel) elSegmentLabel.textContent = segmentLabel;
 
-        container.appendChild(node);
+            container.appendChild(node);
+        };
+
+        if (sorted.length) {
+            sorted.forEach(renderSegment);
+        } else {
+            renderSegment(null);
+        }
     });
 }
 
@@ -280,7 +287,6 @@ export function renderSeatModalPassengers(passengers) {
     if (empty) empty.classList.add("hidden");
 
     passengers.forEach((p) => {
-        const node = template.content.cloneNode(true);
         const profile = p.profile || {};
         const name = profile.lastName || profile.firstName
             ? `${profile.lastName || ""} ${profile.firstName || ""}`.trim()
@@ -291,18 +297,59 @@ export function renderSeatModalPassengers(passengers) {
 
         const segments = Array.isArray(p.segments) ? p.segments : [];
         const sorted = segments.slice().sort((a, b) => (a.segmentOrder || 0) - (b.segmentOrder || 0));
-        const firstSeg = sorted[0];
-        const seatValue = firstSeg?.seat?.seatNo || "-";
+        const renderSegment = (segment) => {
+            const node = template.content.cloneNode(true);
+            const seatValue = segment?.seat?.seatNo || "-";
+            const segmentLabel = formatSegmentLabel(segment?.segmentOrder);
+            const seatText = seatValue === "-" ? seatValue : `${segmentLabel} ${seatValue}`;
+            const segmentKey = segment?.segmentOrder === 2 ? "inbound" : "outbound";
 
-        const elInitial = node.querySelector('[data-field="initial"]');
-        const elName = node.querySelector('[data-field="name"]');
-        const elSeat = node.querySelector('[data-field="seat"]');
-        if (elInitial) elInitial.textContent = initial || "-";
-        if (elName) elName.textContent = name || "-";
-        if (elSeat) elSeat.textContent = seatValue;
+            const elInitial = node.querySelector('[data-field="initial"]');
+            const elName = node.querySelector('[data-field="name"]');
+            const elSeat = node.querySelector('[data-field="seat"]');
+            const root = node.firstElementChild;
+            if (elInitial) elInitial.textContent = initial || "-";
+            if (elName) elName.textContent = name || "-";
+            if (elSeat) elSeat.textContent = seatText;
+            if (root) root.dataset.segment = segmentKey;
 
-        container.appendChild(node);
+            container.appendChild(node);
+        };
+
+        if (sorted.length) {
+            sorted.forEach(renderSegment);
+        } else {
+            renderSegment(null);
+        }
     });
+
+    filterSeatModalPassengers();
+    window.setSeatModalSegment = setSeatModalSegment;
+}
+
+let seatModalSegment = "outbound";
+
+export function setSeatModalSegment(segment) {
+    seatModalSegment = segment || "outbound";
+    filterSeatModalPassengers();
+}
+
+function filterSeatModalPassengers() {
+    const container = $("seatModalPassengers");
+    const empty = $("seatModalPassengersEmpty");
+    if (!container) return;
+    const segment = seatModalSegment;
+    const children = Array.from(container.children);
+    let visibleCount = 0;
+    children.forEach((child) => {
+        const childSegment = child.dataset.segment;
+        const hidden = segment && childSegment && childSegment !== segment;
+        child.classList.toggle("hidden", hidden);
+        if (!hidden) visibleCount += 1;
+    });
+    if (empty) {
+        empty.classList.toggle("hidden", visibleCount > 0);
+    }
 }
 
 export function renderPassengerInfo(passengers, reservationId) {
@@ -317,6 +364,9 @@ export function renderPassengerInfo(passengers, reservationId) {
         return;
     }
     if (empty) empty.classList.add("hidden");
+
+    const statusKey = (document.body.dataset.reservationStatus || "").toUpperCase();
+    const isCancelled = statusKey === "CANCELLED" || statusKey === "CANCELED";
 
     passengers.forEach((p) => {
         const node = template.content.cloneNode(true);
@@ -345,6 +395,8 @@ export function renderPassengerInfo(passengers, reservationId) {
         const elPassportExpiry = node.querySelector('[data-field="passportExpiryInput"]');
         const elPassportMessage = node.querySelector('[data-field="passportMessage"]');
         const elPassportSave = node.querySelector('[data-action="savePassport"]');
+        const elPassportSection = node.querySelector('[data-field="passportSection"]');
+        const elSeatRow = node.querySelector('[data-field="seatRow"]');
         const elBaggage = node.querySelector('[data-field="baggage"]');
         const elMeal = node.querySelector('[data-field="meal"]');
 
@@ -363,103 +415,108 @@ export function renderPassengerInfo(passengers, reservationId) {
         if (elPhone) elPhone.textContent = formatPhoneNumber(profile.phoneNumber);
         if (elEmail) elEmail.textContent = textOrDash(profile.email);
         if (elSeats) elSeats.textContent = summarizeSeats(segments);
-        const normalizedCountry = ensureSelectValue(elPassportCountry, passport.country || passport.issueCountry);
-        const normalizedIssueCountry = ensureSelectValue(elPassportIssueCountry, passport.issueCountry);
-        if (elPassportNo) elPassportNo.value = passport.passportNo || "";
-        if (elPassportExpiry) elPassportExpiry.value = passport.expiryDate || "";
+        if (isCancelled) {
+            if (elPassportSection) elPassportSection.classList.add("hidden");
+            if (elSeatRow) elSeatRow.classList.add("hidden");
+        } else {
+            const normalizedCountry = ensureSelectValue(elPassportCountry, passport.country || passport.issueCountry);
+            const normalizedIssueCountry = ensureSelectValue(elPassportIssueCountry, passport.issueCountry);
+            if (elPassportNo) elPassportNo.value = passport.passportNo || "";
+            if (elPassportExpiry) elPassportExpiry.value = passport.expiryDate || "";
 
-        setOriginalValue(elPassportCountry, normalizedCountry);
-        setOriginalValue(elPassportIssueCountry, normalizedIssueCountry);
-        setOriginalValue(elPassportNo, passport.passportNo || "");
-        setOriginalValue(elPassportExpiry, passport.expiryDate || "");
-        hidePassportMessage(elPassportMessage);
+            setOriginalValue(elPassportCountry, normalizedCountry);
+            setOriginalValue(elPassportIssueCountry, normalizedIssueCountry);
+            setOriginalValue(elPassportNo, passport.passportNo || "");
+            setOriginalValue(elPassportExpiry, passport.expiryDate || "");
+            hidePassportMessage(elPassportMessage);
 
-        if (elPassportNo) {
-            elPassportNo.addEventListener("input", (event) => {
-                const target = event.target;
-                const normalized = normalizePassportNo(target.value);
-                if (target.value !== normalized) target.value = normalized;
-            });
-        }
+            if (elPassportNo) {
+                elPassportNo.addEventListener("input", (event) => {
+                    const target = event.target;
+                    const normalized = normalizePassportNo(target.value);
+                    if (target.value !== normalized) target.value = normalized;
+                });
+            }
 
-        if (elPassportSave && reservationId && p.passengerId) {
-            elPassportSave.addEventListener("click", async () => {
-                hidePassportMessage(elPassportMessage);
-                const passportNoValue = normalizePassportNo(elPassportNo?.value?.trim());
-                const expiryValue = elPassportExpiry?.value || "";
-                const countryValue = normalizeCountryValue(elPassportCountry?.value?.trim());
-                const issueCountryValue = normalizeCountryValue(elPassportIssueCountry?.value?.trim());
+            if (elPassportSave && reservationId && p.passengerId) {
+                elPassportSave.addEventListener("click", async () => {
+                    hidePassportMessage(elPassportMessage);
+                    const passportNoValue = normalizePassportNo(elPassportNo?.value?.trim());
+                    const expiryValue = elPassportExpiry?.value || "";
+                    const countryValue = normalizeCountryValue(elPassportCountry?.value?.trim());
+                    const issueCountryValue = normalizeCountryValue(elPassportIssueCountry?.value?.trim());
 
-                if (!passportNoValue || !expiryValue || !countryValue || !issueCountryValue) {
-                    showPassportMessage(elPassportMessage, "여권 정보를 모두 입력해 주세요.", "error");
-                    if (typeof window.showToast === "function") {
-                        window.showToast("여권 정보를 모두 입력해 주세요.");
+                    if (!passportNoValue || !expiryValue || !countryValue || !issueCountryValue) {
+                        showPassportMessage(elPassportMessage, "여권 정보를 모두 입력해 주세요.", "error");
+                        if (typeof window.showToast === "function") {
+                            window.showToast("여권 정보를 모두 입력해 주세요.");
+                        }
+                        return;
                     }
-                    return;
-                }
 
-                const changed = {
-                    passportNo: passportNoValue !== getOriginalValue(elPassportNo),
-                    expiryDate: expiryValue !== getOriginalValue(elPassportExpiry),
-                    country: countryValue !== getOriginalValue(elPassportCountry),
-                    issueCountry: issueCountryValue !== getOriginalValue(elPassportIssueCountry),
-                };
+                    const changed = {
+                        passportNo: passportNoValue !== getOriginalValue(elPassportNo),
+                        expiryDate: expiryValue !== getOriginalValue(elPassportExpiry),
+                        country: countryValue !== getOriginalValue(elPassportCountry),
+                        issueCountry: issueCountryValue !== getOriginalValue(elPassportIssueCountry),
+                    };
 
-                if (!changed.passportNo && !changed.expiryDate && !changed.country && !changed.issueCountry) {
-                    showPassportMessage(elPassportMessage, "변경사항이 없습니다.", "info");
-                    if (typeof window.showToast === "function") {
-                        window.showToast("변경사항이 없습니다.");
+                    if (!changed.passportNo && !changed.expiryDate && !changed.country && !changed.issueCountry) {
+                        showPassportMessage(elPassportMessage, "변경사항이 없습니다.", "info");
+                        if (typeof window.showToast === "function") {
+                            window.showToast("변경사항이 없습니다.");
+                        }
+                        return;
                     }
-                    return;
-                }
 
-                const payload = {
-                    passportNo: passportNoValue,
-                    expiryDate: expiryValue,
-                    country: countryValue,
-                    issueCountry: issueCountryValue,
-                };
-
-                const originalText = elPassportSave.textContent;
-                elPassportSave.disabled = true;
-                elPassportSave.textContent = "저장 중...";
-                try {
-                    await fetchJson(`/api/users/me/reservations/${reservationId}/passengers/${p.passengerId}/passport`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload),
-                    });
-                    setOriginalValue(elPassportCountry, countryValue);
-                    setOriginalValue(elPassportIssueCountry, issueCountryValue);
-                    setOriginalValue(elPassportNo, passportNoValue);
-                    setOriginalValue(elPassportExpiry, expiryValue);
-
-                    const statusNow = formatPassportStatus({
+                    const payload = {
                         passportNo: passportNoValue,
                         expiryDate: expiryValue,
-                        issueCountry: issueCountryValue,
                         country: countryValue,
-                    });
-                    if (elStatus) {
-                        elStatus.textContent = statusNow.label;
-                        elStatus.className = `px-2.5 py-1 rounded-full text-xs font-semibold border ${statusNow.className}`;
-                    }
+                        issueCountry: issueCountryValue,
+                    };
 
-                    showPassportMessage(elPassportMessage, "여권 정보가 저장되었습니다.", "success");
-                    if (typeof window.showToast === "function") {
-                        window.showToast("여권 정보가 저장되었습니다.");
+                    const originalText = elPassportSave.textContent;
+                    elPassportSave.disabled = true;
+                    elPassportSave.textContent = "저장 중...";
+                    try {
+                        await fetchJson(`/api/users/me/reservations/${reservationId}/passengers/${p.passengerId}/passport`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        });
+                        setOriginalValue(elPassportCountry, countryValue);
+                        setOriginalValue(elPassportIssueCountry, issueCountryValue);
+                        setOriginalValue(elPassportNo, passportNoValue);
+                        setOriginalValue(elPassportExpiry, expiryValue);
+
+                        const statusNow = formatPassportStatus({
+                            passportNo: passportNoValue,
+                            expiryDate: expiryValue,
+                            issueCountry: issueCountryValue,
+                            country: countryValue,
+                        });
+                        if (elStatus) {
+                            elStatus.textContent = statusNow.label;
+                            elStatus.className = `px-2.5 py-1 rounded-full text-xs font-semibold border ${statusNow.className}`;
+                        }
+
+                        showPassportMessage(elPassportMessage, "여권 정보가 저장되었습니다.", "success");
+                        if (typeof window.showToast === "function") {
+                            window.showToast("여권 정보가 저장되었습니다.");
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        showPassportMessage(elPassportMessage, "저장에 실패했습니다.", "error");
+                        if (typeof window.showToast === "function") {
+                            window.showToast("저장에 실패했습니다.");
+                        }
+                    } finally {
+                        elPassportSave.disabled = false;
+                        elPassportSave.textContent = originalText || "정보 저장";
                     }
-                } catch (e) {
-                    console.error(e);
-                    showPassportMessage(elPassportMessage, "저장에 실패했습니다.", "error");
-                    if (typeof window.showToast === "function") {
-                        window.showToast("저장에 실패했습니다.");
-                    }
-                } finally {
-                    elPassportSave.disabled = false;
-                    elPassportSave.textContent = originalText || "정보 저장";
-                }
-            });
+                });
+            }
         }
         if (elBaggage) renderServiceSummary(elBaggage, summarizeBaggageItems(segments));
         if (elMeal) renderServiceSummary(elMeal, summarizeMealItems(segments));

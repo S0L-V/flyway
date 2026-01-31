@@ -79,7 +79,16 @@ export function updateReservationDetail(detail) {
     const statusEl = $("detailStatus");
     if (reservedAt) reservedAt.textContent = `예약일: ${formatDate(res.reservedAt)}`;
     if (reservationNo) reservationNo.textContent = `${res.reservationId || "-"}`;
-    applyStatusBadge(statusEl, getReservationStatus(res));
+    const status = getReservationStatus(res);
+    applyStatusBadge(statusEl, status);
+
+    const statusKey = (status || "").toUpperCase();
+    const isCancelled = statusKey === "CANCELLED" || statusKey === "CANCELED";
+    document.body.dataset.reservationStatus = statusKey;
+    const seatCard = $("detailSeatInfoCard");
+    if (seatCard) {
+        seatCard.classList.toggle("hidden", isCancelled);
+    }
 
     getAirlineMap().then((airlineMap) => {
         if (outbound) {

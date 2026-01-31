@@ -211,13 +211,13 @@
                 <div class="text-xs text-slate-400">이메일</div>
                 <div data-field="email" class="font-medium text-slate-800 mt-1">-</div>
               </div>
-              <div>
+              <div data-field="seatRow">
                 <div class="text-xs text-slate-400">좌석</div>
                 <div data-field="seats" class="font-medium text-slate-800 mt-1">-</div>
               </div>
             </div>
 
-            <div class="mt-5 bg-slate-50 rounded-2xl border border-primary-100 p-5">
+            <div class="mt-5 bg-slate-50 rounded-2xl border border-primary-100 p-5" data-field="passportSection">
               <div class="flex items-center justify-between gap-3 mb-4">
                 <div class="flex items-center gap-2 text-sm font-semibold text-primary-700">
                   <i data-lucide="id-card" class="w-4 h-4 text-primary-700"></i>
@@ -286,7 +286,7 @@
     <div class="relative lg:col-span-1">
       <div class="space-y-6">
         <!-- Seat Info Summary -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200" id="detailSeatInfoCard">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
               <i data-lucide="armchair" class="text-slate-400 w-[18px] h-[18px]"></i> 좌석 정보
@@ -371,6 +371,10 @@
     } else {
       btnIn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all flex flex-col items-center gap-1 bg-primary-50 text-primary-700 shadow-sm border border-primary-100';
       btnOut.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all flex flex-col items-center gap-1 text-slate-400 hover:bg-slate-50';
+    }
+
+    if (window.setSeatModalSegment) {
+      window.setSeatModalSegment(seg);
     }
   }
 </script>
