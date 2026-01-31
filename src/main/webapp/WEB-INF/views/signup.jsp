@@ -26,19 +26,22 @@
       <div class="space-y-3 pl-2">
         <label class="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" class="agree-item w-4 h-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500" data-required="true" onchange="checkAllStatus()">
-          <span class="text-sm text-slate-600">[필수] 이용약관 동의</span>
+          <span class="text-sm text-slate-600">[필수] 서비스 이용약관 동의</span>
           <i data-lucide="chevron-right" class="ml-auto text-slate-400 w-4 h-4"></i>
         </label>
+        <p class="text-xs text-slate-400 pl-7">항공권 검색·예약·결제 및 변경/환불 규정을 포함합니다.</p>
         <label class="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" class="agree-item w-4 h-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500" data-required="true" onchange="checkAllStatus()">
           <span class="text-sm text-slate-600">[필수] 개인정보 수집 및 이용 동의</span>
           <i data-lucide="chevron-right" class="ml-auto text-slate-400 w-4 h-4"></i>
         </label>
+        <p class="text-xs text-slate-400 pl-7">예약자/탑승객 정보, 여권 정보, 결제 정보 처리에 동의합니다.</p>
         <label class="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" class="agree-item w-4 h-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500" data-required="false" onchange="checkAllStatus()">
           <span class="text-sm text-slate-600">[선택] 마케팅 정보 수신 동의</span>
           <i data-lucide="chevron-right" class="ml-auto text-slate-400 w-4 h-4"></i>
         </label>
+        <p class="text-xs text-slate-400 pl-7">특가 항공권, 프로모션, 맞춤 여행 추천 소식을 받아볼 수 있습니다.</p>
       </div>
     </div>
     <div class="mt-8 flex gap-3">

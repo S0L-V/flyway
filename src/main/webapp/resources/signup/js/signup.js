@@ -13,6 +13,23 @@
 
   let currentMethod = null;
 
+  function getStepParam() {
+    const params = new URLSearchParams(window.location.search);
+    const step = Number(params.get("step"));
+    return Number.isFinite(step) ? step : null;
+  }
+
+  function setStepParam(step, replace = false) {
+    const params = new URLSearchParams(window.location.search);
+    params.set("step", String(step));
+    const nextUrl = `${window.location.pathname}?${params.toString()}`;
+    if (replace) {
+      window.history.replaceState({ step }, "", nextUrl);
+    } else {
+      window.history.pushState({ step }, "", nextUrl);
+    }
+  }
+
   function showStep(step) {
     steps.forEach(({ el }) => el.classList.add("hidden"));
     const target = steps.find((item) => item.step === step);
@@ -40,6 +57,9 @@
   }
 
   function goToStep(step) {
+    if (isOauth) {
+      step = 3;
+    }
     if (step === 2) {
       const required = document.querySelectorAll('.agree-item[data-required="true"]');
       for (const cb of required) {
@@ -54,6 +74,7 @@
       }
     }
     showStep(step);
+    setStepParam(step);
     if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
       lucide.createIcons();
     }
@@ -444,8 +465,22 @@
   if (isOauth || hasError) {
     currentMethod = isOauth ? "kakao" : "email";
     showStep(3);
+    setStepParam(3, true);
   } else {
-    showStep(1);
+    const paramStep = getStepParam();
+    if (paramStep && steps.some((item) => item.step === paramStep)) {
+      showStep(paramStep);
+    } else {
+      showStep(1);
+      setStepParam(1, true);
+    }
   }
   updateSubmitState();
+
+  window.addEventListener("popstate", () => {
+    const paramStep = getStepParam();
+    if (paramStep && steps.some((item) => item.step === paramStep)) {
+      showStep(paramStep);
+    }
+  });
 })();
