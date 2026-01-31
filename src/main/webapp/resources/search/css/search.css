@@ -131,8 +131,7 @@
   height: 3px;
 }
 
-.field { position: relative; z-index: 1; }
-.field:focus-within { z-index: 9999; }
+.field { position: relative; }
 
 .dropdown-toggle { width: 100%; text-align: left; }
 
@@ -147,7 +146,7 @@
   border-radius: 12px;
   box-shadow: 0 12px 30px rgba(0,0,0,.12);
   padding: 12px;
-  z-index: 9999;
+  z-index: 50;
 }
 
 .dropdown-search {
@@ -275,8 +274,6 @@
 
 .search-section{
   overflow: visible;
-  position: relative;
-  z-index: 100;
 }
 
 .dropdown-panel{
@@ -506,15 +503,15 @@
   cursor: pointer;
 }
 
-/* 페이징 컨테이너 */
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  margin-top: 40px;
-  margin-bottom: 60px;
-}
+   /* 페이징 컨테이너 */
+ .pagination-container {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 6px;
+   margin-top: 40px;
+   margin-bottom: 60px;
+ }
 
 /* 공통 버튼 스타일 */
 .pg-btn {
