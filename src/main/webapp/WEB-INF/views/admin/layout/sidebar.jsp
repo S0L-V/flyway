@@ -2,19 +2,19 @@
 <!-- 모바일 오버레이 배경 -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" onclick="toggleSidebar()"></div>
 
-<!-- 사이드바: 모바일 토글 / 데스크톱 호버 확장 -->
-<div id="sidebar" class="sidebar-collapsed bg-[#1a1f26] text-slate-300 flex flex-col h-screen fixed left-0 top-0 z-50 shadow-2xl transform -translate-x-full lg:translate-x-0 transition-all duration-300">
+<!-- 사이드바: 글래스 스타일 -->
+<div id="sidebar" class="sidebar-collapsed glass-sidebar text-slate-300 flex flex-col h-screen fixed left-0 top-0 z-50 transform -translate-x-full lg:translate-x-0 transition-all duration-300">
     <!-- 로고 영역 -->
-    <div class="p-4 flex items-center justify-center border-b border-slate-700/30 h-16 relative">
-        <a href="${pageContext.request.contextPath}/admin/dashboard" class="flex items-center justify-center">
+    <div class="p-4 flex items-center justify-center border-b border-white/5 h-16 relative">
+        <a href="${pageContext.request.contextPath}/admin/dashboard" class="logo-3d flex items-center justify-center">
             <!-- 축소 시: 아이콘 로고 -->
             <img src="${pageContext.request.contextPath}/resources/seat/img/logo-icon.svg"
                  alt="Flyway"
-                 class="logo-icon w-8 h-8 brightness-0 invert opacity-90">
+                 class="logo-icon w-8 h-8 brightness-0 invert">
             <!-- 확장 시: 전체 로고 -->
             <img src="${pageContext.request.contextPath}/resources/common/img/logo.svg"
                  alt="Flyway"
-                 class="logo-full h-8 brightness-0 invert opacity-90">
+                 class="logo-full h-7 brightness-0 invert">
         </a>
         <!-- 모바일 닫기 버튼 -->
         <button class="lg:hidden absolute right-3 p-2 hover:bg-white/10 rounded-lg" onclick="toggleSidebar()">
@@ -60,6 +60,54 @@
 </div>
 
 <style>
+    /* 로고 3D 입체감 효과 */
+    .logo-3d {
+        transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    /* 아이콘 로고 (접혔을 때) */
+    .logo-3d .logo-icon {
+        filter:
+                drop-shadow(0 0 8px rgba(255, 255, 255, 0.4))
+                drop-shadow(0 0 20px rgba(255, 255, 255, 0.2))
+                drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+        transition: filter 0.2s ease, transform 0.2s ease;
+    }
+
+    /* 전체 로고 (펼쳐졌을 때) - 더 밝고 선명하게 */
+    .logo-3d .logo-full {
+        filter:
+                brightness(1.5)
+                contrast(1.1)
+                drop-shadow(0 0 10px rgba(255, 255, 255, 0.6))
+                drop-shadow(0 0 25px rgba(255, 255, 255, 0.35))
+                drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+        transition: filter 0.2s ease, transform 0.2s ease;
+    }
+
+    .logo-3d:hover .logo-icon {
+        filter:
+                drop-shadow(0 0 12px rgba(255, 255, 255, 0.6))
+                drop-shadow(0 0 30px rgba(255, 255, 255, 0.3))
+                drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+        transform: translateY(-2px);
+    }
+
+    .logo-3d:hover .logo-full {
+        filter:
+                brightness(1.6)
+                contrast(1.1)
+                drop-shadow(0 0 14px rgba(255, 255, 255, 0.7))
+                drop-shadow(0 0 35px rgba(255, 255, 255, 0.4))
+                drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+        transform: translateY(-2px);
+    }
+
+    .logo-3d:active .logo-icon,
+    .logo-3d:active .logo-full {
+        transform: translateY(0);
+    }
+
     /* 데스크톱: 축소 상태 (아이콘만) */
     @media (min-width: 1024px) {
         .sidebar-collapsed {

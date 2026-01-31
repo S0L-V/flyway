@@ -207,6 +207,34 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 	}
 
 	/**
+	 * 시간대별 예약 분포 조회
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<java.util.Map<String, Object>> getHourlyReservationDistribution(int days) {
+		try {
+			return dashboardRepository.findHourlyReservationDistribution(days);
+		} catch (Exception e) {
+			log.error("Failed to get hourly reservation distribution", e);
+			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * 예약 상태별 분포 조회
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<java.util.Map<String, Object>> getReservationStatusDistribution(int days) {
+		try {
+			return dashboardRepository.findReservationStatusDistribution(days);
+		} catch (Exception e) {
+			log.error("Failed to get reservation status distribution", e);
+			return Collections.emptyList();
+		}
+	}
+
+	/**
 	 * 안전한 카운트 조회 (예외 발생 시 0 반환)
 	 */
 	private long safeCount(CountSupplier supplier) {

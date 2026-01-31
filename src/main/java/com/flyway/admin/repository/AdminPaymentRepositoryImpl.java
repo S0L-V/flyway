@@ -36,12 +36,12 @@ public class AdminPaymentRepositoryImpl implements AdminPaymentRepository {
 	}
 
 	@Override
-	public List<PaymentListDto> selectPaymentList(String status, int offset, int limit) {
-		return adminPaymentMapper.selectPaymentList(status, offset, limit);
+	public List<PaymentListDto> selectPaymentList(String status, String keyword, int offset, int limit) {
+		return adminPaymentMapper.selectPaymentList(status, keyword, offset, limit);
 	}
 
 	@Override
-	public long countPayments(String status) {
-		return adminPaymentMapper.countPayments(status);
+	public long countPayments(String status, String keyword) {
+		return adminPaymentMapper.countPayments(status, keyword);
 	}
 }

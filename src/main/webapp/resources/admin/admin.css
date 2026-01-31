@@ -1,6 +1,8 @@
 /* ========================================
-   Flyway Admin - Global Styles
+   Flyway Admin - Global Styles (Glassmorphism)
    ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* 기본 폰트 설정 */
 body {
@@ -9,38 +11,441 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* 커스텀 스크롤바 */
+/* ========================================
+   다크 배경 (iOS 스타일)
+   ======================================== */
+.admin-bg {
+    background: #1c1c1e;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* 미묘한 노이즈 텍스처 (iOS 느낌) */
+.admin-bg::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+            radial-gradient(ellipse at top, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ========================================
+   글래스 카드 스타일 (iOS 스타일)
+   ======================================== */
+.glass-card {
+    background: rgba(44, 44, 46, 0.8);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0.5px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.glass-card:hover {
+    background: rgba(58, 58, 60, 0.9);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 카드 호버 시 내부 텍스트 강조 */
+.glass-card:hover .text-glass-primary,
+.glass-card:hover .stat-number {
+    color: rgba(255, 255, 255, 1);
+}
+
+.glass-card:hover .text-glass-muted {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* 컬러 아이콘 배경 (iOS 스타일 - 단색 반투명) */
+.glass-icon-blue {
+    background: rgba(10, 132, 255, 0.15);
+    border: 0.5px solid rgba(10, 132, 255, 0.25);
+}
+.glass-icon-teal {
+    background: rgba(48, 209, 88, 0.15);
+    border: 0.5px solid rgba(48, 209, 88, 0.25);
+}
+.glass-icon-rose {
+    background: rgba(255, 69, 58, 0.15);
+    border: 0.5px solid rgba(255, 69, 58, 0.25);
+}
+.glass-icon-emerald {
+    background: rgba(48, 209, 88, 0.15);
+    border: 0.5px solid rgba(48, 209, 88, 0.25);
+}
+.glass-icon-yellow {
+    background: rgba(255, 214, 10, 0.15);
+    border: 0.5px solid rgba(255, 214, 10, 0.25);
+}
+.glass-icon-indigo {
+    background: rgba(94, 92, 230, 0.15);
+    border: 0.5px solid rgba(94, 92, 230, 0.25);
+}
+.glass-icon-purple {
+    background: rgba(191, 90, 242, 0.15);
+    border: 0.5px solid rgba(191, 90, 242, 0.25);
+}
+.glass-icon-sky {
+    background: rgba(100, 210, 255, 0.15);
+    border: 0.5px solid rgba(100, 210, 255, 0.25);
+}
+
+/* ========================================
+   글래스 섹션 (테이블, 리스트 컨테이너) - iOS 스타일
+   ======================================== */
+.glass-section {
+    background: rgba(44, 44, 46, 0.8);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ========================================
+   글래스 버튼 (iOS 스타일)
+   ======================================== */
+.glass-btn {
+    background: #0a84ff;
+    border: none;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+}
+
+.glass-btn:hover {
+    background: #409cff;
+    transform: scale(1.02);
+}
+
+.glass-btn:active {
+    transform: scale(0.98);
+    background: #0077ed;
+}
+
+/* ========================================
+   iOS Segmented Control (슬라이딩 애니메이션)
+   ======================================== */
+.ios-segment-group {
+    position: relative;
+    display: inline-flex;
+    background: rgba(118, 118, 128, 0.12);
+    border-radius: 0.5rem;
+    padding: 2px;
+}
+
+.ios-segment-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    height: calc(100% - 4px);
+    width: calc(33.333% - 2px);
+    background: rgba(99, 99, 102, 0.6);
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ios-segment-btn {
+    position: relative;
+    z-index: 1;
+    padding: 0.4rem 0.875rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    min-width: 70px;
+    text-align: center;
+}
+
+.ios-segment-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.ios-segment-btn:active {
+    transform: scale(0.98);
+}
+
+.ios-segment-btn.active {
+    color: white;
+}
+
+/* 슬라이더 위치 (JavaScript로 제어) */
+.ios-segment-group[data-active="0"] .ios-segment-slider {
+    transform: translateX(0);
+}
+
+.ios-segment-group[data-active="1"] .ios-segment-slider {
+    transform: translateX(100%);
+}
+
+.ios-segment-group[data-active="2"] .ios-segment-slider {
+    transform: translateX(200%);
+}
+
+/* iOS Segment - Small variant (차트용) */
+.ios-segment-group.small {
+    padding: 1px;
+}
+
+.ios-segment-group.small .ios-segment-slider {
+    top: 1px;
+    left: 1px;
+    height: calc(100% - 2px);
+    width: calc(33.333% - 1px);
+}
+
+.ios-segment-group.small .ios-segment-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+    min-width: 40px;
+}
+
+/* 기존 glass-tab 스타일 유지 (다른 곳에서 사용할 수 있음) */
+.glass-tab-group {
+    background: rgba(118, 118, 128, 0.12);
+    border-radius: 0.5rem;
+    padding: 2px;
+}
+
+.glass-tab {
+    padding: 0.4rem 0.875rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.glass-tab:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.glass-tab:active {
+    transform: scale(0.98);
+}
+
+.glass-tab.active {
+    background: rgba(99, 99, 102, 0.5);
+    color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.glass-tab.active:hover {
+    background: rgba(99, 99, 102, 0.6);
+}
+
+/* ========================================
+   다크 테마 텍스트
+   ======================================== */
+.text-glass-primary {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.text-glass-secondary {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.text-glass-muted {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* 테이블/리스트 호버 시 텍스트 강조 */
+tr:hover .text-glass-primary,
+.glass-activity-item:hover .text-glass-primary {
+    color: rgba(255, 255, 255, 1);
+}
+
+tr:hover .text-glass-secondary,
+.glass-activity-item:hover .text-glass-secondary {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+tr:hover .text-glass-muted,
+.glass-activity-item:hover .text-glass-muted {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* 통계 숫자 강조 */
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   글래스 활동 리스트
+   ======================================== */
+.glass-activity-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.glass-activity-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.glass-activity-item:last-child {
+    border-bottom: none;
+}
+
+/* 테이블 행 호버 */
+.glass-section tr:hover,
+tbody tr:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ========================================
+   글래스 모달 (iOS 스타일)
+   ======================================== */
+.glass-modal {
+    background: rgba(44, 44, 46, 0.95);
+    backdrop-filter: blur(50px) saturate(150%);
+    -webkit-backdrop-filter: blur(50px) saturate(150%);
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* 모달 내부 텍스트 가독성 향상 */
+.glass-modal .text-glass-primary {
+    color: rgba(255, 255, 255, 1);
+}
+
+.glass-modal .text-glass-secondary {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.glass-modal .text-glass-muted {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* ========================================
+   글래스 사이드바 (iOS 스타일)
+   ======================================== */
+.glass-sidebar {
+    background: rgba(28, 28, 30, 0.95);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    border-right: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ========================================
+   글래스 탑바 (iOS 스타일)
+   ======================================== */
+.glass-topbar {
+    background: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+
+/* 글래스 검색바 */
+.glass-search {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.glass-search:focus-within {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.glass-search input {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.glass-search input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* 알림 뱃지 */
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+/* 커스텀 스크롤바 (다크 테마) */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: rgba(255, 255, 255, 0.3);
 }
 
-/* 사이드바 메뉴 활성화 스타일 */
+/* 사이드바 메뉴 활성화 스타일 (iOS 스타일) */
 .nav-link {
     transition: all 0.2s ease;
 }
 
 .nav-link.active {
-    background-color: #1e40af !important;
-    color: white !important;
-    box-shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.3);
+    background-color: rgba(10, 132, 255, 0.2) !important;
+    color: #0a84ff !important;
+    border: 0.5px solid rgba(10, 132, 255, 0.3);
 }
 
 .nav-link.active i {
-    color: white !important;
+    color: #0a84ff !important;
+}
+
+.nav-link:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* 통계 카드 호버 효과 */
@@ -51,6 +456,48 @@ body {
 .stat-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   iOS 스타일 토글 스위치
+   ======================================== */
+.ios-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 51px;
+    height: 31px;
+    background: rgba(120, 120, 128, 0.32);
+    border-radius: 15.5px;
+    cursor: pointer;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    padding: 0;
+}
+
+.ios-toggle:active {
+    transform: scale(0.97);
+}
+
+.ios-toggle.active {
+    background: #34c759;
+}
+
+.ios-toggle .ios-toggle-thumb {
+    position: absolute;
+    left: 2px;
+    width: 27px;
+    height: 27px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15),
+    0 1px 1px rgba(0, 0, 0, 0.16),
+    0 3px 1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ios-toggle.active .ios-toggle-thumb {
+    transform: translateX(20px);
 }
 
 /* 로딩 애니메이션 */
