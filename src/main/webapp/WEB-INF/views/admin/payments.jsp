@@ -205,6 +205,13 @@
             viewToggle: document.getElementById('view-toggle')
         };
 
+        // URL 파라미터에서 검색어 읽기 (알림에서 이동 시)
+        const urlParams = new URLSearchParams(window.location.search);
+        const keywordParam = urlParams.get('keyword');
+        if (keywordParam && elements.searchKeyword) {
+            elements.searchKeyword.value = keywordParam;
+        }
+
         // 초기 데이터 로딩
         fetchPaymentStats();
         fetchPaymentList();

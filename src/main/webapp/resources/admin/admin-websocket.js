@@ -125,6 +125,14 @@ const AdminWebSocket = (function() {
                     clearTimeout(pongTimer);
                     break;
 
+                case 'REFRESH_ALL':
+                    // 서버에서 새 알림 생성 시 전체 데이터 갱신 요청
+                    console.log('[WebSocket] REFRESH_ALL received, fetching all data...');
+                    requestStats();
+                    requestActivities();
+                    requestNotifications();
+                    break;
+
                 case 'ERROR':
                     console.error('[WebSocket] Server error:', message.errorMessage);
                     if (handlers.onError) {
