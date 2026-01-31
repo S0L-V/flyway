@@ -199,6 +199,27 @@ public class AdminDashboardApiController {
 		}
 	}
 
+	/**
+	 * 시간대별 예약 분포 조회 (차트용)
+	 * GET /admin/api/dashboard/chart/hourly-reservations?days=7
+	 */
+	@GetMapping("/chart/hourly-reservations")
+	public ApiResponse<List<Map<String, Object>>> getHourlyReservationDistribution(
+		@RequestParam(defaultValue = "7") int days) {
+
+		if (days <= 0 || days > 90) {
+			return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(), "조회 기간은 1일 이상 90일 이하이어야 합니다.");
+		}
+
+		try {
+			List<Map<String, Object>> distribution = dashboardService.getHourlyReservationDistribution(days);
+			return ApiResponse.success(distribution);
+		} catch (Exception e) {
+			log.error("Failed to get hourly reservation distribution", e);
+			return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), "시간대별 예약 분포 조회 중 오류가 발생했습니다.");
+		}
+	}
+
 	@GetMapping("/visitors")
 	public ApiResponse<List<VisitorDetailDto>> getTodayVisitors(@RequestParam(defaultValue = "50") int limit) {
 		if (limit <= 0 || limit > 100) {

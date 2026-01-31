@@ -13,6 +13,12 @@ const AdminDashboard = (function() {
     let currentActivities = [];
     let currentNotifications = [];
 
+    // 차트 관련
+    let revenueChart = null;
+    let currentChartDays = 7;
+    let hourlyChart = null;
+    let currentHourlyDays = 7;
+
     // 컨텍스트 경로 저장
     let basePath = '';
 
@@ -53,6 +59,14 @@ const AdminDashboard = (function() {
 
         // 방문자 모달 이벤트
         bindVisitorModal();
+
+        // 매출 차트 초기화
+        initRevenueChart();
+        bindChartPeriodTabs();
+
+        // 시간대별 예약 차트 초기화
+        initHourlyChart();
+        bindHourlyPeriodTabs();
 
         console.log('[Dashboard] Initialized');
     }
@@ -338,9 +352,8 @@ const AdminDashboard = (function() {
                         <div class="text-xs text-glass-muted mt-0.5 truncate">
                             ${escapeHtml(activity.userName)} · ${escapeHtml(activity.userEmail)}
                         </div>
-                        <div class="flex items-center justify-between mt-1.5">
+                        <div class="mt-1.5">
                             ${timeBadge}
-                            ${activity.amount ? `<span class="text-sm font-bold text-emerald-400">${formatCurrency(activity.amount)}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -691,6 +704,474 @@ const AdminDashboard = (function() {
         html += '</div>';
 
         elements.visitorList.innerHTML = html;
+    }
+
+    // === 매출 차트 관련 ===
+
+    /**
+     * 매출 차트 초기화
+     */
+    function initRevenueChart() {
+        var canvas = document.getElementById('revenue-chart');
+        if (!canvas) return;
+
+        var ctx = canvas.getContext('2d');
+
+        // Chart.js 존재 확인
+        if (typeof Chart === 'undefined') {
+            console.warn('[Dashboard] Chart.js not loaded');
+            return;
+        }
+
+        // 글래스 테마용 그라데이션 생성
+        var gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
+
+        revenueChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '매출',
+                    data: [],
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                    pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: 'rgba(16, 185, 129, 1)',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(items) {
+                                return items[0].label;
+                            },
+                            label: function(context) {
+                                return '₩ ' + new Intl.NumberFormat('ko-KR').format(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(148, 163, 184, 0.8)',
+                            font: {
+                                size: 11
+                            },
+                            maxRotation: 0
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(148, 163, 184, 0.8)',
+                            font: {
+                                size: 11
+                            },
+                            callback: function(value) {
+                                if (value >= 1000000) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                } else if (value >= 1000) {
+                                    return (value / 1000).toFixed(0) + 'K';
+                                }
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 초기 데이터 로드
+        fetchRevenueChartData(currentChartDays);
+    }
+
+    /**
+     * 차트 기간 탭 바인딩
+     */
+    function bindChartPeriodTabs() {
+        var chartSegment = document.getElementById('chart-period-segment');
+        if (!chartSegment) return;
+
+        var buttons = chartSegment.querySelectorAll('.ios-segment-btn');
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var days = parseInt(this.getAttribute('data-days'));
+                var index = this.getAttribute('data-index');
+
+                console.log('[Dashboard] Chart period changed to:', days, 'days');
+
+                // 활성 상태 업데이트
+                buttons.forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+
+                // 슬라이더 이동
+                chartSegment.setAttribute('data-active', index);
+
+                // 라벨 업데이트
+                var periodLabel = document.getElementById('chart-period-label');
+                if (periodLabel) {
+                    periodLabel.textContent = '최근 ' + days + '일간 일별 매출';
+                }
+
+                // 데이터 로드
+                currentChartDays = days;
+                fetchRevenueChartData(days);
+            });
+        });
+    }
+
+    /**
+     * 매출 차트 데이터 로드
+     */
+    function fetchRevenueChartData(days) {
+        console.log('[Dashboard] Fetching chart data for', days, 'days');
+
+        fetch(basePath + '/admin/api/dashboard/stats/daily/recent?days=' + days, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                console.log('[Dashboard] Chart data received:', data);
+                if (data.success && data.data) {
+                    updateRevenueChart(data.data);
+                } else {
+                    console.warn('[Dashboard] No chart data available');
+                }
+            })
+            .catch(function(error) {
+                console.error('[Dashboard] Failed to fetch chart data:', error);
+            });
+    }
+
+    /**
+     * 매출 차트 업데이트
+     */
+    function updateRevenueChart(stats) {
+        if (!revenueChart) return;
+
+        // 날짜순 정렬 (오래된 것부터)
+        var sortedStats = stats.slice().sort(function(a, b) {
+            var dateA = a.statDate;
+            var dateB = b.statDate;
+            if (Array.isArray(dateA)) {
+                dateA = new Date(dateA[0], dateA[1] - 1, dateA[2]);
+            } else {
+                dateA = new Date(dateA);
+            }
+            if (Array.isArray(dateB)) {
+                dateB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
+            } else {
+                dateB = new Date(dateB);
+            }
+            return dateA - dateB;
+        });
+
+        // 라벨과 데이터 추출
+        var labels = [];
+        var revenues = [];
+        var totalRevenue = 0;
+
+        sortedStats.forEach(function(stat) {
+            var date;
+            if (Array.isArray(stat.statDate)) {
+                date = new Date(stat.statDate[0], stat.statDate[1] - 1, stat.statDate[2]);
+            } else {
+                date = new Date(stat.statDate);
+            }
+
+            // 라벨 포맷 (M/D)
+            var label = (date.getMonth() + 1) + '/' + date.getDate();
+            labels.push(label);
+
+            var revenue = stat.totalRevenue || 0;
+            revenues.push(revenue);
+            totalRevenue += revenue;
+        });
+
+        // 차트 업데이트 (애니메이션 포함)
+        revenueChart.data.labels = labels;
+        revenueChart.data.datasets[0].data = revenues;
+        revenueChart.update();
+
+        // 요약 정보 업데이트
+        var avgRevenue = sortedStats.length > 0 ? Math.round(totalRevenue / sortedStats.length) : 0;
+
+        var totalEl = document.getElementById('chart-total-revenue');
+        var avgEl = document.getElementById('chart-avg-revenue');
+
+        if (totalEl) {
+            totalEl.textContent = '₩ ' + new Intl.NumberFormat('ko-KR').format(totalRevenue);
+        }
+        if (avgEl) {
+            avgEl.textContent = '₩ ' + new Intl.NumberFormat('ko-KR').format(avgRevenue);
+        }
+    }
+
+    // === 시간대별 예약 차트 ===
+
+    /**
+     * 시간대별 예약 차트 초기화
+     */
+    function initHourlyChart() {
+        var canvas = document.getElementById('hourly-chart');
+        if (!canvas) return;
+
+        var ctx = canvas.getContext('2d');
+
+        if (typeof Chart === 'undefined') {
+            console.warn('[Dashboard] Chart.js not loaded');
+            return;
+        }
+
+        // 그라데이션 생성 (amber/orange 계열)
+        var gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(251, 191, 36, 0.4)');
+        gradient.addColorStop(1, 'rgba(251, 191, 36, 0.02)');
+
+        hourlyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '예약 건수',
+                    data: [],
+                    backgroundColor: gradient,
+                    borderColor: 'rgba(251, 191, 36, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(items) {
+                                return items[0].label + ' 시';
+                            },
+                            label: function(context) {
+                                return context.parsed.y + '건';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'rgba(148, 163, 184, 0.8)',
+                            font: {
+                                size: 10
+                            },
+                            maxRotation: 0,
+                            callback: function(value, index) {
+                                // 매 3시간마다만 라벨 표시
+                                return index % 3 === 0 ? this.getLabelForValue(value) : '';
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(148, 163, 184, 0.8)',
+                            font: {
+                                size: 11
+                            },
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // 초기 데이터 로드
+        fetchHourlyChartData(currentHourlyDays);
+    }
+
+    /**
+     * 시간대별 차트 기간 탭 바인딩
+     */
+    function bindHourlyPeriodTabs() {
+        var segment = document.getElementById('hourly-period-segment');
+        if (!segment) return;
+
+        var buttons = segment.querySelectorAll('.ios-segment-btn');
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var days = parseInt(this.getAttribute('data-days'));
+                var index = this.getAttribute('data-index');
+
+                console.log('[Dashboard] Hourly chart period changed to:', days, 'days');
+
+                // 활성 상태 업데이트
+                buttons.forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+
+                // 슬라이더 이동
+                segment.setAttribute('data-active', index);
+
+                // 라벨 업데이트
+                var label = document.getElementById('hourly-chart-label');
+                if (label) {
+                    label.textContent = '최근 ' + days + '일간 시간대별 예약 현황';
+                }
+
+                // 데이터 로드
+                currentHourlyDays = days;
+                fetchHourlyChartData(days);
+            });
+        });
+    }
+
+    /**
+     * 시간대별 예약 데이터 로드
+     */
+    function fetchHourlyChartData(days) {
+        console.log('[Dashboard] Fetching hourly chart data for', days, 'days');
+
+        fetch(basePath + '/admin/api/dashboard/chart/hourly-reservations?days=' + days, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                console.log('[Dashboard] Hourly chart data received:', data);
+                if (data.success && data.data) {
+                    updateHourlyChart(data.data);
+                } else {
+                    console.warn('[Dashboard] No hourly chart data available');
+                    // 빈 데이터로 차트 초기화
+                    updateHourlyChart([]);
+                }
+            })
+            .catch(function(error) {
+                console.error('[Dashboard] Failed to fetch hourly chart data:', error);
+            });
+    }
+
+    /**
+     * 시간대별 예약 차트 업데이트
+     */
+    function updateHourlyChart(data) {
+        if (!hourlyChart) return;
+
+        // 0-23시까지 라벨 생성
+        var labels = [];
+        var counts = [];
+        var totalCount = 0;
+        var peakHour = 0;
+        var peakCount = 0;
+
+        // 데이터를 시간대별로 맵핑
+        var hourMap = {};
+        data.forEach(function(item) {
+            var hour = item.hour;
+            var count = item.count || 0;
+            hourMap[hour] = count;
+        });
+
+        // 0-23시 데이터 채우기
+        for (var h = 0; h < 24; h++) {
+            labels.push(h.toString().padStart(2, '0'));
+            var count = hourMap[h] || 0;
+            counts.push(count);
+            totalCount += count;
+
+            if (count > peakCount) {
+                peakCount = count;
+                peakHour = h;
+            }
+        }
+
+        // 차트 업데이트
+        hourlyChart.data.labels = labels;
+        hourlyChart.data.datasets[0].data = counts;
+        hourlyChart.update();
+
+        // 요약 정보 업데이트
+        var avgCount = Math.round(totalCount / 24);
+
+        var peakEl = document.getElementById('hourly-peak-time');
+        var totalEl = document.getElementById('hourly-total-count');
+        var avgEl = document.getElementById('hourly-avg-count');
+
+        if (peakEl) {
+            if (totalCount > 0) {
+                peakEl.textContent = peakHour.toString().padStart(2, '0') + ':00 ~ ' + (peakHour + 1).toString().padStart(2, '0') + ':00';
+            } else {
+                peakEl.textContent = '-';
+            }
+        }
+        if (totalEl) {
+            totalEl.textContent = new Intl.NumberFormat('ko-KR').format(totalCount) + '건';
+        }
+        if (avgEl) {
+            avgEl.textContent = avgCount + '건/시간';
+        }
     }
 
     // === 유틸리티 함수 ===

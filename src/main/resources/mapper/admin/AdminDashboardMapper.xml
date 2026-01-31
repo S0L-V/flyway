@@ -58,7 +58,7 @@
         SELECT COUNT(*)
         FROM reservation
         WHERE status = 'HELD'
-            AND expired_at > NOW()
+          AND expired_at > NOW()
     </select>
 
     <!-- 일일 신규 가입자 수 -->
@@ -217,5 +217,20 @@
         WHERE (admin_id IS NULL OR admin_id = #{adminId})
           AND is_read = 'N'
     </update>
+
+    <!-- ============================================ -->
+    <!-- 차트용 통계 쿼리 -->
+    <!-- ============================================ -->
+
+    <!-- 시간대별 예약 분포 (최근 N일) -->
+    <select id="selectHourlyReservationDistribution" resultType="java.util.HashMap">
+        SELECT
+            HOUR(reserved_at) AS hour,
+            COUNT(*) AS count
+        FROM reservation
+        WHERE reserved_at >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        GROUP BY HOUR(reserved_at)
+        ORDER BY hour
+    </select>
 
 </mapper>
