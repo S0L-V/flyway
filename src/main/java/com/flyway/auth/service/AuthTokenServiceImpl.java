@@ -9,6 +9,7 @@ import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,9 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenHasher tokenHasher;
 
+    @Value("${cookie.secure:false}")
+    private boolean cookieSecure;
+
     @Transactional
     public void issueLoginCookies(HttpServletRequest request, HttpServletResponse response, String userId) {
         LocalDateTime now = LocalDateTime.now();
@@ -55,12 +59,12 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         LocalDateTime expiresAt = now.plusSeconds(refreshTtlSeconds);
 
         RefreshToken token = RefreshToken.builder()
-                .refreshTokenId(refreshId)
-                .userId(userId)
-                .tokenHash(hash)
-                .issuedAt(now)
-                .expiresAt(expiresAt)
-                .build();
+            .refreshTokenId(refreshId)
+            .userId(userId)
+            .tokenHash(hash)
+            .issuedAt(now)
+            .expiresAt(expiresAt)
+            .build();
 
         refreshTokenRepository.insert(token);
         addRefreshTokenCookie(response, refreshRaw, refreshTtlSeconds);
@@ -102,19 +106,19 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         LocalDateTime newExpiresAt = now.plusSeconds(refreshTtlSeconds);
 
         RefreshToken newToken = RefreshToken.builder()
-                .refreshTokenId(newRefreshId)
-                .userId(stored.getUserId())
-                .tokenHash(newHash)
-                .issuedAt(now)
-                .expiresAt(newExpiresAt)
-                .build();
+            .refreshTokenId(newRefreshId)
+            .userId(stored.getUserId())
+            .tokenHash(newHash)
+            .issuedAt(now)
+            .expiresAt(newExpiresAt)
+            .build();
 
         /* 새 refreshToken 저장 */
         refreshTokenRepository.insert(newToken);
 
         /* 기존 refresh 회전 처리 (1건만 성공) */
         int rotated = refreshTokenRepository.markRotated(
-                stored.getRefreshTokenId(), now, newRefreshId
+            stored.getRefreshTokenId(), now, newRefreshId
         );
 
         /* 동시 요청/레이스: 이미 회전됐거나 revoke인 경우 */
@@ -158,36 +162,36 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         long ttl = jwtProperties.getAccessTokenTtlSeconds();
 
         ResponseCookie cookie = ResponseCookie.from(ACCESS_COOKIE, accessToken)
-                .httpOnly(true)
-                .secure(false) // 배포(HTTPS)에서 true
-                .sameSite("Lax")
-                .path(ACCESS_COOKIE_PATH)
-                .maxAge(ttl)
-                .build();
+            .httpOnly(true)
+            .secure(cookieSecure)
+            .sameSite("Lax")
+            .path(ACCESS_COOKIE_PATH)
+            .maxAge(ttl)
+            .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshRaw, long ttl) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, refreshRaw)
-                .httpOnly(true)
-                .secure(false) // https면 true
-                .sameSite("Lax")
-                .path(REFRESH_COOKIE_PATH)
-                .maxAge(ttl)
-                .build();
+            .httpOnly(true)
+            .secure(cookieSecure)
+            .sameSite("Lax")
+            .path(REFRESH_COOKIE_PATH)
+            .maxAge(ttl)
+            .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void deleteCookie(HttpServletResponse response, String name, String path) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path(path)
-                .maxAge(0)
-                .build();
+            .httpOnly(true)
+            .secure(cookieSecure)
+            .sameSite("Lax")
+            .path(path)
+            .maxAge(0)
+            .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
