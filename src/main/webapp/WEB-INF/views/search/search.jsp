@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
     <title>검색 결과 - Flyway</title>
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
