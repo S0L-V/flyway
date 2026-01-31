@@ -3,9 +3,12 @@ package com.flyway.payment.controller;
 import com.flyway.payment.domain.RefundRequest;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.service.PaymentService;
+import com.flyway.security.principal.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import java.util.Map;
  * 결제 API 컨트롤러 (REST API)
  *
  * 마이페이지 등 다른 모듈에서 호출하는 API입니다.
+ * 로그인만 하면 다른 사람 것도 조회가능한 현상 수정
  */
 @Slf4j
 @RestController
@@ -28,9 +32,20 @@ public class PaymentApiController {
      * 결제 정보 조회
      */
     @GetMapping("/{paymentId}")
-    public ResponseEntity<PaymentViewDto> getPayment(@PathVariable String paymentId) {
+    public ResponseEntity<PaymentViewDto> getPayment(
+            @PathVariable String paymentId,
+            @AuthenticationPrincipal CustomUserDetails user) {
 
         PaymentViewDto payment = paymentService.getPayment(paymentId);
+        if (payment == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 본인 결제인지 확인
+        if (!payment.getUserId().equals(user.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         return ResponseEntity.ok(payment);
     }
 
@@ -39,9 +54,20 @@ public class PaymentApiController {
      */
     @GetMapping("/reservation/{reservationId}")
     public ResponseEntity<PaymentViewDto> getPaymentByReservation(
-            @PathVariable String reservationId) {
+            @PathVariable String reservationId,
+            @AuthenticationPrincipal CustomUserDetails user) {
 
         PaymentViewDto payment = paymentService.getPaymentByReservation(reservationId);
+
+        if (payment == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 본인 결제인지 확인
+        if (!payment.getUserId().equals(user.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         return ResponseEntity.ok(payment);
     }
 
@@ -56,12 +82,31 @@ public class PaymentApiController {
     @PostMapping("/{paymentId}/refund")
     public ResponseEntity<Map<String, Object>> processRefund(
             @PathVariable String paymentId,
-            @RequestBody RefundRequest request) {
+            @RequestBody RefundRequest request,
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        log.info("[환불] 요청 - paymentId: {}, reason: {}",
-                paymentId, request.getCancelReason());
+        log.info("[환불] 요청 - paymentId: {}, userId: {}, reason: {}",
+                paymentId, user.getUserId(), request.getCancelReason());
 
         try {
+            // 본인 결제인지 확인
+            PaymentViewDto payment = paymentService.getPayment(paymentId);
+            if (payment == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "결제 정보를 찾을 수 없습니다."
+                ));
+            }
+
+            if (!payment.getUserId().equals(user.getUserId())) {
+                log.warn("[환불] 권한 없음 - paymentId: {}, 요청자: {}, 소유자: {}",
+                        paymentId, user.getUserId(), payment.getUserId());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                        "success", false,
+                        "message", "환불 권한이 없습니다."
+                ));
+            }
+
             PaymentViewDto result = paymentService.refund(paymentId, request);
 
             Map<String, Object> response = new HashMap<>();
@@ -70,12 +115,12 @@ public class PaymentApiController {
 
             return ResponseEntity.ok(response);
 
-        } catch (Exception e) {
+        }catch (Exception e) {
             log.error("[환불] 실패 - paymentId: {}, error: {}", paymentId, e.getMessage());
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "환불 처리 중 문제가 발생했습니다.");
 
             return ResponseEntity.badRequest().body(response);
         }
