@@ -26,3 +26,4 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/static/pretendard.css" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="${pageContext.request.contextPath}/resources/common/js/click-spark.js" defer></script>
