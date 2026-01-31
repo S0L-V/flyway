@@ -55,4 +55,25 @@ public class FlightApiController {
         return service.findPrice(outFlightId, inFlightId, cabinClassCode);
     }
 
+    @GetMapping("/api/public/flights/price-history")
+    public java.util.Map<String, Object> priceHistory(
+            @RequestParam String flightId,
+            @RequestParam String cabinClassCode,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) Integer limit
+    ) {
+        int safeLimit = (limit == null || limit <= 0) ? 2000 : Math.min(limit, 5000);
+
+        List<java.util.Map<String, Object>> points =
+                service.findPriceHistory(flightId, cabinClassCode, from, to, safeLimit);
+
+        java.util.Map<String, Object> res = new java.util.HashMap<>();
+        res.put("flightId", flightId);
+        res.put("cabinClassCode", cabinClassCode);
+        res.put("points", points);
+        return res;
+    }
+
+
 }

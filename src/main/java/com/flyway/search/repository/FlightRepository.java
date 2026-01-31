@@ -9,6 +9,7 @@ import com.flyway.search.dto.FlightSearchResponse;
 import com.flyway.search.dto.LastPriceDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FlightRepository {
     List<Flight> findAll(Flight vo);
@@ -26,4 +27,6 @@ public interface FlightRepository {
     FlightDetailDto findDetails(String cabinClass, String routeType);
 
     List<LastPriceDto> findPrice(String outFlightId, String inFlightId, String cabinClassCode);
+
+    List<Map<String, Object>> findPriceHistory(String flightId, String cabinClassCode, String from, String to, Integer limit);
 }

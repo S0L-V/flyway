@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -181,5 +182,10 @@ public class FlightServiceImpl implements FlightService{
         inFlight.setFlightPrice(totalPrice / 2);
 
         return prePrice;
+    }
+
+    @Override
+    public List<Map<String, Object>> findPriceHistory(String flightId, String cabinClassCode, String from, String to, Integer limit) {
+        return flightRepository.findPriceHistory(flightId, cabinClassCode, from, to, limit);
     }
 }

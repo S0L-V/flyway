@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -41,4 +42,9 @@ public class FlightRepositoryImpl implements FlightRepository {
     public List<LastPriceDto> findPrice(String outFlightId, String inFlightId, String cabinClassCode) {
         return mapper.findPrice(outFlightId, inFlightId, cabinClassCode);
     }
+
+    public List<Map<String, Object>> findPriceHistory(String flightId, String cabinClassCode, String from, String to, Integer limit) {
+        return mapper.selectPriceHistoryPoints(flightId, cabinClassCode, from, to, limit);
+    }
+
 }
