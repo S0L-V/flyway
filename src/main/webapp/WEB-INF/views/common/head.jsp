@@ -13,3 +13,4 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/layout.css?v=<%= System.currentTimeMillis() %>">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/header-hero.css?v=<%= System.currentTimeMillis() %>">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/common-header.css">
