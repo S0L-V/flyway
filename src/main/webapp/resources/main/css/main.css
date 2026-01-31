@@ -19,7 +19,6 @@ html, body {
     margin: 0; padding: 0;
     font-family: 'Pretendard Variable', sans-serif;
     color: var(--color-text-primary);
-    background-color: var(--color-bg-white); /* 전체 배경 흰색 */
     overflow-x: hidden;
 }
 
@@ -60,100 +59,100 @@ html, body {
 /* =========================================
    [SECTION 1] 특가 항공권 슬라이더 (Center Mode)
    ========================================= */
-/*.special-offers-section {*/
-/*    position: relative;*/
-/*    width: 100%;*/
-/*    margin-top: 60px;*/
-/*    margin-bottom: 100px;*/
-/*    background-color: #ffffff; !* 섹션 배경 흰색 고정 *!*/
-/*}*/
+.special-offers-section {
+    position: relative;
+    width: 100%;
+    margin-top: 60px;
+    margin-bottom: 100px;
+    background: transparent;
+}
 
-/*!* 슬라이더 컨테이너 *!*/
-/*.slider-wrapper {*/
-/*    background-color: #ffffff;*/
-/*    position: relative;*/
-/*    width: 100%;*/
-/*    !* max-width 제거 또는 넓게 잡아서 그라데이션 영역 확보 *!*/
-/*    max-width: 100%;*/
-/*    height: 480px; !* 카드+그림자 공간 충분히 확보 *!*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    !* justify-content: center;  <- JS로 위치 계산하므로 제거 *!*/
-/*    overflow: hidden;*/
-/*    padding: 20px 0;*/
-/*}*/
+/* 슬라이더 컨테이너 */
+.slider-wrapper {
+    background: transparent;
+    position: relative;
+    width: 100%;
+    /* max-width 제거 또는 넓게 잡아서 그라데이션 영역 확보 */
+    max-width: 100%;
+    height: 480px; /* 카드+그림자 공간 충분히 확보 */
+    display: flex;
+    align-items: center;
+    /* justify-content: center;  <- JS로 위치 계산하므로 제거 */
+    overflow: hidden;
+    padding: 20px 0;
+}
 
-/*!* --- 양쪽 사이드 화이트 그라데이션 (Pure White) --- *!*/
-/*.slider-wrapper::before,*/
-/*.slider-wrapper::after {*/
-/*    content: "";*/
-/*    position: absolute;*/
-/*    top: 0;*/
-/*    width: 20%; !* 너비를 넓혀서 자연스럽게 흐리게 *!*/
-/*    height: 100%;*/
-/*    z-index: 10;*/
-/*    pointer-events: none;*/
-/*}*/
+/* --- 양쪽 사이드 화이트 그라데이션 (Pure White) --- */
+.slider-wrapper::before,
+.slider-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 20%; /* 너비를 넓혀서 자연스럽게 흐리게 */
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
 
-/*!* 왼쪽 그라데이션 (흰색 -> 투명) *!*/
-/*.slider-wrapper::before {*/
-/*    left: 0;*/
-/*    background: linear-gradient(to right, #ffffff 30%, rgba(255,255,255,0) 100%);*/
-/*}*/
+/* 왼쪽 그라데이션 */
+.slider-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(224, 242, 254, 0.9) 0%, transparent 100%);
+}
 
-/*!* 오른쪽 그라데이션 (흰색 -> 투명) *!*/
-/*.slider-wrapper::after {*/
-/*    right: 0;*/
-/*    background: linear-gradient(to left, #ffffff 30%, rgba(255,255,255,0) 100%);*/
-/*}*/
+/* 오른쪽 그라데이션 */
+.slider-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(241, 245, 249, 0.9) 0%, transparent 100%);
+}
 
-/*!* 트랙 *!*/
-/*.main-slider-track {*/
-/*    display: flex;*/
-/*    gap: var(--card-gap);*/
-/*    padding: 0;*/
-/*    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);*/
-/*    will-change: transform;*/
-/*    align-items: center;*/
-/*    height: 100%;*/
-/*}*/
+/* 트랙 */
+.main-slider-track {
+    display: flex;
+    gap: var(--card-gap);
+    padding: 0;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+    align-items: center;
+    height: 100%;
+}
 
-/*!* 개별 카드 *!*/
-/*.offer-card {*/
-/*    flex: 0 0 var(--card-width);*/
-/*    height: 360px;*/
-/*    border-radius: var(--radius-card);*/
-/*    position: relative;*/
-/*    overflow: hidden;*/
-/*    box-shadow: 0 4px 18px rgba(0,0,0,0.08);*/
-/*    cursor: pointer;*/
-/*    transition: transform 0.3s ease, box-shadow 0.3s ease;*/
-/*    background-color: #ffffff;*/
-/*    background-size: cover;*/
-/*    background-position: center;*/
-/*    z-index: 1;*/
-/*}*/
+/* 개별 카드 */
+.offer-card {
+    flex: 0 0 var(--card-width);
+    height: 360px;
+    border-radius: var(--radius-card);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #ffffff;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
 
-/*!* 활성화(가운데)된 카드 강조 효과 (선택 사항) *!*/
-/*.offer-card.active {*/
-/*    transform: scale(1.05); !* 가운데 오면 약간 커짐 *!*/
-/*    z-index: 5;*/
-/*    box-shadow: 0 15px 35px rgba(0,0,0,0.15);*/
-/*}*/
+/* 활성화(가운데)된 카드 강조 효과 (선택 사항) */
+.offer-card.active {
+    transform: scale(1.05); /* 가운데 오면 약간 커짐 */
+    z-index: 5;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
 
-/*.offer-card:hover {*/
-/*    transform: translateY(-8px) scale(1.02);*/
-/*    box-shadow: 0 15px 30px rgba(0,0,0,0.15);*/
-/*    z-index: 6;*/
-/*}*/
+.offer-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    z-index: 6;
+}
 
-/*!* 오버레이 *!*/
-/*.offer-overlay {*/
-/*    position: absolute; bottom: 0; left: 0; width: 100%; height: 75%;*/
-/*    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);*/
-/*    color: white; padding: 24px 20px;*/
-/*    display: flex; flex-direction: column; justify-content: flex-end;*/
-/*}*/
+/* 오버레이 */
+.offer-overlay {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 75%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    color: white; padding: 24px 20px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+}
 
 /* 배지 & 텍스트 */
 .card-badges { position: absolute; top: 20px; left: 20px; display: flex; gap: 6px; }
