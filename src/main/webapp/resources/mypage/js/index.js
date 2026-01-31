@@ -78,8 +78,10 @@ async function init() {
     }
 
     if (needProfile) {
-        const { initProfileSave } = await import("./profile.js");
+        const { initProfileSave, initProfileInputGuards, initWithdrawHandler } = await import("./profile.js");
+        initProfileInputGuards();
         initProfileSave();
+        initWithdrawHandler();
     }
 }
 

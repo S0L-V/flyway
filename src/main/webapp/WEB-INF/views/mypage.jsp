@@ -50,7 +50,7 @@
     contextPath: "${pageContext.request.contextPath}"
   };
 </script>
-<script type="module" src="${pageContext.request.contextPath}/resources/mypage/js/index.js"></script>
+<script type="module" src="${pageContext.request.contextPath}/resources/mypage/js/index.js?v=<%= System.currentTimeMillis() %>"></script>
 <script>
   lucide.createIcons();
 </script>
