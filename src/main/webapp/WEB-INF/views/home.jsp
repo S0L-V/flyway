@@ -321,8 +321,9 @@
 
                         if (isOW && selectedDates.length === 1) {
                             // 편도 - 단일 날짜 선택
+                            const startText = formatDate(selectedDates[0]);
                             const start = toYYYYMMDD(selectedDates[0]);
-                            dateRangeText.textContent = start;
+                            dateRangeText.textContent = startText;
                             dateRangeText.classList.remove('selecting');
 
                             if (window.state) {
@@ -334,8 +335,9 @@
 
                         } else if (!isOW && selectedDates.length === 1) {
                             // 왕복 - 첫 번째 날짜 선택
+                            const startText = formatDate(selectedDates[0]);
                             const start = toYYYYMMDD(selectedDates[0]);
-                            dateRangeText.textContent = start + '  →  오는날 선택';
+                            dateRangeText.textContent = startText + '  →  오는날 선택';
                             dateRangeText.classList.add('selecting');
 
                             if (window.state) {
@@ -347,9 +349,11 @@
 
                         } else if (selectedDates.length === 2) {
                             // 왕복 - 두 날짜 모두 선택
+                            const startText = formatDate(selectedDates[0]);
+                            const endText = formatDate(selectedDates[1]);
                             const start = toYYYYMMDD(selectedDates[0]);
                             const end = toYYYYMMDD(selectedDates[1]);
-                            dateRangeText.textContent = start + '  →  ' + end;
+                            dateRangeText.textContent = startText + '  →  ' + endText;
                             dateRangeText.classList.remove('selecting');
 
                             if (window.state) {
