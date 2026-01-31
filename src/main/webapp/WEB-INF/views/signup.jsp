@@ -64,7 +64,9 @@
       </button>
       <button type="button" onclick="selectMethod('kakao')" class="w-full p-6 bg-[#FEE500] border border-[#FEE500] rounded-2xl hover:bg-[#FDD835] transition-all group text-left flex items-center gap-4">
         <div class="w-12 h-12 bg-white/50 text-black/80 rounded-full flex items-center justify-center">
-          <i data-lucide="message-circle" class="w-6 h-6"></i>
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 3C7.03 3 3 6.58 3 11c0 2.33 1.12 4.43 2.93 5.85L5 21l4.37-2.29c.83.19 1.71.29 2.63.29 4.97 0 9-3.58 9-8s-4.03-8-9-8z"/>
+          </svg>
         </div>
         <div>
           <div class="font-bold text-black/90">카카오로 가입하기</div>
