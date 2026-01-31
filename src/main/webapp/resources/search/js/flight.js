@@ -124,9 +124,13 @@ function renderFooter(option, index) {
 
     return `
       <div class="flight-footer">
-        <div class="flight-actions">
-          <button class="action-button" type="button" data-action="toggle-graph">가격 변동 그래프</button>
-          <button class="action-button" onclick="openDetailPage(${index})">여정 상세</button>
+        <div class="flight-sub-actions">
+          <button class="flight-sub-action" type="button" data-action="open-graph">
+            <i data-lucide="trending-up" class="icon-sm"></i> 가격 변동
+          </button>
+          <button class="flight-sub-action" data-action="open-detail" onclick="openDetailPage(${index})">
+            <i data-lucide="info" class="icon-sm"></i> 여정 상세
+          </button>
         </div>
         <div class="seats-remaining">${seatCount}석 남음</div>
         <div class="flight-price" tabindex="0">
@@ -135,6 +139,11 @@ function renderFooter(option, index) {
         </div>
       </div>
     `;
+}
+
+// 아이콘 활성화
+function refreshIcons() {
+    lucide.createIcons();
 }
 
 function createOneWayCard(option, index) {
@@ -503,6 +512,9 @@ function renderByTripType(data) {
     } else {
         renderRoundTrip(options);
     }
+
+    // HTML이 DOM에 삽입된 후 아이콘 생성 실행
+    refreshIcons();
 }
 
 // departureTime: [2026,2,1,8,45] → "08:45"
@@ -573,7 +585,7 @@ document.getElementById("resultList").addEventListener("click", async (e) => {
     }
 
     // 2) 그래프 열기/닫기
-    const graphBtn = e.target.closest('button[data-action="toggle-graph"]');
+    const graphBtn = e.target.closest('button[data-action="open-graph"]');
     const closeBtn = e.target.closest('button[data-action="close-graph"]');
 
     if (graphBtn || closeBtn) {
