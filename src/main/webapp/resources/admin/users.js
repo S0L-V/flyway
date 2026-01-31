@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fetchUserList() {
-        elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>회원 목록을 불러오는 중...</p></td></tr>';
+        elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-glass-muted"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i><p>회원 목록을 불러오는 중...</p></td></tr>';
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
         var url = new URL(window.CONTEXT_PATH + '/admin/users/api/list', window.location.origin);
@@ -177,13 +177,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     renderPagination(data.data.totalCount, data.data.currentPage, data.data.pageSize, data.data.totalPages);
                 } else {
                     console.error('Failed to fetch user list:', data.message);
-                    elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">회원 목록 조회에 실패했습니다.</td></tr>';
+                    elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-glass-muted">회원 목록 조회에 실패했습니다.</td></tr>';
                 }
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             })
             .catch(function(error) {
                 console.error('Error fetching user list:', error);
-                elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-red-500">회원 목록 조회 중 오류가 발생했습니다.</td></tr>';
+                elements.userListBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-rose-400">회원 목록 조회 중 오류가 발생했습니다.</td></tr>';
             });
     }
 
@@ -197,10 +197,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (!users || users.length === 0) {
-            const emptyHtml = '<tr><td colspan="6" class="text-center py-12 text-slate-500">회원이 없습니다.</td></tr>';
+            const emptyHtml = '<tr><td colspan="6" class="text-center py-12 text-glass-muted">회원이 없습니다.</td></tr>';
             elements.userListBody.innerHTML = emptyHtml;
             if (userListMobile) {
-                userListMobile.innerHTML = '<div class="p-4 text-center text-slate-400">회원이 없습니다.</div>';
+                userListMobile.innerHTML = '<div class="p-4 text-center text-glass-muted">회원이 없습니다.</div>';
             }
             return;
         }
@@ -213,42 +213,42 @@ document.addEventListener('DOMContentLoaded', function() {
             const initial = escapeHtml(getInitial(user.displayName || user.email));
             const displayName = escapeHtml(user.displayName || '-');
             const email = escapeHtml(user.email);
-            const providerBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getProviderBadgeClass(user.provider)}">${escapeHtml(getProviderDisplayName(user.provider))}</span>`;
+            const providerBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getProviderBadgeClassGlass(user.provider)}">${escapeHtml(getProviderDisplayName(user.provider))}</span>`;
             const reservationCount = formatNumber(user.reservationCount) + '건';
-            const statusBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(user.status)}">${escapeHtml(user.statusDisplayName)}</span>`;
+            const statusBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClassGlass(user.status)}">${escapeHtml(user.statusDisplayName)}</span>`;
             const createdAt = formatDate(user.createdAt);
             const userId = escapeHtml(user.userId);
 
             const actionButtons = `
                 <div class="flex items-center justify-center gap-2">
-                    <button data-action="detail" data-user-id="${userId}" class="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="상세보기">
-                        <i data-lucide="eye" class="w-4 h-4 text-slate-500 pointer-events-none"></i>
+                    <button data-action="detail" data-user-id="${userId}" class="p-2 hover:bg-white/10 rounded-lg transition-colors" title="상세보기">
+                        <i data-lucide="eye" class="w-4 h-4 text-glass-secondary pointer-events-none"></i>
                     </button>
                     ${user.status === 'ACTIVE' ? `
-                    <button data-action="block" data-user-id="${userId}" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="차단하기">
-                        <i data-lucide="ban" class="w-4 h-4 text-red-500 pointer-events-none"></i>
+                    <button data-action="block" data-user-id="${userId}" class="p-2 hover:bg-red-500/20 rounded-lg transition-colors" title="차단하기">
+                        <i data-lucide="ban" class="w-4 h-4 text-red-400 pointer-events-none"></i>
                     </button>` : user.status === 'BLOCKED' ? `
-                    <button data-action="unblock" data-user-id="${userId}" class="p-2 hover:bg-green-50 rounded-lg transition-colors" title="차단해제">
-                        <i data-lucide="check-circle" class="w-4 h-4 text-green-500 pointer-events-none"></i>
+                    <button data-action="unblock" data-user-id="${userId}" class="p-2 hover:bg-green-500/20 rounded-lg transition-colors" title="차단해제">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-green-400 pointer-events-none"></i>
                     </button>` : ''}
                 </div>`;
 
             // --- Desktop Table Row HTML ---
             tableRows.push(`
-                <tr class="hover:bg-slate-50">
+                <tr class="hover:bg-white/5 transition-colors">
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">${initial}</div>
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30">${initial}</div>
                             <div>
-                                <div class="text-sm font-medium text-slate-800">${displayName}</div>
-                                <div class="text-xs text-slate-500">${email}</div>
+                                <div class="text-sm font-medium text-glass-primary">${displayName}</div>
+                                <div class="text-xs text-glass-muted">${email}</div>
                             </div>
                         </div>
                     </td>
-                    <td class="px-4 py-3 text-sm text-slate-600">${providerBadge}</td>
-                    <td class="px-4 py-3 text-sm text-slate-800 font-medium">${reservationCount}</td>
+                    <td class="px-4 py-3 text-sm text-glass-secondary">${providerBadge}</td>
+                    <td class="px-4 py-3 text-sm text-glass-primary font-medium">${reservationCount}</td>
                     <td class="px-4 py-3 text-sm">${statusBadge}</td>
-                    <td class="px-4 py-3 text-sm text-slate-600">${createdAt}</td>
+                    <td class="px-4 py-3 text-sm text-glass-secondary">${createdAt}</td>
                     <td class="px-4 py-3 text-center">${actionButtons}</td>
                 </tr>
             `);
@@ -258,26 +258,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="p-4">
                     <div class="flex justify-between items-start">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">${initial}</div>
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30">${initial}</div>
                             <div>
-                                <div class="text-sm font-medium text-slate-800">${displayName}</div>
-                                <div class="text-xs text-slate-500">${email}</div>
+                                <div class="text-sm font-medium text-glass-primary">${displayName}</div>
+                                <div class="text-xs text-glass-muted">${email}</div>
                             </div>
                         </div>
                         ${statusBadge}
                     </div>
                     <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
                         <div>
-                            <p class="text-xs text-slate-400 mb-1">가입 경로</p>
+                            <p class="text-xs text-glass-muted mb-1">가입 경로</p>
                             ${providerBadge}
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400 mb-1">예약</p>
-                            <p class="font-medium">${reservationCount}</p>
+                            <p class="text-xs text-glass-muted mb-1">예약</p>
+                            <p class="font-medium text-glass-primary">${reservationCount}</p>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400 mb-1">가입일</p>
-                            <p>${createdAt}</p>
+                            <p class="text-xs text-glass-muted mb-1">가입일</p>
+                            <p class="text-glass-secondary">${createdAt}</p>
                         </div>
                     </div>
                     <div class="mt-4 flex justify-end">
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (totalPages <= 1) return;
 
         var infoDiv = document.createElement('div');
-        infoDiv.className = 'text-sm text-slate-500';
+        infoDiv.className = 'text-sm text-glass-muted';
         infoDiv.textContent = '총 ' + formatNumber(totalCount) + '명 중 ' + ((curPage - 1) * pageSize + 1) + '-' + Math.min(curPage * pageSize, totalCount) + '명';
         elements.paginationControls.appendChild(infoDiv);
 
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 이전 페이지
         var prevLi = document.createElement('li');
         var prevButton = document.createElement('button');
-        prevButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
+        prevButton.className = 'p-2 rounded-lg text-glass-secondary hover:bg-white/10 disabled:opacity-50 transition-colors';
         prevButton.innerHTML = '<i data-lucide="chevron-left" class="w-4 h-4"></i>';
         prevButton.disabled = curPage === 1;
         prevButton.addEventListener('click', function() {
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
         for (var i = startPage; i <= endPage; i++) {
             var li = document.createElement('li');
             var button = document.createElement('button');
-            button.className = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors ' + (i === curPage ? 'bg-blue-600 text-white' : 'hover:bg-slate-100');
+            button.className = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors ' + (i === curPage ? 'bg-blue-500/80 text-white shadow-lg shadow-blue-500/30' : 'text-glass-secondary hover:bg-white/10');
             button.textContent = i;
             (function(pageIndex) {
                 button.addEventListener('click', function() {
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 다음 페이지
         var nextLi = document.createElement('li');
         var nextButton = document.createElement('button');
-        nextButton.className = 'p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50';
+        nextButton.className = 'p-2 rounded-lg text-glass-secondary hover:bg-white/10 disabled:opacity-50 transition-colors';
         nextButton.innerHTML = '<i data-lucide="chevron-right" class="w-4 h-4"></i>';
         nextButton.disabled = curPage === totalPages;
         nextButton.addEventListener('click', function() {
@@ -411,66 +411,66 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderUserDetailModal(user) {
-        // [보안 수정] onclick 제거하고 data- 속성 사용
+        // [보안 수정] onclick 제거하고 data- 속성 사용 + 글래스 테마 적용
         elements.modalContent.innerHTML =
             '<div class="space-y-4">' +
-            '<div class="flex items-center gap-4 pb-4 border-b border-slate-100">' +
-            '<div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">' +
+            '<div class="flex items-center gap-4 pb-4 border-b border-white/10">' +
+            '<div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/30">' +
             escapeHtml(getInitial(user.displayName || user.email)) +
             '</div>' +
             '<div>' +
-            '<div class="text-lg font-bold text-slate-800">' + escapeHtml(user.displayName || '-') + '</div>' +
-            '<div class="text-sm text-slate-500">' + escapeHtml(user.email) + '</div>' +
+            '<div class="text-lg font-bold text-glass-primary">' + escapeHtml(user.displayName || '-') + '</div>' +
+            '<div class="text-sm text-glass-muted">' + escapeHtml(user.email) + '</div>' +
             '</div>' +
             '</div>' +
             '<div class="grid grid-cols-2 gap-4">' +
             '<div>' +
-            '<p class="text-xs text-slate-400 mb-1">회원 ID</p>' +
-            '<p class="text-sm text-slate-800 font-mono">' + escapeHtml(user.userId.substring(0, 8)) + '...</p>' +
+            '<p class="text-xs text-glass-muted mb-1">회원 ID</p>' +
+            '<p class="text-sm text-glass-primary font-mono">' + escapeHtml(user.userId.substring(0, 8)) + '...</p>' +
             '</div>' +
             '<div>' +
-            '<p class="text-xs text-slate-400 mb-1">가입 경로</p>' +
-            '<span class="px-2 py-1 text-xs font-medium rounded-full ' + getProviderBadgeClass(user.provider) + '">' +
+            '<p class="text-xs text-glass-muted mb-1">가입 경로</p>' +
+            '<span class="px-2 py-1 text-xs font-medium rounded-full ' + getProviderBadgeClassGlass(user.provider) + '">' +
             escapeHtml(getProviderDisplayName(user.provider)) +
             '</span>' +
             '</div>' +
             '<div>' +
-            '<p class="text-xs text-slate-400 mb-1">상태</p>' +
-            '<span class="px-2 py-1 text-xs font-medium rounded-full ' + getStatusBadgeClass(user.status) + '">' +
+            '<p class="text-xs text-glass-muted mb-1">상태</p>' +
+            '<span class="px-2 py-1 text-xs font-medium rounded-full ' + getStatusBadgeClassGlass(user.status) + '">' +
             escapeHtml(user.statusDisplayName) +
             '</span>' +
             '</div>' +
             '<div>' +
-            '<p class="text-xs text-slate-400 mb-1">예약 건수</p>' +
-            '<p class="text-sm text-slate-800 font-medium">' + formatNumber(user.reservationCount) + '건</p>' +
+            '<p class="text-xs text-glass-muted mb-1">예약 건수</p>' +
+            '<p class="text-sm text-glass-primary font-medium">' + formatNumber(user.reservationCount) + '건</p>' +
             '</div>' +
             '<div>' +
-            '<p class="text-xs text-slate-400 mb-1">성별</p>' +
-            '<p class="text-sm text-slate-800">' + escapeHtml(getGenderDisplayName(user.gender)) + '</p>' +
+            '<p class="text-xs text-glass-muted mb-1">성별</p>' +
+            '<p class="text-sm text-glass-primary">' + escapeHtml(getGenderDisplayName(user.gender)) + '</p>' +
             '</div>' +
             '<div>' +
-            '<p class="text-xs text-slate-400 mb-1">국적</p>' +
-            '<p class="text-sm text-slate-800">' + escapeHtml(user.country || '-') + '</p>' +
+            '<p class="text-xs text-glass-muted mb-1">국적</p>' +
+            '<p class="text-sm text-glass-primary">' + escapeHtml(user.country || '-') + '</p>' +
             '</div>' +
             '<div>' +
-            '<p class="text-xs text-slate-400 mb-1">가입일</p>' +
-            '<p class="text-sm text-slate-800">' + formatDate(user.createdAt) + '</p>' +
+            '<p class="text-xs text-glass-muted mb-1">가입일</p>' +
+            '<p class="text-sm text-glass-primary">' + formatDate(user.createdAt) + '</p>' +
             '</div>' +
             (user.withdrawnAt ?
                 '<div>' +
-                '<p class="text-xs text-slate-400 mb-1">탈퇴일</p>' +
-                '<p class="text-sm text-slate-800">' + formatDate(user.withdrawnAt) + '</p>' +
+                '<p class="text-xs text-glass-muted mb-1">탈퇴일</p>' +
+                '<p class="text-sm text-glass-primary">' + formatDate(user.withdrawnAt) + '</p>' +
                 '</div>' : '') +
             '</div>' +
             (user.status === 'ACTIVE' || user.status === 'BLOCKED' ?
-                '<div class="pt-4 border-t border-slate-100">' +
+                '<div class="pt-4 border-t border-white/10">' +
                 (user.status === 'ACTIVE' ?
                     // 차단하기: data-action="block"
-                    '<button data-action="block" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">' +
+                    '<button data-action="block" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-red-500/80 text-white rounded-lg hover:bg-red-500 transition-colors">' +
                     '<i data-lucide="ban" class="w-4 h-4 inline-block mr-2"></i>차단하기' +
                     '</button>' :
                     // 차단해제: data-action="unblock"
-                    '<button data-action="unblock" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">' +
+                    '<button data-action="unblock" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-green-500/80 text-white rounded-lg hover:bg-green-500 transition-colors">' +
                     '<i data-lucide="check-circle" class="w-4 h-4 inline-block mr-2"></i>차단해제' +
                     '</button>') +
                 '</div>' : '') +
@@ -521,6 +521,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // 글래스 테마용 상태 뱃지
+    function getStatusBadgeClassGlass(status) {
+        switch (status) {
+            case 'ACTIVE': return 'bg-emerald-500/20 text-emerald-400';
+            case 'BLOCKED': return 'bg-red-500/20 text-red-400';
+            case 'ONBOARDING': return 'bg-yellow-500/20 text-yellow-400';
+            case 'WITHDRAWN': return 'bg-white/10 text-glass-secondary';
+            default: return 'bg-white/10 text-glass-secondary';
+        }
+    }
+
     function getProviderBadgeClass(provider) {
         switch (provider) {
             case 'GOOGLE': return 'bg-red-100 text-red-700';
@@ -528,6 +539,17 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'NAVER': return 'bg-green-100 text-green-700';
             case 'EMAIL': return 'bg-blue-100 text-blue-700';
             default: return 'bg-slate-100 text-slate-600';
+        }
+    }
+
+    // 글래스 테마용 제공자 뱃지
+    function getProviderBadgeClassGlass(provider) {
+        switch (provider) {
+            case 'GOOGLE': return 'bg-red-500/20 text-red-400';
+            case 'KAKAO': return 'bg-yellow-500/20 text-yellow-400';
+            case 'NAVER': return 'bg-green-500/20 text-green-400';
+            case 'EMAIL': return 'bg-blue-500/20 text-blue-400';
+            default: return 'bg-white/10 text-glass-secondary';
         }
     }
 

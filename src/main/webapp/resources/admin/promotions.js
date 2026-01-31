@@ -20,8 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadState = {
         flights: {
             isLoading: false,
-            allData: null,       // 전체 데이터 (100개)
-            searchKey: null      // 현재 검색 조건 (출발|도착)
+            allData: null,       // 전체 데이터 (최대 100개)
+            searchKey: null,     // 현재 검색 조건 (출발|도착)
+            isTruncated: false   // 100개 제한으로 잘렸는지 여부
         },
         promotions: {
             isLoading: false,
@@ -29,6 +30,33 @@ document.addEventListener('DOMContentLoaded', function() {
             cachedData: null
         }
     };
+
+    // 데이터 잘림 경고 표시
+    function showTruncationWarning(loadedCount, totalCount) {
+        // 기존 경고 제거
+        const existingWarning = document.getElementById('truncation-warning');
+        if (existingWarning) existingWarning.remove();
+
+        // 경고 메시지 생성
+        const warningDiv = document.createElement('div');
+        warningDiv.id = 'truncation-warning';
+        warningDiv.className = 'bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg mb-4 flex items-center gap-2';
+        warningDiv.innerHTML = `
+            <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0"></i>
+            <span class="text-sm">
+                검색 결과가 많아 <strong>${loadedCount}개</strong>만 표시됩니다.
+                ${totalCount > loadedCount ? `(전체 약 ${totalCount}개)` : ''}
+                더 정확한 결과를 위해 출발/도착 공항을 선택해주세요.
+            </span>
+        `;
+
+        // 항공편 테이블 위에 삽입
+        const flightSection = flightListBody.closest('.bg-white');
+        if (flightSection) {
+            flightSection.parentNode.insertBefore(warningDiv, flightSection);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    }
 
     // --- Element Selectors ---
     const promotionModal = document.getElementById('promotion-modal');
@@ -286,6 +314,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (loadState.flights.searchKey !== searchKey) {
             loadState.flights.allData = null;
             loadState.flights.searchKey = searchKey;
+            // 기존 경고 제거
+            const existingWarning = document.getElementById('truncation-warning');
+            if (existingWarning) existingWarning.remove();
         }
 
         // 이미 전체 데이터가 있으면 클라이언트에서 페이지네이션 (API 호출 안함!)
@@ -324,14 +355,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadState.flights.allData = res.data.list;
                     loadState.flights.searchKey = searchKey;
 
-                    // 페이지네이션 정보 계산
-                    pagination.totalCount = res.data.list.length;
-                    pagination.totalPages = Math.ceil(res.data.list.length / pagination.pageSize);
+                    // 서버에서 반환한 실제 총 개수 vs 로드된 개수 비교
+                    const loadedCount = res.data.list.length;
+                    const serverTotalCount = res.data.totalCount || loadedCount;
+
+                    // 100개 제한으로 인해 일부만 로드된 경우 경고 표시
+                    if (serverTotalCount > loadedCount || loadedCount >= 100) {
+                        loadState.flights.isTruncated = true;
+                        console.warn(`[Flights] 데이터가 잘렸을 수 있음: 로드=${loadedCount}, 전체=${serverTotalCount}`);
+                    } else {
+                        loadState.flights.isTruncated = false;
+                    }
+
+                    // 페이지네이션 정보 계산 (로드된 데이터 기준)
+                    pagination.totalCount = loadedCount;
+                    pagination.totalPages = Math.ceil(loadedCount / pagination.pageSize);
                     pagination.currentPage = page;
 
                     // 현재 페이지 렌더링
                     renderFlightTableFromCache(page);
                     renderFlightPagination();
+
+                    // 잘린 데이터 경고 표시
+                    if (loadState.flights.isTruncated) {
+                        showTruncationWarning(loadedCount, serverTotalCount);
+                    }
                 } else {
                     throw new Error(res.message);
                 }
@@ -401,25 +449,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderFlightTable(flights) {
         flightListBody.innerHTML = '';
         if (!flights || flights.length === 0) {
-            flightListBody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-slate-500">조회된 항공편이 없습니다.</td></tr>`;
+            flightListBody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-glass-muted">조회된 항공편이 없습니다.</td></tr>`;
             return;
         }
         flights.forEach(f => {
             const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50 transition-colors';
+            row.className = 'hover:bg-white/5 transition-colors';
             const flightNumber = escapeHtml(f.flightNumber);
             const departureAirport = escapeHtml(f.departureAirport);
             const arrivalAirport = escapeHtml(f.arrivalAirport);
             const flightId = escapeHtml(f.flightId);
             const flightInfo = escapeHtml(`${f.flightNumber} (${f.departureAirport} → ${f.arrivalAirport})`);
             row.innerHTML = `
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">${flightNumber}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${departureAirport} → ${arrivalAirport}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${formatDisplayDateTime(f.departureTime)}</td>
+                <td class="px-4 py-3 text-sm font-medium text-glass-primary">${flightNumber}</td>
+                <td class="px-4 py-3 text-sm text-glass-secondary">${departureAirport} → ${arrivalAirport}</td>
+                <td class="px-4 py-3 text-sm text-glass-secondary">${formatDisplayDateTime(f.departureTime)}</td>
                 <td class="px-4 py-3 text-sm font-medium flex items-center space-x-2">
-                    <button class="make-promo-btn px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full hover:bg-blue-200" data-flight-id="${flightId}" data-flight-info="${flightInfo}">특가 만들기</button>
-                    <button class="edit-flight-btn px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full hover:bg-gray-200" data-id="${flightId}">수정</button>
-                    <button class="delete-flight-btn w-7 h-7 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-id="${flightId}" title="삭제">
+                    <button class="make-promo-btn px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full hover:bg-blue-500/30 transition-colors border border-blue-500/30" data-flight-id="${flightId}" data-flight-info="${flightInfo}">특가 만들기</button>
+                    <button class="edit-flight-btn px-2 py-1 bg-white/10 text-glass-secondary text-xs font-bold rounded-full hover:bg-white/20 transition-colors border border-white/10" data-id="${flightId}">수정</button>
+                    <button class="delete-flight-btn w-7 h-7 flex items-center justify-center rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors border border-red-500/30" data-id="${flightId}" title="삭제">
                         <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
                     </button>
                 </td>`;
@@ -444,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 이전 버튼
         const prevBtn = document.createElement('button');
-        prevBtn.className = `px-3 py-1 rounded text-sm ${pagination.currentPage === 1 ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`;
+        prevBtn.className = `px-3 py-1 rounded text-sm transition-colors ${pagination.currentPage === 1 ? 'bg-white/5 text-glass-muted cursor-not-allowed' : 'bg-white/10 text-glass-secondary hover:bg-white/20'}`;
         prevBtn.textContent = '이전';
         prevBtn.disabled = pagination.currentPage === 1;
         prevBtn.addEventListener('click', () => {
@@ -458,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         for (let i = startPage; i <= endPage; i++) {
             const pageBtn = document.createElement('button');
-            pageBtn.className = `px-3 py-1 rounded text-sm font-medium ${i === pagination.currentPage ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`;
+            pageBtn.className = `px-3 py-1 rounded text-sm font-medium transition-colors ${i === pagination.currentPage ? 'bg-blue-500/80 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-glass-secondary hover:bg-white/20'}`;
             pageBtn.textContent = i;
             pageBtn.addEventListener('click', () => fetchFlights(i));
             paginationDiv.appendChild(pageBtn);
@@ -466,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 다음 버튼
         const nextBtn = document.createElement('button');
-        nextBtn.className = `px-3 py-1 rounded text-sm ${pagination.currentPage === pagination.totalPages ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`;
+        nextBtn.className = `px-3 py-1 rounded text-sm transition-colors ${pagination.currentPage === pagination.totalPages ? 'bg-white/5 text-glass-muted cursor-not-allowed' : 'bg-white/10 text-glass-secondary hover:bg-white/20'}`;
         nextBtn.textContent = '다음';
         nextBtn.disabled = pagination.currentPage === pagination.totalPages;
         nextBtn.addEventListener('click', () => {
@@ -476,7 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 총 건수 표시
         const totalInfo = document.createElement('span');
-        totalInfo.className = 'ml-4 text-sm text-slate-500';
+        totalInfo.className = 'ml-4 text-sm text-glass-muted';
         totalInfo.textContent = `총 ${pagination.totalCount}건`;
         paginationDiv.appendChild(totalInfo);
 
@@ -487,13 +535,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderPromotionTable(promotions) {
         promotionListBody.innerHTML = '';
         if (!promotions || promotions.length === 0) {
-            promotionListBody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-slate-500">생성된 특가 상품이 없습니다.</td></tr>`;
+            promotionListBody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-glass-muted">생성된 특가 상품이 없습니다.</td></tr>`;
             return;
         }
         promotions.forEach((p, index) => {
             const row = document.createElement('tr');
             row.dataset.id = p.promotionId;
-            row.className = 'hover:bg-slate-50 transition-colors';
+            row.className = 'hover:bg-white/5 transition-colors';
             const title = escapeHtml(p.title);
             const departureAirportName = escapeHtml(p.departureAirportName || '');
             const arrivalAirportName = escapeHtml(p.arrivalAirportName || '');
@@ -503,22 +551,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const isActive = p.isActive === 'Y';
             row.innerHTML = `
                 <td class="px-2 py-3">
-                    <div class="drag-handle inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-200 transition-colors cursor-grab" title="드래그하여 순서 변경">
-                        <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-400"></i>
-                        <span class="text-sm font-semibold text-slate-500">${index + 1}</span>
+                    <div class="drag-handle inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-white/10 transition-colors cursor-grab" title="드래그하여 순서 변경">
+                        <i data-lucide="grip-vertical" class="w-4 h-4 text-glass-muted"></i>
+                        <span class="text-sm font-semibold text-glass-secondary">${index + 1}</span>
                     </div>
                 </td>
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">${title}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${departureAirportName} → ${arrivalAirportName}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">${passengerCount}명</td>
-                <td class="px-4 py-3 text-sm text-slate-800 font-semibold">₩${totalSalePrice}</td>
+                <td class="px-4 py-3 text-sm font-medium text-glass-primary">${title}</td>
+                <td class="px-4 py-3 text-sm text-glass-secondary">${departureAirportName} → ${arrivalAirportName}</td>
+                <td class="px-4 py-3 text-sm text-glass-secondary">${passengerCount}명</td>
+                <td class="px-4 py-3 text-sm text-glass-primary font-semibold">₩${totalSalePrice}</td>
                 <td class="px-4 py-3 text-center">
-                    <button class="promo-toggle-btn relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isActive ? 'bg-green-500' : 'bg-slate-300'}" data-id="${promotionId}" data-active="${isActive ? 'Y' : 'N'}" title="${isActive ? '클릭하여 비활성화' : '클릭하여 활성화'}">
+                    <button class="promo-toggle-btn relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isActive ? 'bg-emerald-500' : 'bg-white/20'}" data-id="${promotionId}" data-active="${isActive ? 'Y' : 'N'}" title="${isActive ? '클릭하여 비활성화' : '클릭하여 활성화'}">
                         <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${isActive ? 'translate-x-6' : 'translate-x-1'}"></span>
                     </button>
                 </td>
                 <td class="px-4 py-3 text-center">
-                    <button class="promo-delete-btn w-7 h-7 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-id="${promotionId}" title="삭제">
+                    <button class="promo-delete-btn w-7 h-7 flex items-center justify-center rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors border border-red-500/30" data-id="${promotionId}" title="삭제">
                         <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
                     </button>
                 </td>`;

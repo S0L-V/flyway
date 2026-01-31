@@ -2,10 +2,10 @@
 <!-- 모바일 오버레이 배경 -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" onclick="toggleSidebar()"></div>
 
-<!-- 사이드바: 모바일 토글 / 데스크톱 호버 확장 -->
-<div id="sidebar" class="sidebar-collapsed bg-[#1a1f26] text-slate-300 flex flex-col h-screen fixed left-0 top-0 z-50 shadow-2xl transform -translate-x-full lg:translate-x-0 transition-all duration-300">
+<!-- 사이드바: 글래스 스타일 -->
+<div id="sidebar" class="sidebar-collapsed glass-sidebar text-slate-300 flex flex-col h-screen fixed left-0 top-0 z-50 transform -translate-x-full lg:translate-x-0 transition-all duration-300">
     <!-- 로고 영역 -->
-    <div class="p-4 flex items-center justify-center border-b border-slate-700/30 h-16 relative">
+    <div class="p-4 flex items-center justify-center border-b border-white/5 h-16 relative">
         <a href="${pageContext.request.contextPath}/admin/dashboard" class="flex items-center justify-center">
             <!-- 축소 시: 아이콘 로고 -->
             <img src="${pageContext.request.contextPath}/resources/seat/img/logo-icon.svg"

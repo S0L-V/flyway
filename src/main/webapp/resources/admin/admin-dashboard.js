@@ -80,8 +80,9 @@ const AdminDashboard = (function() {
             labelCancellations: document.getElementById('label-cancellations'),
             labelRevenue: document.getElementById('label-revenue'),
 
-            // 기간 선택 탭
-            periodTabs: document.querySelectorAll('.period-tab'),
+            // 기간 선택 탭 (iOS 세그먼트)
+            periodTabs: document.querySelectorAll('.ios-segment-btn'),
+            periodSegment: document.getElementById('period-segment'),
 
             // 알림
             notificationBadge: document.getElementById('notification-badge'),
@@ -175,10 +176,15 @@ const AdminDashboard = (function() {
     }
 
     /**
-     * 기간 선택 탭 바인딩
+     * 기간 선택 탭 바인딩 (iOS 세그먼트)
      */
     function bindPeriodTabs() {
         console.log('[Dashboard] Binding period tabs, found:', elements.periodTabs ? elements.periodTabs.length : 0);
+
+        // 초기 슬라이더 위치 설정
+        if (elements.periodSegment) {
+            elements.periodSegment.setAttribute('data-active', '0');
+        }
 
         // querySelectorAll로 찾은 탭들에 이벤트 바인딩
         if (elements.periodTabs && elements.periodTabs.length > 0) {
@@ -220,7 +226,7 @@ const AdminDashboard = (function() {
     }
 
     /**
-     * 기간 전환
+     * 기간 전환 (iOS 슬라이딩 애니메이션)
      */
     function switchPeriod(period) {
         console.log('[Dashboard] switchPeriod called with:', period, 'current:', currentPeriod);
@@ -233,15 +239,20 @@ const AdminDashboard = (function() {
         currentPeriod = period;
         console.log('[Dashboard] Switching to period:', period);
 
-        // 탭 스타일 업데이트 (querySelectorAll 다시 조회)
-        var tabs = document.querySelectorAll('.period-tab');
-        tabs.forEach(function(tab) {
-            if (tab.getAttribute('data-period') === period) {
-                tab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
-                tab.classList.remove('text-slate-500');
+        // iOS 세그먼트 슬라이더 업데이트
+        var segmentGroup = document.getElementById('period-segment');
+        var buttons = document.querySelectorAll('.ios-segment-btn');
+
+        buttons.forEach(function(btn) {
+            if (btn.getAttribute('data-period') === period) {
+                btn.classList.add('active');
+                // 슬라이더 위치 업데이트 (data-active 속성 사용)
+                var index = btn.getAttribute('data-index');
+                if (segmentGroup) {
+                    segmentGroup.setAttribute('data-active', index);
+                }
             } else {
-                tab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
-                tab.classList.add('text-slate-500');
+                btn.classList.remove('active');
             }
         });
 
@@ -302,7 +313,7 @@ const AdminDashboard = (function() {
 
         if (activities.length === 0) {
             elements.activityList.innerHTML = `
-                <div class="text-center text-slate-400 py-8">
+                <div class="text-center text-glass-muted py-8">
                     최근 활동이 없습니다.
                 </div>
             `;
@@ -311,25 +322,27 @@ const AdminDashboard = (function() {
 
         const html = activities.map(activity => {
             const icon = getActivityIcon(activity.activityType);
-            const statusBadge = getStatusBadge(activity.status);
+            const statusBadge = getStatusBadgeGlass(activity.status);
             const timeAgo = formatTimeAgo(activity.createdAt);
 
             return `
-                <div class="flex items-start gap-4 p-4 hover:bg-slate-50 rounded-lg transition-colors">
-                    <div class="p-2 ${icon.bgColor} ${icon.textColor} rounded-lg">
+                <div class="glass-activity-item flex items-start gap-3">
+                    <div class="p-2.5 rounded-xl ${icon.glassBg} ${icon.textColor} flex-shrink-0">
                         <i data-lucide="${icon.name}" class="w-5 h-5"></i>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-slate-800 truncate">${escapeHtml(activity.description)}</span>
+                    <div class="flex-1 min-w-0 overflow-hidden">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-medium text-glass-primary text-sm">${escapeHtml(activity.description)}</span>
                             ${statusBadge}
                         </div>
-                        <div class="text-sm text-slate-500 truncate">
+                        <div class="text-xs text-glass-muted mt-0.5 truncate">
                             ${escapeHtml(activity.userName)} · ${escapeHtml(activity.userEmail)}
                         </div>
-                        <div class="text-xs text-slate-400 mt-1">${timeAgo}</div>
+                        <div class="flex items-center justify-between mt-1">
+                            <span class="text-xs text-glass-muted/70">${timeAgo}</span>
+                            ${activity.amount ? `<span class="text-sm font-semibold text-emerald-400">${formatCurrency(activity.amount)}</span>` : ''}
+                        </div>
                     </div>
-                    ${activity.amount ? `<div class="text-sm font-semibold text-slate-700">${formatCurrency(activity.amount)}</div>` : ''}
                 </div>
             `;
         }).join('');
@@ -486,9 +499,9 @@ const AdminDashboard = (function() {
         elements.connectionStatus.classList.add('flex');
 
         if (connected) {
-            elements.connectionStatus.innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full"></span><span class="text-green-600 text-xs">실시간 연결됨</span>';
+            elements.connectionStatus.innerHTML = '<span class="w-2 h-2 bg-emerald-400 rounded-full"></span><span class="text-emerald-400 text-xs">실시간 연결됨</span>';
         } else {
-            elements.connectionStatus.innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span><span class="text-red-600 text-xs">연결 끊김</span>';
+            elements.connectionStatus.innerHTML = '<span class="w-2 h-2 bg-rose-400 rounded-full animate-pulse"></span><span class="text-rose-400 text-xs">연결 끊김</span>';
         }
     }
 
@@ -581,9 +594,9 @@ const AdminDashboard = (function() {
     function fetchVisitors() {
         if (!elements.visitorList) return;
 
-        // 로딩 표시
+        // 로딩 표시 (glass theme)
         elements.visitorList.innerHTML = `
-            <div class="text-center text-slate-400 py-12">
+            <div class="text-center text-glass-muted py-12">
                 <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>
                 <p>방문자 목록을 불러오는 중...</p>
             </div>
@@ -602,7 +615,7 @@ const AdminDashboard = (function() {
                     renderVisitors(data.data);
                 } else {
                     elements.visitorList.innerHTML = `
-                        <div class="text-center text-slate-400 py-12">
+                        <div class="text-center text-glass-muted py-12">
                             <i data-lucide="users" class="w-8 h-8 mx-auto mb-2"></i>
                             <p>오늘 방문자가 없습니다.</p>
                         </div>
@@ -615,7 +628,7 @@ const AdminDashboard = (function() {
             .catch(function(error) {
                 console.error('[Dashboard] Failed to fetch visitors:', error);
                 elements.visitorList.innerHTML = `
-                    <div class="text-center text-red-400 py-12">
+                    <div class="text-center text-rose-400 py-12">
                         <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2"></i>
                         <p>방문자 목록을 불러오지 못했습니다.</p>
                     </div>
@@ -627,12 +640,12 @@ const AdminDashboard = (function() {
     }
 
     /**
-     * 방문자 목록 렌더링
+     * 방문자 목록 렌더링 (glass theme)
      */
     function renderVisitors(visitors) {
         if (!elements.visitorList || visitors.length === 0) {
             elements.visitorList.innerHTML = `
-                <div class="text-center text-slate-400 py-12">
+                <div class="text-center text-glass-muted py-12">
                     <i data-lucide="users" class="w-8 h-8 mx-auto mb-2"></i>
                     <p>오늘 방문자가 없습니다.</p>
                 </div>
@@ -641,21 +654,21 @@ const AdminDashboard = (function() {
         }
 
         var html = '<div class="overflow-x-auto">';
-        html += '<table class="min-w-full divide-y divide-slate-200">';
-        html += '<thead class="bg-slate-50">';
+        html += '<table class="min-w-full divide-y divide-white/5">';
+        html += '<thead class="bg-white/5">';
         html += '<tr>';
-        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">시간</th>';
-        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">사용자</th>';
-        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">IP 주소</th>';
-        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">페이지</th>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">시간</th>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">사용자</th>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">IP 주소</th>';
+        html += '<th class="px-4 py-3 text-left text-xs font-semibold text-glass-muted uppercase">페이지</th>';
         html += '</tr>';
         html += '</thead>';
-        html += '<tbody class="divide-y divide-slate-100">';
+        html += '<tbody class="divide-y divide-white/5">';
 
         visitors.forEach(function(visitor) {
             var timeStr = formatTimeAgo(visitor.visitedAt);
-            var userName = visitor.userName && visitor.userName.trim() ? escapeHtml(visitor.userName) : '<span class="text-slate-400">비회원</span>';
-            var userEmail = visitor.userEmail ? '<div class="text-xs text-slate-400">' + escapeHtml(visitor.userEmail) + '</div>' : '';
+            var userName = visitor.userName && visitor.userName.trim() ? escapeHtml(visitor.userName) : '<span class="text-glass-muted">비회원</span>';
+            var userEmail = visitor.userEmail ? '<div class="text-xs text-glass-muted">' + escapeHtml(visitor.userEmail) + '</div>' : '';
             var pageUrl = visitor.pageUrl || ''; // null 체크
             var displayPageUrl = pageUrl;
             var titleAttribute = pageUrl ? escapeHtml(pageUrl) : ''; // title에는 전체 URL
@@ -665,11 +678,11 @@ const AdminDashboard = (function() {
             }
             displayPageUrl = escapeHtml(displayPageUrl); // 자른 후 이스케이프
 
-            html += '<tr class="hover:bg-slate-50">';
-            html += '<td class="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">' + timeStr + '</td>';
-            html += '<td class="px-4 py-3">' + userName + userEmail + '</td>';
-            html += '<td class="px-4 py-3 text-sm text-slate-600 font-mono">' + escapeHtml(visitor.ipAddress) + '</td>';
-            html += '<td class="px-4 py-3 text-sm text-slate-600" title="' + titleAttribute + '">' + displayPageUrl + '</td>';
+            html += '<tr class="hover:bg-white/5">';
+            html += '<td class="px-4 py-3 text-sm text-glass-secondary whitespace-nowrap">' + timeStr + '</td>';
+            html += '<td class="px-4 py-3 text-glass-primary">' + userName + userEmail + '</td>';
+            html += '<td class="px-4 py-3 text-sm text-glass-secondary font-mono">' + escapeHtml(visitor.ipAddress) + '</td>';
+            html += '<td class="px-4 py-3 text-sm text-glass-secondary" title="' + titleAttribute + '">' + displayPageUrl + '</td>';
             html += '</tr>';
         });
 
@@ -753,15 +766,15 @@ const AdminDashboard = (function() {
     function getActivityIcon(type) {
         switch (type) {
             case 'RESERVATION':
-                return { name: 'ticket', bgColor: 'bg-blue-50', textColor: 'text-blue-600' };
+                return { name: 'ticket', bgColor: 'bg-blue-50', textColor: 'text-blue-600', glassBg: 'glass-icon-blue' };
             case 'PAYMENT':
-                return { name: 'credit-card', bgColor: 'bg-emerald-50', textColor: 'text-emerald-600' };
+                return { name: 'credit-card', bgColor: 'bg-emerald-50', textColor: 'text-emerald-600', glassBg: 'glass-icon-emerald' };
             case 'REFUND':
-                return { name: 'rotate-ccw', bgColor: 'bg-orange-50', textColor: 'text-orange-600' };
+                return { name: 'rotate-ccw', bgColor: 'bg-orange-50', textColor: 'text-orange-600', glassBg: 'glass-icon-yellow' };
             case 'CANCELLATION':
-                return { name: 'x-circle', bgColor: 'bg-rose-50', textColor: 'text-rose-600' };
+                return { name: 'x-circle', bgColor: 'bg-rose-50', textColor: 'text-rose-600', glassBg: 'glass-icon-rose' };
             default:
-                return { name: 'activity', bgColor: 'bg-slate-50', textColor: 'text-slate-600' };
+                return { name: 'activity', bgColor: 'bg-slate-50', textColor: 'text-slate-600', glassBg: 'glass-icon-indigo' };
         }
     }
 
@@ -779,6 +792,25 @@ const AdminDashboard = (function() {
             case 'REFUNDED':
             case 'EXPIRED':
                 return '<span class="px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-700 rounded-full">취소</span>';
+            default:
+                return '';
+        }
+    }
+
+    function getStatusBadgeGlass(status) {
+        switch (status) {
+            case 'PAID':
+            case 'CONFIRMED':
+            case 'APPROVED':
+                return '<span class="px-2 py-0.5 text-xs font-medium bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">완료</span>';
+            case 'PENDING':
+                return '<span class="px-2 py-0.5 text-xs font-medium bg-yellow-500/20 text-yellow-400 rounded-full border border-yellow-500/30">대기</span>';
+            case 'HELD':
+                return '<span class="px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">좌석 선점</span>';
+            case 'CANCELLED':
+            case 'REFUNDED':
+            case 'EXPIRED':
+                return '<span class="px-2 py-0.5 text-xs font-medium bg-rose-500/20 text-rose-400 rounded-full border border-rose-500/30">취소</span>';
             default:
                 return '';
         }
