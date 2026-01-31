@@ -14,7 +14,7 @@
 <html lang="ko">
 <head>
   <title>마이페이지 - Flyway</title>
-  <jsp:include page="/WEB-INF/views/mypage/include/head.jsp" />
+  <jsp:include page="auth/include/head.jsp" />
 </head>
 <body class="custom-page bg-slate-50 font-sans min-h-screen flex flex-col">
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
@@ -50,7 +50,7 @@
   <% } %>
 </div>
 
-<jsp:include page="mypage/include/toast.jsp" />
+<jsp:include page="auth/include/toast.jsp" />
 <script>
   window.APP = {
     contextPath: "${pageContext.request.contextPath}"
