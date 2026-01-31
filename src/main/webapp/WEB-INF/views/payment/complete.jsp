@@ -150,11 +150,11 @@
             <div class="payment-card">
                 <div class="payment-row">
                     <span class="payment-label">주문번호</span>
-                    <span class="payment-value">${payment.orderId}</span>
+                    <span class="payment-value"><c:out value="${payment.orderId}"/></span>
                 </div>
                 <div class="payment-row">
                     <span class="payment-label">결제수단</span>
-                    <span class="payment-value">${payment.method}</span>
+                    <span class="payment-value"><c:out value="${payment.method}"/></span>
                 </div>
                 <div class="payment-row">
                     <span class="payment-label">결제일시</span>
@@ -190,8 +190,8 @@
 
             <c:if test="${not empty errorCode}">
                 <div class="error-box">
-                    <div class="error-code">에러 코드: ${errorCode}</div>
-                    <div class="error-message">${errorMessage}</div>
+                    <div class="error-code">문의 시 참조: <c:out value="${errorCode}"/></div>
+                    <div class="error-message"><c:out value="${errorMessage}"/></div>
                 </div>
             </c:if>
 
