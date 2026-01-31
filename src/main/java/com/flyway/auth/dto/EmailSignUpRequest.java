@@ -16,4 +16,5 @@ public class EmailSignUpRequest {
     private String email;
     private String rawPassword;
     private String attemptId;
+    private String phoneNumber;
 }
