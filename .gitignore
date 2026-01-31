@@ -75,6 +75,7 @@ $RECYCLE.BIN/
 
 # 기타 민감 정보
 **/application-dev.properties
+**/application-batch.properties
 **/application-secret.properties
 **/*-secret.properties
 

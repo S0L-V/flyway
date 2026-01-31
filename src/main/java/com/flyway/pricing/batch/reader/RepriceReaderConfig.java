@@ -14,8 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import javax.sql.DataSource;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -40,18 +38,19 @@ public class RepriceReaderConfig {
     @StepScope
     public JdbcPagingItemReader<RepriceCandidateRow> repriceItemReader(
             PagingQueryProvider repriceQueryProvider,
-            @Value("#{jobParameters['asOf']}") Long asOfEpochMillis
+//            @Value("#{jobParameters['asOf']}") Long asOfEpochMillis,
+            @Value("#{jobParameters['rangeStart']}") String rangeStart, // "yyyy-MM-dd HH:mm:ss"
+            @Value("#{jobParameters['rangeEnd']}") String rangeEnd
     ) {
-        LocalDateTime referenceTime;
-        if (asOfEpochMillis == null) {
-            referenceTime = LocalDateTime.now(KST);
-        } else {
-            referenceTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(asOfEpochMillis), KST);
+
+        if (rangeStart == null || rangeEnd == null) {
+            throw new IllegalArgumentException("Job Parameters 'rangeStart', 'rangeEnd' 가 누락되었습니다.");
         }
 
         // 2. 쿼리에 바인딩할 파라미터 Map 생성
         Map<String, Object> parameterValues = new HashMap<>();
-        parameterValues.put("asOf", referenceTime);
+        parameterValues.put("rangeStart", rangeStart);
+        parameterValues.put("rangeEnd", rangeEnd);
 
         return new JdbcPagingItemReaderBuilder<RepriceCandidateRow>()
                 .name("repriceItemReader")
@@ -70,7 +69,7 @@ public class RepriceReaderConfig {
     public PagingQueryProvider repriceQueryProvider() throws Exception {
         SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
         factory.setDataSource(this.dataSource);
-        factory.setDatabaseType("MySQL");
+        // factory.setDatabaseType("MySQL");
 
         // 1) SELECT : CASE문으로 좌석 정보 계산
         factory.setSelectClause(
@@ -100,10 +99,10 @@ public class RepriceReaderConfig {
                         "JOIN aircraft ac ON fi.aircraft_id = ac.aircraft_id "
         );
 
-        // 3) WHERE
+        // 3) WHERE : 스케줄러가 정해준 시간 범위로 필터링
         factory.setWhereClause(
-                "WHERE f.departure_time >= CAST(:asOf AS DATETIME) " +
-                        "  AND f.departure_time < TIMESTAMPADD(DAY, 30, CAST(:asOf AS DATETIME))"
+                "WHERE f.departure_time >= CAST(:rangeStart AS DATETIME) " +
+                        "  AND f.departure_time < CAST(:rangeEnd AS DATETIME)"
         );
 
         // 4) 정렬
