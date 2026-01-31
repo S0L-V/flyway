@@ -181,15 +181,15 @@
         <div class="payment-info">
             <div class="payment-row">
                 <span class="payment-label">주문번호</span>
-                <span class="payment-value">${orderId}</span>
+                <span class="payment-value"><c:out value="${orderId}"/></span>
             </div>
             <div class="payment-row">
                 <span class="payment-label">상품명</span>
-                <span class="payment-value">${orderName}</span>
+                <span class="payment-value"><c:out value="${orderName}"/></span>
             </div>
             <div class="payment-row">
                 <span class="payment-label">결제자</span>
-                <span class="payment-value">${customerName}</span>
+                <span class="payment-value"><c:out value="${customerName}"/></span>
             </div>
         </div>
 
@@ -293,7 +293,6 @@
             failUrl: paymentData.failUrl
         }).catch(function(error) {
             // 사용자가 결제창 닫음 또는 에러
-            console.error('결제 에러:', error);
             document.getElementById('loading').classList.remove('show');
             document.getElementById('btnPay').disabled = false;
 
