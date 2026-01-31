@@ -31,7 +31,7 @@ export function updateDashboardProfile(profile) {
     if (elEmail) elEmail.textContent = textOrDash(profile?.email);
 }
 
-export function renderRecentBookings(items) {
+export async function renderRecentBookings(items) {
     const container = $("recentBookings");
     const empty = $("recentBookingsEmpty");
     const template = $("recentBookingTemplate");
@@ -45,9 +45,9 @@ export function renderRecentBookings(items) {
     }
     if (empty) empty.classList.add("hidden");
 
-    const airlineMapPromise = getAirlineMap();
+    const airlineMap = await getAirlineMap();
 
-    items.forEach(async (item) => {
+    for (const item of items) {
         const node = template.content.cloneNode(true);
         const root = node.querySelector("div");
         if (root) {
@@ -76,7 +76,6 @@ export function renderRecentBookings(items) {
         if (arrCity) arrCity.textContent = textOrDash(item.outArrivalCity);
         const outDepartAt = node.querySelector('[data-field="outDepartAt"]');
         if (outDepartAt) outDepartAt.textContent = formatDateTime(item.outDepartureTime);
-        const airlineMap = await airlineMapPromise;
         setAirlineInfo(node, "out", airlineMap, item.outAirlineId, item.outFlightNumber);
         const inboundRow = node.querySelector('[data-field="inboundRow"]');
         const hasInbound = !!item.inFlightId;
@@ -101,9 +100,9 @@ export function renderRecentBookings(items) {
         }
 
         container.appendChild(node);
-    });
+    }
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide?.createIcons) window.lucide.createIcons();
 }
 
 function toAssetUrl(path) {

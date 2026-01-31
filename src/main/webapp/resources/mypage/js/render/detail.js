@@ -32,7 +32,16 @@ async function getAirlineMap() {
 }
 
 function applyAirlineInfo({ logoEl, nameEl, flightEl, airlineMap, airlineId, flightNumber }) {
-    const key = (airlineId || (flightNumber ? String(flightNumber).slice(0, 2) : "") || "").toUpperCase();
+    const trimmedId = airlineId ? String(airlineId).trim() : "";
+    let key = trimmedId ? trimmedId.toUpperCase() : "";
+    if (!key && flightNumber) {
+        const flightStr = String(flightNumber).trim();
+        const match = flightStr.match(/^[A-Za-z]{1,3}/);
+        key = match ? match[0].toUpperCase() : "";
+        if (!key && flightStr) {
+            key = flightStr.slice(0, 2).toUpperCase();
+        }
+    }
     const info = key && airlineMap ? airlineMap[key] : null;
     if (logoEl) {
         if (info?.image) {
