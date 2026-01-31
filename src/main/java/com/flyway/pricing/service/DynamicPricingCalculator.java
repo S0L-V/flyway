@@ -54,17 +54,21 @@ public class DynamicPricingCalculator {
 
         /* ==========================================================
          * 2. 이벤트 기반 쿨다운(last_event_priced_at 고려)
+         *    REFUND 이벤트는 쿨다운 pass
          * ==========================================================
          */
         if (req.isEventBased() && req.getLastEventPricedAt() != null) {
-            long minutes =
-                    Duration.between(req.getLastEventPricedAt(), req.getNow()).toMinutes();
+            long minutes = Duration.between(req.getLastEventPricedAt(), req.getNow()).toMinutes();
 
-            // lastEventPricedAt이 미래인 이상치도 "쿨다운"으로 방어
-            if (minutes < 0 || minutes < EVENT_COOLDOWN_MINUTES) {
+            if (minutes < 0) { // 데이터 이상 방어
+                return PricingResult.skipped(PricingSkipReason.COOLDOWN);
+            }
+
+            if (!req.isBypassCooldown() && minutes < EVENT_COOLDOWN_MINUTES) {
                 return PricingResult.skipped(PricingSkipReason.COOLDOWN);
             }
         }
+
 
         /* ==========================================================
          * 3) 출발까지 남은 시간 계산

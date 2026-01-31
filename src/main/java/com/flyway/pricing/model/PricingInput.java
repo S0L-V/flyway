@@ -28,4 +28,6 @@ public class PricingInput {
     /* ===== 실행 컨텍스트 ===== */
     private boolean eventBased;                // true = 결제 이벤트
     private LocalDateTime  lastEventPricedAt;  // 마지막 '이벤트 기반' 가격 반영 시각
+
+    private boolean bypassCooldown; // REFUND 등에서 true
 }
