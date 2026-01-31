@@ -165,7 +165,7 @@ function escapeHtml(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
-    }
+}
 
 function renderTag(tagString) {
     if (!tagString) return '';
@@ -203,7 +203,7 @@ let autoSlideTimer = null;
 function startAutoSlide() {
     stopAutoSlide(); // 중복 방지
     autoSlideTimer = setInterval(() => {
-        document.getElementById("offerNext").click();
+        moveNext();
     }, 3000);
 }
 
