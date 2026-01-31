@@ -12,51 +12,16 @@
 
 /* ===== Section ===== */
 .special-offers-section {
-    padding: 30px 0 40px;
-    background: transparent;
-    overflow: visible;
-    width: 100%;
-}
-
-/* Section Header - Modern Style */
-.section-header {
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.section-label {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    color: #3b82f6;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 12px;
-}
-
-.section-title-modern {
-    font-size: clamp(1.8rem, 4vw, 2.5rem);
-    font-weight: 800;
-    color: #1e293b;
-    letter-spacing: -0.03em;
-    margin: 0 0 8px 0;
-    line-height: 1.2;
-}
-
-.section-subtitle {
-    font-size: 15px;
-    font-weight: 500;
-    color: #64748b;
-    margin: 0;
+    padding: 48px 0;
+    background: #fff;
+    overflow: hidden;
 }
 
 /* ===== Slider Wrapper ===== */
 .slider-wrapper {
-    margin-top: 0;
+    margin-top: 100px;
     position: relative;
     perspective: 1200px;
-    width: 100%;
-    overflow: visible;
 }
 
 /* 좌우 페이드 마스크 */
@@ -64,9 +29,9 @@
 .slider-wrapper::after {
     content: "";
     position: absolute;
-    top: 20px;
+    top: 0;
     width: 120px;
-    height: calc(100% - 20px);
+    height: 100%;
     z-index: 3;
     pointer-events: none;
     backdrop-filter: blur(6px);
@@ -74,12 +39,12 @@
 
 .slider-wrapper::before {
     left: 0;
-    background: linear-gradient(to right, rgba(219, 234, 254, 0.9) 0%, transparent 100%);
+    background: linear-gradient(to right, #fff 20%, transparent);
 }
 
 .slider-wrapper::after {
     right: 0;
-    background: linear-gradient(to left, rgba(219, 234, 254, 0.9) 0%, transparent 100%);
+    background: linear-gradient(to left, #fff 20%, transparent);
 }
 
 .main-slider-track.is-entering .offer-card {
@@ -99,17 +64,26 @@
 }
 
 /* ===== Overlay ===== */
+/*.offer-overlay {*/
+/*    position: absolute;*/
+/*    bottom: 0;*/
+/*    width: 100%;*/
+/*    padding: 16px;*/
+/*    background: linear-gradient(to top, rgba(0,0,0,.75), transparent);*/
+/*    border-radius: inherit;*/
+/*    color: #fff;*/
+/*}*/
 .offer-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 1.5rem 1.8rem;
+    padding: 1.5rem 1.8rem; /* 좌우 여백 살짝 늘림 */
     background: linear-gradient(to top, rgba(0,0,0,.75), transparent);
     color: white;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 8px; /* 간격 조정 */
     border-bottom-left-radius: 2rem;
     border-bottom-right-radius: 2rem;
 }
@@ -122,18 +96,18 @@
 .offer-airline {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: #94a3b8; /* 연한 회색 */
     letter-spacing: 0.05em;
 }
 
 .offer-title {
-    font-size: 1.8rem;
+    font-size: 1.8rem; /* 크고 강조 */
     font-weight: 900;
     line-height: 1.1;
-    margin: 0;
+    margin: 0; /* 기본 마진 제거 */
     letter-spacing: -0.03em;
 }
-
+/* 도시 이름은 제목보다 약간 작게 보조 */
 .offer-city {
     font-size: 1.1rem;
     font-weight: 700;
@@ -146,7 +120,7 @@
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    padding: 14px 0;
+    padding: 14px 0; /* 상하 여백 증가 */
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin-top: 10px;
     margin-bottom: 4px;
@@ -172,9 +146,10 @@
 .offer-footer {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-end; /* 바닥 기준 정렬 */
 }
 
+/* 왼쪽: 설명 텍스트 + 원가(취소선) */
 .price-info-left {
     display: flex;
     flex-direction: column;
@@ -182,27 +157,30 @@
 }
 .price-label {
     font-size: 0.7rem;
-    color: #94a3b8;
+    color: #94a3b8; /* 회색 텍스트 */
     font-weight: 500;
 }
 .original-price {
     font-size: 0.9rem;
-    color: #ef4444;
-    text-decoration: line-through;
+    color: #ef4444; /* 붉은색 */
+    text-decoration: line-through; /* 취소선 */
     font-weight: 600;
     opacity: 0.8;
+
     text-decoration-thickness: 2px;
     text-decoration-color: #ef4444;
 }
 
+/* 오른쪽: 최종 가격 */
 .final-price {
     font-size: 1.6rem;
     font-weight: 900;
-    color: #60a5fa;
-    font-style: italic;
+    color: #60a5fa; /* 밝은 파란색 (이미지와 유사) */
+    font-style: italic; /* 이탤릭체 포인트 */
     letter-spacing: -0.02em;
     line-height: 1;
 }
+
 
 /* Badge */
 .card-badge.blue {
@@ -226,21 +204,19 @@
     cursor: pointer;
 }
 
-.nav-btn.prev { left: 10%; }
-.nav-btn.next { right: 10%; }
+.nav-btn.prev { left: 16px; }
+.nav-btn.next { right: 16px; }
 
 
 .main-slider-track {
     position: relative;
-    height: 480px;
+    height: 560px;
     perspective: 1200px;
-    width: 100%;
-    padding-top: 20px;
 }
 
 .offer-card {
     position: absolute;
-    top: 10px;
+    top: 0;
     left: 50%;
     width: 300px;
     height: 400px;
@@ -252,6 +228,7 @@
     transition:
             transform 0.6s cubic-bezier(.22,.61,.36,1),
             opacity 0.4s ease;
+
 }
 
 /* ===== Positions ===== */
@@ -266,7 +243,7 @@
 }
 
 :root {
-    --carousel-gap: 280px;
+    --carousel-gap: 280px;   /* ← 이 값만 조절 */
     --carousel-gap-2: 550px;
 }
 
