@@ -97,6 +97,7 @@ public class ReservationPassengersResponseDto {
         private Integer quantity;
         private Long totalPrice;
         private String mealId;
+        private String mealName;
         private String policyId;
         private String serviceDetails;
         private LocalDateTime addedAt;
@@ -181,6 +182,7 @@ public class ReservationPassengersResponseDto {
                     .quantity(row.getQuantity())
                     .totalPrice(row.getTotalPrice())
                     .mealId(row.getMealId())
+                    .mealName(row.getMealName())
                     .policyId(row.getPolicyId())
                     .serviceDetails(row.getServiceDetails())
                     .addedAt(row.getAddedAt())

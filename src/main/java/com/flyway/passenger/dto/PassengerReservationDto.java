@@ -47,6 +47,7 @@ public class PassengerReservationDto {
     private Integer quantity;
     private Long totalPrice;
     private String mealId;
+    private String mealName;
     private String policyId;
     private String serviceDetails;  // JSON
     private LocalDateTime addedAt;

@@ -5,6 +5,16 @@ const PAGE_CONFIG = {
     reservations: { defaultPage: 1, defaultSize: 3 },
 };
 
+const MODULE_VERSION = new URL(import.meta.url).search;
+
+function importWithVersion(path) {
+    const url = new URL(path, import.meta.url);
+    if (MODULE_VERSION) {
+        url.search = MODULE_VERSION;
+    }
+    return import(url);
+}
+
 function readPagingParams(params, key) {
     const config = PAGE_CONFIG[key];
     const pageParam = parseInt(params.get("page") || String(config.defaultPage), 10);
@@ -19,11 +29,11 @@ async function loadProfile({ needDashboard, needProfile }) {
         const res = await fetchJson("/api/profile");
         state.profile = res.data;
         if (needDashboard) {
-            const { updateDashboardProfile } = await import("./render/dashboard.js");
+            const { updateDashboardProfile } = await importWithVersion("./render/dashboard.js");
             updateDashboardProfile(res.data);
         }
         if (needProfile) {
-            const { updateProfileTab } = await import("./profile.js");
+            const { updateProfileTab } = await importWithVersion("./profile.js");
             updateProfileTab(res.data);
         }
     } catch (e) {
@@ -37,11 +47,11 @@ async function loadReservations({ needDashboard, needBookings, page = 1, size = 
         const list = Array.isArray(res.data) ? res.data : [];
         state.reservations = list;
         if (needDashboard) {
-            const { renderRecentBookings } = await import("./render/dashboard.js");
+            const { renderRecentBookings } = await importWithVersion("./render/dashboard.js");
             renderRecentBookings(list.slice(0, 3));
         }
         if (needBookings) {
-            const { renderBookingList } = await import("./render/bookings.js");
+            const { renderBookingList } = await importWithVersion("./render/bookings.js");
             await renderBookingList(list, res.page);
         }
     } catch (e) {
@@ -54,9 +64,10 @@ async function loadReservationPassengers(reservationId) {
     try {
         const res = await fetchJson(`/api/users/me/reservations/${reservationId}/passengers`);
         const passengers = res.data?.passengers || [];
-        const { renderSeatSummary, renderSeatModalPassengers } = await import("./render/passengers.js");
+        const { renderSeatSummary, renderSeatModalPassengers, renderPassengerInfo } = await importWithVersion("./render/passengers.js");
         renderSeatSummary(passengers);
         renderSeatModalPassengers(passengers);
+        renderPassengerInfo(passengers, reservationId);
     } catch (e) {
         console.error(e);
     }
@@ -87,9 +98,23 @@ async function init() {
     if (tab === "booking_detail" && reservationId) {
         try {
             const res = await fetchJson(`/api/users/me/reservations/${reservationId}`);
-            const { updateReservationDetail, initDetailRouteLabels } = await import("./render/detail.js");
+            const { updateReservationDetail, initDetailRouteLabels, updatePaymentBreakdown, initRefundButton } = await importWithVersion("./render/detail.js");
             updateReservationDetail(res.data);
             initDetailRouteLabels(res.data);
+
+            try {
+                const paymentDetailRes = await fetchJson(`/api/reservations/${reservationId}/payment-detail`);
+                updatePaymentBreakdown(paymentDetailRes?.data || null);
+            } catch (e) {
+                console.error(e);
+            }
+
+            try {
+                const paymentView = await fetchJson(`/api/payments/reservation/${reservationId}`);
+                initRefundButton(paymentView);
+            } catch (e) {
+                console.error(e);
+            }
         } catch (e) {
             console.error(e);
         }
@@ -97,7 +122,7 @@ async function init() {
     }
 
     if (needProfile) {
-        const { initProfileSave, initProfileInputGuards, initWithdrawHandler } = await import("./profile.js");
+        const { initProfileSave, initProfileInputGuards, initWithdrawHandler } = await importWithVersion("./profile.js");
         initProfileInputGuards();
         initProfileSave();
         initWithdrawHandler();

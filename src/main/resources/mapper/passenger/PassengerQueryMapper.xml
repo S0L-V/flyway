@@ -46,6 +46,7 @@
             ps.quantity                    AS quantity,
             ps.total_price                 AS totalPrice,
             ps.meal_id                     AS mealId,
+            mo.meal_name                   AS mealName,
             ps.policy_id                   AS policyId,
             ps.service_details             AS serviceDetails,
             ps.added_at                    AS addedAt
@@ -72,6 +73,9 @@
                  LEFT JOIN passenger_service ps
                            ON ps.passenger_id = p.passenger_id
                                AND ps.reservation_segment_id = rs.reservation_segment_id
+
+                 LEFT JOIN meal_option mo
+                           ON mo.meal_id = ps.meal_id
 
         WHERE p.reservation_id = #{reservationId}
           AND r.user_id = #{userId}
