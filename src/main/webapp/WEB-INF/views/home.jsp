@@ -65,8 +65,11 @@
 
                 <!-- 출발 공항 -->
                 <div class="search-field" data-field="from">
-                    <label class="field-label">Departure</label>
-                    <div class="field-input dropdown-toggle" aria-expanded="false">
+                    <label class="field-label" id="label-from">Departure</label>
+                    <div class="field-input dropdown-toggle"
+                         role="button" tabindex="0"
+                         aria-expanded="false" aria-labelledby="label-from"
+                         aria-haspopup="listbox">
                         <div class="field-icon departure">
                             <i class="fa-solid fa-plane-departure"></i>
                         </div>
@@ -74,14 +77,17 @@
                     </div>
                     <div class="dropdown-panel" hidden>
                         <input class="dropdown-search" type="text" placeholder="공항 검색 (예: ICN, 인천)" autocomplete="off">
-                        <ul class="dropdown-list" data-list></ul>
+                        <ul class="dropdown-list" data-list role="listbox"></ul>
                     </div>
                 </div>
 
                 <!-- 도착 공항 -->
                 <div class="search-field" data-field="to">
-                    <label class="field-label">Destination</label>
-                    <div class="field-input dropdown-toggle" aria-expanded="false">
+                    <label class="field-label" id="label-to">Destination</label>
+                    <div class="field-input dropdown-toggle"
+                         role="button" tabindex="0"
+                         aria-expanded="false" aria-labelledby="label-to"
+                         aria-haspopup="listbox">
                         <div class="field-icon">
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
@@ -89,14 +95,16 @@
                     </div>
                     <div class="dropdown-panel" hidden>
                         <input class="dropdown-search" type="text" placeholder="공항 검색 (예: NRT, 나리타)" autocomplete="off">
-                        <ul class="dropdown-list" data-list></ul>
+                        <ul class="dropdown-list" data-list role="listbox"></ul>
                     </div>
                 </div>
 
                 <!-- 날짜 -->
                 <div class="search-field date-field" data-field="dates">
-                    <label class="field-label">Dates</label>
-                    <div class="field-input date-input-wrap" id="dateFieldWrap">
+                    <label class="field-label" id="label-dates">Dates</label>
+                    <div class="field-input date-input-wrap" id="dateFieldWrap"
+                         role="button" tabindex="0"
+                         aria-labelledby="label-dates">
                         <div class="field-icon">
                             <i class="fa-regular fa-calendar"></i>
                         </div>
@@ -111,8 +119,11 @@
 
                 <!-- 인원 + 좌석 -->
                 <div class="search-field pax-field" data-field="paxCabin">
-                    <label class="field-label">Travelers</label>
-                    <div class="field-input dropdown-toggle" aria-expanded="false">
+                    <label class="field-label" id="label-pax">Travelers</label>
+                    <div class="field-input dropdown-toggle"
+                         role="button" tabindex="0"
+                         aria-expanded="false" aria-labelledby="label-pax"
+                         aria-haspopup="true">
                         <div class="field-icon">
                             <i class="fa-solid fa-user"></i>
                         </div>
@@ -268,8 +279,11 @@
                 return;
             }
 
+            // 로컬 타임존 기준 오늘 날짜 (UTC 변환 시 날짜 어긋남 방지)
             const today = new Date();
-            const minDate = today.toISOString().split('T')[0];
+            const minDate = today.getFullYear() + '-' +
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
 
             // 날짜 포맷 함수
             function formatDate(date) {
