@@ -1,7 +1,6 @@
 import {
     $,
     textOrDash,
-    splitKoreanName,
     formatDate,
     formatDateTime,
     getReservationStatus,
@@ -13,7 +12,6 @@ import {
 
 export function updateDashboardProfile(profile) {
     const name = profile?.name || "";
-    const kr = splitKoreanName(name);
     const enLast = profile?.lastName || "";
     const enFirst = profile?.firstName || "";
     const initials = (enLast || enFirst)
@@ -26,7 +24,7 @@ export function updateDashboardProfile(profile) {
     const elEmail = $("dashboardEmail");
 
     if (elInitials) elInitials.textContent = initials || "-";
-    if (elKrName) elKrName.textContent = name ? `${kr.last}${kr.first}` : "-";
+    if (elKrName) elKrName.textContent = name || "-";
     if (elEnName) elEnName.textContent = enLast || enFirst ? `/ ${enLast} ${enFirst}`.trim() : "/ -";
     if (elEmail) elEmail.textContent = textOrDash(profile?.email);
 }
@@ -121,7 +119,16 @@ function getAirlineMap() {
 }
 
 function setAirlineInfo(node, prefix, airlineMap, airlineId, flightNumber) {
-    const key = (airlineId || (flightNumber ? String(flightNumber).slice(0, 2) : "") || "").toUpperCase();
+    const trimmedId = airlineId ? String(airlineId).trim() : "";
+    let key = trimmedId ? trimmedId.toUpperCase() : "";
+    if (!key && flightNumber) {
+        const flightStr = String(flightNumber).trim();
+        const match = flightStr.match(/^[A-Za-z]{1,3}/);
+        key = match ? match[0].toUpperCase() : "";
+        if (!key && flightStr) {
+            key = flightStr.slice(0, 2).toUpperCase();
+        }
+    }
     const info = key && airlineMap ? airlineMap[key] : null;
     const logoEl = node.querySelector(`[data-field="${prefix}AirlineLogo"]`);
     const nameEl = node.querySelector(`[data-field="${prefix}AirlineName"]`);

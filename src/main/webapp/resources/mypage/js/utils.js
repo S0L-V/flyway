@@ -24,18 +24,6 @@ export function formatReservationId(value) {
     return `${str.slice(0, 8)}…${str.slice(-4)}`;
 }
 
-export function splitKoreanName(name) {
-    if (!name) return { last: "", first: "" };
-    if (name.length === 1) return { last: name, first: "" };
-    if (name.length <= 2) return { last: name, first: "" };
-    const compoundSurnames = ["남궁", "선우", "황보", "제갈", "사공", "독고", "동방"];
-    const prefix = name.substring(0, 2);
-    if (compoundSurnames.includes(prefix)) {
-        return { last: prefix, first: name.substring(2) };
-    }
-    return { last: name.substring(0, 1), first: name.substring(1) };
-}
-
 export function formatDate(value) {
     if (!value) return "-";
     const str = String(value);
@@ -55,11 +43,12 @@ export function formatDateTime(value) {
 
 export function formatCurrency(value) {
     if (value == null || value === "") return "-";
-    try {
-        return `₩${Number(value).toLocaleString("ko-KR")}`;
-    } catch (e) {
-        return String(value);
+    const raw = String(value).replace(/,/g, "");
+    const numberValue = Number(raw);
+    if (Number.isFinite(numberValue)) {
+        return `₩${numberValue.toLocaleString("ko-KR")}`;
     }
+    return String(value);
 }
 
 export function formatDurationMinutes(minutes) {

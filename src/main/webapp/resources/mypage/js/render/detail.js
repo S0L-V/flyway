@@ -55,6 +55,16 @@ function applyAirlineInfo({ logoEl, nameEl, flightEl, airlineMap, airlineId, fli
     if (flightEl) flightEl.textContent = flightNumber || "-";
 }
 
+function mapPaymentStatus(status) {
+    const key = (status || "").toUpperCase();
+    if (key === "PAID") return "결제완료";
+    if (key === "PENDING") return "결제대기";
+    if (key === "FAILED") return "결제실패";
+    if (key === "CANCELLED" || key === "CANCELED") return "결제취소";
+    if (key === "REFUNDED") return "환불완료";
+    return status || "-";
+}
+
 export function updateReservationDetail(detail) {
     if (!detail) return;
 
@@ -147,7 +157,7 @@ export function updateReservationDetail(detail) {
     const payAmount = $("detailPaidAmount");
     const payAt = $("detailPaidAt");
     if (payMethod) payMethod.textContent = textOrDash(payment.method);
-    if (payStatus) payStatus.textContent = textOrDash(payment.status);
+    if (payStatus) payStatus.textContent = mapPaymentStatus(payment.status);
     if (payAmount) payAmount.textContent = formatCurrency(payment.paidAmount);
     if (payAt) payAt.textContent = formatDateTime(payment.paidAt);
 }
@@ -185,7 +195,6 @@ function formatFareMeta(segment) {
     if (segment.flightNumber) parts.push(segment.flightNumber);
     if (segment.cabinClass) parts.push(segment.cabinClass);
     if (segment.passengerCount) parts.push(`${segment.passengerCount}명`);
-    if (segment.pricePerPerson != null) parts.push(`1인 ${formatCurrency(segment.pricePerPerson)}`);
     return parts.join(" · ");
 }
 
@@ -286,7 +295,7 @@ export function initRefundButton(payment) {
         const originalText = button.textContent;
         setState({ label: "환불 처리 중...", disabled: true });
         try {
-            const res = await fetchJson(`/api/payments/${paymentId}/refund`, {
+            const res = await fetchJson(`${getContextPath()}/api/payments/${paymentId}/refund`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ cancelReason: reason }),

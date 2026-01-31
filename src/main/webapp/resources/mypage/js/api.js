@@ -19,7 +19,7 @@ export async function fetchJson(url, options) {
     }
 
     const text = await res.text();
-    if (!text) {
+    if (!text || !text.trim()) {
         return null;
     }
 

@@ -1,11 +1,10 @@
-import { $, splitKoreanName, textOrDash } from "./utils.js";
+import { $, textOrDash } from "./utils.js";
 import { fetchJson, fetchOk } from "./api.js";
 import { state } from "./state.js";
 import { updateDashboardProfile } from "./render/dashboard.js";
 
 export function updateProfileTab(profile) {
     const name = profile?.name || "";
-    const kr = splitKoreanName(name);
 
     const elHeaderInitial = $("profileHeaderInitial");
     const elHeaderName = $("profileHeaderName");
@@ -37,8 +36,8 @@ export function updateProfileTab(profile) {
     const elPassportNo = $("profilePassportNo");
     const elPassportExpiryDate = $("profilePassportExpiryDate");
 
-    if (elKrLast) elKrLast.value = profile?.krLastName || kr.last || "";
-    if (elKrFirst) elKrFirst.value = profile?.krFirstName || kr.first || "";
+    if (elKrLast) elKrLast.value = profile?.krLastName || "";
+    if (elKrFirst) elKrFirst.value = profile?.krFirstName || "";
     if (elLast) elLast.value = profile?.lastName || "";
     if (elFirst) elFirst.value = profile?.firstName || "";
     if (elGender) elGender.value = profile?.gender || "";
@@ -80,6 +79,7 @@ export function initProfileInputGuards() {
 
 let withdrawBound = false;
 let withdrawInFlight = false;
+let profileSaveBound = false;
 
 async function handleWithdrawClick(event) {
     if (withdrawInFlight) return false;
@@ -102,7 +102,8 @@ async function handleWithdrawClick(event) {
     const withdrawButton = $("withdrawButton");
     try {
         if (withdrawButton) withdrawButton.disabled = true;
-        const res = await fetchOk("/api/user/withdraw", { method: "POST" });
+        const base = state?.contextPath || "";
+        const res = await fetchOk(`${base}/api/user/withdraw`, { method: "POST" });
         if (res && res.status === 204) {
             window.location.replace(window.APP?.contextPath || "/");
             return false;
@@ -119,6 +120,8 @@ async function handleWithdrawClick(event) {
 }
 
 export function initProfileSave() {
+    if (profileSaveBound) return;
+    profileSaveBound = true;
     const btn = $("profileSaveButton");
     if (!btn) return;
     btn.addEventListener("click", async () => {
@@ -156,7 +159,8 @@ export function initProfileSave() {
         }
 
         try {
-            const res = await fetchJson("/api/profile", {
+            const base = state?.contextPath || "";
+            const res = await fetchJson(`${base}/api/profile`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
