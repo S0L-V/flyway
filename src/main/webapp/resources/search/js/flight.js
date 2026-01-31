@@ -181,7 +181,7 @@ function createRoundTripCard(option, index) {
           <div class="price-graph-tabs">
             <button type="button" class="price-graph-tab is-active"
                     data-action="graph-tab" data-target="sum">합산가</button>    
-            <button type="button" class="price-graph-tab is-active"
+            <button type="button" class="price-graph-tab"
                     data-action="graph-tab" data-target="out">가는편</button>
             <button type="button" class="price-graph-tab"
                     data-action="graph-tab" data-target="in">오는편</button>
