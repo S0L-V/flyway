@@ -80,7 +80,7 @@ window.SeatEvents = (() => {
                         await renderer.refreshAndRender();
                     }
                 } catch (err) {
-                    alert(`좌석 처리 실패: ${err.message}`);
+                    alert(`좌석 선택에 실패했습니다. 다시 시도해주세요.`);
                     await renderer.refreshAndRender().catch(() => {});
                 } finally {
                     state.isHolding = false;
