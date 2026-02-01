@@ -37,6 +37,40 @@
             color: white;
             border-color: #1f6feb;
         }
+
+        /* Flight Card Styles */
+        .flight-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .flight-time { font-size: 24px; font-weight: 800; color: #1a1a1a; line-height: 1; }
+        .airport-code { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-top: 4px; }
+        .airport-name { font-size: 12px; color: #8a8a8a; margin-top: 2px; }
+        .flight-duration { font-size: 12px; color: #9aa4b2; text-align: center; margin-bottom: 6px; }
+        .timeline-line {
+            height: 1px;
+            background-image: linear-gradient(to right, #e2e8f0 50%, transparent 50%);
+            background-size: 6px 1px;
+            background-repeat: repeat-x;
+            position: relative;
+            width: 100%;
+        }
+        .timeline-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 0 6px;
+            color: #1f6feb;
+        }
+        .timeline-icon svg {
+            width: 14px;
+            height: 14px;
+        }
     </style>
 </head>
 
@@ -69,51 +103,74 @@
         <!-- Left Column: Forms -->
         <div class="flex flex-col gap-4">
 
-            <!-- Flight Summary -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div class="flex justify-between items-center mb-4 cursor-pointer">
-                    <div class="flex items-center gap-2">
-                        <span class="bg-slate-800 text-white text-[11px] font-bold px-1.5 py-0.5 rounded">Summary</span>
-                        <c:if test="${not empty vm.segments}">
-                            <span class="text-[15px] font-bold text-gray-800">
-                                <c:out value="${vm.segments[0].snapDepartureCity}"/> ↔ <c:out value="${vm.segments[0].snapArrivalCity}"/>
-                            </span>
-                        </c:if>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-3 pt-4 border-t border-gray-100">
-                    <c:forEach var="s" items="${vm.segments}">
-                        <div class="bg-[#f8fafc] py-3 px-4 rounded-lg border border-[#edf2f7] flex justify-between items-center">
-                            <div>
-                                <strong class="block text-sm text-[#111] mb-1">
-                                    <c:out value="${s.snapDepartureCity}"/> → <c:out value="${s.snapArrivalCity}"/>
-                                </strong>
-                                <div class="text-xs text-[#666]">
-                                    <c:out value="${s.snapAirlineName}"/> |
-                                    <fmt:parseDate value="${s.snapDepartureTime}" pattern="yyyy-MM-dd'T'HH:mm" var="depDate"/>
-                                    <fmt:formatDate value="${depDate}" pattern="yyyy-MM-dd"/>
-                                    <span class="mx-1">·</span>
-                                    성인 ${vm.passengerCount}명 / ${s.snapCabinClassCode}
+            <!-- Flight Summary (Redesigned & Compact) -->
+            <div class="flex flex-col gap-3">
+                <c:forEach var="s" items="${vm.segments}">
+                    <div class="flight-card">
+                        <!-- Card Header -->
+                        <div class="flex justify-between items-center mb-4 text-xs text-[#8a8a8a]">
+                            <div class="flex items-center gap-1.5 font-bold text-[#1a1a1a]">
+                                <span class="text-primary">✈</span>
+                                <span>${s.segmentOrder == 1 ? '가는 편' : '오는 편'}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <fmt:parseDate value="${s.snapDepartureTime}" pattern="yyyy-MM-dd'T'HH:mm" var="depDate"/>
+                                <fmt:formatDate value="${depDate}" pattern="yyyy-MM-dd"/>
+                                <span class="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                                <span>${s.snapAirlineName} ${s.snapFlightNumber}</span>
+                            </div>
+                        </div>
+
+                        <!-- Main Layout (3 Columns) -->
+                        <div class="grid grid-cols-[1fr_1.2fr_1fr] items-center gap-2">
+                            <!-- Left: Departure -->
+                            <div class="text-left">
+                                <div class="flight-time">
+                                    <fmt:formatDate value="${depDate}" pattern="HH:mm"/>
+                                </div>
+                                <div class="airport-code uppercase">${s.snapDepartureAirport}</div>
+                                <div class="airport-name">${s.snapDepartureCity}</div>
+                            </div>
+
+                            <!-- Center: Timeline -->
+                            <div class="flex flex-col items-center w-full px-2">
+                                <div class="flight-duration">
+                                    <!-- Duration calculation logic (simplified for display) -->
+                                    <fmt:parseDate value="${s.snapArrivalTime}" pattern="yyyy-MM-dd'T'HH:mm" var="arrDate"/>
+                                    <c:set var="durationMillis" value="${arrDate.time - depDate.time}" />
+                                    <c:set var="durationHours" value="${durationMillis / (1000 * 60 * 60)}" />
+                                    <c:set var="durationMinutes" value="${(durationMillis / (1000 * 60)) % 60}" />
+                                    <fmt:formatNumber value="${durationHours}" pattern="#,##0" maxFractionDigits="0" />시간
+                                    <fmt:formatNumber value="${durationMinutes}" pattern="#,##0" />분
+                                </div>
+                                <div class="timeline-line">
+                                    <div class="timeline-icon">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="transform rotate-90">
+                                            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Right: Arrival -->
                             <div class="text-right">
-                                <strong class="block text-[#111] text-sm mb-1">
-                                    <fmt:formatDate value="${depDate}" pattern="HH:mm"/>
-                                </strong>
-                                <div class="text-xs text-[#666]">
-                                    <fmt:parseDate value="${s.snapArrivalTime}" pattern="yyyy-MM-dd'T'HH:mm" var="arrDate"/>
-                                    ~ <fmt:formatDate value="${arrDate}" pattern="HH:mm"/>
+                                <div class="flight-time">
+                                    <fmt:formatDate value="${arrDate}" pattern="HH:mm"/>
+                                </div>
+                                <div class="airport-code uppercase">${s.snapArrivalAirport}</div>
+                                <div class="airport-name">
+                                    ${s.snapArrivalCity}
                                     <fmt:formatDate value="${depDate}" pattern="yyyyMMdd" var="depDay"/>
                                     <fmt:formatDate value="${arrDate}" pattern="yyyyMMdd" var="arrDay"/>
                                     <c:set var="dayDiff" value="${arrDay - depDay}"/>
                                     <c:if test="${dayDiff > 0}">
-                                        <span class="text-red-500 font-bold ml-1">(+${dayDiff})</span>
+                                        <span class="text-red-500 font-bold ml-1">+${dayDiff}일</span>
                                     </c:if>
                                 </div>
                             </div>
                         </div>
-                    </c:forEach>
-                </div>
+                    </div>
+                </c:forEach>
             </div>
 
             <!-- Passenger Form -->
