@@ -1,14 +1,13 @@
 package com.flyway.pricing.event;
 
-import com.flyway.payment.mapper.RefundMapper;
-import com.flyway.pricing.mapper.FlightSeatPriceMapper;
-import com.flyway.pricing.mapper.PriceHistoryMapper;
-import com.flyway.pricing.mapper.PricingEventMapper;
 import com.flyway.pricing.model.EventRepriceSegment;
 import com.flyway.pricing.model.FlightSeatPriceRow;
 import com.flyway.pricing.model.PricingInput;
 import com.flyway.pricing.model.PricingResult;
 import com.flyway.pricing.policy.PricingPolicy;
+import com.flyway.pricing.repository.EventRepriceRepository;
+import com.flyway.pricing.repository.FlightSeatPriceRepository;
+import com.flyway.pricing.repository.PriceHistoryRepository;
 import com.flyway.pricing.service.DynamicPricingCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +33,9 @@ public class PricingEventServiceImpl implements PricingEventService {
     private final DynamicPricingCalculator pricingCalculator;
     private final PricingPolicy pricingPolicy;
 
-    private final PricingEventMapper pricingEventMapper;
-    private final RefundMapper refundMapper; // passenger count 재사용
-
-    private final FlightSeatPriceMapper flightSeatPriceMapper;
-    private final PriceHistoryMapper priceHistoryMapper;
+    private final FlightSeatPriceRepository flightSeatPriceRepository;
+    private final EventRepriceRepository eventRepriceRepository;
+    private final PriceHistoryRepository priceHistoryRepository;
 
     /**
      * 결제 완료(좌석 확정) 이후 재가격 수행
@@ -62,7 +59,7 @@ public class PricingEventServiceImpl implements PricingEventService {
         LocalDateTime now = LocalDateTime.now();
 
         // 예약 구간 조회
-        List<EventRepriceSegment> segments = pricingEventMapper.selectRepriceSegments(reservationId);
+        List<EventRepriceSegment> segments = eventRepriceRepository.findRepriceSegments(reservationId);
 
         if (segments.isEmpty()) {
             log.warn("[EVENT_REPRICE] no segments. reservationId={}", reservationId);
@@ -71,7 +68,7 @@ public class PricingEventServiceImpl implements PricingEventService {
         }
 
         // 승객 수 (좌석 변화량 기록용)
-        int passengerCount = refundMapper.selectPassengerCountByReservationId(reservationId);
+        int passengerCount = eventRepriceRepository.selectPassengerCount(reservationId);
 
 
         // 중복 방지: flightId|cabin
@@ -116,7 +113,7 @@ public class PricingEventServiceImpl implements PricingEventService {
             LocalDateTime now,
             Boolean bypass
     ) {
-        FlightSeatPriceRow row = flightSeatPriceMapper.selectForUpdate(flightId, cabinClassCode);
+        FlightSeatPriceRow row = flightSeatPriceRepository.lockForUpdate(flightId, cabinClassCode);
 
         if (row == null) {
             return new RepriceItemResult(flightId, cabinClassCode, null, null, "NO_ROW");
@@ -143,12 +140,12 @@ public class PricingEventServiceImpl implements PricingEventService {
         }
 
         // 가격 반영
-        flightSeatPriceMapper.updateAfterEventPricing(
+        flightSeatPriceRepository.updateAfterEventPricing(
                 flightId, cabinClassCode, result.getNewPrice(), now
         );
 
         // 이력 적재
-        priceHistoryMapper.insertEventHistory(
+        priceHistoryRepository.insertEventHistory(
                 com.flyway.pricing.model.PriceHistoryInsert.builder()
                         .priceHistoryId(UUID.randomUUID().toString())
                         .flightId(flightId)

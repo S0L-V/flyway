@@ -137,7 +137,7 @@ public class PaymentService {
         reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
 
         // 결제 이벤트 기반 항공편 가격 재산정
-        pricingEventServiceImpl.repriceAfterPayment(reservationId, paymentId);
+//        pricingEventServiceImpl.repriceAfterPayment(reservationId, paymentId);
 
         AdminNotificationDto notification = AdminNotificationDto.builder()
                 .notificationType("NEW_RESERVATION")
@@ -242,7 +242,7 @@ public class PaymentService {
         );
 
         // 환불 이벤트 기반 항공편 가격 재산정
-        pricingEventServiceImpl.repriceAfterRefund(reservationId, refundId);
+//        pricingEventServiceImpl.repriceAfterRefund(reservationId, refundId);
 
         // SMS 발송
         String phone = smsMapper.selectPhoneByReservationId(reservationId);
