@@ -71,7 +71,7 @@
 
             <!-- Flight Summary -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex justify-between items-center mb-4 cursor-pointer">
                     <div class="flex items-center gap-2">
                         <span class="bg-slate-800 text-white text-[11px] font-bold px-1.5 py-0.5 rounded">Summary</span>
                         <c:if test="${not empty vm.segments}">
@@ -83,20 +83,33 @@
                 </div>
                 <div class="flex flex-col gap-3 pt-4 border-t border-gray-100">
                     <c:forEach var="s" items="${vm.segments}">
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex justify-between items-center">
+                        <div class="bg-[#f8fafc] py-3 px-4 rounded-lg border border-[#edf2f7] flex justify-between items-center">
                             <div>
-                                <strong class="block text-sm mb-0.5 text-gray-800">
+                                <strong class="block text-sm text-[#111] mb-1">
                                     <c:out value="${s.snapDepartureCity}"/> → <c:out value="${s.snapArrivalCity}"/>
                                 </strong>
-                                <span class="text-xs text-gray-500">
-                                    <c:out value="${s.snapAirlineName}"/> ${s.snapFlightNumber} |
+                                <div class="text-xs text-[#666]">
+                                    <c:out value="${s.snapAirlineName}"/> |
                                     <fmt:parseDate value="${s.snapDepartureTime}" pattern="yyyy-MM-dd'T'HH:mm" var="depDate"/>
                                     <fmt:formatDate value="${depDate}" pattern="yyyy-MM-dd"/>
-                                </span>
+                                    <span class="mx-1">·</span>
+                                    성인 ${vm.passengerCount}명 / ${s.snapCabinClassCode}
+                                </div>
                             </div>
                             <div class="text-right">
-                                <strong class="block text-gray-800"><fmt:formatDate value="${depDate}" pattern="HH:mm"/></strong>
-                                <span class="text-xs text-gray-500">출발</span>
+                                <strong class="block text-[#111] text-sm mb-1">
+                                    <fmt:formatDate value="${depDate}" pattern="HH:mm"/>
+                                </strong>
+                                <div class="text-xs text-[#666]">
+                                    <fmt:parseDate value="${s.snapArrivalTime}" pattern="yyyy-MM-dd'T'HH:mm" var="arrDate"/>
+                                    ~ <fmt:formatDate value="${arrDate}" pattern="HH:mm"/>
+                                    <fmt:formatDate value="${depDate}" pattern="yyyyMMdd" var="depDay"/>
+                                    <fmt:formatDate value="${arrDate}" pattern="yyyyMMdd" var="arrDay"/>
+                                    <c:set var="dayDiff" value="${arrDay - depDay}"/>
+                                    <c:if test="${dayDiff > 0}">
+                                        <span class="text-red-500 font-bold ml-1">(+${dayDiff})</span>
+                                    </c:if>
+                                </div>
                             </div>
                         </div>
                     </c:forEach>
@@ -321,7 +334,7 @@
                             <c:forEach var="svc" items="${s.passengerServices}">
                                 <c:if test="${svc.serviceType == '0'}">
                                     <c:if test="${!isFirst}">, </c:if>
-                                    ${svc.passengerName} ${svc.serviceName} ${svc.quantity}
+                                    ${svc.passengerName} ${svc.serviceName}
                                     <c:set var="isFirst" value="false" />
                                 </c:if>
                             </c:forEach>
