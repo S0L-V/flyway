@@ -178,7 +178,7 @@
 
             <div class="btn-group">
                 <a href="/" class="btn btn-secondary">홈으로</a>
-                <a href="/mypage/reservations" class="btn btn-primary">예약 내역 보기</a>
+                <a href="${pageContext.request.contextPath}/mypage?tab=booking_detail&id=${payment.reservationId}" class="btn btn-primary">예약 내역 보기</a>
             </div>
         </c:when>
 
