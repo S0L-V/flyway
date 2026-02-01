@@ -47,6 +47,12 @@
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite ease-in-out;
     }
+
+    /* Skeleton shimmer effect (라이트 테마) */
+    body.admin-light .skeleton-shimmer {
+        background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+        background-size: 200% 100%;
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
