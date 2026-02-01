@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>약관 동의</title>
 
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
+
     <style>
         :root{
             --bg:#f5f7fb;
@@ -36,6 +38,64 @@
             padding: 16px 16px 60px;
         }
 
+        .page-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding: 18px 0 8px;
+        }
+
+        .page-title{
+            font-size: 24px;
+            font-weight: 800;
+            color:#111;
+        }
+
+        /* stepper */
+        .stepper{
+            list-style:none;
+            display:flex;
+            gap: 14px;
+            margin:0;
+            padding:0;
+            align-items:center;
+        }
+
+        .stepper__item{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap: 6px;
+            color:#9aa3ad;
+            font-size:12px;
+            font-weight:700;
+        }
+
+        .stepper__circle{
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            border: 1px solid #cfd6de;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size: 12px;
+            font-weight: 800;
+            background:#fff;
+            color:#9aa3ad;
+        }
+
+        .stepper__item.is-active{
+            color:#1f6feb;
+        }
+        .stepper__item.is-active .stepper__circle{
+            background:#1f6feb;
+            border-color:#1f6feb;
+            color:#fff;
+        }
+        .pre-flight-white{
+            background:#fff;
+        }
         /* Top bar */
         .topbar{
             display:flex;
@@ -258,23 +318,28 @@
 </head>
 
 <body>
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
 <div class="container">
+    <div class="page-header">
+        <div class="page-header__left">
+            <div class="page-title">예약하기</div>
+        </div>
 
-    <!-- Top bar -->
-    <div class="topbar">
-        <div class="brand">flyway</div>
-        <div class="menu">로그인 | 마이페이지 | 고객센터</div>
-    </div>
-
-    <!-- Header with steps -->
-    <div class="header">
-        <div class="titleRow">
-            <div class="title">예약하기</div>
-            <div class="steps">
-                <div class="step active"><span class="dot">1</span> <span>약관동의</span></div>
-                <div class="step"><span class="dot">2</span> <span>예약자/탑승객</span></div>
-                <div class="step"><span class="dot">3</span> <span>결제정보</span></div>
-            </div>
+        <div class="page-header__right">
+            <ol class="stepper">
+                <li class="stepper__item is-active">
+                    <span class="stepper__circle">1</span>
+                    <span class="stepper__label">약관동의</span>
+                </li>
+                <li class="stepper__item">
+                    <span class="stepper__circle">2</span>
+                    <span class="stepper__label">정보입력/결제</span>
+                </li>
+                <li class="stepper__item">
+                    <span class="stepper__circle">3</span>
+                    <span class="stepper__label">예약결과</span>
+                </li>
+            </ol>
         </div>
     </div>
 

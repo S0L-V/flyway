@@ -1,15 +1,23 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8"/>
     <title>예매 - Flyway</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css"/>
+
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
     <style>
-        body { font-family: Arial, sans-serif; }
+        body {
+            margin:0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
         .container {
             width: 100%;
             max-width: 900px;
@@ -81,9 +89,6 @@
             background:#1f6feb;
             border-color:#1f6feb;
             color:#fff;
-        }
-        .pre-flight-white{
-            background:#fff;
         }
 
         /* 저장 완료 메시지: 1번 이미지의 긴 박스 대신 깔끔한 안내 */
@@ -531,8 +536,16 @@
                     </div>
                     <div>
                         <fmt:parseDate value="${s.snapArrivalTime}" pattern="yyyy-MM-dd'T'HH:mm" var="arrDate"/>
+                        <fmt:formatDate value="${depDate}" pattern="yyyyMMdd" var="depDay"/>
+                        <fmt:formatDate value="${arrDate}" pattern="yyyyMMdd" var="arrDay"/>
+
+                        <c:set var="dayDiff" value="${arrDay - depDay}"/>
+
                         <div class="flight-row__time">
                             <fmt:formatDate value="${arrDate}" pattern="HH:mm"/>
+                            <c:if test="${dayDiff > 0}">
+                                <span class="flight-row__plus-day">+${dayDiff}일</span>
+                            </c:if>
                         </div>
                         <div class="flight-row__airport">${s.snapArrivalCity}(${s.snapArrivalAirport})</div>
                     </div>
@@ -577,13 +590,13 @@
                         <div class="pfield">
                             <label class="plabel">한글 성</label>
                             <div class="pcontrol">
-                                <input name="passengers[${st.index}].krLastName" value="${p.krLastName}" placeholder="한글 성" required />
+                                <input name="passengers[${st.index}].krLastName" value="${p.krLastName}" placeholder="한글 성" pattern="^[가-힣]+$" required />
                             </div>
                         </div>
                         <div class="pfield">
                             <label class="plabel">한글 이름</label>
                             <div class="pcontrol">
-                                <input name="passengers[${st.index}].krFirstName" value="${p.krFirstName}" placeholder="한글 이름" required />
+                                <input name="passengers[${st.index}].krFirstName" value="${p.krFirstName}" placeholder="한글 이름" pattern="^[가-힣]+$" required />
                             </div>
                         </div>
 
@@ -591,13 +604,13 @@
                         <div class="pfield">
                             <label class="plabel">영문 성</label>
                             <div class="pcontrol">
-                                <input name="passengers[${st.index}].lastName" value="${p.lastName}" placeholder="영문 성" required />
+                                <input name="passengers[${st.index}].lastName" value="${p.lastName}" placeholder="영문 성" pattern="^[A-Z\s]+$" oninput="this.value = this.value.toUpperCase()" required />
                             </div>
                         </div>
                         <div class="pfield">
                             <label class="plabel">영문 이름</label>
                             <div class="pcontrol">
-                                <input name="passengers[${st.index}].firstName" value="${p.firstName}" placeholder="영문 이름" required />
+                                <input name="passengers[${st.index}].firstName" value="${p.firstName}" placeholder="영문 이름" pattern="^[A-Z\s]+$" oninput="this.value = this.value.toUpperCase()" required />
                             </div>
                         </div>
 
@@ -607,7 +620,7 @@
                                 <div class="birth">
                                     <label class="plabel">생년월일</label>
                                     <div class="pcontrol">
-                                        <input type="date" name="passengers[${st.index}].birth" value="${p.birth}" required />
+                                        <input type="date" name="passengers[${st.index}].birth" value="${p.birth}" max="9999-12-31" required />
                                     </div>
                                 </div>
 
@@ -632,7 +645,7 @@
                         <div class="pfield">
                             <label class="plabel">연락처</label>
                             <div class="pcontrol">
-                                <input name="passengers[${st.index}].phoneNumber" value="${p.phoneNumber}" placeholder="- 제외 연락처" required />
+                                <input name="passengers[${st.index}].phoneNumber" value="${p.phoneNumber}" placeholder="- 제외 연락처" pattern="^[0-9]{10,11}$" maxlength="11" required />
                             </div>
                         </div>
                         <div class="pfield">
@@ -653,13 +666,13 @@
                         <div class="pfield">
                             <label class="plabel">여권번호</label>
                             <div class="pcontrol">
-                                <input name="passengers[${st.index}].passportNo" value="${p.passportNo}" placeholder="여권번호" />
+                                <input name="passengers[${st.index}].passportNo" value="${p.passportNo}" placeholder="여권번호" pattern="^[A-Z0-9]{7,9}$" oninput="this.value = this.value.toUpperCase()"/>
                             </div>
                         </div>
                         <div class="pfield">
                             <label class="plabel">여권만료일</label>
                             <div class="pcontrol">
-                                <input type="date" name="passengers[${st.index}].passportExpiryDate" value="${p.passportExpiryDate}" />
+                                <input type="date" name="passengers[${st.index}].passportExpiryDate" value="${p.passportExpiryDate}" min="1900-01-01" max="2099-12-31" />
                             </div>
                         </div>
 
@@ -876,6 +889,17 @@
             refreshServiceTotal();
         }
         updateTotalPrice();
+
+        // 생년월일 최대 날짜 제한 (오늘로 설정)
+        const today = new Date().toISOString().split("T")[0];
+        document.querySelectorAll('input[type="date"]').forEach(el => {
+            if(el.name.includes('birth')) {
+                el.max = today;
+            }
+            if(el.name.includes('passportExpiryDate')) {
+                el.min = today; // 여권만료는 오늘부터만 가능
+            }
+        });
     });
     window.openSeatPopup = openSeatPopup;
     window.openServicePopup = openServicePopup;
@@ -888,28 +912,84 @@
         const passengers = [];
         let index = 0;
 
+        // --- 유효성 검사 정규식 ---
+        const regKr = /^[가-힣]+$/;             // 한글만
+        const regEn = /^[A-Z\s]+$/;             // 영문 대문자와 공백만
+        const regPhone = /^01[0-9]{8,9}$/;      // 한국 휴대폰 번호 형식
+        const regEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식
+
         while (true) {
             const passengerIdEl = document.querySelector('input[name="passengers[' + index + '].passengerId"]');
             if (!passengerIdEl) break;
 
+            const krLastName = document.querySelector('input[name="passengers[' + index + '].krLastName"]').value.trim();
+            const krFirstName = document.querySelector('input[name="passengers[' + index + '].krFirstName"]').value.trim();
+            const lastName = document.querySelector('input[name="passengers[' + index + '].lastName"]').value.trim().toUpperCase();
+            const firstName = document.querySelector('input[name="passengers[' + index + '].firstName"]').value.trim().toUpperCase();
+            const birth = document.querySelector('input[name="passengers[' + index + '].birth"]').value;
+            const email = document.querySelector('input[name="passengers[' + index + '].email"]').value.trim();
+            const phoneNumber = document.querySelector('input[name="passengers[' + index + '].phoneNumber"]').value.trim();
             const genderEl = document.querySelector(
                 'input[name="passengers[' + index + '].gender"]:checked'
             );
 
+            const pNum = index + 1; // 탑승자 번호
+
+            // 1. 성별 체크
+            if (!genderEl) {
+                alert(`탑승자 \${pNum}의 성별을 선택해주세요.`);
+                return false;
+            }
+
+            // 2. 한글 이름 검사
+            if (!regKr.test(krLastName) || !regKr.test(krFirstName)) {
+                alert(`탑승자 \${pNum}의 한글 성명은 한글만 입력 가능합니다.`);
+                return false;
+            }
+
+            // 3. 영문 이름 검사
+            if (!regEn.test(lastName) || !regEn.test(firstName)) {
+                alert(`탑승자 \${pNum}의 영문 성명은 영문 대문자만 입력 가능합니다.`);
+                return false;
+            }
+
+            // 4. 생년월일 검사 (미래 날짜 선택 방지)
+            const today = new Date().toISOString().split('T')[0];
+            if (birth > today) {
+                alert(`탑승자 \${pNum}의 생년월일이 올바르지 않습니다.`);
+                return false;
+            }
+
+            // 5. 연락처 및 이메일 형식 검사
+            if (!regPhone.test(phoneNumber)) {
+                alert(`탑승자 \${pNum}의 연락처 형식이 올바르지 않습니다. (예: 01012345678)`);
+                return false;
+            }
+            if (!regEmail.test(email)) {
+                alert(`탑승자 \${pNum}의 이메일 형식이 올바르지 않습니다.`);
+                return false;
+            }
+
+            // 여권 정보가 입력된 경우 추가 검사 (필수가 아닐 수도 있으므로 입력 시에만 체크)
+            const passportNo = document.querySelector('input[name="passengers[' + index + '].passportNo"]').value.trim();
+            const passportExpiry = document.querySelector('input[name="passengers[' + index + '].passportExpiryDate"]').value;
+
+            if (passportNo && passportExpiry) {
+                // 여권 만료일 검사 (오늘 기준 6개월 이후인지 권장 사항 확인)
+                const minExpiry = new Date();
+                minExpiry.setMonth(minExpiry.getMonth() + 6);
+                if (new Date(passportExpiry) < minExpiry) {
+                    if(!confirm(`탑승자 \${pNum}의 여권 만료일이 6개월 미만입니다. 계속하시겠습니까?`)) return false;
+                }
+            }
+
             passengers.push({
                 passengerId: passengerIdEl.value,
-                krLastName: document.querySelector('input[name="passengers[' + index + '].krLastName"]').value,
-                krFirstName: document.querySelector('input[name="passengers[' + index + '].krFirstName"]').value,
-                lastName: document.querySelector('input[name="passengers[' + index + '].lastName"]').value,
-                firstName: document.querySelector('input[name="passengers[' + index + '].firstName"]').value,
-                birth: document.querySelector('input[name="passengers[' + index + '].birth"]').value,
-
+                krLastName, krFirstName, lastName, firstName, birth,
 
                 gender: genderEl ? genderEl.value : '',
 
-                email: document.querySelector('input[name="passengers[' + index + '].email"]').value,
-                phoneNumber: document.querySelector('input[name="passengers[' + index + '].phoneNumber"]').value,
-                passportNo: document.querySelector('input[name="passengers[' + index + '].passportNo"]').value,
+                email, phoneNumber, passportNo,
                 country: document.querySelector('input[name="passengers[' + index + '].country"]').value,
                 passportExpiryDate: document.querySelector('input[name="passengers[' + index + '].passportExpiryDate"]').value,
                 passportIssueCountry: document.querySelector('input[name="passengers[' + index + '].passportIssueCountry"]').value
