@@ -171,6 +171,7 @@ public class PricingEventServiceImpl implements PricingEventService {
 
     private String buildCalcContextJson(PricingResult result, int passengerCount) {
         return String.format(
+                Locale.US,
                 "{\"r\":%.4f,\"alpha\":%.4f,\"target\":%d,\"passengers\":%d}",
                 result.getR(),
                 result.getAlpha(),

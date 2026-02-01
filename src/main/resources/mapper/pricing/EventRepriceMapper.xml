@@ -6,7 +6,7 @@
 
     <select id="selectRepriceSegments"
             parameterType="string"
-            resultType="com.flyway.pricing.event.dto.EventRepriceSegment">
+            resultType="com.flyway.pricing.model.EventRepriceSegment">
         SELECT
             rs.flight_id               AS flightId,
             rs.segment_order           AS segmentOrder,

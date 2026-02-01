@@ -61,7 +61,7 @@ public class DynamicPricingCalculator {
             long minutes = Duration.between(req.getLastEventPricedAt(), req.getNow()).toMinutes();
 
             if (minutes < 0) { // 데이터 이상 방어
-                return PricingResult.skipped(PricingSkipReason.COOLDOWN);
+                return PricingResult.skipped(PricingSkipReason.INVALID_TIME);
             }
 
             if (!req.isBypassCooldown() && minutes < EVENT_COOLDOWN_MINUTES) {
