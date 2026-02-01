@@ -126,14 +126,6 @@
             FOR UPDATE
     </select>
 
-    <!-- flight_seat_id 기준 passenger_seat 소유 passenger_id 조회 (행 락) -->
-    <select id="selectPassengerIdByFlightSeatIdForUpdate" resultType="string">
-        SELECT ps.passenger_id
-        FROM passenger_seat ps
-        WHERE ps.flight_seat_id = #{flightSeatId}
-            FOR UPDATE
-    </select>
-
     <!-- flight_seat 행을 락 걸고 조회 (없으면 null) -->
     <select id="selectFlightSeatForUpdate" resultType="com.flyway.seat.dto.SeatLockRow">
         SELECT
