@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface PricingEventMapper {
+public interface EventRepriceMapper {
     List<EventRepriceSegment> selectRepriceSegments(@Param("reservationId") String reservationId);
 }
