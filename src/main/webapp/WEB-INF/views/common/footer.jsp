@@ -15,11 +15,14 @@
                           no-underline hover:text-[#2F93F7] hover:border-blue-200 transition-colors">
                     <i class="fa-brands fa-github text-lg"></i>
                 </a>
-                <a href="mailto:solv.developers@gmail.com"
-                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/70 text-slate-500
-                          no-underline hover:text-[#2F93F7] hover:border-blue-200 transition-colors">
-                    solv.developers@gmail.com
-                </a>
+                <button onclick="copyEmail()"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/70 text-slate-500
+                               hover:text-[#2F93F7] hover:border-blue-200 transition-colors cursor-pointer"
+                        title="클릭하여 이메일 복사">
+                    <i class="fa-regular fa-envelope text-sm"></i>
+                    <span id="emailText">solv.developers@gmail.com</span>
+                    <i class="fa-regular fa-copy text-xs opacity-50"></i>
+                </button>
             </div>
 
             <!-- Copyright -->
@@ -29,3 +32,17 @@
         </div>
     </div>
 </footer>
+
+<script>
+    function copyEmail() {
+        const email = 'solv.developers@gmail.com';
+        navigator.clipboard.writeText(email).then(() => {
+            const emailText = document.getElementById('emailText');
+            const original = emailText.textContent;
+            emailText.textContent = '복사됨!';
+            setTimeout(() => {
+                emailText.textContent = original;
+            }, 1500);
+        });
+    }
+</script>

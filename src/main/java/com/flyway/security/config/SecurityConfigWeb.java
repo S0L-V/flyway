@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Slf4j
 @Configuration
-@Order(3)
+@Order(2)
 public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
 
     private static final String[] STATIC_RESOURCES = {

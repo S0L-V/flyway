@@ -118,6 +118,7 @@ function renderPromotionCard(list) {
         const safePax = escapeHtml(item.passengerCount);
         const safeOriginal = escapeHtml(formatSalePrice(item.originalPrice));
         const safeSale = escapeHtml(formatSalePrice(item.salePrice));
+        const discountRate = Math.round((1 - item.salePrice / item.originalPrice) * 100);
 
         div.innerHTML = `
             <div class="card-badges">${renderTag(item.tags)}</div>
@@ -134,11 +135,12 @@ function renderPromotionCard(list) {
                 </div>
 
                 <div class="offer-footer">
-                    <div class="price-info-left">
-                        <span class="price-label">성인 1인 편도</span>
+                    <div class="price-row">
+                        <span class="price-label">성인 1인</span>
                         <span class="original-price">₩${safeOriginal}</span>
+                        <span class="discount-badge">${discountRate}%</span>
                     </div>
-                    <div class="price-info-right">
+                    <div class="final-price-row">
                         <span class="final-price">₩${safeSale}</span>
                     </div>
                 </div>
