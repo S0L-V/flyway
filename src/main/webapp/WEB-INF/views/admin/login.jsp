@@ -192,6 +192,17 @@
             document.getElementById('loginForm').dispatchEvent(new Event('submit'));
         }
     });
+
+    // 비밀번호 영문/숫자/특수문자만 입력 허용 (한글 입력 차단)
+    document.getElementById('password').addEventListener('input', function(e) {
+        // 영문, 숫자, 특수문자만 허용하는 정규식
+        this.value = this.value.replace(/[ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+    });
+
+    // IME 입력 방지 (compositionend 이벤트)
+    document.getElementById('password').addEventListener('compositionend', function(e) {
+        this.value = this.value.replace(/[ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+    });
 </script>
 </body>
 </html>
