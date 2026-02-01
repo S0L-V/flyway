@@ -23,6 +23,8 @@ public class SeatDTO {
     private String seatStatus;
 
     private LocalDateTime holdExpiresAt;
+    private String passengerId;
+    private String holdReservationSegmentId;
 
 
 }

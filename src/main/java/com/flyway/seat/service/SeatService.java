@@ -43,4 +43,5 @@ public interface SeatService {
 
     void releaseBookedSeats(String reservationId);
 
+    String findCabinClassCode(String reservationSegmentId);
 }

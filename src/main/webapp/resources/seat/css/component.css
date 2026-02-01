@@ -87,6 +87,19 @@
     color: var(--color-primary-seat);
 }
 
+.segment-tabs {
+    pointer-events: none; /* 클릭/탭 전환 차단 */
+}
+
+.segment-tab {
+    cursor: default;
+}
+
+/* 선택된 탭만 강조는 유지 */
+.segment-tab:not(.segment-tab--active) {
+    opacity: 0.6;
+}
+
 /* ==================== Buttons ==================== */
 .btn {
     padding: 12px 24px;
@@ -142,7 +155,7 @@
 }
 
 .seat-legend__icon--selected {
-    background-color: var(--color-seat-selected);
+    background-color: #ffa500;
 }
 
 .seat-legend__icon--unavailable {
@@ -160,12 +173,6 @@
 }
 
 /* ==================== Selection Panel ==================== */
-.selection-panel {
-    flex: 0 0 265px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xl);
-}
 
 .selection-panel__content {
     background: var(--color-white);

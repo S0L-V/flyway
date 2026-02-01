@@ -65,16 +65,18 @@
                 </c:forEach>
             </div>
 
-            <div id="seat-grid"
-                 class="seat-grid seat-grid--front"
-                 data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
-                 data-rid="${fn:escapeXml(reservationId)}"
-                 data-sid="${fn:escapeXml(reservationSegmentId)}"
-                 data-pid="${fn:escapeXml(passengerId)}">
-                <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
-            </div>
+                <div id="seat-grid"
+                     class="seat-grid seat-grid--front"
+                     data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
+                     data-rid="${fn:escapeXml(reservationId)}"
+                     data-sid="${fn:escapeXml(reservationSegmentId)}"
+                     data-pid="${fn:escapeXml(passengerId)}"
+                     data-cabin="${fn:escapeXml(cabinClassCode)}">
+                    <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
+                </div>
 
-            <div class="seat-legend">
+
+                <div class="seat-legend">
                 <div class="seat-legend__item">
                     <span class="seat-legend__icon seat-legend__icon--available"></span>
                     <span class="seat-legend__label">선택 가능</span>
@@ -86,10 +88,6 @@
                 <div class="seat-legend__item">
                     <span class="seat-legend__icon seat-legend__icon--unavailable"></span>
                     <span class="seat-legend__label">선택 불가</span>
-                </div>
-                <div class="seat-legend__item">
-                    <span class="seat-legend__icon seat-legend__icon--hold"></span>
-                    <span class="seat-legend__label">예약 대기</span>
                 </div>
             </div>
 
@@ -110,7 +108,6 @@
 
             <!-- 좌석 선택 액션(별도 카드) -->
             <div id="seat-action" class="seat-action"></div>
-            <div class="selection-total"></div>
         </div>
 
         <div class="selection-actions">

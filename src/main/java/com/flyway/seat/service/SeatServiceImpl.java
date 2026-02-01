@@ -2,6 +2,7 @@ package com.flyway.seat.service;
 
 import com.flyway.seat.dto.*;
 import com.flyway.seat.mapper.SeatMapper;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,9 +139,8 @@ public class SeatServiceImpl implements SeatService {
                         || !reservationSegmentId.equals(row.getHoldReservationSegmentId())) {
                     throw new IllegalStateException("다른 사용자가 임시 점유 중인 좌석입니다.");
                 }
-                // 같은 segment가 HOLD한 좌석이면 통과(갱신만)
             }
-            // 만료된 HOLD면 선점 가능 (아래 update로 HOLD 갱신됨)
+            // 만료된 HOLD면 선점 가능
         }
 
         // HOLD 업데이트
@@ -149,8 +149,13 @@ public class SeatServiceImpl implements SeatService {
             throw new IllegalStateException("좌석 HOLD 처리 중 동시성 충돌이 발생했습니다.");
         }
 
-        // passenger_seat upsert (UK(reservation_segment_id, passenger_id) 필요)
-        seatMapper.upsertPassengerSeat(reservationSegmentId, request.getPassengerId(), row.getFlightSeatId());
+        // HOLD 성공 후 passenger_seat 저장 (같은 구간에서 승객-좌석 매핑)
+        try {
+            seatMapper.upsertPassengerSeat(reservationSegmentId, request.getPassengerId(), row.getFlightSeatId());
+        } catch (DuplicateKeyException e) {
+            // 같은 좌석을 다른 승객이 이미 잡음(같은 세그먼트 내 중복 포함)
+            throw new IllegalStateException("다른 승객이 이미 선택한 좌석입니다.");
+        }
 
         // 새 좌석 upsert가 끝난 뒤에 기존 좌석이 다른 좌석이면 해제
         if (oldFlightSeatId != null && !oldFlightSeatId.isBlank()
@@ -294,10 +299,19 @@ public class SeatServiceImpl implements SeatService {
         }
     }
 
+    // BOOKED -> AVAILABLE
     @Override
     @Transactional
     public void releaseBookedSeats(String reservationId) {
-        int updated = seatMapper.releaseBookedSeatsByReservation(reservationId);
+        seatMapper.releaseBookedSeatsByReservation(reservationId);
     }
 
+    // 좌석 등급
+    @Override
+    public String findCabinClassCode(String reservationSegmentId) {
+        if (reservationSegmentId == null || reservationSegmentId.isBlank()) {
+            throw new IllegalArgumentException("reservationSegmentId는 필수입니다.");
+        }
+        return seatMapper.selectCabinClassCodeByReservationSegment(reservationSegmentId);
+    }
 }
