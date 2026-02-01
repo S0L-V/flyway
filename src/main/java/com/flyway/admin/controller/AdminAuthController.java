@@ -82,8 +82,7 @@ public class AdminAuthController {
 	@ResponseBody
 	public ApiResponse<?> login(
 		@RequestBody LoginRequest loginRequest,
-		HttpServletRequest httpRequest,
-		HttpSession session) {
+		HttpServletRequest httpRequest) {
 
 		log.info("Login attempt: email={}", loginRequest.getEmail());
 
@@ -95,14 +94,20 @@ public class AdminAuthController {
 			// 로그인 처리
 			LoginResponse loginResponse = adminAuthService.login(loginRequest, clientIp);
 
-			// 세션에 JWT 및 관리자 정보 저장
-			session.setAttribute("adminToken", loginResponse.getAccessToken());
-			session.setAttribute("adminId", loginResponse.getAdminId());
-			session.setAttribute("adminName", loginResponse.getAdminName());
-			session.setAttribute("adminRole", loginResponse.getRole().name());
+			// 세션 고정 공격 방지: 기존 세션 무효화 후 새 세션 생성
+			HttpSession oldSession = httpRequest.getSession(false);
+			if (oldSession != null) {
+				oldSession.invalidate();
+			}
+			HttpSession newSession = httpRequest.getSession(true);
+
+			newSession.setAttribute("adminToken", loginResponse.getAccessToken());
+			newSession.setAttribute("adminId", loginResponse.getAdminId());
+			newSession.setAttribute("adminName", loginResponse.getAdminName());
+			newSession.setAttribute("adminRole", loginResponse.getRole().name());
 
 			// 세션 타임아웃 설정 (30분)
-			session.setMaxInactiveInterval(1800);
+			newSession.setMaxInactiveInterval(1800);
 
 			log.info("Login success: adminId={}, role={}", loginResponse.getAdminId(), loginResponse.getRole());
 
