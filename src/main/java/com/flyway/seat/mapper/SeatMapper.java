@@ -138,11 +138,4 @@ public interface SeatMapper {
     String selectCabinClassCodeByReservationSegment(
             @Param("reservationSegmentId") String reservationSegmentId
     );
-
-    // 좌석맵(승객 매핑 포함) - 구간 기준
-    List<SeatDTO> selectSeatMapByFlightIdAndSegment(
-            @Param("flightId") String flightId,
-            @Param("reservationSegmentId") String reservationSegmentId
-    );
-
 }
