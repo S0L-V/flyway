@@ -59,7 +59,8 @@ public class PricingEventServiceImpl implements PricingEventService {
         LocalDateTime now = LocalDateTime.now();
 
         // 예약 구간 조회
-        List<EventRepriceSegment> segments = eventRepriceRepository.findRepriceSegments(reservationId);
+        List<EventRepriceSegment> segments =
+                new ArrayList<>(eventRepriceRepository.findRepriceSegments(reservationId));
 
         if (segments.isEmpty()) {
             log.warn("[EVENT_REPRICE] no segments. reservationId={}", reservationId);
