@@ -31,6 +31,8 @@
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/admin/**" />
+            <mvc:exclude-mapping path="/admin" />
+            <mvc:exclude-mapping path="/admin/" />
             <mvc:exclude-mapping path="/admin/login" />
             <mvc:exclude-mapping path="/admin/api/auth/login" />
             <mvc:exclude-mapping path="/admin/api/auth/validate" />
