@@ -85,7 +85,9 @@
             </if>
             <if test="keyword != null and keyword != ''">
                 AND (
-                up.name LIKE CONCAT('%', #{keyword}, '%')
+                p.reservation_id LIKE CONCAT('%', #{keyword}, '%')
+                OR p.payment_id LIKE CONCAT('%', #{keyword}, '%')
+                OR up.name LIKE CONCAT('%', #{keyword}, '%')
                 OR up.first_name LIKE CONCAT('%', #{keyword}, '%')
                 OR up.last_name LIKE CONCAT('%', #{keyword}, '%')
                 OR u.email LIKE CONCAT('%', #{keyword}, '%')
@@ -108,7 +110,9 @@
             </if>
             <if test="keyword != null and keyword != ''">
                 AND (
-                up.name LIKE CONCAT('%', #{keyword}, '%')
+                p.reservation_id LIKE CONCAT('%', #{keyword}, '%')
+                OR p.payment_id LIKE CONCAT('%', #{keyword}, '%')
+                OR up.name LIKE CONCAT('%', #{keyword}, '%')
                 OR up.first_name LIKE CONCAT('%', #{keyword}, '%')
                 OR up.last_name LIKE CONCAT('%', #{keyword}, '%')
                 OR u.email LIKE CONCAT('%', #{keyword}, '%')

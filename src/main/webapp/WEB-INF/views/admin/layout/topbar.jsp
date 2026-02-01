@@ -9,7 +9,7 @@
         <!-- 검색 (모바일에서 숨김) -->
         <div class="glass-search hidden sm:flex items-center w-80 relative px-3 py-2">
             <i data-lucide="search" class="text-glass-muted w-4 h-4 mr-2"></i>
-            <input type="text" placeholder="검색어를 입력하세요..."
+            <input type="text" id="global-search-input" placeholder="검색어를 입력하세요..."
                    class="w-full bg-transparent border-none text-sm text-glass-primary placeholder:text-glass-muted focus:outline-none">
         </div>
 
@@ -29,12 +29,12 @@
             </button>
 
             <!-- 알림 드롭다운 (글래스) -->
-            <div id="notification-dropdown" class="hidden absolute right-0 top-12 w-80 glass-modal rounded-xl z-50">
+            <div id="notification-dropdown" class="hidden absolute right-0 top-12 w-[420px] glass-modal rounded-xl z-50">
                 <div class="flex items-center justify-between p-4 border-b border-white/10">
-                    <span class="font-semibold text-glass-primary">알림</span>
+                    <span class="font-semibold text-glass-primary text-base">알림</span>
                     <button onclick="TopbarNotifications.markAllAsRead()" class="text-xs text-blue-400 hover:text-blue-300 transition-colors">모두 읽음</button>
                 </div>
-                <div id="notification-list" class="max-h-80 overflow-y-auto">
+                <div id="notification-list" class="max-h-[480px] overflow-y-auto">
                     <div class="text-center text-glass-muted py-8">
                         알림을 불러오는 중...
                     </div>
@@ -89,6 +89,20 @@
             if (!isDashboardPage) {
                 loadNotifications();
             }
+
+            // 전역 검색 기능
+            var globalSearchInput = document.getElementById('global-search-input');
+            if (globalSearchInput) {
+                globalSearchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        var keyword = this.value.trim();
+                        if (keyword) {
+                            // 결제 내역 페이지로 이동하면서 검색어 전달
+                            window.location.href = basePath + '/admin/payments?keyword=' + encodeURIComponent(keyword);
+                        }
+                    }
+                });
+            }
         });
 
         // 알림 로드 함수
@@ -128,30 +142,38 @@
                 var icon = getNotificationIconGlass(notification.notificationType);
                 var isUnread = notification.isRead === 'N';
                 var timeAgo = formatTimeAgo(notification.createdAt);
+                var bgClass = isUnread ? 'bg-blue-500/20 border-l-2 border-l-blue-400' : 'bg-white/5';
 
-                return '<div class="notification-item p-4 ' + (isUnread ? 'bg-blue-500/10' : '') + ' hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors" data-notification-id="' + escapeHtml(notification.notificationId) + '">' +
-                    '<div class="flex items-start gap-3">' +
-                    '<div class="p-1.5 ' + icon.bgColor + ' ' + icon.textColor + ' rounded-full">' +
-                    '<i data-lucide="' + icon.name + '" class="w-4 h-4"></i>' +
+                return '<div class="notification-item p-4 ' + bgClass + ' hover:bg-white/15 cursor-pointer border-b border-white/10 last:border-b-0 transition-all duration-200" ' +
+                    'data-notification-id="' + escapeHtml(notification.notificationId) + '" ' +
+                    'data-resource-type="' + escapeHtml(notification.relatedResourceType || '') + '" ' +
+                    'data-resource-id="' + escapeHtml(notification.relatedResourceId || '') + '">' +
+                    '<div class="flex items-start gap-4">' +
+                    '<div class="p-2.5 ' + icon.bgColor + ' ' + icon.textColor + ' rounded-lg shrink-0">' +
+                    '<i data-lucide="' + icon.name + '" class="w-5 h-5"></i>' +
                     '</div>' +
                     '<div class="flex-1 min-w-0">' +
-                    '<div class="font-medium text-sm text-glass-primary ' + (isUnread ? 'font-semibold' : '') + '">' + escapeHtml(notification.title) + '</div>' +
-                    '<div class="text-xs text-glass-secondary mt-0.5 truncate">' + escapeHtml(notification.message) + '</div>' +
-                    '<div class="text-xs text-glass-muted mt-1">' + timeAgo + '</div>' +
+                    '<div class="text-sm ' + (isUnread ? 'font-bold text-white' : 'font-medium text-white/90') + '">' + escapeHtml(notification.title) + '</div>' +
+                    '<div class="text-[13px] text-white/80 mt-1.5 leading-relaxed line-clamp-2">' + escapeHtml(notification.message) + '</div>' +
+                    '<div class="text-xs text-white/60 mt-2 font-medium">' + timeAgo + '</div>' +
                     '</div>' +
-                    (isUnread ? '<span class="w-2 h-2 bg-blue-400 rounded-full"></span>' : '') +
+                    (isUnread ? '<span class="w-2.5 h-2.5 bg-blue-400 rounded-full shrink-0 mt-1.5 animate-pulse shadow-lg shadow-blue-400/50"></span>' : '') +
                     '</div>' +
                     '</div>';
             }).join('');
 
             notificationList.innerHTML = html;
 
-            // 클릭 이벤트 바인딩
+            // 클릭 이벤트 바인딩 - 읽음 처리 후 결제 내역으로 이동
             notificationList.querySelectorAll('.notification-item').forEach(function(item) {
                 item.addEventListener('click', function() {
                     var id = this.getAttribute('data-notification-id');
+                    var resourceType = this.getAttribute('data-resource-type');
+                    var resourceId = this.getAttribute('data-resource-id');
+
                     if (id) {
-                        markAsRead(id);
+                        // 읽음 처리 후 페이지 이동
+                        markAsReadAndNavigate(id, resourceType, resourceId);
                     }
                 });
             });
@@ -165,8 +187,14 @@
         // 빈 알림 렌더링 (글래스 스타일)
         function renderEmptyNotifications() {
             if (!notificationList) return;
-            notificationList.innerHTML = '<div class="text-center text-glass-muted py-4 px-4">알림이 없습니다.</div>';
+            notificationList.innerHTML = '<div class="flex flex-col items-center justify-center py-12 px-4">' +
+                '<i data-lucide="bell-off" class="w-10 h-10 text-white/30 mb-3"></i>' +
+                '<p class="text-white/50 text-sm">새로운 알림이 없습니다</p>' +
+                '</div>';
             updateBadge(0);
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
 
         // 배지 업데이트
@@ -194,6 +222,33 @@
                 })
                 .catch(function(error) {
                     console.error('[Topbar] Failed to mark as read:', error);
+                });
+        }
+
+        // 알림 읽음 처리 후 결제 내역으로 이동
+        function markAsReadAndNavigate(notificationId, resourceType, resourceId) {
+            fetch(basePath + '/admin/api/dashboard/notifications/' + encodeURIComponent(notificationId) + '/read', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    // 결제/예약 관련이면 결제 내역 페이지로 이동
+                    if (resourceType === 'RESERVATION' || resourceType === 'PAYMENT') {
+                        var url = basePath + '/admin/payments';
+                        if (resourceId) {
+                            url += '?keyword=' + encodeURIComponent(resourceId);
+                        }
+                        window.location.href = url;
+                    } else {
+                        // 그 외의 경우 알림만 새로고침
+                        loadNotifications();
+                    }
+                })
+                .catch(function(error) {
+                    console.error('[Topbar] Failed to mark as read:', error);
+                    // 에러가 나도 페이지 이동 시도
+                    window.location.href = basePath + '/admin/payments';
                 });
         }
 
