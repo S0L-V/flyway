@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Slf4j
 @Configuration
-@Order(2)
+@Order(3)
 public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
 
     private static final String[] STATIC_RESOURCES = {
@@ -31,7 +31,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/", "/login", "/loginProc", "/signup", "/admin", "/admin/**", "/auth/**", "/search/**",
+            "/", "/login", "/loginProc", "/signup", "/auth/**", "/search/**",
             "/payments/success", "/payments/fail", "/payments/complete" //결제 콜백
     };
 

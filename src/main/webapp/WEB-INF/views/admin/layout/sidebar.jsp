@@ -48,8 +48,14 @@
         <div>
             <p class="sidebar-text text-[10px] font-bold text-slate-500 tracking-wider mb-3 px-2 uppercase whitespace-nowrap overflow-hidden">시스템</p>
             <div class="space-y-1">
+                <!-- 다크모드 토글 -->
+                <div id="darkmode-toggle" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-white/5 cursor-pointer" title="다크모드 전환">
+                    <i data-lucide="moon" id="darkmode-icon" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="sidebar-text text-sm font-medium whitespace-nowrap overflow-hidden">다크모드</span>
+                </div>
+
                 <form id="logout-form" action="${pageContext.request.contextPath}/admin/logout" method="POST" class="w-full">
-                    <button type="submit" class="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all w-full text-left" onclick="return confirm('로그아웃 하시겠습니까?')" title="로그아웃">
+                    <button type="submit" class="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all w-full text-left" title="로그아웃">
                         <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i>
                         <span class="sidebar-text whitespace-nowrap overflow-hidden">로그아웃</span>
                     </button>

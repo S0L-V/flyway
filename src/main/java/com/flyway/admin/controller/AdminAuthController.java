@@ -35,6 +35,17 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminAuthController {
 
 	private final AdminAuthService adminAuthService;
+	/**
+	 * /admin 루트 경로 리다이렉트
+	 * GET /admin, /admin/
+	 */
+	@GetMapping({"/admin", "/admin/"})
+	public String adminRoot(HttpSession session) {
+		if (session.getAttribute("adminId") != null) {
+			return "redirect:/admin/dashboard";
+		}
+		return "redirect:/admin/login";
+	}
 
 	/**
 	 * 로그인 페이지

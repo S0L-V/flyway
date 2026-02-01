@@ -11,6 +11,11 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* 다크모드 기본 (body에 admin-dark 클래스) */
+body.admin-dark {
+    background: #1c1c1e !important;
+}
+
 /* ========================================
    다크 배경 (iOS 스타일)
    ======================================== */
@@ -539,4 +544,779 @@ tbody tr:hover {
 
 .fade-in {
     animation: fadeIn 0.5s ease;
+}
+
+/* ========================================
+   라이트 모드 스타일
+   ======================================== */
+body.admin-light {
+    background: #f1f5f9 !important;
+}
+
+body.admin-light .admin-bg {
+    background: #f1f5f9 !important;
+}
+
+body.admin-light .admin-bg::before {
+    background-image: none;
+}
+
+body.admin-light .glass-card {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .glass-card:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.admin-light .glass-section {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .glass-sidebar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-right-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .glass-topbar {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .text-glass-primary {
+    color: rgba(15, 23, 42, 0.95) !important;
+}
+
+body.admin-light .text-glass-secondary {
+    color: rgba(15, 23, 42, 0.75) !important;
+}
+
+body.admin-light .text-glass-muted {
+    color: rgba(15, 23, 42, 0.55) !important;
+}
+
+body.admin-light .stat-number {
+    background: linear-gradient(135deg, #1e293b 0%, #475569 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+body.admin-light .nav-link {
+    color: rgba(15, 23, 42, 0.7) !important;
+}
+
+body.admin-light .nav-link:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: rgba(15, 23, 42, 0.9) !important;
+}
+
+body.admin-light .nav-link.active {
+    background: rgba(10, 132, 255, 0.1) !important;
+    color: #0a84ff !important;
+}
+
+body.admin-light .glass-search {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.admin-light .glass-search input {
+    color: rgba(15, 23, 42, 0.9) !important;
+}
+
+body.admin-light .glass-search input::placeholder {
+    color: rgba(15, 23, 42, 0.4) !important;
+}
+
+body.admin-light .glass-activity-item {
+    border-bottom-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.admin-light .glass-activity-item:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+body.admin-light tbody tr:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+body.admin-light ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.admin-light ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2) !important;
+}
+
+body.admin-light ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 라이트모드 사이드바 텍스트 */
+body.admin-light .glass-sidebar .text-slate-300,
+body.admin-light .glass-sidebar .text-slate-400,
+body.admin-light .glass-sidebar .text-slate-500 {
+    color: rgba(15, 23, 42, 0.6) !important;
+}
+
+body.admin-light .glass-sidebar button:hover,
+body.admin-light .glass-sidebar a:hover {
+    color: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* 라이트모드 로고 */
+body.admin-light .logo-3d .logo-icon,
+body.admin-light .logo-3d .logo-full {
+    filter: none !important;
+}
+
+/* 라이트모드 버튼 강조 */
+body.admin-light .glass-btn {
+    background: #0a84ff !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3) !important;
+}
+
+body.admin-light .glass-btn:hover {
+    background: #0077ed !important;
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.4) !important;
+}
+
+/* 라이트모드 아이콘 배경 더 진하게 */
+body.admin-light .glass-icon-blue {
+    background: rgba(10, 132, 255, 0.15) !important;
+    border-color: rgba(10, 132, 255, 0.3) !important;
+}
+
+body.admin-light .glass-icon-teal,
+body.admin-light .glass-icon-emerald {
+    background: rgba(22, 163, 74, 0.15) !important;
+    border-color: rgba(22, 163, 74, 0.3) !important;
+}
+
+body.admin-light .glass-icon-rose {
+    background: rgba(225, 29, 72, 0.15) !important;
+    border-color: rgba(225, 29, 72, 0.3) !important;
+}
+
+body.admin-light .glass-icon-yellow {
+    background: rgba(234, 179, 8, 0.15) !important;
+    border-color: rgba(234, 179, 8, 0.3) !important;
+}
+
+body.admin-light .glass-icon-indigo {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+body.admin-light .glass-icon-purple {
+    background: rgba(168, 85, 247, 0.15) !important;
+    border-color: rgba(168, 85, 247, 0.3) !important;
+}
+
+/* 라이트모드 카드 테두리 더 진하게 */
+body.admin-light .glass-card {
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+body.admin-light .glass-section {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 라이트모드 사이드바 더 진하게 */
+body.admin-light .glass-sidebar {
+    background: rgba(248, 250, 252, 0.98) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 라이트모드 탑바 */
+body.admin-light .glass-topbar {
+    background: rgba(248, 250, 252, 0.95) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 라이트모드 탭/세그먼트 */
+body.admin-light .ios-segment-group {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .ios-segment-slider {
+    background: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.admin-light .ios-segment-btn {
+    color: rgba(15, 23, 42, 0.6) !important;
+}
+
+body.admin-light .ios-segment-btn.active {
+    color: rgba(15, 23, 42, 0.95) !important;
+}
+
+body.admin-light .glass-tab-group {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .glass-tab {
+    color: rgba(15, 23, 42, 0.6) !important;
+}
+
+body.admin-light .glass-tab.active {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: rgba(15, 23, 42, 0.95) !important;
+}
+
+/* 라이트모드 테이블 헤더 */
+body.admin-light thead th {
+    background: rgba(0, 0, 0, 0.03) !important;
+    color: rgba(15, 23, 42, 0.7) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body.admin-light tbody td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 라이트모드 알림 뱃지 */
+body.admin-light .notification-badge {
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5) !important;
+}
+
+/* 라이트모드 토글 스위치 */
+body.admin-light .ios-toggle {
+    background: rgba(0, 0, 0, 0.15) !important;
+}
+
+body.admin-light .ios-toggle.active {
+    background: #34c759 !important;
+}
+
+/* 라이트모드 드롭다운/모달 */
+body.admin-light .glass-modal {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.admin-light .glass-modal .notification-item {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+body.admin-light .glass-modal .notification-item:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ========================================
+   SweetAlert2 - Dark Glassmorphism Theme
+   ======================================== */
+
+/* 배경 오버레이 (모달용) */
+.swal2-container:not(.swal2-top-end):not(.swal2-top-start):not(.swal2-bottom-end):not(.swal2-bottom-start) {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* 토스트용 컨테이너 - 배경 블러 없음 */
+.swal2-container.swal2-top-end,
+.swal2-container.swal2-top-start,
+.swal2-container.swal2-bottom-end,
+.swal2-container.swal2-bottom-start {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: transparent !important;
+    pointer-events: none;
+}
+
+.swal2-container.swal2-top-end .swal2-popup,
+.swal2-container.swal2-top-start .swal2-popup,
+.swal2-container.swal2-bottom-end .swal2-popup,
+.swal2-container.swal2-bottom-start .swal2-popup {
+    pointer-events: auto;
+}
+
+/* 팝업 컨테이너 */
+.swal2-popup {
+    background: rgba(44, 44, 46, 0.95) !important;
+    backdrop-filter: blur(50px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(50px) saturate(150%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1.25rem !important;
+    box-shadow:
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+    padding: 2rem !important;
+}
+
+/* 상단 하이라이트 */
+.swal2-popup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 0.5px;
+    background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.15) 80%,
+    transparent);
+    border-radius: 1.25rem;
+}
+
+/* 제목 */
+.swal2-title {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* 내용 텍스트 */
+.swal2-html-container {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.9375rem !important;
+    line-height: 1.6 !important;
+}
+
+/* 아이콘 스타일 */
+.swal2-icon {
+    border-width: 3px !important;
+    margin: 1.5rem auto !important;
+}
+
+.swal2-icon.swal2-success {
+    border-color: rgba(48, 209, 88, 0.4) !important;
+    color: #30d158 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-line-tip,
+.swal2-icon.swal2-success .swal2-success-line-long {
+    background-color: #30d158 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+    border-color: rgba(48, 209, 88, 0.3) !important;
+}
+
+.swal2-icon.swal2-error {
+    border-color: rgba(255, 69, 58, 0.4) !important;
+    color: #ff453a !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark-line-left,
+.swal2-icon.swal2-error .swal2-x-mark-line-right {
+    background-color: #ff453a !important;
+}
+
+.swal2-icon.swal2-warning {
+    border-color: rgba(255, 159, 10, 0.4) !important;
+    color: #ff9f0a !important;
+}
+
+.swal2-icon.swal2-info {
+    border-color: rgba(10, 132, 255, 0.4) !important;
+    color: #0a84ff !important;
+}
+
+.swal2-icon.swal2-question {
+    border-color: rgba(172, 142, 104, 0.4) !important;
+    color: #ac8e68 !important;
+}
+
+/* 버튼 공통 스타일 */
+.swal2-actions {
+    margin-top: 1.5rem !important;
+    gap: 0.75rem !important;
+}
+
+.swal2-styled {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.9375rem !important;
+    font-weight: 500 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 0.625rem !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    min-width: 100px !important;
+}
+
+.swal2-styled:focus {
+    box-shadow: none !important;
+}
+
+/* 확인 버튼 (iOS Blue) */
+.swal2-confirm {
+    background: #0a84ff !important;
+    color: white !important;
+}
+
+.swal2-confirm:hover {
+    background: #409cff !important;
+    transform: scale(1.02);
+}
+
+.swal2-confirm:active {
+    background: #0077ed !important;
+    transform: scale(0.98);
+}
+
+/* 취소 버튼 (iOS Gray) */
+.swal2-cancel {
+    background: rgba(99, 99, 102, 0.5) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.swal2-cancel:hover {
+    background: rgba(99, 99, 102, 0.7) !important;
+    transform: scale(1.02);
+}
+
+.swal2-cancel:active {
+    background: rgba(99, 99, 102, 0.4) !important;
+    transform: scale(0.98);
+}
+
+/* 거부/삭제 버튼 (Red) */
+.swal2-deny {
+    background: #ff453a !important;
+    color: white !important;
+}
+
+.swal2-deny:hover {
+    background: #ff6961 !important;
+    transform: scale(1.02);
+}
+
+.swal2-deny:active {
+    background: #d63a31 !important;
+    transform: scale(0.98);
+}
+
+/* 로딩 스피너 */
+.swal2-loading .swal2-styled.swal2-confirm {
+    background: rgba(10, 132, 255, 0.5) !important;
+}
+
+/* 입력 필드 */
+.swal2-input,
+.swal2-textarea,
+.swal2-select {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 0.625rem !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.swal2-input:focus,
+.swal2-textarea:focus,
+.swal2-select:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: #0a84ff !important;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2) !important;
+    outline: none !important;
+}
+
+.swal2-input::placeholder,
+.swal2-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 유효성 검사 메시지 */
+.swal2-validation-message {
+    background: rgba(255, 69, 58, 0.15) !important;
+    color: #ff453a !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* 토스트 스타일 */
+.swal2-popup.swal2-toast {
+    background: rgba(30, 30, 32, 0.98) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    padding: 0.875rem 1.25rem !important;
+}
+
+.swal2-popup.swal2-toast .swal2-title {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.swal2-popup.swal2-toast .swal2-icon {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    margin: 0 0.5rem 0 0 !important;
+    border-width: 2px !important;
+}
+
+/* 타이머 프로그레스 바 */
+.swal2-timer-progress-bar {
+    background: rgba(10, 132, 255, 0.5) !important;
+}
+
+/* 닫기 버튼 */
+.swal2-close {
+    color: rgba(255, 255, 255, 0.5) !important;
+    transition: all 0.2s ease !important;
+}
+
+.swal2-close:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transform: scale(1.1);
+}
+
+.swal2-close:focus {
+    box-shadow: none !important;
+}
+
+/* ========================================
+   SweetAlert2 - Light Mode Override
+   ======================================== */
+body.admin-light .swal2-popup {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow:
+            0 25px 50px -12px rgba(0, 0, 0, 0.15),
+            0 0 0 1px rgba(0, 0, 0, 0.05) inset !important;
+}
+
+body.admin-light .swal2-popup::before {
+    background: linear-gradient(90deg,
+    transparent,
+    rgba(0, 0, 0, 0.05) 20%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0.05) 80%,
+    transparent);
+}
+
+body.admin-light .swal2-title {
+    color: #0f172a !important;
+}
+
+body.admin-light .swal2-html-container {
+    color: #334155 !important;
+}
+
+body.admin-light .swal2-cancel {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+body.admin-light .swal2-cancel:hover {
+    background: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+body.admin-light .swal2-input,
+body.admin-light .swal2-textarea,
+body.admin-light .swal2-select {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: rgba(15, 23, 42, 0.95) !important;
+}
+
+body.admin-light .swal2-input:focus,
+body.admin-light .swal2-textarea:focus,
+body.admin-light .swal2-select:focus {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .swal2-input::placeholder,
+body.admin-light .swal2-textarea::placeholder {
+    color: rgba(15, 23, 42, 0.4) !important;
+}
+
+body.admin-light .swal2-popup.swal2-toast {
+    background: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.admin-light .swal2-popup.swal2-toast .swal2-title {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+body.admin-light .swal2-popup.swal2-toast .swal2-icon {
+    border-color: currentColor !important;
+}
+
+body.admin-light .swal2-popup.swal2-toast .swal2-icon.swal2-success {
+    border-color: #22c55e !important;
+    color: #22c55e !important;
+}
+
+body.admin-light .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-line-tip,
+body.admin-light .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-line-long {
+    background-color: #22c55e !important;
+}
+
+body.admin-light .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-ring {
+    border-color: #22c55e !important;
+}
+
+body.admin-light .swal2-close {
+    color: rgba(15, 23, 42, 0.5) !important;
+}
+
+body.admin-light .swal2-close:hover {
+    color: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* ========================================
+   알림 드롭다운 - Light Mode
+   ======================================== */
+
+/* 알림 드롭다운 헤더 */
+body.admin-light #notification-dropdown {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body.admin-light #notification-dropdown .border-b {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.admin-light #notification-dropdown .text-glass-primary,
+body.admin-light #notification-dropdown .font-semibold {
+    color: #0f172a !important;
+}
+
+/* 알림 아이템 배경 */
+body.admin-light .notification-item {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.admin-light .notification-item.bg-white\/5 {
+    background: rgba(0, 0, 0, 0.02) !important;
+}
+
+body.admin-light .notification-item.bg-blue-500\/20 {
+    background: rgba(59, 130, 246, 0.1) !important;
+}
+
+body.admin-light .notification-item:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 알림 텍스트 - 흰색을 검은색으로 */
+body.admin-light .notification-item .text-white {
+    color: #0f172a !important;
+}
+
+body.admin-light .notification-item .text-white\/90 {
+    color: #1e293b !important;
+}
+
+body.admin-light .notification-item .text-white\/70 {
+    color: #334155 !important;
+}
+
+body.admin-light .notification-item .text-white\/50 {
+    color: #64748b !important;
+}
+
+body.admin-light .notification-item .text-white\/30 {
+    color: #94a3b8 !important;
+}
+
+body.admin-light .notification-item .font-bold.text-white {
+    color: #0f172a !important;
+}
+
+body.admin-light .notification-item .font-medium.text-white\/90 {
+    color: #1e293b !important;
+}
+
+/* 빈 알림 텍스트 */
+body.admin-light #notification-list .text-white\/50,
+body.admin-light #notification-list .text-white\/30 {
+    color: #64748b !important;
+}
+
+/* 알림 타입 라벨 - 유지 (이미 색상 지정됨) */
+
+/* 알림 아이콘 배경 - 라이트모드 */
+body.admin-light .notification-item .bg-blue-500\/20 {
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+body.admin-light .notification-item .bg-orange-500\/20 {
+    background: rgba(249, 115, 22, 0.15) !important;
+}
+
+body.admin-light .notification-item .bg-emerald-500\/20 {
+    background: rgba(16, 185, 129, 0.15) !important;
+}
+
+body.admin-light .notification-item .bg-rose-500\/20 {
+    background: rgba(244, 63, 94, 0.15) !important;
+}
+
+body.admin-light .notification-item .bg-yellow-500\/20 {
+    background: rgba(234, 179, 8, 0.15) !important;
+}
+
+body.admin-light .notification-item .bg-white\/10 {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 알림 아이콘 색상 - 더 진하게 */
+body.admin-light .notification-item .text-blue-400 {
+    color: #2563eb !important;
+}
+
+body.admin-light .notification-item .text-orange-400 {
+    color: #ea580c !important;
+}
+
+body.admin-light .notification-item .text-emerald-400 {
+    color: #059669 !important;
+}
+
+body.admin-light .notification-item .text-rose-400 {
+    color: #e11d48 !important;
+}
+
+body.admin-light .notification-item .text-yellow-400 {
+    color: #ca8a04 !important;
+}
+
+body.admin-light .notification-item .text-glass-secondary {
+    color: #475569 !important;
+}
+
+/* 모두 읽음 버튼 */
+body.admin-light #notification-dropdown .text-blue-400 {
+    color: #2563eb !important;
+}
+
+body.admin-light #notification-dropdown .text-blue-400:hover {
+    color: #1d4ed8 !important;
+}
+
+/* 읽지 않음 표시 점 */
+body.admin-light .notification-item .bg-blue-400 {
+    background: #3b82f6 !important;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* 알림 드롭다운 border-l 하이라이트 */
+body.admin-light .notification-item.border-l-blue-400 {
+    border-left-color: #3b82f6 !important;
 }
