@@ -67,6 +67,12 @@ public class PricingEventServiceImpl implements PricingEventService {
                     java.time.Instant.now(), List.of());
         }
 
+        // 데드락 방지: 락 획득 순서를 항상 동일하게
+        segments.sort(
+                Comparator.comparing(EventRepriceSegment::getFlightId)
+                        .thenComparing(EventRepriceSegment::getCabinClassCode)
+        );
+
         // 승객 수 (좌석 변화량 기록용)
         int passengerCount = eventRepriceRepository.selectPassengerCount(reservationId);
 
