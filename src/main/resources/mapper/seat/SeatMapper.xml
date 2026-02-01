@@ -249,24 +249,6 @@
                )
     </insert>
 
-    <!-- (reservation_segment_id, passenger_id) 기준으로 seat 갱신 -->
-    <insert id="upsertPassengerSeat">
-        INSERT INTO passenger_seat (
-            passenger_seat_id,
-            reservation_segment_id,
-            passenger_id,
-            flight_seat_id
-        )
-        VALUES (
-                   UUID(),
-                   #{reservationSegmentId},
-                   #{passengerId},
-                   #{flightSeatId}
-               )
-            ON DUPLICATE KEY UPDATE
-                                 flight_seat_id = VALUES(flight_seat_id)
-    </insert>
-
     <!-- flight_seat을 HOLD로 갱신 -->
     <update id="updateFlightSeatHold">
         UPDATE flight_seat
