@@ -58,7 +58,7 @@
         p.paid_at,
         u.user_id,
 
-        -- [수정] up.name을 우선 사용하고, 없으면 first/last_name 조합
+        -- [수정] up.name을 우선 사용하고 (빈 문자열은 NULL 처리), 없으면 first/last_name 조합
         COALESCE(NULLIF(up.name, ''), NULLIF(CONCAT_WS(' ', up.first_name, up.last_name), '')) AS user_name,
 
         u.email AS user_email,
@@ -83,6 +83,14 @@
             <if test="status != null and status != ''">
                 AND p.status = #{status}
             </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                up.name LIKE CONCAT('%', #{keyword}, '%')
+                OR up.first_name LIKE CONCAT('%', #{keyword}, '%')
+                OR up.last_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.email LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
         </where>
         ORDER BY p.paid_at DESC, p.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
@@ -91,9 +99,20 @@
     <select id="countPayments" resultType="long">
         SELECT COUNT(*)
         FROM payment p
+        LEFT JOIN reservation r ON p.reservation_id = r.reservation_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        LEFT JOIN user_profile up ON u.user_id = up.user_id
         <where>
             <if test="status != null and status != ''">
                 AND p.status = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                up.name LIKE CONCAT('%', #{keyword}, '%')
+                OR up.first_name LIKE CONCAT('%', #{keyword}, '%')
+                OR up.last_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.email LIKE CONCAT('%', #{keyword}, '%')
+                )
             </if>
         </where>
     </select>

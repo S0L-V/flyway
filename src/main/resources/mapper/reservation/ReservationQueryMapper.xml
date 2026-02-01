@@ -18,35 +18,41 @@
 
             -- 가는 편 (segment_order = 1)
             MAX(CASE WHEN rs.segment_order = 1 THEN rs.flight_id END)        AS outFlightId,
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.flight_number END)     AS outFlightNumber,
             MAX(CASE WHEN rs.segment_order = 1 THEN f.departure_airport END) AS outDepartureAirport,
             MAX(CASE WHEN rs.segment_order = 1 THEN dep.city END)            AS outDepartureCity,
             MAX(CASE WHEN rs.segment_order = 1 THEN f.arrival_airport END)   AS outArrivalAirport,
             MAX(CASE WHEN rs.segment_order = 1 THEN arr.city END)            AS outArrivalCity,
             MAX(CASE WHEN rs.segment_order = 1 THEN f.departure_time END)    AS outDepartureTime,
             MAX(CASE WHEN rs.segment_order = 1 THEN f.arrival_time END)      AS outArrivalTime,
+            MAX(CASE WHEN rs.segment_order = 1 THEN ac.airline_id END)       AS outAirlineId,
 
             -- 오는 편 (segment_order = 2)
             MAX(CASE WHEN rs.segment_order = 2 THEN rs.flight_id END)        AS inFlightId,
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.flight_number END)     AS inFlightNumber,
             MAX(CASE WHEN rs.segment_order = 2 THEN f.departure_airport END) AS inDepartureAirport,
             MAX(CASE WHEN rs.segment_order = 2 THEN dep.city END)            AS inDepartureCity,
             MAX(CASE WHEN rs.segment_order = 2 THEN f.arrival_airport END)   AS inArrivalAirport,
             MAX(CASE WHEN rs.segment_order = 2 THEN arr.city END)            AS inArrivalCity,
             MAX(CASE WHEN rs.segment_order = 2 THEN f.departure_time END)    AS inDepartureTime,
-            MAX(CASE WHEN rs.segment_order = 2 THEN f.arrival_time END)      AS inArrivalTime
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.arrival_time END)      AS inArrivalTime,
+            MAX(CASE WHEN rs.segment_order = 2 THEN ac.airline_id END)       AS inAirlineId
 
         FROM reservation r
                  JOIN reservation_segment rs
                       ON rs.reservation_id = r.reservation_id
                  JOIN flight f
                       ON f.flight_id = rs.flight_id
+                 LEFT JOIN flight_info fi
+                      ON fi.flight_id = rs.flight_id
+                 LEFT JOIN aircraft ac
+                      ON ac.aircraft_id = fi.aircraft_id
                  JOIN airport dep
                       ON dep.airport_id = f.departure_airport
                  JOIN airport arr
                       ON arr.airport_id = f.arrival_airport
 
                  LEFT JOIN (
-            -- 예약별 최신 'PAID' 결제 1건
-            -- 동일 paid_at 시 payment_id로 tie-break
             SELECT reservation_id, amount
             FROM (
                 SELECT
@@ -57,13 +63,13 @@
                         ORDER BY p1.paid_at DESC, p1.payment_id DESC
                     ) AS rn
                 FROM payment p1
-                WHERE p1.status = 'PAID'
+                WHERE p1.status = 'PAID' OR p1.status = 'CANCELLED'
             ) ranked
             WHERE ranked.rn = 1
         ) pay
                            ON pay.reservation_id = r.reservation_id
 
-        WHERE r.user_id = #{userId} AND r.status = 'CONFIRMED'
+        WHERE r.user_id = #{userId} AND r.status != 'EXPIRED' AND r.status != 'HELD'
 
         GROUP BY
             r.reservation_id,
@@ -96,7 +102,7 @@
 
             -- 가는 편 (segment_order = 1)
             MAX(CASE WHEN rs.segment_order = 1 THEN rs.flight_id END)              AS outFlightId,
-            MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_flight_number END)     AS outFlightNumber,
+            MAX(CASE WHEN rs.segment_order = 1 THEN f.flight_number END)          AS outFlightNumber,
             MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_cabin_class_code END)  AS outCabinClassCode,
             MAX(CASE WHEN rs.segment_order = 1 THEN rs.snap_price END)             AS outPricePerPerson,
 
@@ -113,10 +119,11 @@
 
             MAX(CASE WHEN rs.segment_order = 1 THEN f.terminal_no END)             AS outTerminalNo,
             MAX(CASE WHEN rs.segment_order = 1 THEN f.duration_minutes END)        AS outDurationMinutes,
+            MAX(CASE WHEN rs.segment_order = 1 THEN ac.airline_id END)             AS outAirlineId,
 
             -- 오는 편 (segment_order = 2)
             MAX(CASE WHEN rs.segment_order = 2 THEN rs.flight_id END)              AS inFlightId,
-            MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_flight_number END)     AS inFlightNumber,
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.flight_number END)          AS inFlightNumber,
             MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_cabin_class_code END)  AS inCabinClassCode,
             MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_price END)             AS inPricePerPerson,
 
@@ -132,7 +139,8 @@
             MAX(CASE WHEN rs.segment_order = 2 THEN rs.snap_arrival_time END)      AS inArrivalTime,
 
             MAX(CASE WHEN rs.segment_order = 2 THEN f.terminal_no END)             AS inTerminalNo,
-            MAX(CASE WHEN rs.segment_order = 2 THEN f.duration_minutes END)        AS inDurationMinutes
+            MAX(CASE WHEN rs.segment_order = 2 THEN f.duration_minutes END)        AS inDurationMinutes,
+            MAX(CASE WHEN rs.segment_order = 2 THEN ac.airline_id END)             AS inAirlineId
 
         FROM reservation r
                  JOIN reservation_segment rs
@@ -140,6 +148,10 @@
 
                  JOIN flight f
                       ON f.flight_id = rs.flight_id
+                 LEFT JOIN flight_info fi
+                      ON fi.flight_id = rs.flight_id
+                 LEFT JOIN aircraft ac
+                      ON ac.aircraft_id = fi.aircraft_id
 
                  JOIN airport dep
                       ON dep.airport_id = rs.snap_departure_airport
@@ -165,7 +177,7 @@
                         ORDER BY p1.paid_at DESC, p1.payment_id DESC
                     ) AS rn
                 FROM payment p1
-                WHERE p1.status = 'PAID'
+                WHERE p1.status = 'PAID' OR p1.status = 'CANCELLED'
             ) ranked
             WHERE ranked.rn = 1
         ) pay
@@ -173,7 +185,7 @@
 
         WHERE r.user_id = #{userId}
           AND r.reservation_id = #{reservationId}
-          AND r.status = 'CONFIRMED'
+          AND r.status != 'EXPIRED' AND r.status != 'HELD'
 
         GROUP BY
             r.reservation_id,
@@ -193,7 +205,7 @@
     <select id="countReservationHistoriesByUserId" resultType="int">
         SELECT COUNT(*)
         FROM reservation r
-        WHERE r.user_id = #{userId} AND r.status = 'CONFIRMED'
+        WHERE r.user_id = #{userId} AND r.status != 'EXPIRED' AND r.status != 'HELD'
     </select>
 
 </mapper>

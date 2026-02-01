@@ -1,41 +1,41 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 fixed top-0 left-0 lg:left-[72px] right-0 z-40 transition-all duration-300">
+<header class="glass-topbar h-16 flex items-center justify-between px-4 lg:px-8 fixed top-0 left-0 lg:left-[72px] right-0 z-40 transition-all duration-300">
     <div class="flex items-center gap-4 lg:gap-6">
         <!-- 모바일 햄버거 메뉴 -->
-        <button id="sidebar-toggle" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg" onclick="toggleSidebar()">
-            <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
+        <button id="sidebar-toggle" class="lg:hidden p-2 hover:bg-white/10 rounded-lg transition-colors" onclick="toggleSidebar()">
+            <i data-lucide="menu" class="w-5 h-5 text-glass-secondary"></i>
         </button>
 
         <!-- 검색 (모바일에서 숨김) -->
-        <div class="hidden sm:flex items-center w-80 relative">
-            <i data-lucide="search" class="absolute left-3 text-slate-400 w-4 h-4"></i>
+        <div class="glass-search hidden sm:flex items-center w-80 relative px-3 py-2">
+            <i data-lucide="search" class="text-glass-muted w-4 h-4 mr-2"></i>
             <input type="text" placeholder="검색어를 입력하세요..."
-                   class="w-full bg-slate-50 border-none rounded-md py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none">
+                   class="w-full bg-transparent border-none text-sm text-glass-primary placeholder:text-glass-muted focus:outline-none">
         </div>
 
         <!-- 연결 상태 (대시보드에서만 표시) -->
         <div id="connection-status" class="hidden items-center gap-1.5">
-            <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
-            <span class="text-slate-400 text-xs">연결 중...</span>
+            <span class="w-2 h-2 bg-slate-400 rounded-full"></span>
+            <span class="text-glass-muted text-xs">연결 중...</span>
         </div>
     </div>
 
     <div class="flex items-center gap-4">
         <!-- 알림 버튼 및 드롭다운 -->
         <div class="relative" id="notification-container">
-            <button id="notification-button" class="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full">
+            <button id="notification-button" class="relative p-2 text-glass-secondary hover:bg-white/10 rounded-full transition-colors">
                 <i data-lucide="bell" class="w-5 h-5"></i>
-                <span id="notification-badge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-white hidden">0</span>
+                <span id="notification-badge" class="notification-badge hidden">0</span>
             </button>
 
-            <!-- 알림 드롭다운 -->
-            <div id="notification-dropdown" class="hidden absolute right-0 top-12 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50">
-                <div class="flex items-center justify-between p-4 border-b border-slate-100">
-                    <span class="font-semibold text-slate-800">알림</span>
-                    <button onclick="TopbarNotifications.markAllAsRead()" class="text-xs text-blue-600 hover:text-blue-700">모두 읽음</button>
+            <!-- 알림 드롭다운 (글래스) -->
+            <div id="notification-dropdown" class="hidden absolute right-0 top-12 w-80 glass-modal rounded-xl z-50">
+                <div class="flex items-center justify-between p-4 border-b border-white/10">
+                    <span class="font-semibold text-glass-primary">알림</span>
+                    <button onclick="TopbarNotifications.markAllAsRead()" class="text-xs text-blue-400 hover:text-blue-300 transition-colors">모두 읽음</button>
                 </div>
                 <div id="notification-list" class="max-h-80 overflow-y-auto">
-                    <div class="text-center text-slate-400 py-8">
+                    <div class="text-center text-glass-muted py-8">
                         알림을 불러오는 중...
                     </div>
                 </div>
@@ -43,12 +43,12 @@
         </div>
 
         <!-- 관리자 정보 -->
-        <div class="flex items-center gap-3 ml-2 pl-4 border-l border-slate-200">
+        <div class="flex items-center gap-3 ml-2 pl-4 border-l border-white/10">
             <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold text-slate-700">${sessionScope.adminName != null ? sessionScope.adminName : '관리자'}</p>
-                <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-tight">${sessionScope.role != null ? sessionScope.role : 'ADMIN'}</p>
+                <p class="text-sm font-semibold text-glass-primary">${sessionScope.adminName != null ? sessionScope.adminName : '관리자'}</p>
+                <p class="text-[10px] text-glass-muted uppercase font-extrabold tracking-tight">${sessionScope.role != null ? sessionScope.role : 'ADMIN'}</p>
             </div>
-            <div class="w-9 h-9 bg-slate-200 rounded-xl overflow-hidden border-2 border-slate-100">
+            <div class="w-9 h-9 rounded-xl overflow-hidden border-2 border-white/20 shadow-lg">
                 <img src="https://picsum.photos/id/64/100" alt="profile" class="w-full h-full object-cover">
             </div>
         </div>
@@ -111,7 +111,7 @@
                 });
         }
 
-        // 알림 렌더링
+        // 알림 렌더링 (글래스 스타일)
         function renderNotifications(notifications) {
             if (!notificationList) return;
 
@@ -125,21 +125,21 @@
             }
 
             var html = notifications.map(function(notification) {
-                var icon = getNotificationIcon(notification.notificationType);
+                var icon = getNotificationIconGlass(notification.notificationType);
                 var isUnread = notification.isRead === 'N';
                 var timeAgo = formatTimeAgo(notification.createdAt);
 
-                return '<div class="notification-item p-4 ' + (isUnread ? 'bg-blue-50' : '') + ' hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0" data-notification-id="' + escapeHtml(notification.notificationId) + '">' +
+                return '<div class="notification-item p-4 ' + (isUnread ? 'bg-blue-500/10' : '') + ' hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors" data-notification-id="' + escapeHtml(notification.notificationId) + '">' +
                     '<div class="flex items-start gap-3">' +
                     '<div class="p-1.5 ' + icon.bgColor + ' ' + icon.textColor + ' rounded-full">' +
                     '<i data-lucide="' + icon.name + '" class="w-4 h-4"></i>' +
                     '</div>' +
                     '<div class="flex-1 min-w-0">' +
-                    '<div class="font-medium text-sm text-slate-800 ' + (isUnread ? 'font-semibold' : '') + '">' + escapeHtml(notification.title) + '</div>' +
-                    '<div class="text-xs text-slate-500 mt-0.5 truncate">' + escapeHtml(notification.message) + '</div>' +
-                    '<div class="text-xs text-slate-400 mt-1">' + timeAgo + '</div>' +
+                    '<div class="font-medium text-sm text-glass-primary ' + (isUnread ? 'font-semibold' : '') + '">' + escapeHtml(notification.title) + '</div>' +
+                    '<div class="text-xs text-glass-secondary mt-0.5 truncate">' + escapeHtml(notification.message) + '</div>' +
+                    '<div class="text-xs text-glass-muted mt-1">' + timeAgo + '</div>' +
                     '</div>' +
-                    (isUnread ? '<span class="w-2 h-2 bg-blue-500 rounded-full"></span>' : '') +
+                    (isUnread ? '<span class="w-2 h-2 bg-blue-400 rounded-full"></span>' : '') +
                     '</div>' +
                     '</div>';
             }).join('');
@@ -162,10 +162,10 @@
             }
         }
 
-        // 빈 알림 렌더링
+        // 빈 알림 렌더링 (글래스 스타일)
         function renderEmptyNotifications() {
             if (!notificationList) return;
-            notificationList.innerHTML = '<div class="text-center text-slate-400 py-4 px-4">알림이 없습니다.</div>';
+            notificationList.innerHTML = '<div class="text-center text-glass-muted py-4 px-4">알림이 없습니다.</div>';
             updateBadge(0);
         }
 
@@ -258,6 +258,17 @@
                 case 'PAYMENT_FAILED': return { name: 'alert-circle', bgColor: 'bg-rose-100', textColor: 'text-rose-600' };
                 case 'SYSTEM_ALERT': return { name: 'alert-triangle', bgColor: 'bg-yellow-100', textColor: 'text-yellow-600' };
                 default: return { name: 'bell', bgColor: 'bg-slate-100', textColor: 'text-slate-600' };
+            }
+        }
+
+        // 글래스 테마용 알림 아이콘
+        function getNotificationIconGlass(type) {
+            switch (type) {
+                case 'NEW_RESERVATION': return { name: 'ticket', bgColor: 'bg-blue-500/20', textColor: 'text-blue-400' };
+                case 'REFUND_REQUEST': return { name: 'rotate-ccw', bgColor: 'bg-orange-500/20', textColor: 'text-orange-400' };
+                case 'PAYMENT_FAILED': return { name: 'alert-circle', bgColor: 'bg-rose-500/20', textColor: 'text-rose-400' };
+                case 'SYSTEM_ALERT': return { name: 'alert-triangle', bgColor: 'bg-yellow-500/20', textColor: 'text-yellow-400' };
+                default: return { name: 'bell', bgColor: 'bg-white/10', textColor: 'text-glass-secondary' };
             }
         }
     })();

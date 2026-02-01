@@ -13,6 +13,7 @@ public class PaymentViewDto {
 
     private String paymentId;        // 우리 DB의 결제 ID
     private String reservationId;    // 예약 ID
+    private String userId;
     private String paymentKey;       // 토스 결제 키
     private String orderId;          // 주문 ID
     private Long amount;             // 결제 금액

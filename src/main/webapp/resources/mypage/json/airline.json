@@ -1,0 +1,10 @@
+{
+  "OZ": {
+    "name": "아시아나항공",
+    "image": "/resources/search/img/asiana-logo.svg"
+  },
+  "KE": {
+    "name": "대한항공",
+    "image": "/resources/search/img/korean-logo.svg"
+  }
+}

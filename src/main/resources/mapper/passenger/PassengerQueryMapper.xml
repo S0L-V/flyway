@@ -22,7 +22,7 @@
             p.phone_number                 AS phoneNumber,
             p.checked_baggage_applied      AS checkedBaggageApplied,
 
-            -- 항공편
+            -- 여권 정보
             p.passport_no                  AS passportNo,
             p.passport_issue_country       AS passportIssueCountry,
             p.passport_expiry_date         AS passportExpiryDate,
@@ -34,17 +34,19 @@
             rs.reservation_segment_id      AS reservationSegmentId,
             rs.segment_order               AS segmentOrder,
 
-            -- 좌석
+            -- 좌석 정보
             pst.passenger_seat_id          AS passengerSeatId,
             pst.flight_seat_id             AS flightSeatId,
+            acs.seat_no                    AS seatNo,
 
-            -- 부가서비스
+            -- 부가 서비스
             ps.ps_id                       AS psId,
             ps.service_type                AS serviceType,
             ps.trip_type                   AS tripType,
             ps.quantity                    AS quantity,
             ps.total_price                 AS totalPrice,
             ps.meal_id                     AS mealId,
+            mo.meal_name                   AS mealName,
             ps.policy_id                   AS policyId,
             ps.service_details             AS serviceDetails,
             ps.added_at                    AS addedAt
@@ -52,16 +54,28 @@
         FROM passenger p
                  JOIN reservation r
                       ON r.reservation_id = p.reservation_id
+
                  JOIN reservation_segment rs
                       ON rs.reservation_id = p.reservation_id
 
+            -- 좌석 배정
                  LEFT JOIN passenger_seat pst
                            ON pst.passenger_id = p.passenger_id
                                AND pst.reservation_segment_id = rs.reservation_segment_id
 
+                 LEFT JOIN flight_seat fs
+                           ON fs.flight_seat_id = pst.flight_seat_id
+
+                 LEFT JOIN aircraft_seat acs
+                           ON acs.airplane_seat_id = fs.aircraft_seat_id
+
+            -- 부가 서비스
                  LEFT JOIN passenger_service ps
                            ON ps.passenger_id = p.passenger_id
                                AND ps.reservation_segment_id = rs.reservation_segment_id
+
+                 LEFT JOIN meal_option mo
+                           ON mo.meal_id = ps.meal_id
 
         WHERE p.reservation_id = #{reservationId}
           AND r.user_id = #{userId}

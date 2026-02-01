@@ -1,4 +1,6 @@
 package com.flyway.payment.service;
+import com.flyway.admin.dto.AdminNotificationDto;
+import com.flyway.admin.service.AdminNotificationService;
 import com.flyway.payment.domain.*;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.client.TossPaymentsClient;
@@ -40,22 +42,23 @@ public class PaymentService {
     private final SmsMapper smsMapper;
     private final SeatService seatService;
     private final PricingEventServiceImpl pricingEventServiceImpl;
+    private final AdminNotificationService adminNotificationService;
 
     /**
      * 결제 처리 메인 로직 (개선된 3단계 설계)
      */
-    public PaymentViewDto processPayment(PaymentConfirmRequest request, String userId) {
+    public PaymentViewDto processPaymentByOrderId(PaymentConfirmRequest request) {
         // 1단계: 결제 준비 (짧은 트랜잭션)
-        PaymentViewDto payment = preparePayment(request, userId);
+        PaymentViewDto payment = preparePaymentByOrderId(request);
 
         try {
-            // 2단계: 토스 API 호출 (트랜잭션 밖 - DB 커넥션 점유 안함)
+            // 2단계: 토스 API 호출 (트랜잭션 밖!)
             TossPaymentResponse tossResponse = tossClient.confirmPayment(request);
 
-            // 3단계: 결제 성공 처리 (짧은 트랜잭션)
+            // 3단계: 결제 완료 (짧은 트랜잭션)
             return completePayment(payment.getPaymentId(), tossResponse);
         } catch (Exception e) {
-            // 3단계: 결제 실패 처리 (짧은 트랜잭션)
+            // 실패 처리 (짧은 트랜잭션)
             failPayment(payment.getPaymentId(), payment.getReservationId());
             throw new RuntimeException("결제 실패: " + e.getMessage(), e);
         }
@@ -65,20 +68,30 @@ public class PaymentService {
      * 1단계: 결제 준비 - 예약 검증 및 PENDING 상태로 결제 생성
      */
     @Transactional
-    public PaymentViewDto preparePayment(PaymentConfirmRequest request, String userId) {
+    public PaymentViewDto  preparePaymentByOrderId(PaymentConfirmRequest request) {
         String reservationId = extractReservationId(request.getOrderId());
 
         // 예약 row 잠금 (동시 결제 방지)
         ReservationCoreView reservation = reservationBookingRepository.lockReservationForUpdate(reservationId);
+        if (reservation == null) {
+            throw new RuntimeException("예약 정보를 찾을 수 없습니다");
+        }
+        //예약 상태 검증
+        if (!"HELD".equals(reservation.getStatus())) {
+            throw new RuntimeException("결제 가능한 상태가 아닙니다: " + reservation.getStatus());
+        }
 
-        // 예약 검증
-        validateReservation(reservation, userId);
+        //예약 만료 시간 검증
+        if (reservation.getExpiredAt() != null &&
+                reservation.getExpiredAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("예약이 만료되었습니다");
+        }
 
         // 금액 계산 및 검증
         long calculatedAmount = calculateTotalAmount(reservationId);
         if (calculatedAmount != request.getAmount()) {
-            throw new RuntimeException("결제 금액 불일치: 예상=" + calculatedAmount + ", 요청=" +
-                    request.getAmount());
+            log.error("금액 불일치 - 계산: {}, 요청: {}", calculatedAmount, request.getAmount());
+            throw new RuntimeException("결제 금액이 일치하지 않습니다");
         }
 
         // 예약 상태 변경: HELD → PAYING
@@ -96,12 +109,11 @@ public class PaymentService {
                 .build();
 
         paymentRepository.insert(payment);
-
         return payment;
     }
 
     /**
-     * 3단계 성공: 결제 완료 처리
+     *  결제 완료 처리
      */
     @Transactional
     public PaymentViewDto completePayment(String paymentId, TossPaymentResponse tossResponse) {
@@ -127,6 +139,15 @@ public class PaymentService {
         // 결제 이벤트 기반 항공편 가격 재산정
         pricingEventServiceImpl.repriceAfterPayment(reservationId, paymentId);
 
+        AdminNotificationDto notification = AdminNotificationDto.builder()
+                .notificationType("NEW_RESERVATION")
+                .title("신규 예약 발생")
+                .message("새로운 예약이 확정되었습니다.")
+                .relatedResourceType("RESERVATION")
+                .relatedResourceId(reservationId)
+                .priority("NORMAL")
+                .build();
+        adminNotificationService.createAndBroadcastNotification(notification);
         // SMS 발송 (여기에 추가)
         String phone = smsMapper.selectPhoneByReservationId(payment.getReservationId());
         if (phone != null && !phone.isEmpty()) {
@@ -147,6 +168,17 @@ public class PaymentService {
 
         // 예약 상태 → HELD (원복)
         reservationBookingRepository.updateReservationStatus(reservationId, "HELD");
+
+        // [알림] 결제 실패 알림 생성
+        AdminNotificationDto notification = AdminNotificationDto.builder()
+                .notificationType("PAYMENT_FAILED")
+                .title("결제 실패 발생")
+                .message("결제 실패가 발생했습니다: " )
+                .relatedResourceType("RESERVATION")
+                .relatedResourceId(reservationId)
+                .priority("HIGH")
+                .build();
+        adminNotificationService.createAndBroadcastNotification(notification);
     }
 
     /**
@@ -182,6 +214,17 @@ public class PaymentService {
 
         for (RefundSegmentDto segment : segments) {
             refundMapper.incrementSeat(segment.getFlightId(), segment.getCabinClass(), passengerCount);
+
+            // [알림] 환불 완료 알림 생성
+            AdminNotificationDto notification = AdminNotificationDto.builder()
+                    .notificationType("REFUND_COMPLETED")
+                    .title("환불 처리 완료")
+                    .message("사용자 요청에 의해 환불이 완료되었습니다.")
+                    .relatedResourceType("RESERVATION")
+                    .relatedResourceId(reservationId)
+                    .priority("NORMAL")
+                    .build();
+            adminNotificationService.createAndBroadcastNotification(notification);
         }
 
         String refundId = UUID.randomUUID().toString();

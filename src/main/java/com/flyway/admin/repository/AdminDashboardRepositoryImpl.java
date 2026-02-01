@@ -1,6 +1,7 @@
 package com.flyway.admin.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
@@ -102,4 +103,18 @@ public class AdminDashboardRepositoryImpl implements AdminDashboardRepository {
 		log.debug("Finding today visitors, limit: {}", limit);
 		return visitorLogMapper.selectTodayVisitors(limit);
 	}
+
+	// == 차트용 통계 ==
+	@Override
+	public List<Map<String, Object>> findHourlyReservationDistribution(int days) {
+		log.debug("Finding hourly reservation distribution for {} days", days);
+		return dashboardMapper.selectHourlyReservationDistribution(days);
+	}
+
+	@Override
+	public List<Map<String, Object>> findReservationStatusDistribution(int days) {
+		log.debug("Finding reservation status distribution for {} days", days);
+		return dashboardMapper.selectReservationStatusDistribution(days);
+	}
 }
+

@@ -103,4 +103,20 @@ public interface AdminDashboardMapper {
 	 * @param adminId 관리자 ID
 	 */
 	int markAllNotificationsAsRead(@Param("adminId") String adminId);
+
+	// == 차트용 통계 ==
+
+	/**
+	 * 시간대별 예약 분포 조회 (최근 N일)
+	 * @param days 조회 기간 (일)
+	 * @return 시간대(0-23)별 예약 건수 리스트
+	 */
+	List<java.util.Map<String, Object>> selectHourlyReservationDistribution(@Param("days") int days);
+
+	/**
+	 * 예약 상태별 분포 조회 (최근 N일)
+	 * @param days 조회 기간 (일)
+	 * @return 상태별 예약 건수 리스트
+	 */
+	List<java.util.Map<String, Object>> selectReservationStatusDistribution(@Param("days") int days);
 }

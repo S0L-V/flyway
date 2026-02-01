@@ -12,7 +12,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class UserProfileResponse extends UserProfile {
-    private String email;
     private String createdAt;
     private AuthStatus status;
 }

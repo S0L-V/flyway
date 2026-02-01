@@ -1,6 +1,7 @@
 package com.flyway.admin.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.DashboardStatsDto;
@@ -49,4 +50,18 @@ public interface AdminDashboardService {
 	 * 오늘 방문자 상세 목록 조회
 	 */
 	List<VisitorDetailDto> getTodayVisitors(int limit);
+
+	/**
+	 * 시간대별 예약 분포 조회 (차트용)
+	 * @param days 조회 기간 (일)
+	 * @return 시간대(0-23)별 예약 건수 리스트
+	 */
+	List<Map<String, Object>> getHourlyReservationDistribution(int days);
+
+	/**
+	 * 예약 상태별 분포 조회 (차트용)
+	 * @param days 조회 기간 (일)
+	 * @return 상태별 예약 건수 리스트
+	 */
+	List<Map<String, Object>> getReservationStatusDistribution(int days);
 }

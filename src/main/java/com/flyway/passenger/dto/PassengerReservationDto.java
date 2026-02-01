@@ -38,6 +38,7 @@ public class PassengerReservationDto {
     /* 좌석 */
     private String passengerSeatId;
     private String flightSeatId;
+    private String seatNo;
 
     /* 부가 서비스 */
     private String psId;            // passenger service id
@@ -46,6 +47,7 @@ public class PassengerReservationDto {
     private Integer quantity;
     private Long totalPrice;
     private String mealId;
+    private String mealName;
     private String policyId;
     private String serviceDetails;  // JSON
     private LocalDateTime addedAt;

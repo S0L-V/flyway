@@ -42,6 +42,7 @@ public class ReservationDetailDto {
 
     private String outTerminalNo;
     private Integer outDurationMinutes;
+    private String outAirlineId;
 
     /* INBOUND (segment_order = 2) */
     private String inFlightId;
@@ -62,4 +63,5 @@ public class ReservationDetailDto {
 
     private String inTerminalNo;
     private Integer inDurationMinutes;
+    private String inAirlineId;
 }

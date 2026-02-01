@@ -14,7 +14,7 @@ public interface AdminPaymentRepository {
 
 	long sumMonthlyRevenue();
 
-	List<PaymentListDto> selectPaymentList(String status, int offset, int limit);
+	List<PaymentListDto> selectPaymentList(String status, String keyword, int offset, int limit);
 
-	long countPayments(String status);
+	long countPayments(String status, String keyword);
 }

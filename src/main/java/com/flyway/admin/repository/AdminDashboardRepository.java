@@ -1,6 +1,7 @@
 package com.flyway.admin.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.dto.RecentActivityDto;
@@ -44,4 +45,9 @@ public interface AdminDashboardRepository {
 	int markNotificationAsRead(String notificationId, String adminId);
 
 	int markAllNotificationsAsRead(String adminId);
+
+	// == 차트용 통계 ==
+	List<Map<String, Object>> findHourlyReservationDistribution(int days);
+
+	List<Map<String, Object>> findReservationStatusDistribution(int days);
 }

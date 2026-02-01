@@ -2,13 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
     <title>로그인</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/resources/auth/login.css">
 </head>
-<body>
+<body class="hero-page">
 
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
 

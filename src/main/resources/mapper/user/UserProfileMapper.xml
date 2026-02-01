@@ -19,12 +19,19 @@
     <!-- user_id로 프로필 조회 -->
     <select id="findByUserId" parameterType="string" resultType="com.flyway.user.domain.UserProfile">
         SELECT user_id,
-               name,
                passport_no,
                country,
                gender,
                first_name,
-               last_name
+               last_name,
+               name,
+               kr_first_name,
+               kr_last_name,
+               birth,
+               email,
+               phone_number,
+               passport_expiry_date,
+               passport_issue_country
         FROM user_profile
         WHERE user_id = #{userId}
     </select>
@@ -34,7 +41,14 @@
         UPDATE user_profile
         <set>
             <if test="name != null">name = #{name},</if>
+            <if test="krFirstName != null">kr_first_name = #{krFirstName},</if>
+            <if test="krLastName != null">kr_last_name = #{krLastName},</if>
+            <if test="birth != null">birth = #{birth},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phoneNumber != null">phone_number = #{phoneNumber},</if>
             <if test="passportNo != null">passport_no = #{passportNo},</if>
+            <if test="passportExpiryDate != null">passport_expiry_date = #{passportExpiryDate},</if>
+            <if test="passportIssueCountry != null">passport_issue_country = #{passportIssueCountry},</if>
             <if test="country != null">country = #{country},</if>
             <if test="gender != null">gender = #{gender},</if>
             <if test="firstName != null">first_name = #{firstName},</if>
@@ -49,9 +63,18 @@
             JOIN users u ON u.user_id = up.user_id
         SET
             up.passport_no = NULL,
+            up.country = NULL,
+            up.gender = NULL,
             up.first_name  = NULL,
             up.last_name   = NULL,
-            up.name        = #{maskedName}
+            up.name        = #{maskedName},
+            up.kr_first_name = NULL,
+            up.kr_last_name = NULL,
+            up.birth = NULL,
+            up.email = NULL,
+            up.phone_number = '',
+            up.passport_expiry_date = NULL,
+            up.passport_issue_country = NULL
         WHERE up.user_id = #{userId}
           AND u.status = 'WITHDRAWN'
     </update>
