@@ -266,6 +266,27 @@ html, body {
     .container { padding: 0 20px; }
     .trending-grid { grid-template-columns: 1fr; }
     .nav-btn { display: none; }
-    .slider-wrapper { overflow-x: auto; padding-left: 20px; }
+    .slider-wrapper { overflow-x: auto; padding-left: 20px; height: 400px; }
     .slider-wrapper::before, .slider-wrapper::after { display: none; }
+    .offer-card { height: 300px; flex: 0 0 240px; }
+    .offer-city { font-size: 22px; }
+    .offer-price { font-size: 20px; }
+    .special-offers-section { margin-top: 40px; margin-bottom: 60px; }
+    .section-title-modern { font-size: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+    .container { padding: 0 16px; }
+    .slider-wrapper { height: 360px; padding-left: 16px; }
+    .offer-card { height: 280px; flex: 0 0 220px; }
+    .offer-overlay { padding: 16px; }
+    .offer-city { font-size: 20px; }
+    .offer-price { font-size: 18px; }
+    .card-badges { top: 12px; left: 12px; }
+    .card-badge { font-size: 10px; padding: 4px 8px; }
+    .trend-item { padding: 16px; }
+    .trend-thumb { width: 50px; height: 50px; }
+    .rank-num { font-size: 22px; width: 32px; margin-right: 12px; }
+    .trend-city { font-size: 15px; }
+    .score-val { font-size: 18px; }
 }

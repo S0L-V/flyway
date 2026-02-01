@@ -19,19 +19,19 @@
     </a>
 
     <!-- User Buttons -->
-    <div class="flex items-center space-x-3">
+    <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
       <sec:authorize access="isAuthenticated()">
         <a href="${pageContext.request.contextPath}/mypage"
-           class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
-                          no-underline transition-all duration-300 active:scale-95"
+           class="tilt-btn btn-text auth-text-btn px-2 md:px-3 py-2 rounded-full
+                          no-underline transition-all duration-300 active:scale-95 whitespace-nowrap"
            data-tilt data-tilt-glare data-tilt-max-glare="0.3"
            data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
           마이페이지
         </a>
         <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="inline">
           <button type="submit"
-                  class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
-                                   transition-all duration-300 active:scale-95"
+                  class="tilt-btn btn-text auth-text-btn px-2 md:px-3 py-2 rounded-full
+                                   transition-all duration-300 active:scale-95 whitespace-nowrap"
                   data-tilt data-tilt-glare data-tilt-max-glare="0.4"
                   data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
             로그아웃
@@ -41,26 +41,21 @@
 
       <sec:authorize access="isAnonymous()">
         <a href="${pageContext.request.contextPath}/login"
-           class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
-                          no-underline transition-all duration-300 active:scale-95"
+           class="tilt-btn btn-text auth-text-btn px-2 md:px-3 py-2 rounded-full
+                          no-underline transition-all duration-300 active:scale-95 whitespace-nowrap"
            data-tilt data-tilt-glare data-tilt-max-glare="0.3"
            data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
           로그인
         </a>
         <a href="${pageContext.request.contextPath}/signup"
-           class="tilt-btn btn-text auth-text-btn px-3 py-2 rounded-full
-                          no-underline transition-all duration-300 active:scale-95"
+           class="tilt-btn btn-text auth-text-btn px-2 md:px-3 py-2 rounded-full
+                          no-underline transition-all duration-300 active:scale-95 whitespace-nowrap"
            data-tilt data-tilt-glare data-tilt-max-glare="0.4"
            data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
           회원가입
         </a>
       </sec:authorize>
     </div>
-
-    <!-- Mobile Menu Button -->
-    <button class="lg:hidden text-slate-700 p-2" id="mobileMenuBtn">
-      <i class="fa-solid fa-bars text-xl"></i>
-    </button>
   </div>
 </header>
 

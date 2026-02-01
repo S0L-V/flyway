@@ -127,12 +127,12 @@ function renderPromotionCard(list) {
                     <h3 class="offer-title">${safeTitle}</h3>
                     <div class="offer-city">${safeArrival}</div>
                 </div>
-        
+
                 <div class="offer-date-row">
-                    <span class="offer-date">📅 ${safeDate}</span>
-                    <span class="offer-person"><span class="icon-only">👤</span> ${safePax}명</span>
+                    <span class="offer-date"><i class="fa-regular fa-calendar"></i> ${safeDate}</span>
+                    <span class="offer-person"><i class="fa-solid fa-user-group"></i> ${safePax}명</span>
                 </div>
-        
+
                 <div class="offer-footer">
                     <div class="price-info-left">
                         <span class="price-label">성인 1인 편도</span>
@@ -170,11 +170,23 @@ function escapeHtml(value) {
 function renderTag(tagString) {
     if (!tagString) return '';
 
+    const tagStyles = {
+        '얼리버드': { icon: 'fa-solid fa-dove', style: 'earlybird' },
+        '특가': { icon: 'fa-solid fa-bolt', style: 'sale' },
+        '마감임박': { icon: 'fa-solid fa-fire', style: 'hot' },
+        '인기': { icon: 'fa-solid fa-heart', style: 'popular' },
+        '추천': { icon: 'fa-solid fa-star', style: 'recommend' },
+        '신규': { icon: 'fa-solid fa-sparkles', style: 'new' }
+    };
+
     return tagString
         .split(',')
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0)
-        .map(tag => `<span class="card-badge blue">${escapeHtml(tag)}</span>`)
+        .map(tag => {
+            const config = tagStyles[tag] || { icon: 'fa-solid fa-tag', style: 'default' };
+            return `<span class="card-badge ${config.style}"><i class="${config.icon}"></i>${escapeHtml(tag)}</span>`;
+        })
         .join('')
 }
 

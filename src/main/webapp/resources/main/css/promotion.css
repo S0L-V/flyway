@@ -27,10 +27,10 @@
     right: 0;
     height: 180px;
     background: linear-gradient(
-        to bottom,
-        #dbeafe 0%,
-        rgba(219, 234, 254, 0.65) 40%,
-        rgba(248, 250, 252, 0) 100%
+            to bottom,
+            #dbeafe 0%,
+            rgba(219, 234, 254, 0.65) 40%,
+            rgba(248, 250, 252, 0) 100%
     );
     pointer-events: none;
     z-index: 0;
@@ -82,27 +82,10 @@
     overflow: visible;
 }
 
-/* 좌우 페이드 마스크 */
+/* 좌우 페이드 마스크 - 비활성화 */
 .slider-wrapper::before,
 .slider-wrapper::after {
-    content: "";
-    position: absolute;
-    top: 20px;
-    width: 120px;
-    height: calc(100% - 20px);
-    z-index: 3;
-    pointer-events: none;
-    backdrop-filter: blur(6px);
-}
-
-.slider-wrapper::before {
-    left: 0;
-    background: linear-gradient(to right, rgba(219, 234, 254, 0.9) 0%, transparent 100%);
-}
-
-.slider-wrapper::after {
-    right: 0;
-    background: linear-gradient(to left, rgba(219, 234, 254, 0.9) 0%, transparent 100%);
+    display: none;
 }
 
 .main-slider-track.is-entering .offer-card {
@@ -168,27 +151,28 @@
 .offer-date-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 8px;
-    padding: 14px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     margin-top: 10px;
     margin-bottom: 4px;
 }
 
-.offer-date {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.9);
-}
-
+.offer-date,
 .offer-person {
-    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.9);
 }
 
-.icon-only {
-    filter: invert(1) brightness(2);
+.offer-date i,
+.offer-person i {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* 3. 가격 영역 (좌우 배치) */
@@ -227,12 +211,69 @@
     line-height: 1;
 }
 
-/* Badge */
+/* ===== Minimal Badges ===== */
+.card-badges {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    z-index: 10;
+}
+
+.card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.card-badge i {
+    font-size: 8px;
+    opacity: 0.9;
+}
+
+/* 얼리버드 - 청록 */
+.card-badge.earlybird {
+    background: #0d9488;
+}
+
+/* 특가 - 주황 */
+.card-badge.sale {
+    background: #ea580c;
+}
+
+/* 마감임박 - 빨강 */
+.card-badge.hot {
+    background: #dc2626;
+}
+
+/* 인기 - 핑크 */
+.card-badge.popular {
+    background: #db2777;
+}
+
+/* 추천 - 노랑 */
+.card-badge.recommend {
+    background: #ca8a04;
+}
+
+/* 신규 - 보라 */
+.card-badge.new {
+    background: #7c3aed;
+}
+
+/* 기본 - 파랑 */
+.card-badge.default,
 .card-badge.blue {
-    background: #2f93f7;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
+    background: #2563eb;
 }
 
 /* Nav Buttons */
