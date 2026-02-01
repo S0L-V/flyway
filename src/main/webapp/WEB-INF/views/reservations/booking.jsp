@@ -536,6 +536,11 @@
         location.href = '/payments/' + reservationId;
     }
 
+    function getLocalISODate() {
+        const now = new Date();
+        const tzOffsetMs = now.getTimezoneOffset() * 60000;
+        return new Date(now.getTime() - tzOffsetMs).toISOString().split('T')[0];
+    }
 
     // 페이지 로드 시 부가서비스 총액 조회
     document.addEventListener('DOMContentLoaded', function() {
@@ -552,7 +557,7 @@
         updateTotalPrice();
 
         // 생년월일 최대 날짜 제한 (오늘로 설정)
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalISODate();
         document.querySelectorAll('input[type="date"]').forEach(el => {
             if(el.name.includes('birth')) {
                 el.max = today;
@@ -615,7 +620,7 @@
             }
 
             // 4. 생년월일 검사 (미래 날짜 선택 방지)
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalISODate();
             if (birth > today) {
                 alert(`탑승자 \${pNum}의 생년월일이 올바르지 않습니다.`);
                 return false;
