@@ -115,8 +115,8 @@ window.SeatEvents = (() => {
                 else if (zone === "mid") dom.seatGridEl.classList.add("seat-grid--mid");
                 else if (zone === "rear") dom.seatGridEl.classList.add("seat-grid--rear");
 
-                zoneButtons.forEach((b) => b.classList.toggle("is-active", b.dataset.zone === zone));
-                dom.seatGridEl.scrollIntoView({ block: "start", behavior: "smooth" });
+                zoneButtons.forEach((b) =>
+                    b.classList.toggle("is-active", b.dataset.zone === zone));
             }
 
             if (zoneButtons.length) setZone("front");

@@ -24,9 +24,6 @@ window.SeatRenderer = (() => {
         async function refreshAndRender() {
             const seats = await SeatAPI.fetchSeatMap(ctx.base, ctx.reservationId, ctx.segmentId);
 
-            // 디버깅용: seatStatus 값이 실제로 들어오는지 확인
-            console.log("[seat] sample seat:", seats && seats[0] ? seats[0] : null);
-
             // 서버에서 이미 AVAILABLE로 바뀐 좌석은 로컬 선택에서도 제거
             const seatStatusBySeatNo = new Map();
             (seats || []).forEach((s) => {

@@ -58,11 +58,6 @@ public interface SeatMapper {
             @Param("aircraftSeatId") String aircraftSeatId
     );
 
-    // flight_seat_id 기준으로 passenger_seat의 소유 passenger_id 조회(락)
-    String selectPassengerIdByFlightSeatIdForUpdate(
-            @Param("flightSeatId") String flightSeatId
-    );
-
     // flight_seat가 없으면 HOLD row를 생성 (UNIQUE(flight_id, aircraft_seat_id) 기반)
     int insertFlightSeatHold(
             @Param("flightId") String flightId,
