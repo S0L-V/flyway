@@ -35,25 +35,40 @@
         seatGridEl.appendChild(headerRow);
     }
 
-    function buildSeatButton(seat, selectedSeatNo) {
+    function buildSeatButton(seat, activePassengerId) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "seat-item";
         btn.textContent = seat.seatNo;
         btn.dataset.seatNo = seat.seatNo;
 
-        // 상태별 클래스
-        if (seat.seatStatus === "AVAILABLE") btn.classList.add("seat-item--available");
-        else if (seat.seatStatus === "HOLD") btn.classList.add("seat-item--hold");
-        else {
-            btn.classList.add("seat-item--unavailable");
-            btn.disabled = true;
+        const status = String(seat.seatStatus || "").toUpperCase();
+        const holderPid = seat.passengerId ? String(seat.passengerId) : "";
+
+        if (status === "AVAILABLE") {
+            btn.classList.add("seat-item--available");
+            return btn;
         }
 
-        // 현재 선택중(활성 승객의 선택 좌석만 selected로 표시)
-        if (selectedSeatNo === seat.seatNo) btn.classList.add("seat-item--selected");
+        if (status === "HOLD") {
+            // 활성 승객이 잡은 HOLD만 주황색 + 클릭 가능(해제/변경)
+            if (holderPid && activePassengerId && holderPid === String(activePassengerId)) {
+                btn.classList.add("seat-item--hold");
+                return btn;
+            }
+
+            // 그 외 HOLD(다른 승객/다른 사용자) 는 회색 + 클릭 불가
+            btn.classList.add("seat-item--unavailable");
+            btn.disabled = true;
+            return btn;
+        }
+
+        // BOOKED 등 나머지
+        btn.classList.add("seat-item--unavailable");
+        btn.disabled = true;
         return btn;
     }
+
 
     function calcSectionByIndex(idx, total) {
         if (total <= 0) return "front";
@@ -66,7 +81,8 @@
         return "rear";
     }
 
-    function renderSeatGrid(seatGridEl, seats, selectedSeatNo, cabinClassCode) {
+    function renderSeatGrid(seatGridEl, seats, activePassengerId, cabinClassCode) {
+
         if (!seatGridEl) return;
 
         seatGridEl.innerHTML = "";
@@ -116,7 +132,7 @@
 
             list.forEach((seat) => {
                 const col = String(seat.colNo).toUpperCase();
-                const btn = buildSeatButton(seat, selectedSeatNo);
+                const btn = buildSeatButton(seat, activePassengerId);
 
                 if (LEFT_COLS.includes(col)) leftWrap.appendChild(btn);
                 else rightWrap.appendChild(btn);
@@ -138,11 +154,6 @@
             .replaceAll("'", "&#039;");
     }
 
-    function formatMoneyKRW(amount) {
-        const n = Number(amount || 0);
-        return `₩${n.toLocaleString("ko-KR")}`;
-    }
-
     // 좌석 선택 내역 카드 렌더
     function renderSelectedSummary(boxEl, opts) {
         if (!boxEl) return;
@@ -153,7 +164,6 @@
             opts?.selectedSeatsByPassenger && typeof opts.selectedSeatsByPassenger === "object"
                 ? opts.selectedSeatsByPassenger
                 : {};
-        const seatPrice = Number(opts?.seatPrice || 0);
 
         const routeText = (opts?.segment?.routeText || "").trim();
         const dateTimeText = (opts?.segment?.dateTimeText || "").trim();
@@ -185,12 +195,6 @@
                 <div class="seat-summary-row__left">
                     <div class="seat-summary-row__name">${escapeHtml(name)}</div>
                     <div class="seat-summary-row__seat ${seatNo ? "" : "is-empty"}">${seatNo ? escapeHtml(seatNo) : ""}</div>
-                </div>
-
-                <div class="seat-summary-row__right">
-                    <div class="seat-summary-row__price ${seatNo ? "" : "is-hidden"}">
-                        ${formatMoneyKRW(seatPrice)}
-                    </div>
                 </div>
             </div>
         `;
@@ -225,7 +229,6 @@
             opts?.selectedSeatsByPassenger && typeof opts.selectedSeatsByPassenger === "object"
                 ? opts.selectedSeatsByPassenger
                 : {};
-        const seatPrice = Number(opts?.seatPrice || 0);
 
         // 승객이 없으면 아무것도 표시하지 않음
         if (!passengers.length) {

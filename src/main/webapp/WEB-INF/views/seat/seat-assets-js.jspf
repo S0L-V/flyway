@@ -1,3 +1,9 @@
-<script src="${pageContext.request.contextPath}/resources/seat/js/seatapi.js?v=<%= System.currentTimeMillis() %>"></script>
-<script src="${pageContext.request.contextPath}/resources/seat/js/seatgrid.js?v=<%= System.currentTimeMillis() %>"></script>
-<script src="${pageContext.request.contextPath}/resources/seat/js/seat-select.js?v=<%= System.currentTimeMillis() %>"></script>
+<script defer src="${pageContext.request.contextPath}/resources/seat/js/seat-api.js?v=<%= System.currentTimeMillis() %>"></script>
+<script defer src="${pageContext.request.contextPath}/resources/seat/js/seat-grid.js?v=<%= System.currentTimeMillis() %>"></script>
+
+<script defer src="${pageContext.request.contextPath}/resources/seat/js/seat-state.js?v=<%= System.currentTimeMillis() %>"></script>
+<script defer src="${pageContext.request.contextPath}/resources/seat/js/seat-render.js?v=<%= System.currentTimeMillis() %>"></script>
+<script defer src="${pageContext.request.contextPath}/resources/seat/js/seat-confirm.js?v=<%= System.currentTimeMillis() %>"></script>
+<script defer src="${pageContext.request.contextPath}/resources/seat/js/seat-events.js?v=<%= System.currentTimeMillis() %>"></script>
+
+<script defer src="${pageContext.request.contextPath}/resources/seat/js/seat-main.js?v=<%= System.currentTimeMillis() %>"></script>

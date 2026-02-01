@@ -12,6 +12,7 @@ public class SegmentCardDTO {
     private String depAirportCode;
     private String arrAirportCode;
     private LocalDateTime depTime;
+    private long snapPrice;
 
     public String getDepTimeText() {
         if (depTime == null) return "";

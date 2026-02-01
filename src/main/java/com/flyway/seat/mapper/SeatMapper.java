@@ -79,8 +79,15 @@ public interface SeatMapper {
             @Param("reservationSegmentId") String reservationSegmentId
     );
 
-    // passenger_seat upsert
-    int upsertPassengerSeat(
+    // passenger_seat을 (reservation_segment_id, passenger_id) 기준 UPDATE
+    int updatePassengerSeat(
+            @Param("reservationSegmentId") String reservationSegmentId,
+            @Param("passengerId") String passengerId,
+            @Param("flightSeatId") String flightSeatId
+    );
+
+    // passenger_seat: 신규 INSERT
+    int insertPassengerSeat(
             @Param("reservationSegmentId") String reservationSegmentId,
             @Param("passengerId") String passengerId,
             @Param("flightSeatId") String flightSeatId
@@ -101,6 +108,7 @@ public interface SeatMapper {
     // 예약(reservationId) 기준 탑승자 목록 조회 (좌석 팝업 다인원 탭용)
     List<PassengerDTO> selectPassengersByReservationId(@Param("reservationId") String reservationId);
 
+
     // 결제 확정 (reservationId 기준 유효한 HOLD 좌석 수 카운트 함)
     int countActiveHoldSeatsByReservation(
             @Param("reservationId") String reservationId,
@@ -112,8 +120,17 @@ public interface SeatMapper {
             @Param("reservationId") String reservationId,
             @Param("now") LocalDateTime now
     );
-
+    // BOOKED
     int releaseBookedSeatsByReservation(
             @Param("reservationId") String reservationId);
 
+    void upsertPassengerSeat(
+            @org.apache.ibatis.annotations.Param("reservationSegmentId") String reservationSegmentId,
+            @org.apache.ibatis.annotations.Param("passengerId") String passengerId,
+            @org.apache.ibatis.annotations.Param("flightSeatId") String flightSeatId
+    );
+    // 좌석 등급
+    String selectCabinClassCodeByReservationSegment(
+            @Param("reservationSegmentId") String reservationSegmentId
+    );
 }
