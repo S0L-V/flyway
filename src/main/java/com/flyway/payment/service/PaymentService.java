@@ -6,6 +6,8 @@ import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.client.TossPaymentsClient;
 import com.flyway.payment.mapper.RefundMapper;
 import com.flyway.payment.repository.PaymentRepository;
+import com.flyway.pricing.event.PricingEventService;
+import com.flyway.pricing.event.PricingEventServiceImpl;
 import com.flyway.reservation.dto.ReservationCoreView;
 import com.flyway.reservation.dto.ReservationSegmentView;
 import com.flyway.reservation.repository.ReservationBookingRepository;
@@ -39,6 +41,7 @@ public class PaymentService {
     private final SmsService smsService;
     private final SmsMapper smsMapper;
     private final SeatService seatService;
+    private final PricingEventServiceImpl pricingEventServiceImpl;
     private final AdminNotificationService adminNotificationService;
 
     /**
@@ -133,6 +136,8 @@ public class PaymentService {
 
         reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
 
+        // 결제 이벤트 기반 항공편 가격 재산정
+//        pricingEventServiceImpl.repriceAfterPayment(reservationId, paymentId);
 
         AdminNotificationDto notification = AdminNotificationDto.builder()
                 .notificationType("NEW_RESERVATION")
@@ -222,10 +227,11 @@ public class PaymentService {
             adminNotificationService.createAndBroadcastNotification(notification);
         }
 
+        String refundId = UUID.randomUUID().toString();
 
         // refund 테이블 INSERT
         refundMapper.insertRefund(
-                UUID.randomUUID().toString(),
+                refundId,
                 reservationId,
                 paymentId,
                 "DEFAULT_RF_ID",  // TODO: 실제 refund_policy 조회 후 설정
@@ -234,6 +240,9 @@ public class PaymentService {
                 request.getCancelReason(),
                 null
         );
+
+        // 환불 이벤트 기반 항공편 가격 재산정
+//        pricingEventServiceImpl.repriceAfterRefund(reservationId, refundId);
 
         // SMS 발송
         String phone = smsMapper.selectPhoneByReservationId(reservationId);

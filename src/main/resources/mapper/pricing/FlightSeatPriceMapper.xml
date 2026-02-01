@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.flyway.pricing.mapper.FlightSeatPriceMapper">
+
+    <select id="selectForUpdate"
+            resultType="com.flyway.pricing.model.FlightSeatPriceRow">
+        SELECT
+            fsp.base_price        AS basePrice,
+            fsp.current_price     AS currentPrice,
+            fsp.last_event_priced_at AS lastEventPricedAt,
+            f.departure_time      AS departureTime,
+
+            CASE
+                WHEN fsp.cabin_class_code = 'ECO' THEN fi.economy_class_seat
+                WHEN fsp.cabin_class_code = 'BIZ' THEN fi.business_class_seat
+                WHEN fsp.cabin_class_code = 'FST' THEN fi.first_class_seat
+            END AS remainingSeats,
+
+            CASE
+                WHEN fsp.cabin_class_code = 'ECO' THEN ac.economy_class_seats
+                WHEN fsp.cabin_class_code = 'BIZ' THEN ac.business_class_seats
+                WHEN fsp.cabin_class_code = 'FST' THEN ac.first_class_seats
+            END AS totalSeats
+
+        FROM flight_seat_price fsp
+                 JOIN flight f ON f.flight_id = fsp.flight_id
+                 JOIN flight_info fi ON fi.flight_id = f.flight_id
+                 JOIN aircraft ac ON ac.aircraft_id = fi.aircraft_id
+        WHERE fsp.flight_id = #{flightId}
+          AND fsp.cabin_class_code = #{cabinClassCode}
+            FOR UPDATE
+    </select>
+
+
+    <update id="updateAfterEventPricing">
+        UPDATE flight_seat_price
+        SET current_price = #{newPrice},
+            last_priced_at = #{now},
+            last_event_priced_at = #{now}
+        WHERE flight_id = #{flightId}
+          AND cabin_class_code = #{cabinClassCode}
+    </update>
+
+</mapper>
