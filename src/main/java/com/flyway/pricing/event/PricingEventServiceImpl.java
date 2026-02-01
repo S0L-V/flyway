@@ -132,6 +132,7 @@ public class PricingEventServiceImpl implements PricingEventService {
                 .currentPrice(row.getCurrentPrice())
                 .totalSeats(row.getTotalSeats())
                 .remainingSeats(row.getRemainingSeats())
+                .departureTime(row.getDepartureTime())
                 .now(now)
                 .eventBased(true)
                 .bypassCooldown(bypass)
