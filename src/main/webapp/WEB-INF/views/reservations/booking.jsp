@@ -197,23 +197,27 @@
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">한글 성</label>
                                     <input name="passengers[${st.index}].krLastName" value="${p.krLastName}" placeholder="홍" pattern="^[가-힣]+$" required
+                                           oninput="this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '')"
                                            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
                                 </div>
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">한글 이름</label>
                                     <input name="passengers[${st.index}].krFirstName" value="${p.krFirstName}" placeholder="길동" pattern="^[가-힣]+$" required
+                                           oninput="this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '')"
                                            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
                                 </div>
 
                                 <!-- Row 2: English Name -->
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">영문 성 (Last Name)</label>
-                                    <input name="passengers[${st.index}].lastName" value="${p.lastName}" placeholder="HONG" pattern="^[A-Z\s]+$" oninput="this.value = this.value.toUpperCase()" required
+                                    <input name="passengers[${st.index}].lastName" value="${p.lastName}" placeholder="HONG" pattern="^[A-Z\s]+$" required
+                                           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()"
                                            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
                                 </div>
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">영문 이름 (First Name)</label>
-                                    <input name="passengers[${st.index}].firstName" value="${p.firstName}" placeholder="GILDONG" pattern="^[A-Z\s]+$" oninput="this.value = this.value.toUpperCase()" required
+                                    <input name="passengers[${st.index}].firstName" value="${p.firstName}" placeholder="GILDONG" pattern="^[A-Z\s]+$" required
+                                           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()"
                                            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
                                 </div>
 
@@ -241,6 +245,7 @@
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">연락처</label>
                                     <input name="passengers[${st.index}].phoneNumber" value="${p.phoneNumber}" placeholder="- 제외 연락처" pattern="^[0-9]{10,11}$" maxlength="11" required
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
                                 </div>
                                 <div class="flex flex-col gap-1.5">
