@@ -101,7 +101,7 @@ const AdminDashboard = (function() {
             labelRevenue: document.getElementById('label-revenue'),
 
             // 기간 선택 탭 (iOS 세그먼트)
-            periodTabs: document.querySelectorAll('.ios-segment-btn'),
+            periodTabs: document.querySelectorAll('#period-segment .ios-segment-btn'),
             periodSegment: document.getElementById('period-segment'),
 
             // 알림
