@@ -84,6 +84,7 @@ public class SignUpServiceImpl implements SignUpService {
         UserProfile profile = UserProfile.builder()
                 .userId(userId)
                 .name(request.getName())
+                .phoneNumber(request.getPhoneNumber())
                 .build();
 
         userProfileRepository.createProfile(profile);
@@ -157,6 +158,7 @@ public class SignUpServiceImpl implements SignUpService {
         UserProfile profile = UserProfile.builder()
                 .userId(userId)
                 .name(request.getName())
+                .phoneNumber(request.getPhoneNumber())
                 .build();
         userProfileRepository.updateProfile(profile);
     }
@@ -169,6 +171,7 @@ public class SignUpServiceImpl implements SignUpService {
         requireText(request.getRawPassword(), ErrorCode.USER_INVALID_INPUT);
         requireText(request.getName(), ErrorCode.USER_INVALID_INPUT);
         requireText(request.getAttemptId(), ErrorCode.USER_INVALID_SIGN_UP_ATTEMPT);
+        requireText(request.getPhoneNumber(), ErrorCode.USER_INVALID_INPUT);
     }
 
     private void validateOauthRequest(EmailSignUpRequest request) {
@@ -177,6 +180,7 @@ public class SignUpServiceImpl implements SignUpService {
         }
         requireText(request.getEmail(), ErrorCode.USER_EMAIL_REQUIRED);
         requireText(request.getName(), ErrorCode.USER_INVALID_INPUT);
+        requireText(request.getPhoneNumber(), ErrorCode.USER_INVALID_INPUT);
     }
 
     private void validateKakaoUserInfo(KakaoUserInfo userInfo) {

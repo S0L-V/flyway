@@ -9,10 +9,12 @@
     <insert id="insertProfile" parameterType="com.flyway.user.domain.UserProfile">
         INSERT INTO user_profile (
             user_id,
-            name
+            name,
+            phone_number
         ) VALUES (
                      #{userId},
-                     #{name}
+                     #{name},
+                     #{phoneNumber}
                  )
     </insert>
 

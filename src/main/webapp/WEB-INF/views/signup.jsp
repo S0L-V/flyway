@@ -2,93 +2,189 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <title>회원가입</title>
-    <jsp:include page="/WEB-INF/views/common/head.jsp" />
-    <link rel="stylesheet"
-          href="${pageContext.request.contextPath}/resources/auth/signup.css">
+    <jsp:include page="auth/include/head.jsp" />
+    <script src="https://unpkg.com/lucide@0.563.0/dist/umd/lucide.min.js"></script>
 </head>
-<body class="hero-page">
+<body class="hero-page bg-slate-50 font-sans min-h-screen flex flex-col" data-oauth-signup="${oauthSignUp}" data-has-error="${not empty error}">
 
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
 
-<div class="register-container">
-    <h2>회원가입</h2>
+<main class="flex-1 w-full flex items-center justify-center py-10 px-6">
+  <!-- Step 1: Terms -->
+  <div id="step-1" class="w-full max-w-md animate-fade-in">
+    <h1 class="text-2xl font-bold text-slate-900 mb-6">약관 동의</h1>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+      <div class="pb-4 border-b border-slate-200">
+        <label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-50 rounded-lg">
+          <input type="checkbox" id="agree-all" class="w-5 h-5 rounded border-slate-300 text-primary-500 focus:ring-primary-500" onchange="toggleAllAgreements(this)">
+          <span class="font-bold text-slate-800">약관 전체 동의</span>
+        </label>
+      </div>
+      <div class="space-y-3 pl-2">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" class="agree-item w-4 h-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500" data-required="true" onchange="checkAllStatus()">
+          <span class="text-sm text-slate-600">[필수] 서비스 이용약관 동의</span>
+          <i data-lucide="chevron-right" class="ml-auto text-slate-400 w-4 h-4"></i>
+        </label>
+        <p class="text-xs text-slate-400 pl-7">항공권 검색·예약·결제 및 변경/환불 규정을 포함합니다.</p>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" class="agree-item w-4 h-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500" data-required="true" onchange="checkAllStatus()">
+          <span class="text-sm text-slate-600">[필수] 개인정보 수집 및 이용 동의</span>
+          <i data-lucide="chevron-right" class="ml-auto text-slate-400 w-4 h-4"></i>
+        </label>
+        <p class="text-xs text-slate-400 pl-7">예약자/탑승객 정보, 여권 정보, 결제 정보 처리에 동의합니다.</p>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" class="agree-item w-4 h-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500" data-required="false" onchange="checkAllStatus()">
+          <span class="text-sm text-slate-600">[선택] 마케팅 정보 수신 동의</span>
+          <i data-lucide="chevron-right" class="ml-auto text-slate-400 w-4 h-4"></i>
+        </label>
+        <p class="text-xs text-slate-400 pl-7">특가 항공권, 프로모션, 맞춤 여행 추천 소식을 받아볼 수 있습니다.</p>
+      </div>
+    </div>
+    <div class="mt-8 flex gap-3">
+      <button type="button" onclick="location.href='${pageContext.request.contextPath}/login'" class="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-100 rounded-xl transition-colors">취소</button>
+      <button type="button" onclick="goToStep(2)" class="flex-1 py-3 bg-primary-500 text-white font-bold rounded-xl hover:bg-primary-600 transition-colors shadow-lg shadow-primary-500/30">다음</button>
+    </div>
+  </div>
 
-    <!-- 에러 메시지 출력 -->
-    <c:if test="${not empty error}">
-        <div class="error">
-            <c:out value="${error}"/>
+  <!-- Step 2: Method -->
+  <div id="step-2" class="w-full max-w-md animate-fade-in text-center hidden">
+    <h1 class="text-2xl font-bold text-slate-900 mb-2">가입 방식 선택</h1>
+    <p class="text-slate-500 mb-8">원하시는 회원가입 방식을 선택해주세요.</p>
+    <div class="space-y-4">
+      <button type="button" onclick="selectMethod('email')" class="w-full p-6 bg-white border border-slate-200 rounded-2xl hover:border-primary-500 hover:shadow-md transition-all group text-left flex items-center gap-4">
+        <div class="w-12 h-12 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center">
+          <i data-lucide="mail" class="w-6 h-6"></i>
         </div>
+        <div>
+          <div class="font-bold text-slate-900 group-hover:text-primary-500 transition-colors">이메일로 가입하기</div>
+          <div class="text-sm text-slate-400">자주 사용하는 이메일로 시작하세요</div>
+        </div>
+        <i data-lucide="chevron-right" class="ml-auto text-slate-300 group-hover:text-primary-500"></i>
+      </button>
+      <button type="button" onclick="selectMethod('kakao')" class="w-full p-6 bg-[#FEE500] border border-[#FEE500] rounded-2xl hover:bg-[#FDD835] transition-all group text-left flex items-center gap-4">
+        <div class="w-12 h-12 bg-white/50 text-black/80 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 3C7.03 3 3 6.58 3 11c0 2.33 1.12 4.43 2.93 5.85L5 21l4.37-2.29c.83.19 1.71.29 2.63.29 4.97 0 9-3.58 9-8s-4.03-8-9-8z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="font-bold text-black/90">카카오로 가입하기</div>
+          <div class="text-sm text-black/60">카카오 계정으로 간편하게 시작하세요</div>
+        </div>
+        <i data-lucide="chevron-right" class="ml-auto text-black/40"></i>
+      </button>
+    </div>
+    <button type="button" onclick="goToStep(1)" class="mt-8 text-sm text-slate-400 hover:text-slate-600 underline">이전으로</button>
+  </div>
+
+  <!-- Step 3: Form -->
+  <div id="step-3" class="w-full max-w-md animate-fade-in hidden">
+    <h1 class="text-2xl font-bold text-slate-900 mb-6">정보 입력</h1>
+
+    <c:if test="${not empty error}">
+      <div class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+        <c:out value="${error}" />
+      </div>
     </c:if>
 
-    <form id="signupForm" action="${pageContext.request.contextPath}/auth/signup" method="post">
+    <form id="signupForm" action="${pageContext.request.contextPath}/auth/signup" method="post" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-5">
 
-        <div class="form-group">
-            <label for="name">이름</label>
-            <input type="text" id="name" name="name" placeholder="이름을 입력하세요" required>
-        </div>
+      <!-- Name -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">이름</label>
+        <input type="text" id="name" name="name" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none" placeholder="실명을 입력해주세요" required>
+      </div>
 
-        <!-- 이메일 + 인증메일 발송 -->
-        <div class="form-group">
-            <label for="email">이메일</label>
-
-            <div class="email-row">
-                <input type="email" id="email" name="email" placeholder="example@mail.com" value="${signupEmail}"
-                ${oauthSignUp and signupEmail ? 'readonly="readonly"' : ''}
-                       required>
-
-                <c:if test="${not oauthSignUp}">
-                    <button type="button" id="sendVerifyBtn">인증메일</button>
-                </c:if>
-            </div>
-
-            <c:if test="${not oauthSignUp}">
-                <div id="sendStatus" class="status-text"></div>
-            </c:if>
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">이메일</label>
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <input type="email" id="email" name="email" class="w-full pl-10 px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none" placeholder="example@email.com" value="${signupEmail}" ${oauthSignUp ? 'readonly="readonly"' : ''} required>
+            <i data-lucide="mail" class="absolute left-3.5 top-3 text-slate-400 w-[18px] h-[18px]"></i>
+          </div>
+          <c:if test="${not oauthSignUp}">
+            <button type="button" id="sendVerifyBtn" class="px-4 py-2 bg-slate-800 text-white text-sm font-bold rounded-xl hover:bg-slate-900 disabled:bg-slate-300 whitespace-nowrap">인증메일</button>
+            <button type="button" id="changeEmailBtn" class="hidden px-4 py-2 text-sm font-semibold text-slate-500 border border-slate-200 rounded-xl hover:text-slate-700 hover:border-slate-300 whitespace-nowrap">이메일 변경</button>
+          </c:if>
         </div>
 
         <c:if test="${not oauthSignUp}">
-            <!-- 인증 확인 -->
-            <div class="form-group verify-box is-hidden" id="verifyBox">
-                <label>이메일 인증</label>
-
-                <div class="verify-row">
-                    <button type="button" id="verifyBtn" class="btn-submit btn-inline">
-                        인증 확인
-                    </button>
-                </div>
-
-                <div id="verifyStatus" class="verify-status"></div>
-
-                <input type="hidden" id="emailVerified" name="emailVerified" value="false">
-                <input type="hidden" id="attemptId" name="attemptId" value="">
+          <div id="sendErrorStatus" class="mt-2 text-xs text-red-600 hidden"></div>
+          <div id="verifySentBox" class="mt-3 hidden w-full rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="sendStatus" class="text-sm text-[#2559a3]">인증 메일이 발송되었습니다.</span>
+              <button type="button" id="resendBtn" class="text-sm font-semibold text-blue-500 underline hover:text-blue-600">재전송</button>
             </div>
+            <button type="button" id="verifyBtn" class="text-sm font-semibold text-white bg-primary-600 px-3 py-1.5 rounded-lg hover:bg-primary-700">인증 확인</button>
+          </div>
+          <div id="verifySuccessBox" class="mt-3 hidden items-center gap-2 text-green-600 text-sm flex">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span id="verifyStatus">인증되었습니다.</span>
+          </div>
+          <div id="verifyErrorStatus" class="mt-2 text-xs text-red-600 hidden"></div>
+          <input type="hidden" id="emailVerified" name="emailVerified" value="false">
+          <input type="hidden" id="attemptId" name="attemptId" value="">
         </c:if>
+      </div>
 
-        <c:if test="${oauthSignUp}">
-            <input type="hidden" name="oauthSignUp" value="true">
-        </c:if>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">휴대전화</label>
+        <div class="relative">
+          <input type="tel" id="phoneNumber" name="phoneNumber" class="w-full pl-10 px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none" placeholder="01000000000" required>
+          <i data-lucide="smartphone" class="absolute left-3.5 top-3 text-slate-400 w-[18px] h-[18px]"></i>
+        </div>
+      </div>
 
-        <c:if test="${not oauthSignUp}">
-            <div class="form-group">
-                <label for="rawPassword">비밀번호</label>
-                <input type="password" id="rawPassword" name="rawPassword"
-                       placeholder="비밀번호를 입력하세요" required>
+      <c:if test="${oauthSignUp}">
+        <input type="hidden" name="oauthSignUp" value="true">
+      </c:if>
+
+      <!-- Password (Email Only) -->
+      <c:if test="${not oauthSignUp}">
+        <div id="password-section">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">비밀번호</label>
+            <div class="relative">
+              <input type="password" id="rawPassword" name="rawPassword" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none" placeholder="영문, 숫자, 특수문자 포함 8자 이상" required>
+              <button type="button" onclick="togglePasswordVisibility('rawPassword', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+                <i data-lucide="eye" class="w-[18px] h-[18px]"></i>
+              </button>
             </div>
-        </c:if>
+            <p class="mt-1 text-xs text-slate-400">영문, 숫자, 특수문자 포함 8자 이상 입력해주세요.</p>
+            <p id="passwordRuleStatus" class="mt-2 text-xs hidden"></p>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">비밀번호 확인</label>
+            <input type="password" id="passwordConfirm" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none" placeholder="비밀번호 재입력" required>
+            <p id="passwordMatchStatus" class="mt-2 text-xs hidden"></p>
+          </div>
+        </div>
+      </c:if>
 
-        <button type="submit" class="btn-submit">가입하기</button>
+      <button type="submit" class="w-full py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/30 mt-4">
+        가입하기
+      </button>
     </form>
-</div>
+
+    <c:if test="${not oauthSignUp}">
+      <button type="button" onclick="goToStep(2)" class="w-full mt-4 text-sm text-slate-400 hover:text-slate-600 underline">이전으로</button>
+    </c:if>
+  </div>
+</main>
+
+<jsp:include page="/WEB-INF/views/auth/include/toast.jsp" />
 
 <script>
     window.APP = {
         contextPath: "${pageContext.request.contextPath}"
     };
 </script>
-<script src="${pageContext.request.contextPath}/resources/auth/signup.js"></script>
+<script src="${pageContext.request.contextPath}/resources/signup/js/signup.js"></script>
 
 </body>
 </html>

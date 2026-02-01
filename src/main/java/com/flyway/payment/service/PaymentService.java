@@ -1,4 +1,6 @@
 package com.flyway.payment.service;
+import com.flyway.admin.dto.AdminNotificationDto;
+import com.flyway.admin.service.AdminNotificationService;
 import com.flyway.payment.domain.*;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.client.TossPaymentsClient;
@@ -37,6 +39,7 @@ public class PaymentService {
     private final SmsService smsService;
     private final SmsMapper smsMapper;
     private final SeatService seatService;
+    private final AdminNotificationService adminNotificationService;
 
     /**
      * 결제 처리 메인 로직 (개선된 3단계 설계)
@@ -130,6 +133,16 @@ public class PaymentService {
 
         reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
 
+
+        AdminNotificationDto notification = AdminNotificationDto.builder()
+                .notificationType("NEW_RESERVATION")
+                .title("신규 예약 발생")
+                .message("새로운 예약이 확정되었습니다.")
+                .relatedResourceType("RESERVATION")
+                .relatedResourceId(reservationId)
+                .priority("NORMAL")
+                .build();
+        adminNotificationService.createAndBroadcastNotification(notification);
         // SMS 발송 (여기에 추가)
         String phone = smsMapper.selectPhoneByReservationId(payment.getReservationId());
         if (phone != null && !phone.isEmpty()) {
@@ -150,6 +163,17 @@ public class PaymentService {
 
         // 예약 상태 → HELD (원복)
         reservationBookingRepository.updateReservationStatus(reservationId, "HELD");
+
+        // [알림] 결제 실패 알림 생성
+        AdminNotificationDto notification = AdminNotificationDto.builder()
+                .notificationType("PAYMENT_FAILED")
+                .title("결제 실패 발생")
+                .message("결제 실패가 발생했습니다: " )
+                .relatedResourceType("RESERVATION")
+                .relatedResourceId(reservationId)
+                .priority("HIGH")
+                .build();
+        adminNotificationService.createAndBroadcastNotification(notification);
     }
 
     /**
@@ -185,6 +209,17 @@ public class PaymentService {
 
         for (RefundSegmentDto segment : segments) {
             refundMapper.incrementSeat(segment.getFlightId(), segment.getCabinClass(), passengerCount);
+
+            // [알림] 환불 완료 알림 생성
+            AdminNotificationDto notification = AdminNotificationDto.builder()
+                    .notificationType("REFUND_COMPLETED")
+                    .title("환불 처리 완료")
+                    .message("사용자 요청에 의해 환불이 완료되었습니다.")
+                    .relatedResourceType("RESERVATION")
+                    .relatedResourceId(reservationId)
+                    .priority("NORMAL")
+                    .build();
+            adminNotificationService.createAndBroadcastNotification(notification);
         }
 
 
