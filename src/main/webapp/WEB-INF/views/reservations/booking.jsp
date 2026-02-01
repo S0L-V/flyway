@@ -1,793 +1,467 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8"/>
-    <title>예매 - Flyway</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>정보 입력 및 결제 - Flyway</title>
+
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1f6feb',
+                        'primary-hover': '#165bca',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .box { border: 1px solid #ddd; padding: 16px; margin: 16px 0; border-radius: 8px; }
-        .muted { color: #666; }
-        .btn { padding: 10px 16px; border: 1px solid #333; background: #fff; cursor: pointer; border-radius: 6px; margin-right: 8px; }
-        .btn.primary { background: #1f6feb; color: #fff; border-color: #1f6feb; }
-        .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
-        .row { display: flex; gap: 12px; flex-wrap: wrap; }
-        .field { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
-        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
-        .ok { color: #0a7; font-weight: bold; }
+        /* Custom overrides or specific styles not easily done with Tailwind utilities */
+        body { font-family: 'Pretendard', Arial, sans-serif; background-color: #f5f7fb; }
+        .stepper__item.is-active .stepper__circle { background-color: #1f6feb; border-color: #1f6feb; color: white; }
+        .stepper__item.is-completed .stepper__circle { background-color: #333; border-color: #333; color: white; }
 
-        .page-header{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding: 18px 0 8px;
+        /* Hide default radio */
+        .gender-input { display: none; }
+        .gender-input:checked + .gender-box {
+            background-color: #1f6feb;
+            color: white;
+            border-color: #1f6feb;
         }
 
-        .page-title{
-            font-size: 24px;
-            font-weight: 800;
-            color:#111;
-        }
-
-        /* stepper */
-        .stepper{
-            list-style:none;
-            display:flex;
-            gap: 14px;
-            margin:0;
-            padding:0;
-            align-items:center;
-        }
-
-        .stepper__item{
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap: 6px;
-            color:#9aa3ad;
-            font-size:12px;
-            font-weight:700;
-        }
-
-        .stepper__circle{
-            width: 22px;
-            height: 22px;
-            border-radius: 999px;
-            border: 1px solid #cfd6de;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size: 12px;
-            font-weight: 800;
-            background:#fff;
-            color:#9aa3ad;
-        }
-
-        .stepper__item.is-active{
-            color:#1f6feb;
-        }
-        .stepper__item.is-active .stepper__circle{
-            background:#1f6feb;
-            border-color:#1f6feb;
-            color:#fff;
-        }
-        .pre-flight-white{
-            background:#fff;
-        }
-
-        /* 저장 완료 메시지: 1번 이미지의 긴 박스 대신 깔끔한 안내 */
-        .toast-success{
-            margin: 10px 0 0;
-            padding: 12px 14px;
-            border: 1px solid #e6f0ff;
-            background: #f5f9ff;
-            border-radius: 10px;
-            color: #0a7;
-            font-weight: 800;
-            font-size: 13px;
-        }
-
-        /* 반응형: 모바일에서 스텝을 아래로 내림 */
-        @media (max-width: 640px){
-            .page-header{ flex-direction:column; align-items:flex-start; gap: 10px; }
-            .stepper{ gap: 10px; }
-        }
-        .flight-section {
-        background-color: #e8f4fc;
-            margin: 0 -9999px;
-            padding: 24px 9999px;
-        }
-        .flight-section__title {
-        max-width: 900px;
-            margin: 0 auto 16px auto;
-            font-size: 16px;
-            font-weight: bold;
-            color: #111;
-        }
+        /* Flight Card Styles */
         .flight-card {
-        background: #fff;
-            border-radius: 12px;
-            padding: 20px 24px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .flight-card__title {
-            font-size: 18px;
-            font-weight: bold;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            padding: 20px;
             margin-bottom: 16px;
         }
-        .flight-row {
-            display: grid;
-            grid-template-columns: 110px 140px 220px 1fr 120px 1fr;
-            align-items: center;
-            column-gap: 18px;
-            row-gap: 10px;
-            padding: 18px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .flight-row:last-child {
-            border-bottom: none;
-        }
-        .flight-row__date {
-            min-width: 100px;
-            font-weight: 500;
-            font-size: 15px;
-            font-weight: bold;
-        color: #000;
-        }
-        .flight-row__info {
-            min-width: 100px;
-            font-weight: bold;
-            color: #000;
-        font-size: 14px;
-        }
-        .flight-row__airline {
-            min-width: 140px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #000;
-        }
-        .flight-row__point {
-            min-width: 80px;
-            text-align: center;
-        }
-        .flight-row__time {
-            font-size: 22px;
-        font-weight: bold;
-            color: #000;
-        }
-        .flight-row__airport {
-            font-size: 14px;
-            color: #333;
-            margin-top: 4px;
-        }
-        .flight-row__duration {
-            justify-self: center;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #1f6feb;
-            color: #fff;
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 1;
-            min-width: auto;
-            text-align: center;
-        }
-        /* pill 앞에 비행기 아이콘 */
-        .flight-row__duration::before {
-            content: "✈";
-            font-size: 12px;
-            line-height: 1;
-        }
-        /* 구간(출발/가운데 pill/도착) 3개 블록이 grid 칼럼을 그대로 쓰도록 변경 */
-        .flight-row__segment {
-            display: contents;
-        }
-        /* 결제 금액 섹션 */
-        .price-section { background: #f9f9f9; }
-        .price-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .price-row:last-child { border-bottom: none; }
-        .price-row.total { font-weight: bold; font-size: 1.2em; color: #1f6feb; border-top: 2px solid #1f6feb; margin-top: 8px; padding-top: 12px; }
-        .price-label { color: #555; }
-        .price-value { text-align: right; }
-
-        /* 버튼 그룹 */
-        .btn-group { display: flex; gap: 12px; margin-top: 16px; }
-        .btn-group .btn { flex: 1; text-align: center; padding: 12px; }
-
-        @media (max-width: 1024px) {
-            .flight-row {
-                grid-template-columns: 90px 1fr;
-                grid-template-areas:
-                        "date airline"
-                        "info info"
-                        "segment segment";
-                row-gap: 8px;
-            }
-
-            .flight-row__date { grid-area: date; }
-            .flight-row__airline { grid-area: airline; justify-self: end; text-align: right; }
-            .flight-row__info { grid-area: info; }
-            .flight-row__segment { grid-area: segment; }
-
-            /* 구간(출발/도착/가운데 pill)은 3칸 유지하되 폭이 좁으면 자연스럽게 줄바꿈 */
-            .flight-row__segment {
-                display: grid;
-                grid-template-columns: 1fr auto 1fr;
-                gap: 10px;
-            }
-
-            .flight-row__segment > div:nth-child(1) { justify-self: start; }
-            .flight-row__segment > div:nth-child(2) { justify-self: center; }
-            .flight-row__segment > div:nth-child(3) { justify-self: end; text-align: right; }
-
-            .flight-row__airport { white-space: normal; }
-        }
-
-        /* 모바일 */
-        @media (max-width: 640px) {
-            .flight-row {
-                /* 모바일에서는 완전 세로 스택 */
-                display: block;
-            }
-
-            .flight-row__date,
-            .flight-row__airline,
-            .flight-row__info {
-                margin-bottom: 8px;
-            }
-
-            .flight-row__airline { text-align: left; }
-
-            .flight-row__segment {
-                /* 출발/도착을 위아래로 분리 */
-                display: block;
-            }
-
-            /* 출발 블록 / 도착 블록 */
-            .flight-row__segment > div:nth-child(1),
-            .flight-row__segment > div:nth-child(3) {
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-                gap: 10px;
-            }
-
-            /* 가운데 pill */
-            .flight-row__segment > div:nth-child(2) {
-                margin: 10px 0;
-                text-align: center;
-            }
-
-            .flight-row__airport {
-                text-align: right;
-                word-break: keep-all;
-            }
-        }
-        .passenger-section-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin: 0 0 10px 0;
-        }
-
-        .passenger-help {
-            margin: 0 0 14px 0;
-            padding-left: 18px;
-            color: #666;
-            font-size: 13px;
-            line-height: 1.55;
-        }
-        .passenger-help li { margin: 6px 0; }
-
-        #passengerForm .passenger-card {
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 18px;
-            margin-top: 14px;
-            background: #fff;
-        }
-
-        #passengerForm .passenger-card__header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        #passengerForm .passenger-card__title {
-            font-size: 16px;
-            font-weight: 800;
-            margin: 0;
-        }
-
-        #passengerForm .pgrid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px 18px;
-        }
-
-        #passengerForm .pfield { min-width: 0; }
-        #passengerForm .plabel {
-            display: block;
-            font-size: 13px;
-            font-weight: 700;
-            color: #111;
-            margin-bottom: 6px;
-        }
-
-        #passengerForm .pcontrol input,
-        #passengerForm .pcontrol select {
+        .flight-time { font-size: 24px; font-weight: 800; color: #1a1a1a; line-height: 1; }
+        .airport-code { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-top: 4px; }
+        .airport-name { font-size: 12px; color: #8a8a8a; margin-top: 2px; }
+        .flight-duration { font-size: 12px; color: #9aa4b2; text-align: center; margin-bottom: 6px; }
+        .timeline-line {
+            height: 1px;
+            background-image: linear-gradient(to right, #e2e8f0 50%, transparent 50%);
+            background-size: 6px 1px;
+            background-repeat: repeat-x;
+            position: relative;
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #e5e5e5;
-            border-radius: 6px;
-            background: #fff !important;
-            box-shadow: none !important;
         }
-        #passengerForm input[type="date"] {
-            background-color: #fff !important;
-        }
-
-        #passengerForm select {
-            background-color: #fff !important;
-        }
-
-        #passengerForm .span-2 { grid-column: span 2; }
-
-        /* 생년월일 + 성별(버튼형) 한 줄 */
-        #passengerForm .birth-gender {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-        #passengerForm .birth-gender .birth { flex: 1; }
-
-        /* 버튼형 성별 */
-        #passengerForm .segmented {
-            display: inline-flex;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            height: 40px;
-        }
-        #passengerForm .segmented input {
+        .timeline-icon {
             position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-        #passengerForm .segmented label {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 18px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #666;
-            cursor: pointer;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: #fff;
-            border-right: 1px solid #ddd;
-        }
-        #passengerForm .segmented label:last-child { border-right: none; }
-        #passengerForm .segmented input:checked + label {
-            background: #1f6feb;
-            color: #fff;
-        }
-
-        /* 여권 정보 헤더 */
-        #passengerForm .passport-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 18px 0 10px;
-        }
-        #passengerForm .passport-title {
-            font-size: 14px;
-            font-weight: 800;
-            color: #111;
-        }
-        #passengerForm .passport-later {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #777;
-            font-size: 12px;
-            user-select: none;
-        }
-        #passengerForm .passport-later input { width: 14px; height: 14px; }
-        .passenger-box {
-            background: #fff !important;      /* 탑승자 정보 큰 네모칸 */
-        }
-
-        .passenger-box .passenger-card {
-            background: #fff !important;      /* 탑승자 1 카드 네모칸 */
-        }
-
-        /* 혹시 base.css가 box에 그라데이션/그림자 넣으면 제거 */
-        .passenger-box,
-        .passenger-box .passenger-card {
-            box-shadow: none !important;
-        }
-
-        /* 탑승자 섹션 내부의 모든 input/select wrapper까지 흰색으로 */
-        .passenger-box .pcontrol {
-            background: #fff !important;
-        }
-        /* 저장 버튼 위치/모양 */
-        #passengerForm .save-btn {
-            margin-top: 16px;
-            padding: 12px 18px;
-            border-radius: 8px;
-        }
-
-        /* 반응형: 모바일 1열 */
-        @media (max-width: 640px) {
-            #passengerForm .pgrid { grid-template-columns: 1fr; }
-            #passengerForm .span-2 { grid-column: auto; }
-            #passengerForm .birth-gender { flex-direction: column; align-items: stretch; }
-            #passengerForm .segmented { width: 100%; }
-            #passengerForm .segmented label { flex: 1; }
-        }
-
-        .notice-blue{
-            margin: 10px 0 0;
-            padding-left: 18px;
+            padding: 0 6px;
             color: #1f6feb;
-            font-size: 12px;
-            line-height: 1.55;
         }
-        .notice-blue li { margin: 6px 0; }
-
-        .page-card {
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* flight-section 내부에서 padding 트릭 영향 최소화 */
-        .flight-card { box-sizing: border-box; }
-        .container { --cp: 20px; } /* container padding 값과 맞춰야 함 */
-
-        .container .flush-in-container{
-            width: calc(100% + (var(--cp) * 2));
-            margin-left: calc(var(--cp) * -1);
-            margin-right: calc(var(--cp) * -1);
-            box-sizing: border-box;
+        .timeline-icon svg {
+            width: 14px;
+            height: 14px;
         }
     </style>
 </head>
-<body>
+
+<body class="text-gray-900">
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
-<div class="pre-flight-white">
-    <div class="container">
-     <div class="page-header">
-        <div class="page-header__left">
-            <div class="page-title">예약하기</div>
-        </div>
 
-        <div class="page-header__right">
-            <ol class="stepper">
-                <li class="stepper__item">
-                    <span class="stepper__circle">1</span>
-                    <span class="stepper__label">약관동의</span>
-                </li>
-                <li class="stepper__item is-active">
-                    <span class="stepper__circle">2</span>
-                    <span class="stepper__label">정보입력/결제</span>
-                </li>
-                <li class="stepper__item">
-                    <span class="stepper__circle">3</span>
-                    <span class="stepper__label">예약결과</span>
-                </li>
-            </ol>
-        </div>
-    </div>
+<div class="max-w-[1100px] mx-auto px-4 pb-20">
+
+    <!-- Header & Stepper -->
+    <div class="flex flex-col sm:flex-row items-center justify-between py-6 gap-4">
+        <div class="text-2xl font-extrabold text-gray-900">예약하기</div>
+        <ol class="flex gap-4 items-center m-0 p-0 list-none">
+            <li class="flex flex-col items-center gap-1.5 text-xs font-bold text-gray-400 is-completed">
+                <span class="stepper__circle w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs font-extrabold bg-white">✓</span>
+                <span>약관동의</span>
+            </li>
+            <li class="flex flex-col items-center gap-1.5 text-xs font-bold text-primary is-active">
+                <span class="stepper__circle w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs font-extrabold bg-white">2</span>
+                <span>정보입력/결제</span>
+            </li>
+            <li class="flex flex-col items-center gap-1.5 text-xs font-bold text-gray-400">
+                <span class="stepper__circle w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs font-extrabold bg-white">3</span>
+                <span>예약결과</span>
+            </li>
+        </ol>
     </div>
 
-<%--    <c:if test="${param.saved == '1'}">--%>
-<%--        <div class="toast-success">탑승자 정보 저장 완료</div>--%>
-<%--    </c:if>--%>
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
 
-<!-- 예약 정보 -->
-</div><!-- container 닫기 -->
-<!-- 예약 항공편 (전체 너비) -->
-<div class="flight-section">
-    <div class="flight-section__title">예약 항공편</div>
-    <div class="flight-card page-card">
-        <c:forEach var="s" items="${vm.segments}">
-            <div class="flight-row">
-                <div class="flight-row__date">
-                    <fmt:parseDate value="${s.snapDepartureTime}" pattern="yyyy-MM-dd'T'HH:mm" var="depDate"/>
-                    <fmt:formatDate value="${depDate}" pattern="yyyy-MM-dd"/>
-                </div>
-                <div class="flight-row__info">
-                    성인 ${vm.passengerCount} / ${s.snapCabinClassCode}
-                </div>
-                <div class="flight-row__airline">
-                        ${s.snapAirlineName} ${s.snapFlightNumber}
-                </div>
-                <div class="flight-row__segment">
-                    <div>
-                        <div class="flight-row__time">
-                            <fmt:formatDate value="${depDate}" pattern="HH:mm"/>
-                        </div>
-                        <div class="flight-row__airport">${s.snapDepartureCity}(${s.snapDepartureAirport})</div>
-                    </div>
-                    <div class="flight-row__duration">
-                            ${s.segmentOrder == 1 ? '가는편' : '오는편'}
-                    </div>
-                    <div>
-                        <fmt:parseDate value="${s.snapArrivalTime}" pattern="yyyy-MM-dd'T'HH:mm" var="arrDate"/>
-                        <div class="flight-row__time">
-                            <fmt:formatDate value="${arrDate}" pattern="HH:mm"/>
-                        </div>
-                        <div class="flight-row__airport">${s.snapArrivalCity}(${s.snapArrivalAirport})</div>
-                    </div>
-                </div>
+        <!-- Left Column: Forms -->
+        <div class="flex flex-col gap-4">
 
-            </div>
-        </c:forEach>
-        <c:if test="${empty vm.segments}">
-            <div class="muted">항공편 정보가 없습니다.</div>
-        </c:if>
-    </div>
-</div>
-
-<div class="container"><!-- container 다시 열기 -->
-
-
-
-<!-- 탑승자 정보 입력 -->
-    <!-- 탑승자 정보 -->
-    <div class="box passenger-box page-card flush-in-container">
-    <div class="passenger-section-title">탑승자 정보</div>
-
-        <ul class="passenger-help">
-            <li>예약 후 영문 변경은 불가하니 실제 탑승객의 여권상 영문 이름을 입력해주세요.</li>
-            <li>정보가 잘못 입력된 경우 공항에서 탑승이 거절될 수 있으며, 정보 등록에 대한 책임은 탑승객 본인에게 있음을 안내드립니다.</li>
-        </ul>
-
-        <c:url var="saveUrl" value="/reservations/${vm.reservationId}/passengers"/>
-
-        <form id="passengerForm" onsubmit="return savePassengers(event)">
-            <c:forEach var="p" items="${vm.passengers}" varStatus="st">
-
-                <div class="passenger-card">
-                    <div class="passenger-card__header">
-                        <h4 class="passenger-card__title">탑승자 ${st.index + 1}</h4>
-                    </div>
-
-                    <input type="hidden" name="passengers[${st.index}].passengerId" value="${p.passengerId}"/>
-
-                    <div class="pgrid">
-                        <!-- 한글 -->
-                        <div class="pfield">
-                            <label class="plabel">한글 성</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].krLastName" value="${p.krLastName}" placeholder="한글 성" required />
+            <!-- Flight Summary (Redesigned & Compact) -->
+            <div class="flex flex-col gap-3">
+                <c:forEach var="s" items="${vm.segments}">
+                    <div class="flight-card">
+                        <!-- Card Header -->
+                        <div class="flex justify-between items-center mb-4 text-xs text-[#8a8a8a]">
+                            <div class="flex items-center gap-1.5 font-bold text-[#1a1a1a]">
+                                <span class="text-primary">✈</span>
+                                <span>${s.segmentOrder == 1 ? '가는 편' : '오는 편'}</span>
                             </div>
-                        </div>
-                        <div class="pfield">
-                            <label class="plabel">한글 이름</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].krFirstName" value="${p.krFirstName}" placeholder="한글 이름" required />
+                            <div class="flex items-center gap-2">
+                                <fmt:parseDate value="${s.snapDepartureTime}" pattern="yyyy-MM-dd'T'HH:mm" var="depDate"/>
+                                <fmt:formatDate value="${depDate}" pattern="yyyy-MM-dd"/>
+                                <span class="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                                <span>${s.snapAirlineName} ${s.snapFlightNumber}</span>
                             </div>
                         </div>
 
-                        <!-- 영문 -->
-                        <div class="pfield">
-                            <label class="plabel">영문 성</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].lastName" value="${p.lastName}" placeholder="영문 성" required />
-                            </div>
-                        </div>
-                        <div class="pfield">
-                            <label class="plabel">영문 이름</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].firstName" value="${p.firstName}" placeholder="영문 이름" required />
-                            </div>
-                        </div>
-
-                        <!-- 생년월일(가로 전체) + 성별(버튼형) -->
-                        <div class="pfield span-2">
-                            <div class="birth-gender">
-                                <div class="birth">
-                                    <label class="plabel">생년월일</label>
-                                    <div class="pcontrol">
-                                        <input type="date" name="passengers[${st.index}].birth" value="${p.birth}" required />
-                                    </div>
+                        <!-- Main Layout (3 Columns) -->
+                        <div class="grid grid-cols-[1fr_1.2fr_1fr] items-center gap-2">
+                            <!-- Left: Departure -->
+                            <div class="text-left">
+                                <div class="flight-time">
+                                    <fmt:formatDate value="${depDate}" pattern="HH:mm"/>
                                 </div>
+                                <div class="airport-code uppercase">${s.snapDepartureAirport}</div>
+                                <div class="airport-name">${s.snapDepartureCity}</div>
+                            </div>
 
-                                <div>
-                                    <label class="plabel">성별</label>
-                                    <div class="segmented" role="group" aria-label="gender">
-                                        <input id="gM_${st.index}" type="radio"
-                                               name="passengers[${st.index}].gender"
-                                               value="M" <c:if test="${p.gender == 'M'}">checked</c:if> />
-                                        <label for="gM_${st.index}">남</label>
-
-                                        <input id="gF_${st.index}" type="radio"
-                                               name="passengers[${st.index}].gender"
-                                               value="F" <c:if test="${p.gender == 'F'}">checked</c:if> />
-                                        <label for="gF_${st.index}">여</label>
+                            <!-- Center: Timeline -->
+                            <div class="flex flex-col items-center w-full px-2">
+                                <div class="flight-duration">
+                                    <!-- Duration calculation logic (simplified for display) -->
+                                    <fmt:parseDate value="${s.snapArrivalTime}" pattern="yyyy-MM-dd'T'HH:mm" var="arrDate"/>
+                                    <c:set var="durationMillis" value="${arrDate.time - depDate.time}" />
+                                    <c:set var="durationHours" value="${durationMillis / (1000 * 60 * 60)}" />
+                                    <c:set var="durationMinutes" value="${(durationMillis / (1000 * 60)) % 60}" />
+                                    <fmt:formatNumber value="${durationHours}" pattern="#,##0" maxFractionDigits="0" />시간
+                                    <fmt:formatNumber value="${durationMinutes}" pattern="#,##0" />분
+                                </div>
+                                <div class="timeline-line">
+                                    <div class="timeline-icon">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="transform rotate-90">
+                                            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                                        </svg>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 연락처/이메일 -->
-                        <div class="pfield">
-                            <label class="plabel">연락처</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].phoneNumber" value="${p.phoneNumber}" placeholder="- 제외 연락처" required />
-                            </div>
-                        </div>
-                        <div class="pfield">
-                            <label class="plabel">이메일</label>
-                            <div class="pcontrol">
-                                <input type="email" name="passengers[${st.index}].email" value="${p.email}" placeholder="이메일" required />
+                            <!-- Right: Arrival -->
+                            <div class="text-right">
+                                <div class="flight-time">
+                                    <fmt:formatDate value="${arrDate}" pattern="HH:mm"/>
+                                </div>
+                                <div class="airport-code uppercase">${s.snapArrivalAirport}</div>
+                                <div class="airport-name">
+                                    ${s.snapArrivalCity}
+                                    <fmt:formatDate value="${depDate}" pattern="yyyyMMdd" var="depDay"/>
+                                    <fmt:formatDate value="${arrDate}" pattern="yyyyMMdd" var="arrDay"/>
+                                    <c:set var="dayDiff" value="${arrDay - depDay}"/>
+                                    <c:if test="${dayDiff > 0}">
+                                        <span class="text-red-500 font-bold ml-1">+${dayDiff}일</span>
+                                    </c:if>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </c:forEach>
+            </div>
 
-                    <!-- 여권 정보 헤더 -->
-                    <div class="passport-header">
-                        <div class="passport-title">여권 정보</div>
+            <!-- Passenger Form -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-gray-100">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     </div>
-
-                    <!-- 여권 입력 (2열) -->
-                    <div class="pgrid" id="passportGrid_${st.index}">
-                        <div class="pfield">
-                            <label class="plabel">여권번호</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].passportNo" value="${p.passportNo}" placeholder="여권번호" />
-                            </div>
-                        </div>
-                        <div class="pfield">
-                            <label class="plabel">여권만료일</label>
-                            <div class="pcontrol">
-                                <input type="date" name="passengers[${st.index}].passportExpiryDate" value="${p.passportExpiryDate}" />
-                            </div>
-                        </div>
-
-                        <!-- 요구사항대로 국적 입력칸 유지(내국/외국 버튼 없음) -->
-                        <div class="pfield">
-                            <label class="plabel">국적</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].country" value="${p.country}" placeholder="대한민국" />
-                            </div>
-                        </div>
-                        <div class="pfield">
-                            <label class="plabel">발행국</label>
-                            <div class="pcontrol">
-                                <input name="passengers[${st.index}].passportIssueCountry" value="${p.passportIssueCountry}" placeholder="대한민국" />
-                            </div>
-                        </div>
+                    <div>
+                        <div class="font-bold text-base text-gray-900">탑승자 정보</div>
+                        <div class="text-xs text-gray-500">여권 정보와 동일하게 입력해주세요.</div>
                     </div>
                 </div>
-            </c:forEach>
 
-            <button class="btn primary save-btn" type="submit">탑승자 정보 저장</button>
-        </form>
+                <c:url var="saveUrl" value="/reservations/${vm.reservationId}/passengers"/>
+                <form id="passengerForm" onsubmit="return savePassengers(event)">
+                    <c:forEach var="p" items="${vm.passengers}" varStatus="st">
+                        <div class="mb-8 last:mb-0 border-b last:border-0 border-gray-100 pb-8 last:pb-0">
+                            <h4 class="font-bold text-sm text-gray-800 mb-4">탑승자 ${st.index + 1}</h4>
+                            <input type="hidden" name="passengers[${st.index}].passengerId" value="${p.passengerId}"/>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Row 1: Korean Name -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">한글 성</label>
+                                    <input name="passengers[${st.index}].krLastName" value="${p.krLastName}" placeholder="홍" pattern="^[가-힣]+$" required
+                                           oninput="this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '')"
+                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">한글 이름</label>
+                                    <input name="passengers[${st.index}].krFirstName" value="${p.krFirstName}" placeholder="길동" pattern="^[가-힣]+$" required
+                                           oninput="this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '')"
+                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                </div>
+
+                                <!-- Row 2: English Name -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">영문 성 (Last Name)</label>
+                                    <input name="passengers[${st.index}].lastName" value="${p.lastName}" placeholder="HONG" pattern="^[A-Z\s]+$" required
+                                           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()"
+                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">영문 이름 (First Name)</label>
+                                    <input name="passengers[${st.index}].firstName" value="${p.firstName}" placeholder="GILDONG" pattern="^[A-Z\s]+$" required
+                                           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()"
+                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
+                                </div>
+
+                                <!-- Row 3: Birth & Gender -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">생년월일</label>
+                                    <input type="date" name="passengers[${st.index}].birth" value="${p.birth}" max="9999-12-31" required
+                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">성별</label>
+                                    <div class="flex gap-2">
+                                        <label class="flex-1 cursor-pointer">
+                                            <input type="radio" name="passengers[${st.index}].gender" value="M" class="gender-input" <c:if test="${p.gender == 'M'}">checked</c:if>>
+                                            <span class="gender-box flex items-center justify-center h-[46px] border border-gray-200 rounded-xl bg-gray-50 text-slate-500 text-sm font-bold transition-all">남성</span>
+                                        </label>
+                                        <label class="flex-1 cursor-pointer">
+                                            <input type="radio" name="passengers[${st.index}].gender" value="F" class="gender-input" <c:if test="${p.gender == 'F'}">checked</c:if>>
+                                            <span class="gender-box flex items-center justify-center h-[46px] border border-gray-200 rounded-xl bg-gray-50 text-slate-500 text-sm font-bold transition-all">여성</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Row 4: Contact -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">연락처</label>
+                                    <input name="passengers[${st.index}].phoneNumber" value="${p.phoneNumber}" placeholder="- 제외 연락처" pattern="^[0-9]{10,11}$" maxlength="11" required
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-bold text-slate-500 ml-0.5">이메일</label>
+                                    <input type="email" name="passengers[${st.index}].email" value="${p.email}" placeholder="example@email.com" required
+                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                </div>
+
+                                <!-- Row 5: Passport Info -->
+                                <div class="md:col-span-2 mt-2">
+                                    <div class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                        여권 정보
+                                        <span class="text-[11px] font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">선택사항 (나중에 등록 가능)</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="flex flex-col gap-1.5">
+                                            <label class="text-xs font-bold text-slate-500 ml-0.5">여권번호</label>
+                                            <input name="passengers[${st.index}].passportNo" value="${p.passportNo}" placeholder="M12345678" pattern="^[A-Z0-9]{7,9}$" oninput="this.value = this.value.toUpperCase()"
+                                                   class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label class="text-xs font-bold text-slate-500 ml-0.5">여권만료일</label>
+                                            <input type="date" name="passengers[${st.index}].passportExpiryDate" value="${p.passportExpiryDate}" min="1900-01-01" max="2099-12-31"
+                                                   class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label class="text-xs font-bold text-slate-500 ml-0.5">국적</label>
+                                            <input name="passengers[${st.index}].country" value="${p.country}" placeholder="대한민국"
+                                                   class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label class="text-xs font-bold text-slate-500 ml-0.5">발행국</label>
+                                            <input name="passengers[${st.index}].passportIssueCountry" value="${p.passportIssueCountry}" placeholder="대한민국"
+                                                   class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </c:forEach>
+
+                    <div class="flex justify-end mt-6 pt-6 border-t border-gray-100">
+                        <button type="submit" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            탑승자 정보 저장
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Service Options -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div class="font-bold text-lg text-gray-900">좌석 및 부가서비스</div>
+                </div>
+
+                <div class="text-sm text-gray-500 mb-4">
+                    탑승자 정보 저장 후 선택 가능합니다. (현재: <span class="${vm.passengerSaved ? 'text-green-600 font-bold' : 'text-red-500 font-bold'}">${vm.passengerSaved ? '저장 완료' : '미저장'}</span>)
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <c:forEach var="s" items="${vm.segments}" varStatus="status">
+                        <div class="flex items-center justify-between bg-slate-50 border border-slate-200 p-4 rounded-xl hover:bg-white hover:border-primary transition-all group">
+                            <div>
+                                <span class="inline-block px-2 py-0.5 rounded text-[11px] font-extrabold mb-1 ${status.first ? 'bg-blue-50 text-primary' : 'bg-slate-100 text-slate-600'}">
+                                    ${status.first ? '가는편' : '오는편'}
+                                </span>
+                                <div class="text-sm font-bold text-gray-800">
+                                    <c:out value="${s.snapDepartureCity}"/> → <c:out value="${s.snapArrivalCity}"/>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    <c:out value="${s.snapAirlineName}"/> <c:out value="${s.snapFlightNumber}"/>
+                                </div>
+                            </div>
+                            <button type="button" ${vm.passengerSaved ? "" : "disabled"} onclick="openSeatPopup('${s.reservationSegmentId}')"
+                                    class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                좌석 선택
+                            </button>
+                        </div>
+                    </c:forEach>
+                </div>
+
+                <!-- Baggage / Ancillary Banner -->
+                <div class="mt-4 bg-white border border-gray-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center shrink-0">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2" ry="2"></rect><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><path d="M12 6v13"></path></svg>
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <div class="font-bold text-sm text-slate-800">부가서비스 신청</div>
+                            <div class="text-xs text-slate-500">사전 수하물 구매 및 기내식 신청</div>
+                        </div>
+                    </div>
+                    <button type="button" ${vm.passengerSaved ? "" : "disabled"} onclick="openServicePopup()"
+                            class="w-full sm:w-auto px-5 py-2.5 bg-primary text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        신청하기
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Sidebar -->
+        <div class="sticky top-6">
+
+            <!-- Price Summary -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-4">
+                <div class="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100 font-bold text-gray-800">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                    결제 상세
+                </div>
+
+                <div class="flex justify-between mb-3 text-sm text-slate-500">
+                    <span>항공 운임</span>
+                    <strong class="text-slate-800" id="flightPrice">₩0</strong>
+                </div>
+
+                <!-- Seat Details -->
+                <c:forEach var="s" items="${vm.segments}">
+                    <c:if test="${not empty s.passengerSeats}">
+                        <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
+                            <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 좌석:</span>
+                            <c:forEach var="seat" items="${s.passengerSeats}" varStatus="st">
+                                ${seat.passengerName} ${seat.seatNo}<c:if test="${!st.last}">, </c:if>
+                            </c:forEach>
+                        </div>
+                    </c:if>
+                </c:forEach>
+
+                <div class="flex justify-between mb-3 text-sm text-slate-500">
+                    <span>부가서비스</span>
+                    <strong class="text-slate-800" id="servicePrice">₩0</strong>
+                </div>
+
+                <!-- Service Details -->
+                <c:forEach var="s" items="${vm.segments}">
+                    <c:set var="hasBaggage" value="false"/>
+                    <c:forEach var="svc" items="${s.passengerServices}">
+                        <c:if test="${svc.serviceType == '0'}"><c:set var="hasBaggage" value="true"/></c:if>
+                    </c:forEach>
+                    <c:if test="${hasBaggage}">
+                        <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
+                            <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 수하물:</span>
+                            <c:set var="isFirst" value="true" />
+                            <c:forEach var="svc" items="${s.passengerServices}">
+                                <c:if test="${svc.serviceType == '0'}">
+                                    <c:if test="${!isFirst}">, </c:if>
+                                    ${svc.passengerName} ${svc.serviceName}
+                                    <c:set var="isFirst" value="false" />
+                                </c:if>
+                            </c:forEach>
+                        </div>
+                    </c:if>
+                </c:forEach>
+
+                <c:forEach var="s" items="${vm.segments}">
+                    <c:set var="hasMeal" value="false"/>
+                    <c:forEach var="svc" items="${s.passengerServices}">
+                        <c:if test="${svc.serviceType == '1'}"><c:set var="hasMeal" value="true"/></c:if>
+                    </c:forEach>
+                    <c:if test="${hasMeal}">
+                        <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
+                            <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 기내식:</span>
+                            <c:set var="isFirst" value="true" />
+                            <c:forEach var="svc" items="${s.passengerServices}">
+                                <c:if test="${svc.serviceType == '1'}">
+                                    <c:if test="${!isFirst}">, </c:if>
+                                    ${svc.passengerName} ${svc.serviceName}
+                                    <c:set var="isFirst" value="false" />
+                                </c:if>
+                            </c:forEach>
+                        </div>
+                    </c:if>
+                </c:forEach>
+
+                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-end">
+                    <span class="font-extrabold text-slate-800">총 결제금액</span>
+                    <span class="text-2xl font-black text-primary" id="totalPrice">₩0</span>
+                </div>
+
+                <button type="button" ${vm.passengerSaved ? "" : "disabled"} onclick="goPayment()" id="payBtn"
+                        class="w-full mt-5 py-4 bg-primary text-white rounded-xl font-extrabold text-base shadow-lg shadow-blue-500/25 hover:bg-blue-700 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                    결제하기
+                </button>
+                <div class="text-center text-[11px] text-slate-400 mt-3">
+                    유류할증료와 제세공과금은 변동될 수 있습니다.
+                </div>
+            </div>
+
+            <!-- Notices -->
+            <div class="bg-white rounded-2xl p-5 border border-gray-100">
+                <div class="flex items-center gap-1.5 text-xs font-extrabold text-slate-800 mb-3">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    예약 유의사항
+                </div>
+                <div class="flex flex-col gap-2">
+                    <div class="pl-2 border-l-2 border-blue-50 text-[11px] text-slate-500 leading-relaxed">
+                        영문 성명 철자가 여권과 다를 경우 탑승이 거절될 수 있으며, 이에 대한 책임은 본인에게 있습니다.
+                    </div>
+                    <div class="pl-2 border-l-2 border-blue-50 text-[11px] text-slate-500 leading-relaxed">
+                        여권 유효기간은 출발일 기준 6개월 이상 남아있어야 합니다.
+                    </div>
+                    <div class="pl-2 border-l-2 border-blue-50 text-[11px] text-slate-500 leading-relaxed">
+                        목적지 국가의 비자 필요 여부를 반드시 확인해주시기 바랍니다.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
-
-    <ul class="notice-blue flush-in-container">
-        <li>여권 유효기간은 출발일 기준으로 6개월 이상 남아 있어야 합니다.</li>
-        <li>여권 정보 수정은 가능하나, 일부 항공사의 경우 여권 정보 수정 기한 및 수정 횟수가 제한될 수 있습니다.</li>
-        <li>여권 정보를 나중에 등록하는 경우, 임의의 여권 번호와 만료일이 임시로 등록됩니다.</li>
-    </ul>
-
-<!-- 좌석/부가서비스 선택 -->
-<div class="box">
-    <h3>사전 좌석 지정 / 부가 서비스</h3>
-    <div class="muted" style="margin-bottom: 12px;">
-        탑승자 정보 저장 후 선택 가능합니다. (현재: ${vm.passengerSaved ? '저장 완료' : '미저장'})
-    </div>
-
-    <c:forEach var="s" items="${vm.segments}">
-        <button class="btn" ${vm.passengerSaved ? "" : "disabled"}
-                onclick="openSeatPopup('${s.reservationSegmentId}')">
-            좌석 선택 (구간 ${s.segmentOrder})
-        </button>
-    </c:forEach>
-
-
-    <button class="btn" ${vm.passengerSaved ? "" : "disabled"}
-            onclick="openServicePopup()">
-        수하물 / 기내식 추가
-    </button>
 </div>
 
-<!-- 결제 금액 -->
-<div class="box price-section">
-    <h3>결제 금액</h3>
-
-    <div class="price-row">
-        <span class="price-label">항공 운임</span>
-        <span class="price-value" id="flightPrice">₩0</span>
-    </div>
-
-    <!-- 좌석 상세 -->
-    <c:forEach var="s" items="${vm.segments}">
-        <c:if test="${not empty s.passengerSeats}">
-            <div class="price-row" style="padding-left: 20px; font-size: 13px; color: #666;">
-                  <span class="price-label">${s.segmentOrder == 1 ? '가는편' : '오는편'}:
-                      <c:forEach var="seat" items="${s.passengerSeats}" varStatus="st">
-                          ${seat.passengerName} ${seat.seatNo}<c:if test="${!st.last}">, </c:if>
-                      </c:forEach>
-                  </span>
-            </div>
-        </c:if>
-    </c:forEach>
-
-    <div class="price-row">
-        <span class="price-label">부가서비스</span>
-        <span class="price-value" id="servicePrice">₩0</span>
-    </div>
-    <!-- 부가서비스 상세 (수하물) -->
-    <c:forEach var="s" items="${vm.segments}">
-        <c:set var="hasBaggage" value="false"/>
-        <c:forEach var="svc" items="${s.passengerServices}">
-            <c:if test="${svc.serviceType == '0'}"><c:set var="hasBaggage" value="true"/></c:if>
-        </c:forEach>
-        <c:if test="${hasBaggage}">
-            <div class="price-row" style="padding-left: 20px; font-size: 13px; color: #666;">
-                  <span class="price-label">${s.segmentOrder == 1 ? '가는편' : '오는편'} 수하물:
-                      <c:forEach var="svc" items="${s.passengerServices}" varStatus="st">
-                          <c:if test="${svc.serviceType == '0'}">
-                              ${svc.passengerName} ${svc.serviceName}<c:if test="${!st.last}">, </c:if>
-                          </c:if>
-                      </c:forEach>
-                  </span>
-            </div>
-        </c:if>
-    </c:forEach>
-    <!-- 부가서비스 상세 (기내식) -->
-    <c:forEach var="s" items="${vm.segments}">
-        <c:set var="hasMeal" value="false"/>
-        <c:forEach var="svc" items="${s.passengerServices}">
-            <c:if test="${svc.serviceType == '1'}"><c:set var="hasMeal" value="true"/></c:if>
-        </c:forEach>
-        <c:if test="${hasMeal}">
-            <div class="price-row" style="padding-left: 20px; font-size: 13px; color: #666;">
-                  <span class="price-label">${s.segmentOrder == 1 ? '가는편' : '오는편'} 기내식:
-                      <c:forEach var="svc" items="${s.passengerServices}" varStatus="st">
-                          <c:if test="${svc.serviceType == '1'}">
-                              ${svc.passengerName} ${svc.serviceName}<c:if test="${!st.last}">, </c:if>
-                          </c:if>
-                      </c:forEach>
-                  </span>
-            </div>
-        </c:if>
-    </c:forEach>
-
-    <div class="price-row total">
-        <span class="price-label">총 결제 금액</span>
-        <span class="price-value" id="totalPrice">₩0</span>
-    </div>
-
-    <div class="btn-group">
-        <button class="btn" onclick="history.back()">취소</button>
-        <button class="btn primary" ${vm.passengerSaved ? "" : "disabled"}
-                onclick="goPayment()" id="payBtn">
-            결제하기
-        </button>
-    </div>
-</div>
-</div>
 <script type="module">
     import { fetchWithRefresh } from '/resources/common/js/authFetch.js';
     var reservationId = '${vm.reservationId}';
@@ -862,6 +536,11 @@
         location.href = '/payments/' + reservationId;
     }
 
+    function getLocalISODate() {
+        const now = new Date();
+        const tzOffsetMs = now.getTimezoneOffset() * 60000;
+        return new Date(now.getTime() - tzOffsetMs).toISOString().split('T')[0];
+    }
 
     // 페이지 로드 시 부가서비스 총액 조회
     document.addEventListener('DOMContentLoaded', function() {
@@ -876,6 +555,17 @@
             refreshServiceTotal();
         }
         updateTotalPrice();
+
+        // 생년월일 최대 날짜 제한 (오늘로 설정)
+        const today = getLocalISODate();
+        document.querySelectorAll('input[type="date"]').forEach(el => {
+            if(el.name.includes('birth')) {
+                el.max = today;
+            }
+            if(el.name.includes('passportExpiryDate')) {
+                el.min = today; // 여권만료는 오늘부터만 가능
+            }
+        });
     });
     window.openSeatPopup = openSeatPopup;
     window.openServicePopup = openServicePopup;
@@ -888,28 +578,84 @@
         const passengers = [];
         let index = 0;
 
+        // --- 유효성 검사 정규식 ---
+        const regKr = /^[가-힣]+$/;             // 한글만
+        const regEn = /^[A-Z\s]+$/;             // 영문 대문자와 공백만
+        const regPhone = /^01[0-9]{8,9}$/;      // 한국 휴대폰 번호 형식
+        const regEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식
+
         while (true) {
             const passengerIdEl = document.querySelector('input[name="passengers[' + index + '].passengerId"]');
             if (!passengerIdEl) break;
 
+            const krLastName = document.querySelector('input[name="passengers[' + index + '].krLastName"]').value.trim();
+            const krFirstName = document.querySelector('input[name="passengers[' + index + '].krFirstName"]').value.trim();
+            const lastName = document.querySelector('input[name="passengers[' + index + '].lastName"]').value.trim().toUpperCase();
+            const firstName = document.querySelector('input[name="passengers[' + index + '].firstName"]').value.trim().toUpperCase();
+            const birth = document.querySelector('input[name="passengers[' + index + '].birth"]').value;
+            const email = document.querySelector('input[name="passengers[' + index + '].email"]').value.trim();
+            const phoneNumber = document.querySelector('input[name="passengers[' + index + '].phoneNumber"]').value.trim();
             const genderEl = document.querySelector(
                 'input[name="passengers[' + index + '].gender"]:checked'
             );
 
+            const pNum = index + 1; // 탑승자 번호
+
+            // 1. 성별 체크
+            if (!genderEl) {
+                alert(`탑승자 \${pNum}의 성별을 선택해주세요.`);
+                return false;
+            }
+
+            // 2. 한글 이름 검사
+            if (!regKr.test(krLastName) || !regKr.test(krFirstName)) {
+                alert(`탑승자 \${pNum}의 한글 성명은 한글만 입력 가능합니다.`);
+                return false;
+            }
+
+            // 3. 영문 이름 검사
+            if (!regEn.test(lastName) || !regEn.test(firstName)) {
+                alert(`탑승자 \${pNum}의 영문 성명은 영문 대문자만 입력 가능합니다.`);
+                return false;
+            }
+
+            // 4. 생년월일 검사 (미래 날짜 선택 방지)
+            const today = getLocalISODate();
+            if (birth > today) {
+                alert(`탑승자 \${pNum}의 생년월일이 올바르지 않습니다.`);
+                return false;
+            }
+
+            // 5. 연락처 및 이메일 형식 검사
+            if (!regPhone.test(phoneNumber)) {
+                alert(`탑승자 \${pNum}의 연락처 형식이 올바르지 않습니다. (예: 01012345678)`);
+                return false;
+            }
+            if (!regEmail.test(email)) {
+                alert(`탑승자 \${pNum}의 이메일 형식이 올바르지 않습니다.`);
+                return false;
+            }
+
+            // 여권 정보가 입력된 경우 추가 검사 (필수가 아닐 수도 있으므로 입력 시에만 체크)
+            const passportNo = document.querySelector('input[name="passengers[' + index + '].passportNo"]').value.trim();
+            const passportExpiry = document.querySelector('input[name="passengers[' + index + '].passportExpiryDate"]').value;
+
+            if (passportNo && passportExpiry) {
+                // 여권 만료일 검사 (오늘 기준 6개월 이후인지 권장 사항 확인)
+                const minExpiry = new Date();
+                minExpiry.setMonth(minExpiry.getMonth() + 6);
+                if (new Date(passportExpiry) < minExpiry) {
+                    if(!confirm(`탑승자 \${pNum}의 여권 만료일이 6개월 미만입니다. 계속하시겠습니까?`)) return false;
+                }
+            }
+
             passengers.push({
                 passengerId: passengerIdEl.value,
-                krLastName: document.querySelector('input[name="passengers[' + index + '].krLastName"]').value,
-                krFirstName: document.querySelector('input[name="passengers[' + index + '].krFirstName"]').value,
-                lastName: document.querySelector('input[name="passengers[' + index + '].lastName"]').value,
-                firstName: document.querySelector('input[name="passengers[' + index + '].firstName"]').value,
-                birth: document.querySelector('input[name="passengers[' + index + '].birth"]').value,
-
+                krLastName, krFirstName, lastName, firstName, birth,
 
                 gender: genderEl ? genderEl.value : '',
 
-                email: document.querySelector('input[name="passengers[' + index + '].email"]').value,
-                phoneNumber: document.querySelector('input[name="passengers[' + index + '].phoneNumber"]').value,
-                passportNo: document.querySelector('input[name="passengers[' + index + '].passportNo"]').value,
+                email, phoneNumber, passportNo,
                 country: document.querySelector('input[name="passengers[' + index + '].country"]').value,
                 passportExpiryDate: document.querySelector('input[name="passengers[' + index + '].passportExpiryDate"]').value,
                 passportIssueCountry: document.querySelector('input[name="passengers[' + index + '].passportIssueCountry"]').value
@@ -941,6 +687,5 @@
     window.savePassengers = savePassengers;
 
 </script>
-
 </body>
 </html>

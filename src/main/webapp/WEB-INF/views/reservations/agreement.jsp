@@ -1,413 +1,277 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!doctype html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>약관 동의</title>
+    <title>약관 동의 - Flyway</title>
 
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1f6feb',
+                        'primary-hover': '#165bca',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root{
-            --bg:#f5f7fb;
-            --card:#ffffff;
-            --line:#e8edf3;
-            --text:#111;
-            --muted:#666;
-            --primary:#1f6feb;
-            --danger:#d32f2f;
-            --shadow:0 2px 10px rgba(0,0,0,0.06);
-            --radius:10px;
-        }
+        body { font-family: 'Pretendard', Arial, sans-serif; background-color: #f5f7fb; }
+        .stepper__item.is-active .stepper__circle { background-color: #1f6feb; border-color: #1f6feb; color: white; }
+        .stepper__item.is-completed .stepper__circle { background-color: #333; border-color: #333; color: white; }
 
-        * { box-sizing: border-box; }
-
-        body{
-            margin:0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+        /* Flight Card Styles (Same as booking.jsp) */
+        .flight-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            padding: 20px;
+            margin-bottom: 16px;
         }
-
-        /* ✅ 반응형 컨테이너: 고정 width 제거 */
-        .container{
-            max-width: 880px;
-            margin: 0 auto;
-            padding: 16px 16px 60px;
+        .flight-time { font-size: 24px; font-weight: 800; color: #1a1a1a; line-height: 1; }
+        .airport-code { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-top: 4px; }
+        .airport-name { font-size: 12px; color: #8a8a8a; margin-top: 2px; }
+        .flight-duration { font-size: 12px; color: #9aa4b2; text-align: center; margin-bottom: 6px; }
+        .timeline-line {
+            height: 1px;
+            background-image: linear-gradient(to right, #e2e8f0 50%, transparent 50%);
+            background-size: 6px 1px;
+            background-repeat: repeat-x;
+            position: relative;
+            width: 100%;
         }
-
-        /* Top bar */
-        .topbar{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:12px;
-            flex-wrap:wrap;
-            padding: 10px 0 16px;
+        .timeline-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 0 6px;
+            color: #1f6feb;
         }
-        .brand{ font-weight:700; letter-spacing:0.5px; }
-        .menu{ font-size:12px; color:var(--muted); }
-
-        /* Card base */
-        .card{
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 16px 18px;
-            box-shadow: var(--shadow);
-        }
-        .section{ margin-top: 16px; }
-        .subTitle{ font-weight:700; margin-bottom:10px; }
-
-        /* Header + steps */
-        .header{
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 18px 20px;
-            box-shadow: var(--shadow);
-        }
-        .titleRow{
-            display:flex;
-            align-items:flex-start;
-            justify-content:space-between;
-            gap: 12px;
-            flex-wrap:wrap;
-        }
-        .title{ font-size:18px; font-weight:700; }
-
-        .steps{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            flex-wrap:wrap; /* ✅ 좁으면 줄바꿈 */
-        }
-        .step{
-            display:flex;
-            align-items:center;
-            gap:6px;
-            color:#9aa3ad;
-            font-size:12px;
-            white-space:nowrap;
-        }
-        .dot{
-            width:18px;
-            height:18px;
-            border-radius:50%;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            border:1px solid #cfd6df;
-            font-size:11px;
-            flex: 0 0 auto;
-        }
-        .active{ color:var(--primary); font-weight:700; }
-        .active .dot{ border-color:var(--primary); color:var(--primary); }
-
-        /* Flight summary */
-        .flightBox{
-            background:#eef6ff;
-            border-radius: var(--radius);
-            padding: 14px;
-        }
-
-        /* ✅ 4칸 고정 flex -> 반응형 grid */
-        .flightGrid{
-            display:grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 12px;
-            align-items:start;
-        }
-        .flightCol{
-            font-size:12px;
-            color:#333;
-            min-width:0;
-        }
-        .flightCol strong{
-            display:block;
-            font-size:13px;
-            margin-bottom:4px;
-        }
-        .pill{
-            display:inline-block;
-            padding:2px 8px;
-            border-radius:999px;
-            background:var(--primary);
-            color:#fff;
-            font-size:11px;
-        }
-
-        /* Notice */
-        .notice{
-            font-size:12px;
-            color:#555;
-            line-height:1.6;
-        }
-
-        /* Terms */
-        .error{
-            color:var(--danger);
-            font-size:12px;
-            margin: 10px 0 0;
-        }
-
-        .agreeAllRow{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            padding: 10px 0 14px;
-            border-bottom: 1px solid var(--line);
-        }
-        .agreeAllRow label{ font-weight:700; }
-
-        .termsList{ margin-top: 6px; }
-
-        .termItem{
-            display:flex;
-            align-items:flex-start;
-            gap:10px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--line);
-        }
-        .termMain{
-            flex:1;
-            min-width:0;
-        }
-        .termTitleRow{
-            display:flex;
-            gap:8px;
-            align-items:center;
-            justify-content:space-between;
-            cursor:pointer;
-            user-select:none;
-        }
-        .termLeft{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            min-width:0;
-        }
-        .badgeRequired{
-            color:var(--primary);
-            font-weight:700;
-            font-size:12px;
-            flex:0 0 auto;
-        }
-        .badgeOptional{
-            color:#6b7280;
-            font-weight:700;
-            font-size:12px;
-            flex:0 0 auto;
-        }
-        .termName{
-            font-size:13px;
-            overflow:hidden;
-            text-overflow:ellipsis;
-            white-space:nowrap;
-        }
-        .chev{
-            color:#6b7280;
-            font-size:14px;
-            flex:0 0 auto;
-            transform: rotate(0deg);
-            transition: transform .15s ease;
-        }
-        .termBody{
-            display:none;
-            margin-top:10px;
-            font-size:12px;
-            color:#666;
-            line-height:1.6;
-        }
-        .termItem.open .termBody{ display:block; }
-        .termItem.open .chev{ transform: rotate(180deg); }
-
-        /* Bottom buttons */
-        .btnRow{
-            margin-top: 16px;
-            display:flex;
-            gap:12px;
-        }
-        .btn{
-            width:50%;
-            padding: 14px 0;
-            border-radius: 8px;
-            border:0;
-            font-size:14px;
-            cursor:pointer;
-        }
-        .btnCancel{ background:#dfe3e8; color:#333; }
-        .btnNext{ background:var(--primary); color:#fff; font-weight:700; }
-        .btnNext:disabled{
-            opacity:.55;
-            cursor:not-allowed;
-        }
-
-        /* ✅ 반응형 브레이크포인트 */
-        @media (max-width: 820px){
-            .flightGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .btn{ width: 100%; }
-            .btnRow{ flex-direction: column; }
-        }
-        @media (max-width: 480px){
-            .header{ padding: 16px; }
-            .card{ padding: 14px; }
-            .flightBox{ padding: 12px; }
-            .flightGrid{ grid-template-columns: 1fr; }
-            .menu{ width:100%; }
+        .timeline-icon svg {
+            width: 14px;
+            height: 14px;
         }
     </style>
 </head>
 
-<body>
-<div class="container">
+<body class="text-gray-900">
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
 
-    <!-- Top bar -->
-    <div class="topbar">
-        <div class="brand">flyway</div>
-        <div class="menu">로그인 | 마이페이지 | 고객센터</div>
+<div class="max-w-[1100px] mx-auto px-4 pb-20">
+
+    <!-- Header & Stepper -->
+    <div class="flex flex-col sm:flex-row items-center justify-between py-6 gap-4">
+        <div class="text-2xl font-extrabold text-gray-900">예약하기</div>
+        <ol class="flex gap-4 items-center m-0 p-0 list-none">
+            <li class="flex flex-col items-center gap-1.5 text-xs font-bold text-primary is-active">
+                <span class="stepper__circle w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs font-extrabold bg-white">1</span>
+                <span>약관동의</span>
+            </li>
+            <li class="flex flex-col items-center gap-1.5 text-xs font-bold text-gray-400">
+                <span class="stepper__circle w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs font-extrabold bg-white">2</span>
+                <span>정보입력/결제</span>
+            </li>
+            <li class="flex flex-col items-center gap-1.5 text-xs font-bold text-gray-400">
+                <span class="stepper__circle w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs font-extrabold bg-white">3</span>
+                <span>예약결과</span>
+            </li>
+        </ol>
     </div>
 
-    <!-- Header with steps -->
-    <div class="header">
-        <div class="titleRow">
-            <div class="title">예약하기</div>
-            <div class="steps">
-                <div class="step active"><span class="dot">1</span> <span>약관동의</span></div>
-                <div class="step"><span class="dot">2</span> <span>예약자/탑승객</span></div>
-                <div class="step"><span class="dot">3</span> <span>결제정보</span></div>
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
+
+        <!-- Left Column: Flight Summary & Notices -->
+        <div class="flex flex-col gap-4">
+
+            <!-- Flight Summary (Redesigned & Compact) -->
+            <div class="flex flex-col gap-3">
+                <c:forEach var="s" items="${segments}">
+                    <div class="flight-card">
+                        <!-- Card Header -->
+                        <div class="flex justify-between items-center mb-4 text-xs text-[#8a8a8a]">
+                            <div class="flex items-center gap-1.5 font-bold text-[#1a1a1a]">
+                                <span class="text-primary">✈</span>
+                                <span>${s.segmentOrder == 1 ? '가는 편' : '오는 편'}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <fmt:parseDate value="${s.snapDepartureTime}" pattern="yyyy-MM-dd'T'HH:mm" var="depDate"/>
+                                <fmt:formatDate value="${depDate}" pattern="yyyy-MM-dd"/>
+                                <span class="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                                <span>${s.snapAirlineName} ${s.snapFlightNumber}</span>
+                            </div>
+                        </div>
+
+                        <!-- Main Layout (3 Columns) -->
+                        <div class="grid grid-cols-[1fr_1.2fr_1fr] items-center gap-2">
+                            <!-- Left: Departure -->
+                            <div class="text-left">
+                                <div class="flight-time">
+                                    <fmt:formatDate value="${depDate}" pattern="HH:mm"/>
+                                </div>
+                                <div class="airport-code uppercase">${s.snapDepartureAirport}</div>
+                                <div class="airport-name">${s.snapDepartureCity}</div>
+                            </div>
+
+                            <!-- Center: Timeline -->
+                            <div class="flex flex-col items-center w-full px-2">
+                                <div class="flight-duration">
+                                    <!-- Duration calculation logic -->
+                                    <fmt:parseDate value="${s.snapArrivalTime}" pattern="yyyy-MM-dd'T'HH:mm" var="arrDate"/>
+                                    <c:set var="durationMillis" value="${arrDate.time - depDate.time}" />
+                                    <c:set var="durationHours" value="${durationMillis / (1000 * 60 * 60)}" />
+                                    <c:set var="durationMinutes" value="${(durationMillis / (1000 * 60)) % 60}" />
+                                    <fmt:formatNumber value="${durationHours}" pattern="#,##0" maxFractionDigits="0" />시간
+                                    <fmt:formatNumber value="${durationMinutes}" pattern="#,##0" />분
+                                </div>
+                                <div class="timeline-line">
+                                    <div class="timeline-icon">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="transform rotate-90">
+                                            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Arrival -->
+                            <div class="text-right">
+                                <div class="flight-time">
+                                    <fmt:formatDate value="${arrDate}" pattern="HH:mm"/>
+                                </div>
+                                <div class="airport-code uppercase">${s.snapArrivalAirport}</div>
+                                <div class="airport-name">
+                                    ${s.snapArrivalCity}
+                                    <fmt:formatDate value="${depDate}" pattern="yyyyMMdd" var="depDay"/>
+                                    <fmt:formatDate value="${arrDate}" pattern="yyyyMMdd" var="arrDay"/>
+                                    <c:set var="dayDiff" value="${arrDay - depDay}"/>
+                                    <c:if test="${dayDiff > 0}">
+                                        <span class="text-red-500 font-bold ml-1">+${dayDiff}일</span>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+
+            <!-- Notices -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-2 mb-4 font-bold text-lg text-gray-900">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    유의사항
+                </div>
+                <div class="text-xs text-gray-500 leading-relaxed space-y-2">
+                    <p>※ 출국 전 경유지 및 목적지의 필요 서류, 비자, 자격 요건 등을 반드시 확인하시어 불이익이 발생하지 않도록 사전에 준비하시기 바랍니다.</p>
+                    <p>※ 편도 항공권으로 여행하시는 경우, 입국 국가의 유효한 비자를 반드시 소지하셔야 합니다. 비자를 소지하지 않은 경우 해당 국가로의 출국이 거부될 수 있습니다.</p>
+                    <p>※ 무비자 입국이 가능한 국가라도 편도 항공권으로는 입국이 제한될 수 있으므로, 해당 국가 대사관 또는 공식 기관을 통해 입국 조건을 사전에 확인하시기 바랍니다.</p>
+                    <p>※ 항공기 탑승 및 입국 관련 사항은 탑승객 본인의 책임 하에 확인해야 하며, 탑승 거절 또는 입국 거부가 발생하더라도 여행사는 이에 대한 책임을 지지 않습니다.</p>
+                    <p>※ 일부 특가 운임은 무료 수하물이 포함되지 않을 수 있으므로, 항공 스케줄 및 운임 상세 내용을 반드시 확인하시기 바랍니다.</p>
+                    <p>※ 항공권 취소 수수료는 항공사별 규정에 따라 상이하므로, 해당 항공권의 요금 규정을 반드시 확인하시기 바랍니다.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Terms -->
+        <div class="sticky top-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="font-bold text-lg text-gray-900 mb-4 pb-4 border-b border-gray-100">약관 동의</div>
+
+                <!-- 서버에서 넘어온 error 파라미터 -->
+                <c:if test="${param.error eq 'agreeRequired'}">
+                    <div class="text-red-500 text-xs font-bold mb-4 bg-red-50 p-3 rounded-lg">
+                        모든 필수 약관에 동의해야 다음 단계로 이동할 수 있습니다.
+                    </div>
+                </c:if>
+
+                <form method="post" id="agreeForm">
+                    <input type="hidden" name="agreeAll" id="agreeAllHidden" value="false"/>
+
+                    <!-- 전체 동의 -->
+                    <div class="flex items-center gap-3 py-3 border-b border-gray-100 mb-2">
+                        <input id="agreeAll" type="checkbox" class="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"/>
+                        <label for="agreeAll" class="font-bold text-sm cursor-pointer select-none">전체 동의</label>
+                    </div>
+
+                    <!-- 개별 약관 -->
+                    <div class="flex flex-col gap-0">
+                        <!-- 필수1 -->
+                        <div class="termItem py-3 border-b border-gray-50 last:border-0 open" data-required="true">
+                            <div class="flex items-start gap-3">
+                                <input class="termChk w-4 h-4 mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" type="checkbox" id="t1"/>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-center cursor-pointer select-none" data-toggle>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <span class="text-primary font-bold text-xs">[필수]</span>
+                                            <span class="truncate">결제 및 서비스 약관 동의</span>
+                                        </div>
+                                        <span class="chev text-gray-400 text-xs transform transition-transform">▼</span>
+                                    </div>
+                                    <div class="termBody hidden mt-2 text-xs text-gray-500 leading-relaxed bg-gray-50 p-3 rounded-lg">
+                                        결제 관련 유의사항과 서비스 제공 조건 (임시 텍스트)<br/>
+                                        전자상거래 등에서의 소비자보호에 관한 법률 등 관련 법령에 따릅니다.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 필수2 -->
+                        <div class="termItem py-3 border-b border-gray-50 last:border-0" data-required="true">
+                            <div class="flex items-start gap-3">
+                                <input class="termChk w-4 h-4 mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" type="checkbox" id="t2"/>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-center cursor-pointer select-none" data-toggle>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <span class="text-primary font-bold text-xs">[필수]</span>
+                                            <span class="truncate">개인정보 수집·이용 동의</span>
+                                        </div>
+                                        <span class="chev text-gray-400 text-xs transform transition-transform">▼</span>
+                                    </div>
+                                    <div class="termBody hidden mt-2 text-xs text-gray-500 leading-relaxed bg-gray-50 p-3 rounded-lg">
+                                        예약 처리 및 고객 응대를 위해 최소한의 개인정보를 수집합니다.<br/>
+                                        수집항목: 성명, 생년월일, 성별, 연락처, 이메일, 여권정보 등
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 필수3 -->
+                        <div class="termItem py-3 border-b border-gray-50 last:border-0" data-required="true">
+                            <div class="flex items-start gap-3">
+                                <input class="termChk w-4 h-4 mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" type="checkbox" id="t3"/>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-center cursor-pointer select-none" data-toggle>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <span class="text-primary font-bold text-xs">[필수]</span>
+                                            <span class="truncate">제3자 제공 동의(항공사)</span>
+                                        </div>
+                                        <span class="chev text-gray-400 text-xs transform transition-transform">▼</span>
+                                    </div>
+                                    <div class="termBody hidden mt-2 text-xs text-gray-500 leading-relaxed bg-gray-50 p-3 rounded-lg">
+                                        항공권 발권 및 운송 계약 이행을 위해 항공사에 개인정보를 제공합니다.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100">
+                        <button type="button" class="flex-1 py-3.5 bg-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-300 transition-colors" onclick="history.back()">취소</button>
+                        <button type="submit" class="flex-1 py-3.5 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" id="nextBtn" disabled>다음 단계</button>
+                    </div>
+                </form>
             </div>
         </div>
+
     </div>
-
-    <!-- Flight summary -->
-    <div class="section card">
-        <div class="subTitle">예약 항공편</div>
-        <c:forEach var="seg" items="${segments}">
-            <div class="flightBox" style="margin-bottom: 10px;">
-                <div class="flightGrid">
-                    <div class="flightCol">
-                        <strong><c:out value="${seg.snapDepartureTime.toLocalDate()}"/></strong>
-                        <div><c:out value="${seg.snapDepartureCity}"/>(<c:out value="${seg.snapDepartureAirport}"/>) →
-                            <c:out value="${seg.snapArrivalCity}"/>(<c:out value="${seg.snapArrivalAirport}"/>)</div>
-                    </div>
-                    <div class="flightCol">
-                        <strong><c:out value="${seg.snapDepartureTime.toLocalTime()}"/></strong>
-                        <div><span class="pill">직항</span></div>
-                    </div>
-                    <div class="flightCol">
-                        <strong><c:out value="${seg.snapAirlineName}"/></strong>
-                        <div><c:out value="${seg.snapFlightNumber}"/></div>
-                    </div>
-                    <div class="flightCol">
-                        <strong><c:out value="${seg.snapArrivalTime.toLocalTime()}"/></strong>
-                        <div>도착</div>
-                    </div>
-                </div>
-            </div>
-        </c:forEach>
-    </div>
-
-    <!-- Notices -->
-    <div class="section card">
-        <div class="subTitle">유의사항</div>
-        <div class="notice">
-            ※ 출국 전 경유지 및 목적지의 필요 서류, 비자, 자격 요건 등을 반드시 확인하시어 불이익이 발생하지 않도록 사전에 준비하시기 바랍니다.<br/>
-            ※ 편도 항공권으로 여행하시는 경우, 입국 국가의 유효한 비자를 반드시 소지하셔야 합니다. 비자를 소지하지 않은 경우 해당 국가로의 출국이 거부될 수
-            있습니다.<br/>
-            (일부 국가는 편도 항공권만 소지한 경우 탑승이 제한될 수 있으니 각별히 유의하시기 바랍니다.)<br/>
-            ※ 무비자 입국이 가능한 국가라도 편도 항공권으로는 입국이 제한될 수 있으므로, 해당 국가 대사관 또는 공식 기관을 통해 입국 조건을 사전에 확인하시
-            기 바랍니다.<br/>
-            ※ 항공기 탑승 및 입국 관련 사항은 탑승객 본인의 책임 하에 확인해야 하며, 탑승 거절 또는 입국 거부가 발생하더라도 여행사는 이에 대한 책임을 지지
-            않습니다.<br/>
-            ※ 일부 특가 운임은 무료 수하물이 포함되지 않을 수 있으므로, 항공 스케줄 및 운임 상세 내용을 반드시 확인하시기 바랍니다.<br/>
-            ※ 항공권 취소 수수료는 항공사별 규정에 따라 상이하므로, 해당 항공권의 요금 규정을 반드시 확인하시기 바랍니다.<br/>
-            ※ 환불이 가능한 항공권의 경우, 요금 규정에 명시된 항공권 취소 수수료 외에 여행업무대행수수료가 별도로 부과될 수 있습니다.
-        </div>
-    </div>
-
-    <!-- Terms -->
-    <div class="section card">
-        <div class="subTitle">약관 동의</div>
-
-        <!-- 서버에서 넘어온 error 파라미터 -->
-        <c:if test="${param.error eq 'agreeRequired'}">
-            <div class="error">모든 필수 약관에 동의해야 다음 단계로 이동할 수 있습니다.</div>
-        </c:if>
-
-        <form method="post" id="agreeForm">
-            <!-- 서버는 agreeAll 파라미터만 보므로, 아래 JS가 true/false를 세팅 -->
-            <input type="hidden" name="agreeAll" id="agreeAllHidden" value="false"/>
-
-            <!-- 전체 동의 -->
-            <div class="agreeAllRow">
-                <input id="agreeAll" type="checkbox"/>
-                <label for="agreeAll">전체 동의</label>
-            </div>
-
-            <!-- 개별 약관 -->
-            <div class="termsList">
-
-                <!-- 필수1 -->
-                <div class="termItem open" data-required="true">
-                    <input class="termChk" type="checkbox" id="t1"/>
-                    <div class="termMain">
-                        <div class="termTitleRow" data-toggle>
-                            <div class="termLeft">
-                                <span class="badgeRequired">[필수]</span>
-                                <span class="termName">결제 및 서비스 약관 동의</span>
-                            </div>
-                            <span class="chev">▾</span>
-                        </div>
-                        <div class="termBody">
-                            결제 관련 유의사항과 서비스 제공 조건 (임시 텍스트)<br/>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 필수2 -->
-                <div class="termItem" data-required="true">
-                    <input class="termChk" type="checkbox" id="t2"/>
-                    <div class="termMain">
-                        <div class="termTitleRow" data-toggle>
-                            <div class="termLeft">
-                                <span class="badgeRequired">[필수]</span>
-                                <span class="termName">개인정보 수집·이용 동의</span>
-                            </div>
-                            <span class="chev">▾</span>
-                        </div>
-                        <div class="termBody">
-                            예약 처리 및 고객 응대를 위해 최소한의 개인정보를 수집 (임시 텍스트)
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 필수3 -->
-                <div class="termItem" data-required="true">
-                    <input class="termChk" type="checkbox" id="t3"/>
-                    <div class="termMain">
-                        <div class="termTitleRow" data-toggle>
-                            <div class="termLeft">
-                                <span class="badgeRequired">[필수]</span>
-                                <span class="termName">제3자 제공 동의(항공사)</span>
-                            </div>
-                            <span class="chev">▾</span>
-                        </div>
-                        <div class="termBody">
-                            제3자 제공 동의 (임시 텍스트)
-                        </div>
-                    </div>
-                </div>
-
-
-
-            </div>
-
-            <div class="btnRow">
-                <button type="button" class="btn btnCancel" onclick="history.back()">취소</button>
-                <button type="submit" class="btn btnNext" id="nextBtn" disabled>다음</button>
-            </div>
-        </form>
-    </div>
-
 </div>
 
 <script>
@@ -451,9 +315,27 @@
         document.querySelectorAll('[data-toggle]').forEach(el => {
             el.addEventListener('click', () => {
                 const item = el.closest('.termItem');
-                item.classList.toggle('open');
+                const body = item.querySelector('.termBody');
+                const chev = item.querySelector('.chev');
+
+                if (body.classList.contains('hidden')) {
+                    body.classList.remove('hidden');
+                    chev.style.transform = 'rotate(180deg)';
+                } else {
+                    body.classList.add('hidden');
+                    chev.style.transform = 'rotate(0deg)';
+                }
             });
         });
+
+        // 초기 오픈 상태 처리 (첫번째 약관)
+        const firstItem = document.querySelector('.termItem.open');
+        if(firstItem) {
+            const body = firstItem.querySelector('.termBody');
+            const chev = firstItem.querySelector('.chev');
+            body.classList.remove('hidden');
+            chev.style.transform = 'rotate(180deg)';
+        }
 
         // 초기 상태 반영
         syncState();
