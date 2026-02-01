@@ -1,5 +1,6 @@
 package com.flyway.admin.controller;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +20,7 @@ import com.flyway.admin.dto.DashboardStatsDto;
 import com.flyway.admin.dto.RecentActivityDto;
 import com.flyway.admin.dto.StatisticsDto;
 import com.flyway.admin.dto.VisitorDetailDto;
+import com.flyway.admin.scheduler.StatisticsScheduler;
 import com.flyway.admin.service.AdminDashboardService;
 import com.flyway.template.common.ApiResponse;
 import com.flyway.template.exception.ErrorCode;
@@ -33,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminDashboardApiController {
 
 	private final AdminDashboardService dashboardService;
+	private final StatisticsScheduler statisticsScheduler;
 
 	/**
 	 * 대시보드 통계 조회
@@ -253,6 +256,40 @@ public class AdminDashboardApiController {
 		} catch (Exception e) {
 			log.error("Failed to get today visitors", e);
 			return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), "방문자 조회 중 오류가 발생했습니다.");
+		}
+	}
+
+	/**
+	 * 일일 통계 백필 (누락된 데이터 채우기)
+	 * POST /admin/api/dashboard/stats/backfill?from=2025-01-31&to=2025-02-01
+	 */
+	@PostMapping("/stats/backfill")
+	public ApiResponse<Map<String, Object>> backfillDailyStats(
+		@RequestParam String from,
+		@RequestParam String to) {
+
+		try {
+			LocalDate fromDate = LocalDate.parse(from);
+			LocalDate toDate = LocalDate.parse(to);
+
+			if (fromDate.isAfter(toDate)) {
+				return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE.getCode(), "시작일이 종료일보다 클 수 없습니다.");
+			}
+
+			if (toDate.isAfter(LocalDate.now().minusDays(1))) {
+				toDate = LocalDate.now().minusDays(1);
+			}
+
+			statisticsScheduler.backfillDailyStatistics(fromDate, toDate);
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("from", fromDate.toString());
+			data.put("to", toDate.toString());
+
+			return ApiResponse.success(data, "일일 통계 백필이 완료되었습니다.");
+		} catch (Exception e) {
+			log.error("Failed to backfill daily stats", e);
+			return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), "통계 백필 중 오류가 발생했습니다: " + e.getMessage());
 		}
 	}
 
