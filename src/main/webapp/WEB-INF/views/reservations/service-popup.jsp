@@ -215,19 +215,26 @@
         document.getElementById('totalServicePrice').textContent = '₩' + numberWithCommas(total);
     }
 
-    // 기내식 선택
+    // 기내식 선택 (토글 가능)
     function selectMeal(passengerId, segmentId, mealId) {
         var key = passengerId + '_' + segmentId;
+        var clickedEl = document.getElementById('meal_' + passengerId + '_' + segmentId + '_' + mealId);
+
+        // 이미 선택된 것을 다시 클릭하면 선택 해제
+        if (clickedEl.classList.contains('selected')) {
+            clickedEl.classList.remove('selected');
+            delete selectedMeals[key];
+            return;
+        }
 
         // 기존 선택 해제
         document.querySelectorAll('[id^="meal_' + passengerId + '_' + segmentId + '_"]')
             .forEach(function(el) { el.classList.remove('selected'); });
 
         // 새로 선택
-        document.getElementById('meal_' + passengerId + '_' + segmentId + '_' + mealId).classList.add('selected');
+        clickedEl.classList.add('selected');
         selectedMeals[key] = mealId;
     }
-
     // 저장 후 닫기
     async function saveAndClose() {
         // 1. 수하물 저장
@@ -281,9 +288,11 @@
                 await mealRes.json();
             }
 
-            // 부모 창에 총액 갱신 요청
-            if (window.opener && window.opener.refreshServiceTotal) {
-                window.opener.refreshServiceTotal();
+            // 부모 창에 부가서비스 정보 갱신 요청
+            if (window.opener && typeof window.opener.refreshServiceInfo === 'function') {
+                window.opener.refreshServiceInfo();
+            } else if (window.opener && typeof window.opener.refreshServiceTotal === 'function') {
+                window.opener.refreshServiceTotal();  // fallback
             }
             alert('저장되었습니다.');
             window.close();

@@ -2,43 +2,63 @@
     /* ===== Seat Theme Colors (공통에 없는 것만) ===== */
 
     /* component.css에서 사용 */
-    --color-primary-seat: #2a74e3;   /* 공통 primary를 seat primary로 alias */
+    --color-primary-seat: var(--color-primary);   /* 공통 primary를 seat primary로 alias */
+    --color-primary-light: #e8f4fd;               /* 연한 파랑 배경 */
+    --color-primary-gradient: linear-gradient(135deg, #2f93f7 0%, #1e7ae0 100%);
     --color-bg-gray: #e9ecef;                     /* 회색 라인/구분용 */
+    --color-bg-soft: #f8fafc;                     /* 부드러운 배경 */
     --color-border-gray: #d0d5dd;                 /* 탭 테두리 등 */
     --color-border-medium: #c7cbd1;               /* 카드 테두리 등 */
 
     /* 텍스트 */
-    /* 공통 muted를 light-gray로 alias */
-    --color-text-light-gray: var(--color-text-muted);
-    --color-text-subtle: var(--color-text-muted);
+    --color-text-light-gray: var(--color-text-muted); /* 공통 muted를 light-gray로 alias */
     --color-seat-text-white: #ffffff;
 
     /* 좌석 상태 */
-    --color-seat-available: #2a74e3; /* 기본 파랑 */
-    --color-seat-selected: #1e5bb8;               /* 선택된 좌석(진한 파랑) */
-    --color-seat-unavailable: #bdbdbd;            /* 불가 좌석(회색) */
+    --color-seat-available: #3b82f6;              /* 선택 가능 - 밝은 파랑 */
+    --color-seat-selected: #1d4ed8;               /* 선택됨 - 진한 파랑 */
+    --color-seat-unavailable: #cbd5e1;            /* 불가 좌석(회색) */
+    --color-seat-hold: #f59e0b;                   /* 예약 대기 - 주황 */
 
     /* 공통에 없음 */
     --radius-xs: 8px;
+    --radius-seat: 8px 8px 4px 4px;               /* 좌석 모양 radius */
 
     --font-family-logo: var(--font-family-primary);
 
     /* 공통엔 xl(24px)까지만 있어서 확장 */
     --font-size-2xl: 26px;
     --font-size-3xl: 28px;  /* 로고/타이틀용 */
+
+    /* 애니메이션 */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}
+
+/* ==================== Body (좌석 선택 페이지) ==================== */
+body {
+    background: linear-gradient(180deg, #f0f7ff 0%, #f8fafc 50%, #ffffff 100%);
+    min-height: 100vh;
 }
 
 /* ==================== Header ==================== */
 .seat-header {
-    background-color: var(--color-white);
-    border-bottom: 1px solid var(--color-bg-gray);
-    padding: 15px 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+    border-bottom: 1px solid rgba(47, 147, 247, 0.15);
+    padding: 18px 0;
+    box-shadow: 0 2px 12px rgba(47, 147, 247, 0.08);
 }
 
 .seat-header__content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.seat-header__left {
     display: flex;
     align-items: center;
     gap: var(--spacing-xl);
@@ -51,46 +71,122 @@
 }
 
 .seat-header__logo-icon {
-    width: 61px;
-    height: 42px;
+    width: 52px;
+    height: 36px;
 }
 
 .seat-header__logo-text {
     font-family: var(--font-family-logo);
-    font-size: var(--font-size-3xl);
+    font-size: 24px;
     font-weight: var(--font-weight-bold);
-    color: var(--color-text-tertiary);
+    color: var(--color-primary-seat);
 }
 
 .seat-header__title {
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-primary-seat);
+    color: var(--color-text-primary);
     margin: 0;
+    padding-left: var(--spacing-xl);
+    border-left: 2px solid rgba(47, 147, 247, 0.3);
+}
+
+/* 예약 단계 표시 */
+.seat-header__steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seat-header__step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.seat-header__step-number {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+.seat-header__step--active .seat-header__step-number {
+    background: #3b82f6;
+    color: white;
+}
+
+.seat-header__step--active {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.seat-header__step--done .seat-header__step-number {
+    background: #10b981;
+    color: white;
+}
+
+/* CSS 체크마크 */
+.seat-header__step--done .seat-header__step-number::after {
+    content: '';
+    width: 5px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+.seat-header__step-arrow {
+    color: #d1d5db;
+    font-size: 12px;
+    margin: 0 2px;
+}
+
+/* CSS 화살표 */
+.seat-header__step-arrow::after {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-top: 1.5px solid #d1d5db;
+    border-right: 1.5px solid #d1d5db;
+    transform: rotate(45deg);
 }
 
 /* ==================== Container ==================== */
 .seat-container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 30px 20px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 24px;
+    background: var(--color-bg-soft);
+    min-height: calc(100vh - 80px);
 }
 
 /* ==================== Main Content Layout ==================== */
 /* 3컬럼(미니맵 / 좌석배치 / 우측패널) 레이아웃 */
 .seat-content {
     display: flex;
-    gap: 30px;
-    align-items: flex-start; /* 상단 정렬 */
+    gap: 24px;
+    align-items: flex-start;
 }
 
 /* 왼쪽 미니맵 */
 .minimap-col {
-    flex: 0 0 170px; /* 미니맵 영역 폭 */
+    flex: 0 0 180px;
     align-self: flex-start;
 }
 
@@ -98,17 +194,28 @@
 .minimap-col .minimap {
     display: flex;
     flex-direction: column;
+    align-items: center;
 
-    background: var(--color-white);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-xl);
-    box-shadow: var(--shadow-card);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 45px 20px 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(47, 147, 247, 0.1);
 
     position: sticky;
     top: 20px;
     height: fit-content;
 
     z-index: 5;
+}
+
+.minimap-col .minimap::before {
+    content: '기내 배치도';
+    font-size: 11px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
 }
 
 /* 가운데 좌석 배치도 컬럼 */
@@ -121,29 +228,27 @@
 .seat-map-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 
-    background: var(--color-white);
-    border-radius: var(--radius-md);
-    padding: 16px;
-    box-shadow: var(--shadow-card);
+    background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.04);
 
     align-self: flex-start;
 }
 
+/* 좌석 배치도 상단 안내 - 제거 */
+
 .seat-map-container .seat-grid {
     align-self: center;
-    transform: scale(0.92);
+    transform: scale(0.95);
     transform-origin: top center;
 }
 
-/* 오른쪽 패널 - 좌석 선택 내역 */
+/* 오른쪽 패널 - 좌석 선택 내역 (sticky 위치만) */
 .selection-panel {
-    flex: 0 0 265px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xl);
-
     position: sticky;
     top: 20px;
     height: fit-content;

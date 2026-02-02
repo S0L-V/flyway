@@ -14,7 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  */
 @Configuration
 @EnableWebSecurity
-@Order(3)
+@Order(2)
 public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override

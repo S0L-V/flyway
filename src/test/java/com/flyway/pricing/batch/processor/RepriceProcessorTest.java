@@ -1,5 +1,7 @@
 package com.flyway.pricing.batch.processor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flyway.pricing.policy.PricingPolicy;
 import com.flyway.pricing.service.DynamicPricingCalculator;
 import com.flyway.pricing.batch.row.PricingResultRow;
 import com.flyway.pricing.batch.row.RepriceCandidateRow;
@@ -14,11 +16,18 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 class RepriceProcessorTest {
 
     @Mock
     DynamicPricingCalculator calculator;
+
+    @Mock
+    ObjectMapper objectMapper;
+
+    @Mock
+    PricingPolicy pricingPolicy;
 
     @InjectMocks
     RepriceProcessor processor;
@@ -40,7 +49,10 @@ class RepriceProcessorTest {
         // given
         RepriceCandidateRow item = sampleCandidate();
 
-        Mockito.when(calculator.calculate(any(PricingInput.class)))
+        // ObjectMapper 동작 스터빙 (빈 JSON 반환)
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        when(calculator.calculate(any(PricingInput.class)))
                 .thenReturn(
                         PricingResult.builder()
                                 .applied(false)
@@ -59,7 +71,13 @@ class RepriceProcessorTest {
         // given
         RepriceCandidateRow item = sampleCandidate();
 
-        Mockito.when(calculator.calculate(any(PricingInput.class)))
+        // 호출 시 "v1" 반환하도록 스터빙
+        when(pricingPolicy.version()).thenReturn("v1");
+
+        // ObjectMapper 동작 스터빙 (빈 JSON 반환)
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        when(calculator.calculate(any(PricingInput.class)))
                 .thenReturn(
                         PricingResult.builder()
                                 .applied(true)
@@ -75,6 +93,7 @@ class RepriceProcessorTest {
         assertThat(result.getFlightId()).isEqualTo(item.getFlightId());
         assertThat(result.getNewPrice()).isEqualTo(155_000L);
         assertThat(result.isApplied()).isTrue();
+        assertThat(result.getPolicyVersion()).isEqualTo("v1");
         assertThat(result.getCalculatedAt()).isNotNull();
     }
 

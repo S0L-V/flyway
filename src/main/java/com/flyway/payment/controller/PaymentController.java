@@ -4,9 +4,11 @@ import com.flyway.payment.config.TossPaymentsConfig;
 import com.flyway.payment.domain.PaymentConfirmRequest;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.service.PaymentService;
+import com.flyway.reservation.dto.BookingViewModel;
 import com.flyway.reservation.dto.ReservationSegmentView;
 import com.flyway.passenger.repository.PassengerServiceRepository;
 import com.flyway.reservation.repository.ReservationBookingRepository;
+import com.flyway.reservation.service.ReservationBookingService;
 import com.flyway.security.principal.CustomUserDetails;
 import com.flyway.user.domain.UserProfile;
 import com.flyway.user.mapper.UserProfileMapper;
@@ -41,6 +43,7 @@ public class PaymentController {
     private final ReservationBookingRepository reservationBookingRepository;
     private final PassengerServiceRepository passengerServiceRepository;
     private final UserProfileMapper userProfileMapper;
+    private final ReservationBookingService bookingService;
     // private final ReservationBookingService bookingService;  // 예약 정보 조회용
 
     /**
@@ -57,11 +60,15 @@ public class PaymentController {
         log.info("[결제페이지] 진입 - reservationId: {}, userId: {}",
                 reservationId, user.getUserId());
 
-        // 실제 금액 계산
-        List<ReservationSegmentView> segments = reservationBookingRepository.findSegments(reservationId);
+        BookingViewModel booking = bookingService.getBookingView(reservationId, user.getUserId());
+        List<ReservationSegmentView> segments = booking.getSegments();
+
         long flightTotal = segments.stream()
                 .mapToLong(seg -> seg.getSnapPrice() != null ? seg.getSnapPrice() : 0L)
                 .sum();
+
+        // 승객 수 곱하기
+        flightTotal *= booking.getPassengerCount();
 
         // 부가서비스 금액
         Long serviceTotal = passengerServiceRepository.findServiceTotal(reservationId);
@@ -91,6 +98,11 @@ public class PaymentController {
         model.addAttribute("successUrl", tossConfig.getSuccessUrl());
         model.addAttribute("failUrl", tossConfig.getFailUrl());
         model.addAttribute("reservationId", reservationId);
+
+        model.addAttribute("segments", segments);
+        model.addAttribute("flightTotal", flightTotal);
+        model.addAttribute("serviceTotal", serviceTotal != null ? serviceTotal : 0L);
+        model.addAttribute("passengerCount", booking.getPassengerCount());
 
         return "payment/payment";
     }

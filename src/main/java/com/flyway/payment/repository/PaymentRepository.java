@@ -40,6 +40,11 @@ public interface PaymentRepository {
     void updateStatus(String paymentId, String status);
 
     /**
+     * 결제 ID로 조회 + Row Lock (동시 환불 방지)
+     */
+    Optional<PaymentViewDto> lockPaymentForUpdate(String paymentId);
+
+    /**
      * 토스 paymentKey 저장
      */
     void updatePaymentKey(String paymentId, String paymentKey);

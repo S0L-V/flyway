@@ -12,7 +12,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -43,6 +45,26 @@ public class ReservationBookingController {
         bookingService.savePassengers(reservationId, userId, form.getPassengers());
 
         return "redirect:/reservations/" + reservationId + "/booking?saved=1";
+    }
+    // 좌석 정보 조회 API (AJAX용)
+    @GetMapping("/{reservationId}/seats/info")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getSeatInfo(@PathVariable String reservationId) {
+        String userId = getAuthenticatedUserIdOrThrow();
+        BookingViewModel vm = bookingService.getBookingView(reservationId, userId);
+
+        List<Map<String, Object>> segmentSeats = new ArrayList<>();
+        for (var segment : vm.getSegments()) {
+            Map<String, Object> segData = new HashMap<>();
+            segData.put("segmentOrder", segment.getSegmentOrder());
+            segData.put("passengerSeats", segment.getPassengerSeats());
+            segmentSeats.add(segData);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("segments", segmentSeats);
+        return ResponseEntity.ok(result);
     }
 //json형식
     @PostMapping("/{reservationId}/passengers/api")
