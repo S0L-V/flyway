@@ -796,39 +796,66 @@
     }
 
     // 결제 페이지 이동
-    function goPayment() {
+    async function goPayment() {
         if (!passengerSaved) {
             Swal.warning('탑승자 정보를 먼저 저장해주세요.', '정보 미입력');
             return;
         }
 
-        // 좌석 선택 여부 체크
-        const incompleteSegment = segments.find(seg => seg.seatCount < passengerCount);
+        try {
+            // 서버에서 최신 좌석 선택 정보 조회
+            const res = await fetchWithRefresh('/reservations/' + reservationId + '/seats/info');
+            const data = await res.json();
 
-        if (incompleteSegment) {
-            const segmentLabel = incompleteSegment.segmentOrder === 1 ? '가는편' : '오는편';
-            const routeText = incompleteSegment.depCity + ' → ' + incompleteSegment.arrCity;
+            if (!data.success) {
+                Swal.error(data.message || '좌석 정보를 불러오지 못했습니다.', '오류');
+                return;
+            }
 
-            Swal.fire({
-                icon: 'warning',
-                title: '좌석 미선택',
-                html: '<b>' + segmentLabel + '</b> (' + routeText + ')<br>모든 승객의 좌석을 선택해주세요.',
-                confirmButtonText: '좌석 선택하기',
-                confirmButtonColor: '#1f6feb',
-                showCancelButton: true,
-                cancelButtonText: '취소',
-                cancelButtonColor: '#64748b'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    openSeatPopup(incompleteSegment.segmentId);
-                }
-            });
-            return;
+            // 최신 seatCount 기준으로 검증
+            const latestSegments = data.segments || [];
+            const incomplete = latestSegments.find(seg => (seg.passengerSeats?.length || 0) < passengerCount);
+
+            if (incomplete) {
+                const segmentLabel = incomplete.segmentOrder === 1 ? '가는편' : '오는편';
+                const routeText = (incomplete.depCity && incomplete.arrCity)
+                    ? (incomplete.depCity + ' → ' + incomplete.arrCity)
+                    : '';
+
+                const detail = segmentLabel + (routeText ? ' (' + routeText + ')' : '');
+                Swal.fire({
+                    icon: 'warning',
+                    title: '좌석 미선택',
+                    text: detail + '\n 모든 승객의 좌석을 선택해주세요.',
+                    confirmButtonText: '좌석 선택하기',
+                    confirmButtonColor: '#1f6feb',
+                    showCancelButton: true,
+                    cancelButtonText: '취소',
+                    cancelButtonColor: '#64748b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // API가 seg.segmentId를 내려주면 그걸 사용, 없으면 booking.jsp의 segments에서 매핑
+                        const segId = incomplete.segmentId || incomplete.reservationSegmentId;
+                        if (segId) openSeatPopup(segId);
+                        else {
+                            // fallback: booking.jsp의 segments 배열에서 segmentOrder로 찾아서 오픈
+                            const localSeg = segments.find(s => s.segmentOrder === incomplete.segmentOrder);
+                            if (localSeg) openSeatPopup(localSeg.segmentId);
+                        }
+                    }
+                });
+                return;
+            }
+
+            // 좌석 선택 OK → 결제 페이지로 이동
+            location.href = '/payments/' + reservationId;
+
+        } catch (err) {
+            console.error('goPayment seat check failed', err);
+            Swal.error('좌석 검증 중 오류가 발생했습니다.', '오류');
         }
-
-        // 결제 페이지로 이동 (PaymentController)
-        location.href = '/payments/' + reservationId;
     }
+
 
     function getLocalISODate() {
         const now = new Date();
@@ -1255,6 +1282,7 @@
                 const minExpiry = new Date();
                 minExpiry.setMonth(minExpiry.getMonth() + 6);
                 if (new Date(passportExpiry) < minExpiry) {
+
                     const confirmResult = await Swal.fire({
                         icon: 'warning',
                         title: '여권 만료일 확인',

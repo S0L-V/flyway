@@ -74,13 +74,20 @@ window.SeatEvents = (() => {
         function bindSeatGridClick() {
             dom.seatGridEl.addEventListener("click", async (e) => {
                 const btn = e.target.closest("button.seat-item");
-                if (!btn || state.isHolding) return;
+                if (!btn) return;
 
                 const seatNo = btn.dataset.seatNo;
                 if (!seatNo) return;
 
+                // 처리중이면 클릭 무시(연타/더블클릭 방지)
+                if (state.isHolding) {
+                    Swal?.info?.("좌석 처리 중입니다. 잠시만 기다려주세요.", "처리 중");
+                    return;
+                }
+
                 const pid = state.activePassengerId;
                 const segId = state.activeSegmentId;
+
                 const currentSeats = state.selectedSeatsBySegment[segId] || {};
                 const currentSeatNo = currentSeats[pid] || null;
 
@@ -96,67 +103,84 @@ window.SeatEvents = (() => {
                 // disabled 좌석은 클릭 무시 (현재 선택좌석 해제만 허용)
                 if (btn.disabled && !(currentSeatNo && seatNo === currentSeatNo)) return;
 
+                //  여기서부터 진짜 처리 시작
                 state.isHolding = true;
+                try {
+                    // 같은 좌석 재클릭 → 해제
+                    if (currentSeatNo === seatNo) {
+                        // 즉시 UI 업데이트
+                        // 즉시 UI 업데이트
+                        SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
+                        if (state.selectedSeatsBySegment[segId]) {
+                            delete state.selectedSeatsBySegment[segId][pid];
+                        }
+                        updateSummaryUI();
 
-                // 같은 좌석 재클릭 → 해제
-                if (currentSeatNo === seatNo) {
-                    // 1. 즉시 UI 업데이트
-                    SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
-                    delete state.selectedSeatsBySegment[segId][pid];
+                        try {
+                            // 해제만 수행
+                            await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+
+                            // 서버 기준 동기화
+                            await renderer.refreshAndRender().catch(() => {});
+                        } catch (err) {
+                            // 실패 시 UI/로컬 롤백
+                            state.selectedSeatsBySegment[segId] = state.selectedSeatsBySegment[segId] || {};
+                            state.selectedSeatsBySegment[segId][pid] = seatNo;
+
+                            SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
+                            updateSummaryUI();
+
+                            // 상태 불일치 방지 동기화
+                            await renderer.refreshAndRender().catch(() => {});
+
+                            Swal.error("좌석 해제에 실패했습니다. 다시 시도해주세요.", "오류");
+                        }
+
+                        return;
+                    }
+
+                    // 새 좌석 선택
+                    // 즉시 UI 업데이트
+                    if (currentSeatNo) {
+                        SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "AVAILABLE");
+                    }
+                    SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
+
+                    if (!state.selectedSeatsBySegment[segId]) {
+                        state.selectedSeatsBySegment[segId] = {};
+                    }
+                    state.selectedSeatsBySegment[segId][pid] = seatNo;
                     updateSummaryUI();
 
-                    // 2. 백그라운드 API 호출
+                    // releaseHold를 무조건 시도 → 중복 HOLD 방지
                     try {
-                        await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+                        try {
+                            await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+                        } catch (_) {
+                            // 기존 HOLD가 없으면 무시
+                        }
+
+                        await SeatAPI.holdSeat(ctx.base, ctx.reservationId, segId, {
+                            passengerId: pid,
+                            seatNo,
+                        });
                     } catch (err) {
                         // 실패 시 롤백
-                        state.selectedSeatsBySegment[segId][pid] = seatNo;
-                        SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
+                        SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
+                        if (currentSeatNo) {
+                            state.selectedSeatsBySegment[segId][pid] = currentSeatNo;
+                            SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "HOLD");
+                        } else {
+                            delete state.selectedSeatsBySegment[segId][pid];
+                        }
                         updateSummaryUI();
-                        Swal.error("좌석 해제에 실패했습니다.", "오류");
-                    } finally {
-                        state.isHolding = false;
+                        Swal.error("좌석 선택에 실패했습니다. 다시 시도해주세요.", "오류");
                     }
-                    return;
-                }
-
-                // 새 좌석 선택
-                // 1. 즉시 UI 업데이트
-                if (currentSeatNo) {
-                    SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "AVAILABLE");
-                }
-                SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
-
-                if (!state.selectedSeatsBySegment[segId]) {
-                    state.selectedSeatsBySegment[segId] = {};
-                }
-                state.selectedSeatsBySegment[segId][pid] = seatNo;
-                updateSummaryUI();
-
-                // 2. 백그라운드 API 호출
-                try {
-                    if (currentSeatNo) {
-                        await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
-                    }
-                    await SeatAPI.holdSeat(ctx.base, ctx.reservationId, segId, {
-                        passengerId: pid,
-                        seatNo,
-                    });
-                } catch (err) {
-                    // 실패 시 롤백
-                    SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
-                    if (currentSeatNo) {
-                        state.selectedSeatsBySegment[segId][pid] = currentSeatNo;
-                        SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "HOLD");
-                    } else {
-                        delete state.selectedSeatsBySegment[segId][pid];
-                    }
-                    updateSummaryUI();
-                    Swal.error("좌석 선택에 실패했습니다. 다시 시도해주세요.", "오류");
                 } finally {
                     state.isHolding = false;
                 }
             });
+
 
             // 우측 패널 요약 업데이트 (전체 렌더링 없이)
             function updateSummaryUI() {
@@ -237,6 +261,5 @@ window.SeatEvents = (() => {
             });
         }
     }
-
     return { bind };
 })();

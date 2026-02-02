@@ -25,22 +25,21 @@ window.SeatRenderer = (() => {
             const segId = state.activeSegmentId;
             const seats = await SeatAPI.fetchSeatMap(ctx.base, ctx.reservationId, segId);
 
-            // 서버에서 이미 AVAILABLE로 바뀐 좌석은 로컬 선택에서도 제거
-            const seatStatusBySeatNo = new Map();
-            (seats || []).forEach((s) => {
-                const seatNo = String(s.seatNo || "");
-                const st = String(s.seatStatus || "").toUpperCase();
-                if (seatNo) seatStatusBySeatNo.set(seatNo, st);
-            });
+            // 서버 HOLD -> 로컬 선택 좌석 동기화 (팝업 재진입/새로고침 대비)
+            const myPassengerIds = new Set((state.passengers || []).map((p) => String(p.passengerId)));
+            const serverSelected = {}; // { passengerId: seatNo }
 
-            const currentSegmentSeats = state.selectedSeatsBySegment[segId] || {};
-            Object.entries(currentSegmentSeats).forEach(([pid, seatNo]) => {
-                const st = seatStatusBySeatNo.get(String(seatNo)) || "AVAILABLE";
-                // 서버가 AVAILABLE로 보여주면(만료/해제) 로컬도 제거
-                if (st === "AVAILABLE") {
-                    delete state.selectedSeatsBySegment[segId][pid];
+            (seats || []).forEach((s) => {
+                const st = String(s.seatStatus || "").toUpperCase();
+                const pid = s.passengerId != null ? String(s.passengerId) : "";
+                const seatNo = s.seatNo != null ? String(s.seatNo) : "";
+                if (st === "HOLD" && pid && seatNo && myPassengerIds.has(pid)) {
+                    serverSelected[pid] = seatNo;
                 }
             });
+
+            // 서버 기준으로 덮어쓰기 (불일치/유령 선택 방지)
+            state.selectedSeatsBySegment[segId] = serverSelected;
 
             SeatGrid.renderSeatGrid(dom.seatGridEl, seats, state.activePassengerId, ctx.cabinClassCode);
 
