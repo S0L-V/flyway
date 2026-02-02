@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/details.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/search/css/flights.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/main/css/hero.css?v=<%= System.currentTimeMillis() %>">
+    <!-- Pretendard Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
@@ -22,6 +24,7 @@
         /* search.jsp 전용 스타일 오버라이드 */
         body {
             background-color: #f5f7fb;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
         }
         .main-content {
             padding-top: 120px; /* 헤더 높이만큼 내림 */
@@ -35,68 +38,6 @@
             padding: 0 20px;
             margin-bottom: 24px;
         }
-
-        /*!* Trip Selector *!*/
-        /*.trip-selector {*/
-        /*    margin-bottom: 12px;*/
-        /*    display: flex;*/
-        /*    gap: 4px;*/
-        /*    justify-content: flex-start;*/
-        /*}*/
-        /*.trip-btn {*/
-        /*    padding: 6px 14px;*/
-        /*    border-radius: 8px;*/
-        /*    font-size: 14px;*/
-        /*    font-weight: 700;*/
-        /*    color: #64748b;*/
-        /*    background: transparent;*/
-        /*    border: none;*/
-        /*    cursor: pointer;*/
-        /*    transition: all 0.2s;*/
-        /*}*/
-        /*.trip-btn.active {*/
-        /*    background: #1f6feb;*/
-        /*    color: #fff;*/
-        /*}*/
-        /*.trip-indicator { display: none; }*/
-
-        /*!* Search Bar Panel *!*/
-        /*.search-glass-panel {*/
-        /*    background: #ffffff;*/
-        /*    border: 1px solid #e2e8f0;*/
-        /*    border-radius: 16px;*/
-        /*    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);*/
-        /*    padding: 20px;*/
-        /*}*/
-
-        /*.search-grid {*/
-        /*    display: grid;*/
-        /*    grid-template-columns: 1.2fr 1.2fr 1.5fr 1.2fr auto;*/
-        /*    gap: 12px;*/
-        /*    align-items: center;*/
-        /*}*/
-
-        /*.search-btn-logo {*/
-        /*    width: 56px;*/
-        /*    height: 56px;*/
-        /*    border-radius: 12px;*/
-        /*    background: #1f6feb;*/
-        /*    border: none;*/
-        /*    cursor: pointer;*/
-        /*    display: flex;*/
-        /*    align-items: center;*/
-        /*    justify-content: center;*/
-        /*    transition: all 0.2s;*/
-        /*}*/
-        /*.search-btn-logo:hover {*/
-        /*    background: #165bca;*/
-        /*    transform: translateY(-2px);*/
-        /*}*/
-        /*.search-logo-icon {*/
-        /*    width: 24px;*/
-        /*    height: 24px;*/
-        /*    filter: brightness(0) invert(1);*/
-        /*}*/
 
         /* 필터 및 정렬 행 */
         .filter-sort-row {
@@ -129,6 +70,7 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
+            font-family: 'Pretendard', sans-serif;
         }
         .filter-button:hover {
             border-color: #bfdbfe;
@@ -167,6 +109,7 @@
             font-size: 14px;
             font-weight: 500;
             color: #6b7280;
+            font-family: 'Pretendard', sans-serif;
         }
         .result-count strong {
             color: #111827;
@@ -189,6 +132,7 @@
             border: none;
             cursor: pointer;
             transition: all 0.2s;
+            font-family: 'Pretendard', sans-serif;
         }
         .sort-button:hover {
             background-color: #ffffff;
@@ -205,6 +149,7 @@
             font-size: 18px;
             font-weight: 800;
             color: #1e293b;
+            font-family: 'Pretendard', sans-serif;
         }
     </style>
 </head>

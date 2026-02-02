@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 </head>
-<body>
+<body class="font-pretendard">
 
 <!-- Header -->
 <%@ include file="/WEB-INF/views/common/header.jsp" %>

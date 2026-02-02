@@ -61,8 +61,8 @@
 
 .flight-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #002561;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 효과 */
+  border-color: var(--color-border-card); /* 테두리 색상 변경 없음 */
 }
 
 .flight-segment {

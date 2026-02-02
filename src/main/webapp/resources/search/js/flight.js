@@ -27,7 +27,7 @@ const lastPriceLabelPlugin = {
         const y = lastPoint.y;
 
         ctx.save();
-        ctx.font = "12px sans-serif";
+        ctx.font = "12px Pretendard, sans-serif";
         ctx.textBaseline = "middle";
 
         const paddingX = 10;
@@ -122,8 +122,7 @@ function renderSegment(f) {
                 <div class="w-full h-[2px] bg-gray-200 relative flex items-center justify-center">
                     <div class="absolute w-1.5 h-1.5 rounded-full bg-gray-300 left-0"></div>
                     <div class="absolute w-1.5 h-1.5 rounded-full bg-gray-300 right-0"></div>
-<!--                    <i data-lucide="plane" class="w-4 h-4 text-blue-500 transform rotate-90 bg-white p-[1px] fill-current"></i>-->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plane" aria-hidden="true" class="lucide lucide-plane text-slate-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform rotate-45 w-3.5 h-3.5"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"></path></svg>
+                    <i data-lucide="plane" class="w-4 h-4 text-blue-500 transform rotate-90 bg-white p-[1px] fill-current"></i>
                 </div>
                 <div class="mt-1">
                     ${directBadge}
@@ -151,7 +150,7 @@ function renderFooter(option, index) {
 
     if (totalSeatCount !== "-" && totalSeatCount <= 9) {
         seatBadge = `
-            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 bg-amber-50 whitespace-nowrap border border-amber-100">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 bg-red-50 whitespace-nowrap border border-red-100">
                 <i data-lucide="armchair" class="w-3.5 h-3.5"></i>
                 ${totalSeatCount}석 남음
             </div>
@@ -163,7 +162,7 @@ function renderFooter(option, index) {
     return `
       <div class="bg-gray-50/50 border-t border-gray-100 px-5 sm:px-7 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-sm">
         <div class="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
-            <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors whitespace-nowrap shadow-sm cursor-pointer" type="button" data-action="open-graph">
+            <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-colors whitespace-nowrap shadow-sm cursor-pointer" type="button" data-action="open-graph">
                 <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
                 가격 변동
             </button>
@@ -182,8 +181,8 @@ function renderFooter(option, index) {
                 <div class="text-[10px] text-gray-400 font-normal">유류할증료 및 세금 포함</div>
             </div>
 
-            <button class="search-btn-logo cursor-pointer flight-select-btn">
-                <img src="${CONTEXT_PATH}/resources/seat/img/logo-icon.svg" alt="Select" class="search-logo-icon">
+            <button class="flex items-center justify-center w-auto h-auto px-6 py-3 bg-[#1f6feb] hover:bg-[#165bca] text-white rounded-xl transition-all duration-200 hover:-translate-y-[2px] shadow-sm flight-select-btn cursor-pointer border-0">
+                <span class="font-bold text-sm">선택</span>
             </button>
         </div>
       </div>
