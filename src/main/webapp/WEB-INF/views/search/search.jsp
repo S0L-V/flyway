@@ -533,7 +533,7 @@
             <!-- Sort Button -->
             <div class="sort-container">
                 <span class="result-count">
-                    <strong id="resultCount">${displayedOptions.length}개</strong>의 항공편
+                    <strong id="resultCount">0개</strong>의 항공편
                 </span>
                 <div class="divider"></div>
                 <button class="sort-button">

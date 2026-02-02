@@ -683,7 +683,7 @@ document.getElementById("resultList").addEventListener("click", async (e) => {
                 params.set("inFlightId", inId);
             }
 
-            const response = await fetch(`/api/public/flights/prices?${params}`, {
+            const response = await fetch(`${CONTEXT_PATH}/api/public/flights/prices?${params}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
