@@ -110,7 +110,7 @@ window.SeatConfirm = (() => {
                 if (window.opener && typeof window.opener.refreshSeatInfo === 'function') {
                     window.opener.refreshSeatInfo();
                 }
-                window.opener ? window.close() : history.back();drl
+                window.opener ? window.close() : history.back();
             });
         }
 
