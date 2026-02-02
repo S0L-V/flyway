@@ -31,7 +31,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/", "/login", "/loginProc", "/signup", "/auth/**", "/search/**",
+            "/", "/login", "/loginProc", "/admin", "/admin/**", "/signup", "/auth/**", "/search/**",
             "/payments/success", "/payments/fail", "/payments/complete" //결제 콜백
     };
 
