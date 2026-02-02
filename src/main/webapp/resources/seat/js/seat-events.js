@@ -109,60 +109,31 @@ window.SeatEvents = (() => {
                     // 같은 좌석 재클릭 → 해제
                     if (currentSeatNo === seatNo) {
                         // 즉시 UI 업데이트
+                        // 즉시 UI 업데이트
                         SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
                         if (state.selectedSeatsBySegment[segId]) {
                             delete state.selectedSeatsBySegment[segId][pid];
                         }
                         updateSummaryUI();
 
-                        // api 호출
-                        let releasedPrevOnServer = false;
-
                         try {
-                            // 중복 HOLD 방지 기존 HOLD가 있으면 먼저 해제
-                            try {
-                                await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
-                                releasedPrevOnServer = true;
-                            } catch (_) {
-                                // 기존 HOLD가 없으면 무시
-                            }
+                            // 해제만 수행
+                            await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
 
-                            // 새 좌석 HOLD
-                            await SeatAPI.holdSeat(ctx.base, ctx.reservationId, segId, {
-                                passengerId: pid,
-                                seatNo,
-                            });
-
-                            // 성공하면 서버가 source of truth니까 한 번 싱크
+                            // 서버 기준 동기화
                             await renderer.refreshAndRender().catch(() => {});
                         } catch (err) {
-                            // UI/로컬 롤백
-                            SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
+                            // 실패 시 UI/로컬 롤백
+                            state.selectedSeatsBySegment[segId] = state.selectedSeatsBySegment[segId] || {};
+                            state.selectedSeatsBySegment[segId][pid] = seatNo;
 
-                            if (currentSeatNo) {
-                                state.selectedSeatsBySegment[segId][pid] = currentSeatNo;
-                                SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "HOLD");
-                            } else {
-                                delete state.selectedSeatsBySegment[segId][pid];
-                            }
+                            SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
                             updateSummaryUI();
 
-                            // releaseHold가 서버에서 성공했을 수도 있으니 이전 좌석을 서버에도 복구 시도
-                            if (currentSeatNo && releasedPrevOnServer) {
-                                try {
-                                    await SeatAPI.holdSeat(ctx.base, ctx.reservationId, segId, {
-                                        passengerId: pid,
-                                        seatNo: currentSeatNo,
-                                    });
-                                } catch (_) {
-                                    // 복구 실패하면 서버 기준 재동기화
-                                }
-                            }
-
-                            // 서버 기준 재동기화 (상태 불일치 방지)
+                            // 상태 불일치 방지 동기화
                             await renderer.refreshAndRender().catch(() => {});
 
-                            Swal.error("좌석 선택에 실패했습니다. 다시 시도해주세요.", "오류");
+                            Swal.error("좌석 해제에 실패했습니다. 다시 시도해주세요.", "오류");
                         }
 
                         return;
@@ -181,7 +152,7 @@ window.SeatEvents = (() => {
                     state.selectedSeatsBySegment[segId][pid] = seatNo;
                     updateSummaryUI();
 
-                    // api 호출: releaseHold를 무조건 시도 → 중복 HOLD 방지
+                    // releaseHold를 무조건 시도 → 중복 HOLD 방지
                     try {
                         try {
                             await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
@@ -290,6 +261,5 @@ window.SeatEvents = (() => {
             });
         }
     }
-
     return { bind };
 })();
