@@ -1,7 +1,10 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/variables.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/global.css">
 
-<%-- css --%>
+<%-- SweetAlert2 --%>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<%-- Seat Selection CSS --%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/base.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/component.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/seat/css/minimap.css">

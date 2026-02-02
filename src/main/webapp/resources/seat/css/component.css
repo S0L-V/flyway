@@ -45,18 +45,18 @@
     display: flex;
     gap: 12px;
     background: white;
-    padding: 12px 16px;
+    padding: 14px 16px;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
 .segment-tab {
     flex: 1;
-    max-width: 200px;
+    max-width: 240px;
     background: #f8fafc;
-    border: 2px solid transparent;
+    border: 2px solid #e2e8f0;
     border-radius: 12px;
-    padding: 14px 18px;
+    padding: 16px 20px;
     cursor: pointer;
     transition: all 0.25s ease;
     font-family: var(--font-family-primary);
@@ -75,26 +75,73 @@
     transition: background 0.25s ease;
 }
 
+/* 완료 체크 아이콘 영역 */
+.segment-tab::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    transition: all 0.25s ease;
+}
+
+/* 완료된 세그먼트 표시 */
+.segment-tab.is-complete::after {
+    background: #10b981;
+}
+
+.segment-tab.is-complete::before {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
 .segment-tab:hover {
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.4);
     background: #f0f7ff;
+    transform: translateY(-1px);
 }
 
 .segment-tab--active {
     border-color: #3b82f6;
     background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
 }
 
 .segment-tab--active::before {
     background: linear-gradient(90deg, #3b82f6, #60a5fa);
 }
 
+.segment-tab--active::after {
+    background: #bfdbfe;
+}
+
+.segment-tab--active.is-complete::after {
+    background: #10b981;
+}
+
+.segment-tab__label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.segment-tab--active .segment-tab__label {
+    color: #3b82f6;
+}
+
 .segment-tab__route {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: #111827;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .segment-tab--active .segment-tab__route {
@@ -109,6 +156,22 @@
 
 .segment-tab--active .segment-tab__datetime {
     color: #3b82f6;
+}
+
+/* 화살표 아이콘 */
+.segment-tab__route::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M5 12h14M12 5l7 7-7 7'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+.segment-tab--active .segment-tab__route::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'%3E%3Cpath d='M5 12h14M12 5l7 7-7 7'/%3E%3C/svg%3E");
 }
 
 /* ==================== Buttons ==================== */

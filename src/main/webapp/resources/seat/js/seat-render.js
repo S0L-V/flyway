@@ -22,7 +22,8 @@ window.SeatRenderer = (() => {
         }
 
         async function refreshAndRender() {
-            const seats = await SeatAPI.fetchSeatMap(ctx.base, ctx.reservationId, ctx.segmentId);
+            const segId = state.activeSegmentId;
+            const seats = await SeatAPI.fetchSeatMap(ctx.base, ctx.reservationId, segId);
 
             // 서버에서 이미 AVAILABLE로 바뀐 좌석은 로컬 선택에서도 제거
             const seatStatusBySeatNo = new Map();
@@ -32,16 +33,14 @@ window.SeatRenderer = (() => {
                 if (seatNo) seatStatusBySeatNo.set(seatNo, st);
             });
 
-            Object.entries(state.selectedSeatsByPassenger).forEach(([pid, seatNo]) => {
+            const currentSegmentSeats = state.selectedSeatsBySegment[segId] || {};
+            Object.entries(currentSegmentSeats).forEach(([pid, seatNo]) => {
                 const st = seatStatusBySeatNo.get(String(seatNo)) || "AVAILABLE";
                 // 서버가 AVAILABLE로 보여주면(만료/해제) 로컬도 제거
                 if (st === "AVAILABLE") {
-                    delete state.selectedSeatsByPassenger[pid];
+                    delete state.selectedSeatsBySegment[segId][pid];
                 }
             });
-
-            const activeSeatNo =
-                state.selectedSeatsByPassenger[String(state.activePassengerId)] || null;
 
             SeatGrid.renderSeatGrid(dom.seatGridEl, seats, state.activePassengerId, ctx.cabinClassCode);
 
@@ -50,14 +49,14 @@ window.SeatRenderer = (() => {
             SeatGrid.renderSelectedSummary(dom.summaryEl, {
                 passengers: state.passengers,
                 activePassengerId: state.activePassengerId,
-                selectedSeatsByPassenger: state.selectedSeatsByPassenger,
+                selectedSeatsByPassenger: state.selectedSeatsBySegment[segId] || {},
                 segment: segInfo,
             });
 
             SeatGrid.renderSeatAction(dom.actionEl, {
                 passengers: state.passengers,
                 activePassengerId: state.activePassengerId,
-                selectedSeatsByPassenger: state.selectedSeatsByPassenger,
+                selectedSeatsByPassenger: state.selectedSeatsBySegment[segId] || {},
                 segment: segInfo,
             });
 

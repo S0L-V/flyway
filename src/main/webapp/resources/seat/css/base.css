@@ -186,7 +186,7 @@ body {
 
 /* 왼쪽 미니맵 */
 .minimap-col {
-    flex: 0 0 160px;
+    flex: 0 0 180px;
     align-self: flex-start;
 }
 
@@ -198,7 +198,7 @@ body {
 
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 16px;
-    padding: 20px 16px;
+    padding: 45px 20px 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     border: 1px solid rgba(47, 147, 247, 0.1);
 
@@ -210,12 +210,12 @@ body {
 }
 
 .minimap-col .minimap::before {
-    content: '기내 위치';
+    content: '기내 배치도';
     font-size: 11px;
     font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 10px;
-    letter-spacing: 0.2px;
+    color: #374151;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
 }
 
 /* 가운데 좌석 배치도 컬럼 */

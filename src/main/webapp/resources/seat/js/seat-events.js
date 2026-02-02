@@ -2,10 +2,59 @@ window.SeatEvents = (() => {
     function bind(app, renderer) {
         const { dom, ctx, state } = app;
 
+        bindSegmentTabs();
         bindActionSeatSelect();
         bindSeatGridClick();
         bindCancel();
         bindMinimapZone();
+
+        // 세그먼트 탭 전환 (가는편/오는편)
+        function bindSegmentTabs() {
+            const tabsEl = dom.segmentTabsEl;
+            if (!tabsEl) return;
+
+            // 초기 완료 상태 표시
+            updateAllSegmentTabsStatus();
+
+            tabsEl.addEventListener("click", async (e) => {
+                const tab = e.target.closest(".segment-tab");
+                if (!tab) return;
+
+                const newSegmentId = tab.dataset.segmentId;
+                if (!newSegmentId || newSegmentId === state.activeSegmentId) return;
+
+                // 탭 UI 전환
+                tabsEl.querySelectorAll(".segment-tab").forEach((t) => {
+                    t.classList.toggle("segment-tab--active", t.dataset.segmentId === newSegmentId);
+                });
+
+                // 상태 업데이트
+                state.activeSegmentId = newSegmentId;
+                ctx.segmentId = newSegmentId;
+
+                // 첫 번째 승객으로 리셋
+                state.activePassengerId =
+                    (state.passengers[0] && state.passengers[0].passengerId) || ctx.defaultPassengerId;
+
+                // 좌석 정보 다시 로드
+                await renderer.refreshAndRender().catch(console.error);
+
+                // 완료 상태 업데이트
+                updateAllSegmentTabsStatus();
+            });
+        }
+
+        // 모든 세그먼트 탭 완료 상태 업데이트
+        function updateAllSegmentTabsStatus() {
+            const tabs = document.querySelectorAll("#segment-tabs .segment-tab");
+            tabs.forEach((tab) => {
+                const segId = tab.dataset.segmentId;
+                const seats = state.selectedSeatsBySegment[segId] || {};
+                const isComplete = state.passengers.length > 0 &&
+                    state.passengers.every((p) => !!seats[p.passengerId]);
+                tab.classList.toggle("is-complete", isComplete);
+            });
+        }
 
         // 오른쪽 액션 카드 버튼으로 activePassengerId 변경
         function bindActionSeatSelect() {
@@ -21,7 +70,7 @@ window.SeatEvents = (() => {
             });
         }
 
-        // 좌석 클릭 → HOLD/RELEASE
+        // 좌석 클릭 → HOLD/RELEASE (Optimistic UI Update)
         function bindSeatGridClick() {
             dom.seatGridEl.addEventListener("click", async (e) => {
                 const btn = e.target.closest("button.seat-item");
@@ -31,72 +80,130 @@ window.SeatEvents = (() => {
                 if (!seatNo) return;
 
                 const pid = state.activePassengerId;
-                const currentSeatNo = state.selectedSeatsByPassenger[pid] || null;
+                const segId = state.activeSegmentId;
+                const currentSeats = state.selectedSeatsBySegment[segId] || {};
+                const currentSeatNo = currentSeats[pid] || null;
 
                 // 동일 화면 중복 선택 방지
-                const occupiedByOther = Object.entries(state.selectedSeatsByPassenger).some(
+                const occupiedByOther = Object.entries(currentSeats).some(
                     ([otherPid, s]) => otherPid !== String(pid) && s === seatNo
                 );
                 if (occupiedByOther) {
-                    alert("다른 승객이 이미 선택한 좌석입니다.");
+                    Swal.warning("다른 승객이 이미 선택한 좌석입니다.", "좌석 선택 불가");
                     return;
                 }
 
                 // disabled 좌석은 클릭 무시 (현재 선택좌석 해제만 허용)
                 if (btn.disabled && !(currentSeatNo && seatNo === currentSeatNo)) return;
 
-                try {
-                    state.isHolding = true;
+                state.isHolding = true;
 
-                    if (currentSeatNo === seatNo) {
-                        await SeatAPI.releaseHold(
-                            ctx.base,
-                            ctx.reservationId,
-                            ctx.segmentId,
-                            pid
-                        );
+                // 같은 좌석 재클릭 → 해제
+                if (currentSeatNo === seatNo) {
+                    // 1. 즉시 UI 업데이트
+                    SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
+                    delete state.selectedSeatsBySegment[segId][pid];
+                    updateSummaryUI();
 
-                        delete state.selectedSeatsByPassenger[pid];
-                        await renderer.refreshAndRender();
-                        return;
-                    } else {
-                        if (currentSeatNo) {
-                            await SeatAPI.releaseHold(
-                                ctx.base,
-                                ctx.reservationId,
-                                ctx.segmentId,
-                                pid
-                            );
-                        }
-                        await SeatAPI.holdSeat(
-                            ctx.base,
-                            ctx.reservationId,
-                            ctx.segmentId, {
-                            passengerId: pid,
-                            seatNo,
-                        });
-
-                        state.selectedSeatsByPassenger[pid] = seatNo;
-                        await renderer.refreshAndRender();
+                    // 2. 백그라운드 API 호출
+                    try {
+                        await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+                    } catch (err) {
+                        // 실패 시 롤백
+                        state.selectedSeatsBySegment[segId][pid] = seatNo;
+                        SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
+                        updateSummaryUI();
+                        Swal.error("좌석 해제에 실패했습니다.", "오류");
+                    } finally {
+                        state.isHolding = false;
                     }
+                    return;
+                }
+
+                // 새 좌석 선택
+                // 1. 즉시 UI 업데이트
+                if (currentSeatNo) {
+                    SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "AVAILABLE");
+                }
+                SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
+
+                if (!state.selectedSeatsBySegment[segId]) {
+                    state.selectedSeatsBySegment[segId] = {};
+                }
+                state.selectedSeatsBySegment[segId][pid] = seatNo;
+                updateSummaryUI();
+
+                // 2. 백그라운드 API 호출
+                try {
+                    if (currentSeatNo) {
+                        await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+                    }
+                    await SeatAPI.holdSeat(ctx.base, ctx.reservationId, segId, {
+                        passengerId: pid,
+                        seatNo,
+                    });
                 } catch (err) {
-                    alert(`좌석 선택에 실패했습니다. 다시 시도해주세요.`);
-                    await renderer.refreshAndRender().catch(() => {});
+                    // 실패 시 롤백
+                    SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
+                    if (currentSeatNo) {
+                        state.selectedSeatsBySegment[segId][pid] = currentSeatNo;
+                        SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "HOLD");
+                    } else {
+                        delete state.selectedSeatsBySegment[segId][pid];
+                    }
+                    updateSummaryUI();
+                    Swal.error("좌석 선택에 실패했습니다. 다시 시도해주세요.", "오류");
                 } finally {
                     state.isHolding = false;
                 }
             });
+
+            // 우측 패널 요약 업데이트 (전체 렌더링 없이)
+            function updateSummaryUI() {
+                const segInfo = getActiveSegmentInfo();
+                const segId = state.activeSegmentId;
+
+                SeatGrid.renderSelectedSummary(dom.summaryEl, {
+                    passengers: state.passengers,
+                    activePassengerId: state.activePassengerId,
+                    selectedSeatsByPassenger: state.selectedSeatsBySegment[segId] || {},
+                    segment: segInfo,
+                });
+                SeatGrid.renderSeatAction(dom.actionEl, {
+                    passengers: state.passengers,
+                    activePassengerId: state.activePassengerId,
+                    selectedSeatsByPassenger: state.selectedSeatsBySegment[segId] || {},
+                    segment: segInfo,
+                });
+
+                // 세그먼트 탭 완료 상태 업데이트
+                updateAllSegmentTabsStatus();
+            }
+
+            function getActiveSegmentInfo() {
+                const activeSegBtn = document.querySelector("#segment-tabs .segment-tab--active");
+                if (!activeSegBtn) return { routeText: "", dateTimeText: "" };
+                const dep = activeSegBtn.dataset.dep || "";
+                const arr = activeSegBtn.dataset.arr || "";
+                const depTimeText = activeSegBtn.dataset.deptime || "";
+                return {
+                    routeText: dep && arr ? `${dep} → ${arr}` : "",
+                    dateTimeText: depTimeText,
+                };
+            }
         }
 
-        // 취소: HOLD 풀고 닫기
+        // 취소: 모든 세그먼트의 HOLD 풀고 닫기
         function bindCancel() {
             dom.btnCancel?.addEventListener("click", async () => {
-                const pids = Object.keys(state.selectedSeatsByPassenger);
-
-                for (const pid of pids) {
-                    try {
-                        await SeatAPI.releaseHold(ctx.base, ctx.reservationId, ctx.segmentId, pid);
-                    } catch (e) {}
+                // 모든 세그먼트의 선택된 좌석 해제
+                for (const segId of Object.keys(state.selectedSeatsBySegment)) {
+                    const seats = state.selectedSeatsBySegment[segId];
+                    for (const pid of Object.keys(seats)) {
+                        try {
+                            await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+                        } catch (e) {}
+                    }
                 }
 
                 window.opener ? window.close() : history.back();

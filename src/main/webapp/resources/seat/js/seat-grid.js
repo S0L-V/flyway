@@ -267,5 +267,46 @@
      `;
     }
 
-    global.SeatGrid = { renderSeatGrid, renderSelectedSummary, renderSeatAction };
+    // =========================
+    // 개별 좌석 UI 업데이트 (전체 렌더링 없이)
+    // =========================
+    function updateSeatUI(seatGridEl, seatNo, status) {
+        if (!seatGridEl || !seatNo) return;
+
+        const btn = seatGridEl.querySelector(`button.seat-item[data-seat-no="${seatNo}"]`);
+        if (!btn) return;
+
+        // 기존 상태 클래스 제거
+        btn.classList.remove(
+            "seat-item--available",
+            "seat-item--hold",
+            "seat-item--selected",
+            "seat-item--unavailable"
+        );
+        btn.disabled = false;
+
+        // 클릭 애니메이션 효과
+        btn.style.transform = "scale(0.9)";
+        requestAnimationFrame(() => {
+            btn.style.transition = "transform 0.15s ease";
+            btn.style.transform = "";
+        });
+
+        // 새 상태 적용
+        if (status === "HOLD" || status === "SELECTED") {
+            btn.classList.add("seat-item--hold");
+        } else if (status === "AVAILABLE") {
+            btn.classList.add("seat-item--available");
+        } else {
+            btn.classList.add("seat-item--unavailable");
+            btn.disabled = true;
+        }
+    }
+
+    global.SeatGrid = {
+        renderSeatGrid,
+        renderSelectedSummary,
+        renderSeatAction,
+        updateSeatUI
+    };
 })(window);

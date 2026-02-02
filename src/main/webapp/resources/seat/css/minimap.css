@@ -8,78 +8,224 @@
 
 .minimap__plane {
     position: relative;
-    width: 110px;
-    height: 280px;
-    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+    width: 100px;
+    height: 320px;
+    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+    box-shadow:
+            0 4px 20px rgba(0, 0, 0, 0.12),
+            inset 0 0 20px rgba(255, 255, 255, 0.5);
     overflow: visible;
 
     /* 비행기 동체 모양 */
-    border-radius: 50px 50px 20px 20px;
-    border: 3px solid #94a3b8;
+    border-radius: 45px 45px 25px 25px;
+    border: 2px solid #94a3b8;
 }
 
-/* 비행기 코 부분 */
-.minimap__plane::before {
-    content: '';
+/* 비행기 기수 (노즈콘) */
+.minimap__nose {
     position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 30px;
-    background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
-    border-radius: 50% 50% 0 0;
-    border: 3px solid #94a3b8;
-    border-bottom: none;
-}
-
-/* 날개 표시 */
-.minimap__plane::after {
-    content: '';
-    position: absolute;
-    top: 45%;
-    left: -20px;
-    right: -20px;
-    height: 8px;
-    background: linear-gradient(90deg, #64748b, #94a3b8, #64748b);
-    border-radius: 4px;
-    transform: translateY(-50%);
-}
-
-.minimap__cockpit {
-    position: absolute;
-    top: 16px;
+    top: -35px;
     left: 50%;
     transform: translateX(-50%);
     width: 50px;
-    height: 16px;
-    border-radius: 8px;
-    background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    height: 45px;
+    background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-radius: 50% 50% 45% 45%;
+    border: 2px solid #94a3b8;
+    border-bottom: none;
+    z-index: 1;
 }
 
-/* 장식용 좌석 점들 */
-.minimap__seats {
+/* 조종석 창문 */
+.minimap__cockpit {
     position: absolute;
-    top: 50px;
-    left: 16px;
-    right: 16px;
-    bottom: 20px;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 14px;
+    border-radius: 50% 50% 40% 40%;
+    background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 100%);
+    box-shadow:
+            inset 0 2px 4px rgba(255, 255, 255, 0.4),
+            0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+}
 
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    align-content: start;
+/* 꼬리 날개 (수직 안정판) */
+.minimap__tail {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 35px;
+    background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+    border-radius: 4px 4px 2px 2px;
+    z-index: 1;
+}
+
+.minimap__tail::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 6px;
+    background: linear-gradient(90deg, #64748b, #94a3b8, #64748b);
+    border-radius: 3px;
+}
+
+/* 주날개 */
+.minimap__wing {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 12px;
+    background: linear-gradient(180deg, #64748b 0%, #94a3b8 50%, #64748b 100%);
+    border-radius: 6px;
+    z-index: 3;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 날개 엔진 */
+.minimap__wing::before,
+.minimap__wing::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 8px;
+    background: linear-gradient(180deg, #475569 0%, #64748b 100%);
+    border-radius: 4px;
+}
+
+.minimap__wing::before {
+    left: 15px;
+}
+
+.minimap__wing::after {
+    right: 15px;
+}
+
+/* 날개 라벨 */
+.minimap__wing-label {
+    position: absolute;
+    top: 42%;
+    font-size: 8px;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+    z-index: 4;
+}
+
+.minimap__wing-label--left {
+    right: calc(50% + 75px);
+    transform: translateY(-50%);
+}
+
+.minimap__wing-label--right {
+    left: calc(50% + 75px);
+    transform: translateY(-50%);
+}
+
+/* 비상구 표시 */
+.minimap__exit {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2px;
+    z-index: 5;
+}
+
+.minimap__exit-marker {
+    width: 14px;
+    height: 6px;
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+    border-radius: 2px;
+    position: relative;
+}
+
+/* 비상구 화살표 */
+.minimap__exit-marker::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    transform: translateY(-50%);
+}
+
+.minimap__exit-marker--left::after {
+    left: -4px;
+    border-right: 4px solid #22c55e;
+}
+
+.minimap__exit-marker--right::after {
+    right: -4px;
+    border-left: 4px solid #22c55e;
+}
+
+.minimap__exit--front {
+    top: 12%;
+}
+
+.minimap__exit--overwing {
+    top: 48%;
+}
+
+.minimap__exit--rear {
+    top: 85%;
+}
+
+/* 좌석 영역 */
+.minimap__cabin {
+    position: absolute;
+    top: 45px;
+    left: 12px;
+    right: 12px;
+    bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+/* 좌석 행 */
+.minimap__seat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex: 1;
+    max-height: 8px;
+}
+
+.minimap__seat-group {
+    display: flex;
+    gap: 2px;
+    flex: 1;
 }
 
 .minimap__seat {
-    width: 100%;
-    height: 10px;
-    border-radius: 3px 3px 2px 2px;
+    flex: 1;
+    height: 100%;
+    border-radius: 2px 2px 1px 1px;
     background: #cbd5e1;
     border: 1px solid #94a3b8;
     transition: all 0.2s ease;
+}
+
+/* 통로 표시 */
+.minimap__aisle {
+    width: 6px;
+    flex-shrink: 0;
 }
 
 /* 3구역 클릭 오버레이 */
@@ -92,84 +238,116 @@
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.2s ease;
+    z-index: 10;
 }
 
 .minimap__zone:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(59, 130, 246, 0.15);
 }
 
 .minimap__zone--front {
     top: 8px;
-    height: 30%;
+    height: 28%;
     border-radius: 40px 40px 8px 8px;
 }
+
 .minimap__zone--mid {
-    top: calc(8px + 30%);
-    height: 35%;
+    top: calc(8px + 28%);
+    height: 38%;
 }
+
 .minimap__zone--rear {
-    top: calc(8px + 65%);
-    height: calc(35% - 16px);
-    border-radius: 8px 8px 16px 16px;
+    top: calc(8px + 66%);
+    height: calc(34% - 16px);
+    border-radius: 8px 8px 20px 20px;
 }
 
 .minimap__zone.is-active {
-    background: rgba(59, 130, 246, 0.25);
+    background: rgba(59, 130, 246, 0.2);
     box-shadow: inset 0 0 0 2px #3b82f6;
 }
 
 /* 구역 라벨 */
-.minimap__zone::after {
-    content: '';
+.minimap__zone-label {
     position: absolute;
-    right: 6px;
+    left: 50%;
     top: 50%;
-    transform: translateY(-50%);
-    font-size: 9px;
-    font-weight: 600;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: 700;
     color: #64748b;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    pointer-events: none;
 }
 
-.minimap__zone--front::after { content: '앞'; }
-.minimap__zone--mid::after { content: '중간'; }
-.minimap__zone--rear::after { content: '뒤'; }
-
-.minimap__zone:hover::after,
-.minimap__zone.is-active::after {
+.minimap__zone:hover .minimap__zone-label,
+.minimap__zone.is-active .minimap__zone-label {
     opacity: 1;
+    color: #3b82f6;
 }
 
-/* 미니맵 하단 범례 */
-.minimap__legend {
+/* 범례 */
+.minimap__info {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-top: 8px;
+    gap: 8px;
+    width: 100%;
     padding-top: 12px;
     border-top: 1px solid #e2e8f0;
-    width: 100%;
 }
 
-.minimap__legend-item {
+.minimap__info-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.minimap__info-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 10px;
     color: #64748b;
 }
 
-.minimap__legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
+.minimap__info-icon {
+    width: 14px;
+    height: 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
 }
 
-.minimap__legend-dot--available {
-    background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+.minimap__info-icon--exit {
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
 }
 
-.minimap__legend-dot--selected {
-    background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+.minimap__info-icon--wing {
+    background: linear-gradient(180deg, #64748b 0%, #94a3b8 100%);
+    width: 20px;
+}
+
+/* 구역 설명 */
+.minimap__zones-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.minimap__zones-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    color: #6b7280;
+}
+
+.minimap__zones-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid #3b82f6;
 }
