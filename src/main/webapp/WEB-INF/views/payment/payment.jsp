@@ -263,7 +263,7 @@
     document.querySelectorAll('.method-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.method-btn').forEach(function(b) {
-                b.classList.remove('active');d
+                b.classList.remove('active');
             });
             this.classList.add('active');
             selectedMethod = this.dataset.method;
