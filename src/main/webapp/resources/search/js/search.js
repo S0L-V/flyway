@@ -675,9 +675,12 @@ function syncSearchBarFromState() {
     const dateRangeText = document.getElementById("dateRangeText");
     if (dateRangeText) {
         if (state.tripType === "RT" && state.dateEnd) {
-            dateRangeText.textContent = `${state.dateStart}  →  ${state.dateEnd}`;
+            const start = formatDateKR(state.dateStart);
+            const end = formatDateKR(state.dateEnd);
+            dateRangeText.textContent = `${start}  →  ${end}`;
         } else if (state.dateStart) {
-            dateRangeText.textContent = state.dateStart;
+            const start = formatDateKR(state.dateStart);
+            dateRangeText.textContent = start;
         }
     } else {
         // 기존 방식 (search.jsp 등)
@@ -703,6 +706,20 @@ function syncSearchBarFromState() {
     // 기존 search-tab 스타일
     document.querySelectorAll(".search-tab").forEach(t => t.classList.remove("search-tab--active"));
     document.querySelector(`.search-tab[data-trip="${state.tripType}"]`)?.classList.add("search-tab--active");
+}
+
+function formatDateKR(dateStr) {
+    if (!dateStr) return "-";
+
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const mm = d.getMonth() + 1;
+    const dd = d.getDate();
+    const day = days[d.getDay()];
+
+    return `${mm}.${dd}(${day})`;
 }
 
 function loadStateFromQuery() {
