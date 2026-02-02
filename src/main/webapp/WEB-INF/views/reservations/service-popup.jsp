@@ -281,9 +281,11 @@
                 await mealRes.json();
             }
 
-            // 부모 창에 총액 갱신 요청
-            if (window.opener && window.opener.refreshServiceTotal) {
-                window.opener.refreshServiceTotal();
+            // 부모 창에 부가서비스 정보 갱신 요청
+            if (window.opener && typeof window.opener.refreshServiceInfo === 'function') {
+                window.opener.refreshServiceInfo();
+            } else if (window.opener && typeof window.opener.refreshServiceTotal === 'function') {
+                window.opener.refreshServiceTotal();  // fallback
             }
             alert('저장되었습니다.');
             window.close();

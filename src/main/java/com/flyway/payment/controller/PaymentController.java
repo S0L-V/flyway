@@ -4,6 +4,7 @@ import com.flyway.payment.config.TossPaymentsConfig;
 import com.flyway.payment.domain.PaymentConfirmRequest;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.service.PaymentService;
+import com.flyway.reservation.dto.BookingViewModel;
 import com.flyway.reservation.dto.ReservationSegmentView;
 import com.flyway.passenger.repository.PassengerServiceRepository;
 import com.flyway.reservation.repository.ReservationBookingRepository;
@@ -57,11 +58,15 @@ public class PaymentController {
         log.info("[결제페이지] 진입 - reservationId: {}, userId: {}",
                 reservationId, user.getUserId());
 
-        // 실제 금액 계산
+        BookingViewModel booking = reservationBookingRepository.findReservationHeader(reservationId);
         List<ReservationSegmentView> segments = reservationBookingRepository.findSegments(reservationId);
+
         long flightTotal = segments.stream()
                 .mapToLong(seg -> seg.getSnapPrice() != null ? seg.getSnapPrice() : 0L)
                 .sum();
+
+        // 승객 수 곱하기
+        flightTotal *= booking.getPassengerCount();
 
         // 부가서비스 금액
         Long serviceTotal = passengerServiceRepository.findServiceTotal(reservationId);

@@ -1,6 +1,8 @@
 package com.flyway.payment.service;
 import com.flyway.admin.dto.AdminNotificationDto;
 import com.flyway.admin.service.AdminNotificationService;
+import com.flyway.passenger.dto.PassengerReservationDto;
+import com.flyway.passenger.mapper.PassengerQueryMapper;
 import com.flyway.payment.domain.*;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.client.TossPaymentsClient;
@@ -8,6 +10,7 @@ import com.flyway.payment.mapper.RefundMapper;
 import com.flyway.payment.repository.PaymentRepository;
 import com.flyway.pricing.event.PricingEventService;
 import com.flyway.pricing.event.PricingEventServiceImpl;
+import com.flyway.reservation.dto.BookingViewModel;
 import com.flyway.reservation.dto.ReservationCoreView;
 import com.flyway.reservation.dto.ReservationSegmentView;
 import com.flyway.reservation.repository.ReservationBookingRepository;
@@ -43,6 +46,7 @@ public class PaymentService {
     private final SeatService seatService;
     private final PricingEventService pricingEventService;
     private final AdminNotificationService adminNotificationService;
+
 
     /**
      * 결제 처리 메인 로직 (개선된 3단계 설계)
@@ -148,10 +152,19 @@ public class PaymentService {
                 .priority("NORMAL")
                 .build();
         adminNotificationService.createAndBroadcastNotification(notification);
-        // SMS 발송 (여기에 추가)
+        // SMS 발송
         String phone = smsMapper.selectPhoneByReservationId(payment.getReservationId());
         if (phone != null && !phone.isEmpty()) {
             smsService.sendPaymentComplete(phone, payment.getReservationId(), payment.getAmount());
+        }
+
+        // 탑승객 예약 항공편 정보 전송
+        try {
+            smsService.sendTicketInfoToPassengers(reservationId);
+        } catch (Exception e) {
+            log.warn("[SMS] 탑승객 티켓 발송 실패 - reservationId: {}, error: {}",
+                    reservationId, e.getMessage());
+            // SMS 실패해도 결제는 성공 처리
         }
 
         return paymentRepository.findByPaymentId(paymentId)
@@ -182,9 +195,31 @@ public class PaymentService {
     }
 
     /**
-     * 환불 처리
+     * 환불 처리 메인 로직 \
      */
     public PaymentViewDto processRefund(String paymentId, RefundRequest request) {
+        // 1단계: 환불 준비
+        PaymentViewDto payment = prepareRefund(paymentId);
+
+        try {
+            // 2단계: 토스 API 호출 (트랜잭션 밖)
+            request.setPaymentKey(payment.getPaymentKey());
+            TossPaymentResponse tossResponse = tossClient.cancelPayment(request);
+
+            // 3단계: 환불 완료
+            return completeRefund(paymentId, tossResponse, request);
+        } catch (Exception e) {
+            // 실패 처리
+            failRefund(paymentId);
+            throw new RuntimeException("환불 실패: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 1단계: 환불 준비 - 결제 검증 및 상태 변경
+     */
+    @Transactional
+    public PaymentViewDto prepareRefund(String paymentId) {
         PaymentViewDto payment = paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
 
@@ -192,9 +227,21 @@ public class PaymentService {
             throw new RuntimeException("환불 가능한 상태가 아닙니다: " + payment.getStatus());
         }
 
-        // 토스 환불 API 호출
-        request.setPaymentKey(payment.getPaymentKey());
-        TossPaymentResponse tossResponse = tossClient.cancelPayment(request);
+        // 상태를 REFUNDING으로 변경 (중복 환불 방지)
+        paymentRepository.updateStatus(paymentId, "REFUNDING");
+
+        return payment;
+    }
+
+    /**
+     * 2단계 성공: 환불 완료 처리
+     */
+    @Transactional
+    public PaymentViewDto completeRefund(String paymentId, TossPaymentResponse tossResponse, RefundRequest request) {
+        PaymentViewDto payment = paymentRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
+
+        String reservationId = payment.getReservationId();
 
         // 결제 상태 업데이트
         String newStatus = "CANCELED".equals(tossResponse.getStatus())
@@ -203,55 +250,61 @@ public class PaymentService {
         paymentRepository.updateStatus(paymentId, newStatus);
 
         // 예약 상태 → CANCELLED
-        String reservationId = payment.getReservationId();
-        reservationBookingRepository.updateReservationStatus(payment.getReservationId(), "CANCELLED");
+        reservationBookingRepository.updateReservationStatus(reservationId, "CANCELLED");
 
         // 좌석 BOOKED -> AVAILABLE
         seatService.releaseBookedSeats(reservationId);
+
         // 잔여석 복구
         int passengerCount = refundMapper.selectPassengerCountByReservationId(reservationId);
         List<RefundSegmentDto> segments = refundMapper.selectSegmentsByReservationId(reservationId);
 
         for (RefundSegmentDto segment : segments) {
             refundMapper.incrementSeat(segment.getFlightId(), segment.getCabinClass(), passengerCount);
-
-            // [알림] 환불 완료 알림 생성
-            AdminNotificationDto notification = AdminNotificationDto.builder()
-                    .notificationType("REFUND_COMPLETED")
-                    .title("환불 처리 완료")
-                    .message("사용자 요청에 의해 환불이 완료되었습니다.")
-                    .relatedResourceType("RESERVATION")
-                    .relatedResourceId(reservationId)
-                    .priority("NORMAL")
-                    .build();
-            adminNotificationService.createAndBroadcastNotification(notification);
         }
 
-        String refundId = UUID.randomUUID().toString();
+        // 관리자 알림
+        AdminNotificationDto notification = AdminNotificationDto.builder()
+                .notificationType("REFUND_COMPLETED")
+                .title("환불 처리 완료")
+                .message("사용자 요청에 의해 환불이 완료되었습니다.")
+                .relatedResourceType("RESERVATION")
+                .relatedResourceId(reservationId)
+                .priority("NORMAL")
+                .build();
+        adminNotificationService.createAndBroadcastNotification(notification);
 
         // refund 테이블 INSERT
         refundMapper.insertRefund(
-                refundId,
+                UUID.randomUUID().toString(),
                 reservationId,
                 paymentId,
-                "DEFAULT_RF_ID",  // TODO: 실제 refund_policy 조회 후 설정
+                "DEFAULT_RF_ID",
                 payment.getAmount(),
                 payment.getAmount(),
                 request.getCancelReason(),
                 null
         );
 
-        // 환불 이벤트 기반 항공편 가격 재산정
-//        pricingEventService.repriceAfterRefund(reservationId, refundId);
-
         // SMS 발송
         String phone = smsMapper.selectPhoneByReservationId(reservationId);
         if (phone != null && !phone.isEmpty()) {
             smsService.sendRefundComplete(phone, reservationId, payment.getAmount());
         }
+
         return paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
     }
+
+    /**
+     * 2단계 실패: 환불 실패 처리
+     */
+    @Transactional
+    public void failRefund(String paymentId) {
+        // 상태를 PAID로 원복
+        paymentRepository.updateStatus(paymentId, PaymentStatus.PAID.name());
+    }
+
 
     /**
      * 결제 조회
@@ -352,11 +405,16 @@ public class PaymentService {
             throw new RuntimeException("예약 구간 정보가 없습니다: " + reservationId);
         }
 
+        // 승객 수 조회
+        BookingViewModel booking = reservationBookingRepository.findReservationHeader(reservationId);
+
         long flightTotal = segments.stream()
                 .mapToLong(seg -> seg.getSnapPrice() != null ? seg.getSnapPrice() : 0L)
                 .sum();
 
-        // 부가서비스 금액 (수하물, 기내식)
+        // 승객 수 곱하기
+        flightTotal *= booking.getPassengerCount();
+
         Long serviceTotal = passengerServiceRepository.findServiceTotal(reservationId);
 
         return flightTotal + (serviceTotal != null ? serviceTotal : 0L);
