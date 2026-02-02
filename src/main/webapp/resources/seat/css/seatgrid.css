@@ -177,8 +177,13 @@
     background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
     color: #ffffff;
     border: 2px solid #d97706;
-    cursor: not-allowed;
+    cursor: pointer;
     opacity: 0.85;
+}
+
+/* 내 HOLD 좌석은 다시 클릭 가능 */
+.seat-item--hold.seat-item--self-hold {
+    cursor: pointer;
 }
 
 .seat-item--unavailable {
