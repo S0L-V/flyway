@@ -103,7 +103,7 @@ public class RankServiceImpl implements RankService {
                             .comparing(RankItemDto::getSearchCount).reversed()
                             .thenComparing(RankItemDto::getAirportId)
                 )
-                .limit(6)
+                .limit(8)
                 .toList();
     }
 
@@ -144,7 +144,7 @@ public class RankServiceImpl implements RankService {
 
             Integer prev = previousRankIndex.get(dto.getAirportId());
 
-            if (prev == null || prev > 6) {
+            if (prev == null || prev > 8) {
                 dto.setDiff(0);
                 dto.setNew(true);
             } else {

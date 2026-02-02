@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 </head>
-<body class="font-pretendard">
+<body>
 
 <!-- Header -->
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
@@ -207,21 +207,26 @@
     </div>
 </section>
 
-<!-- Trending Section -->
-<div class="container">
-    <div class="content" style="padding-top: 0;">
-        <section class="trending-section">
-            <div class="trending-header">
-                <h2 class="section-title">
-                    여행지 인기 급상승 <span class="badge-live">LIVE</span>
+<!-- Trending Section (Bento Grid) -->
+<section class="trending-section-v2">
+    <div class="trending-container">
+        <!-- Section Header -->
+        <div class="trending-header-v2">
+            <div class="trending-title-area">
+                <span class="trending-label">TRENDING NOW</span>
+                <h2 class="trending-title">
+                    World's Top <span class="highlight">8</span><br/>
+                    Flight Hotspots.
                 </h2>
-                <a href="#" class="view-all-link">실시간 데이터 상세 보기 →</a>
             </div>
-            <p class="trending-desc">"최근 일주일, 가장 많이 검색된 도시들"</p>
-            <div class="trending-grid"></div>
-        </section>
+        </div>
+
+        <!-- Bento Grid -->
+        <div class="trending-bento-grid" id="trendingBentoGrid">
+            <!-- JS로 렌더링 -->
+        </div>
     </div>
-</div>
+</section>
 
 <!-- Hidden Form for Reservation -->
 <form id="reservationForm" action="${pageContext.request.contextPath}/reservations/draft" method="post" style="display:none;">
