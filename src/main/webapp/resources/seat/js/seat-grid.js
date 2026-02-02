@@ -69,9 +69,18 @@
         return btn;
     }
 
+    function buildEmptySeatCell() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "seat-item seat-item--empty";
+        btn.disabled = true;
+        btn.setAttribute("disabled", "true");
+        btn.tabIndex = -1;
+        return btn;
+    }
 
     function calcSectionByIndex(idx, total) {
-        if (total <= 0) return "front";
+        if (total <= 10) return "front";
 
         const cut1 = Math.ceil(total / 3);
         const cut2 = Math.ceil((total * 2) / 3);
@@ -130,12 +139,25 @@
                 .get(rowNo)
                 .sort((a, b) => String(a.colNo).localeCompare(String(b.colNo)));
 
-            list.forEach((seat) => {
-                const col = String(seat.colNo).toUpperCase();
-                const btn = buildSeatButton(seat, activePassengerId);
+            // colNo -> seat 매핑 (없는 컬럼은 빈칸으로 처리)
+            const seatByCol = new Map();
+            list.forEach((s) => {
+                const col = String(s.colNo || "").toUpperCase();
+                if (col) seatByCol.set(col, s);
+            });
 
-                if (LEFT_COLS.includes(col)) leftWrap.appendChild(btn);
-                else rightWrap.appendChild(btn);
+            // A,B,C 3칸 렌더 (없으면 empty cell)
+            LEFT_COLS.forEach((col) => {
+                const seat = seatByCol.get(col);
+                const cell = seat ? buildSeatButton(seat, activePassengerId) : buildEmptySeatCell();
+                leftWrap.appendChild(cell);
+            });
+
+            // D,E,F 3칸 렌더 (없으면 empty cell)
+            RIGHT_COLS.forEach((col) => {
+                const seat = seatByCol.get(col);
+                const cell = seat ? buildSeatButton(seat, activePassengerId) : buildEmptySeatCell();
+                rightWrap.appendChild(cell);
             });
 
             rowDiv.appendChild(leftWrap);
@@ -143,6 +165,17 @@
             rowDiv.appendChild(rightWrap);
             seatGridEl.appendChild(rowDiv);
         });
+
+        // 실제 존재하는 섹션(front/mid/rear) 기록
+        const present = new Set();
+        seatGridEl.querySelectorAll(".seat-row[data-section]").forEach((el) => {
+            if (el.dataset.section) present.add(el.dataset.section);
+        });
+
+        // row가 0이거나 이상할 때 최소 front 보장
+        if (!present.size) present.add("front");
+
+        seatGridEl.dataset.presentSections = Array.from(present).join(",");
     }
 
     function escapeHtml(s) {

@@ -296,8 +296,8 @@
 }
 
 .seat-legend__icon--selected {
-    background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
-    border: 2px solid #1e3a8a;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    border: 2px solid #d97706;
 }
 
 .seat-legend__icon--unavailable {
