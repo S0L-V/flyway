@@ -75,8 +75,7 @@ public class RankServiceImpl implements RankService {
     @Override
     public void increaseRealtime(String airportId) {
         realTimeCount.merge(airportId, 1, Integer::sum);
-
-        updateRank();
+//        updateRank();
     }
 
     private List<RankItemDto> calculateRank() {
@@ -123,6 +122,21 @@ public class RankServiceImpl implements RankService {
             }
         }
 
+        if(!changed) {
+            Map<String, RankItemDto> currentMap = new HashMap<>();
+            for(RankItemDto dto : currentRankCache) {
+                currentMap.put(dto.getAirportId(), dto);
+            }
+
+            for(RankItemDto newDto : newRank) {
+                RankItemDto existing = currentMap.get(newDto.getAirportId());
+                if(existing != null) {
+                    existing.setSearchCount(newDto.getSearchCount());
+                }
+            }
+            return;
+        }
+
         Map<String, Integer> newIndex = new HashMap<>();
         for(int i = 0; i < newRank.size(); i++) {
             RankItemDto dto = newRank.get(i);
@@ -130,16 +144,11 @@ public class RankServiceImpl implements RankService {
 
             Integer prev = previousRankIndex.get(dto.getAirportId());
 
-            if (changed) {
-                if (prev == null || prev > 6) {
-                    dto.setDiff(0);
-                    dto.setNew(true);
-                } else {
-                    dto.setDiff(prev - (i + 1));
-                    dto.setNew(false);
-                }
-            } else {
+            if (prev == null || prev > 6) {
                 dto.setDiff(0);
+                dto.setNew(true);
+            } else {
+                dto.setDiff(prev - (i + 1));
                 dto.setNew(false);
             }
 
@@ -150,7 +159,7 @@ public class RankServiceImpl implements RankService {
         currentRankCache = newRank;
     }
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelay = 180000)
     public void refreshRankCache() {
         updateRank();
     }

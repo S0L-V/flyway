@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadHotSixAirport();
-    setInterval(loadHotSixAirport, 30_000);
+    setInterval(loadHotSixAirport, 180_000);
 })
 
 async function loadHotSixAirport() {
