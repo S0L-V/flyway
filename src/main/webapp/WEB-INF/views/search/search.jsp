@@ -414,7 +414,7 @@
                             </p>
                         </div>
 
-                        <div class="range-slider-container px-4 py-4 relative h-16">
+                        <div class="range-slider-container py-4 relative h-16">
                             <div class="slider-track absolute top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 rounded"></div>
                             <div class="slider-range absolute top-1/2 transform -translate-y-1/2 h-1 bg-blue-600 rounded" id="slider-range-bar"></div>
 
@@ -533,7 +533,7 @@
             <!-- Sort Button -->
             <div class="sort-container">
                 <span class="result-count">
-                    <strong id="resultCount">0개</strong>의 항공편
+                    <strong id="resultCount">0</strong>개의 항공편
                 </span>
                 <div class="divider"></div>
                 <button class="sort-button">
