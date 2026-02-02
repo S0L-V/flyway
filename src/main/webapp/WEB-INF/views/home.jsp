@@ -24,7 +24,7 @@
     <!-- 비디오 컨테이너 (overflow: hidden) -->
     <div class="hero-video-container">
         <video autoplay loop muted playsinline class="hero-video">
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-flying-over-the-clouds-at-sunset-24422-large.mp4" type="video/mp4" />
+            <source src="https://flyway-static-files.s3.ap-northeast-2.amazonaws.com/857251-hd_1620_1080_25fps.mp4" type="video/mp4" />
         </video>
         <div class="hero-overlay"></div>
     </div>
