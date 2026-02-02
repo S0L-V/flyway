@@ -367,16 +367,18 @@
                 </div>
 
                 <!-- Seat Details -->
-                <c:forEach var="s" items="${vm.segments}">
-                    <c:if test="${not empty s.passengerSeats}">
-                        <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
-                            <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 좌석:</span>
-                            <c:forEach var="seat" items="${s.passengerSeats}" varStatus="st">
-                                ${seat.passengerName} ${seat.seatNo}<c:if test="${!st.last}">, </c:if>
-                            </c:forEach>
-                        </div>
-                    </c:if>
-                </c:forEach>
+                <div id="seatInfoContainer">
+                    <c:forEach var="s" items="${vm.segments}">
+                        <c:if test="${not empty s.passengerSeats}">
+                            <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
+                                <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 좌석:</span>
+                                <c:forEach var="seat" items="${s.passengerSeats}" varStatus="st">
+                                    ${seat.passengerName} ${seat.seatNo}<c:if test="${!st.last}">, </c:if>
+                                </c:forEach>
+                            </div>
+                        </c:if>
+                    </c:forEach>
+                </div>
 
                 <div class="flex justify-between mb-3 text-sm text-slate-500">
                     <span>부가서비스</span>
@@ -384,45 +386,47 @@
                 </div>
 
                 <!-- Service Details -->
-                <c:forEach var="s" items="${vm.segments}">
-                    <c:set var="hasBaggage" value="false"/>
-                    <c:forEach var="svc" items="${s.passengerServices}">
-                        <c:if test="${svc.serviceType == '0'}"><c:set var="hasBaggage" value="true"/></c:if>
+                <div id="serviceInfoContainer">
+                    <c:forEach var="s" items="${vm.segments}">
+                        <c:set var="hasBaggage" value="false"/>
+                        <c:forEach var="svc" items="${s.passengerServices}">
+                            <c:if test="${svc.serviceType == '0'}"><c:set var="hasBaggage" value="true"/></c:if>
+                        </c:forEach>
+                        <c:if test="${hasBaggage}">
+                            <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
+                                <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 수하물:</span>
+                                <c:set var="isFirst" value="true" />
+                                <c:forEach var="svc" items="${s.passengerServices}">
+                                    <c:if test="${svc.serviceType == '0'}">
+                                        <c:if test="${!isFirst}">, </c:if>
+                                        ${svc.passengerName} ${svc.serviceName}
+                                        <c:set var="isFirst" value="false" />
+                                    </c:if>
+                                </c:forEach>
+                            </div>
+                        </c:if>
                     </c:forEach>
-                    <c:if test="${hasBaggage}">
-                        <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
-                            <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 수하물:</span>
-                            <c:set var="isFirst" value="true" />
-                            <c:forEach var="svc" items="${s.passengerServices}">
-                                <c:if test="${svc.serviceType == '0'}">
-                                    <c:if test="${!isFirst}">, </c:if>
-                                    ${svc.passengerName} ${svc.serviceName}
-                                    <c:set var="isFirst" value="false" />
-                                </c:if>
-                            </c:forEach>
-                        </div>
-                    </c:if>
-                </c:forEach>
 
-                <c:forEach var="s" items="${vm.segments}">
-                    <c:set var="hasMeal" value="false"/>
-                    <c:forEach var="svc" items="${s.passengerServices}">
-                        <c:if test="${svc.serviceType == '1'}"><c:set var="hasMeal" value="true"/></c:if>
+                    <c:forEach var="s" items="${vm.segments}">
+                        <c:set var="hasMeal" value="false"/>
+                        <c:forEach var="svc" items="${s.passengerServices}">
+                            <c:if test="${svc.serviceType == '1'}"><c:set var="hasMeal" value="true"/></c:if>
+                        </c:forEach>
+                        <c:if test="${hasMeal}">
+                            <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
+                                <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 기내식:</span>
+                                <c:set var="isFirst" value="true" />
+                                <c:forEach var="svc" items="${s.passengerServices}">
+                                    <c:if test="${svc.serviceType == '1'}">
+                                        <c:if test="${!isFirst}">, </c:if>
+                                        ${svc.passengerName} ${svc.serviceName}
+                                        <c:set var="isFirst" value="false" />
+                                    </c:if>
+                                </c:forEach>
+                            </div>
+                        </c:if>
                     </c:forEach>
-                    <c:if test="${hasMeal}">
-                        <div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">
-                            <span class="block mb-1">${s.segmentOrder == 1 ? '가는편' : '오는편'} 기내식:</span>
-                            <c:set var="isFirst" value="true" />
-                            <c:forEach var="svc" items="${s.passengerServices}">
-                                <c:if test="${svc.serviceType == '1'}">
-                                    <c:if test="${!isFirst}">, </c:if>
-                                    ${svc.passengerName} ${svc.serviceName}
-                                    <c:set var="isFirst" value="false" />
-                                </c:if>
-                            </c:forEach>
-                        </div>
-                    </c:if>
-                </c:forEach>
+                </div>
 
                 <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-end">
                     <span class="font-extrabold text-slate-800">총 결제금액</span>
@@ -495,17 +499,89 @@
         window.open(popupUrl, 'servicePopup', popupOption);
     }
 
-    // 부가서비스 총액 갱신 (팝업에서 호출)
-    async function refreshServiceTotal() {
+    // 부가서비스 정보 갱신 (총액 + 상세)
+    async function refreshServiceInfo() {
         try {
-            const res = await fetchWithRefresh('/reservations/' + reservationId + '/services/total');
+            const res = await fetchWithRefresh('/reservations/' + reservationId + '/services/details');
             const data = await res.json();
             if (data.success) {
+                // 총액 갱신
                 document.getElementById('servicePrice').textContent = '₩' + numberWithCommas(data.total);
+
+                // 상세 정보 갱신
+                let html = '';
+                data.segments.forEach(function(seg) {
+                    var label = seg.segmentOrder === 1 ? '가는편' : '오는편';
+
+                    // 수하물
+                    if (seg.baggageServices && seg.baggageServices.length > 0) {
+                        html += '<div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">';
+                        html += '<span class="block mb-1">' + label + ' 수하물:</span>';
+                        seg.baggageServices.forEach(function(svc, idx) {
+                            if (idx > 0) html += ', ';
+                            html += svc.passengerName + ' ' + parseBaggageInfo(svc.serviceName);
+                        });
+                        html += '</div>';
+                    }
+
+                    // 기내식
+                    if (seg.mealServices && seg.mealServices.length > 0) {
+                        html += '<div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">';
+                        html += '<span class="block mb-1">' + label + ' 기내식:</span>';
+                        seg.mealServices.forEach(function(svc, idx) {
+                            if (idx > 0) html += ', ';
+                            html += svc.passengerName + ' ' + svc.serviceName;
+                        });
+                        html += '</div>';
+                    }
+                });
+                document.getElementById('serviceInfoContainer').innerHTML = html;
+
                 updateTotalPrice();
             }
         } catch (err) {
-            console.error('Failed to refresh service total', err);
+            console.error('Failed to refresh service info', err);
+        }
+    }
+
+    // 수하물 JSON 파싱 (예: {"extraKg":5,"extraBags":1} → "+5kg, 추가 1개")
+    function parseBaggageInfo(jsonStr) {
+        try {
+            var obj = JSON.parse(jsonStr);
+            var parts = [];
+            if (obj.extraKg > 0) parts.push('+' + obj.extraKg + 'kg');
+            if (obj.extraBags > 0) parts.push('추가 ' + obj.extraBags + '개');
+            return parts.length > 0 ? parts.join(', ') : '기본';
+        } catch (e) {
+            return jsonStr || '기본';
+        }
+    }
+
+    // 기존 호환성 유지
+    function refreshServiceTotal() {
+        refreshServiceInfo();
+    }
+    async function refreshSeatInfo() {
+        try {
+            const res = await fetchWithRefresh('/reservations/' + reservationId + '/seats/info');
+            const data = await res.json();
+            if (data.success) {
+                let html = '';
+                data.segments.forEach(function(seg) {
+                    if (seg.passengerSeats && seg.passengerSeats.length > 0) {
+                        html += '<div class="pl-3 mb-2 text-xs text-slate-400 border-l-2 border-slate-100">';
+                        html += '<span class="block mb-1">' + (seg.segmentOrder === 1 ? '가는편' : '오는편') + '좌석:</span>';
+                        seg.passengerSeats.forEach(function(seat, idx) {
+                            html += seat.passengerName + ' ' + seat.seatNo;
+                            if (idx < seg.passengerSeats.length - 1) html += ', ';
+                        });
+                        html += '</div>';
+                    }
+                });
+                document.getElementById('seatInfoContainer').innerHTML = html;
+            }
+        } catch (err) {
+            console.error('Failed to refresh seat info', err);
         }
     }
     // 총 금액 업데이트
@@ -552,7 +628,7 @@
         document.getElementById('flightPrice').textContent = '₩' + numberWithCommas(flightTotal);
 
         if (passengerSaved) {
-            refreshServiceTotal();
+            refreshServiceInfo();
         }
         updateTotalPrice();
 
@@ -570,6 +646,8 @@
     window.openSeatPopup = openSeatPopup;
     window.openServicePopup = openServicePopup;
     window.refreshServiceTotal = refreshServiceTotal;
+    window.refreshServiceInfo = refreshServiceInfo;
+    window.refreshSeatInfo = refreshSeatInfo;
     window.goPayment = goPayment;
 
     async function savePassengers(event) {

@@ -32,5 +32,7 @@ public interface PaymentMapper {
                               @Param("status") String status,
                               @Param("method") String method);
     List<PaymentViewDto> selectByUserId(@Param("userId") String userId);
+    // 결제 row lock (FOR UPDATE)
+    PaymentViewDto selectByPaymentIdForUpdate(@Param("paymentId") String paymentId);
 
 }

@@ -58,4 +58,10 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public List<PaymentViewDto> findByUserId(String userId) {
         return paymentMapper.selectByUserId(userId);
     }
+
+    @Override
+    public Optional<PaymentViewDto> lockPaymentForUpdate(String paymentId) {
+        return Optional.ofNullable(paymentMapper.selectByPaymentIdForUpdate(paymentId));
+    }
+
 }

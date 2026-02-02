@@ -35,26 +35,43 @@
                      #{status}
                  )
     </insert>
-
     <!-- 결제 ID로 조회 -->
     <select id="selectByPaymentId" parameterType="string"
             resultType="com.flyway.payment.dto.PaymentViewDto">
         SELECT
-        p.payment_id      AS paymentId,
-        p.reservation_id  AS reservationId,
-        r.user_id         AS userId,
-        p.payment_key     AS paymentKey,
-        p.order_id        AS orderId,
-        p.amount          AS amount,
-        p.payment_method  AS method,
-        p.status          AS status,
-        p.paid_at         AS paidAt,
-        p.created_at      AS createdAt
+            p.payment_id      AS paymentId,
+            p.reservation_id  AS reservationId,
+            r.user_id         AS userId,
+            p.payment_key     AS paymentKey,
+            p.order_id        AS orderId,
+            p.amount          AS amount,
+            p.payment_method  AS method,
+            p.status          AS status,
+            p.paid_at         AS paidAt,
+            p.created_at      AS createdAt
         FROM payment p
-        JOIN reservation r ON p.reservation_id = r.reservation_id
+                 JOIN reservation r ON p.reservation_id = r.reservation_id
         WHERE p.payment_id = #{paymentId}
     </select>
-
+    <!-- 결제 ID로 조회 + Row Lock (동시 환불 방지) -->
+    <select id="selectByPaymentIdForUpdate" parameterType="string"
+            resultType="com.flyway.payment.dto.PaymentViewDto">
+        SELECT
+            p.payment_id      AS paymentId,
+            p.reservation_id  AS reservationId,
+            r.user_id         AS userId,
+            p.payment_key     AS paymentKey,
+            p.order_id        AS orderId,
+            p.amount          AS amount,
+            p.payment_method  AS method,
+            p.status          AS status,
+            p.paid_at         AS paidAt,
+            p.created_at      AS createdAt
+        FROM payment p
+                 JOIN reservation r ON p.reservation_id = r.reservation_id
+        WHERE p.payment_id = #{paymentId}
+            FOR UPDATE
+    </select>
 
     <!-- 주문 ID로 조회 -->
     <select id="selectByOrderId" parameterType="string"
