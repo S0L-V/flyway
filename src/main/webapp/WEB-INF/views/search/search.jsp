@@ -17,38 +17,69 @@
     <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* search.jsp 전용 스타일 오버라이드 */
-        /*.search-glass-panel {*/
-        /*    margin-top: 0;*/
-        /*    background: rgba(255, 255, 255, 0.95);*/
-        /*    backdrop-filter: blur(10px);*/
-        /*    border: 1px solid rgba(255, 255, 255, 0.5);*/
-        /*    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);*/
-        /*}*/
-        /*.search-section {*/
-        /*    padding: 40px 0;*/
-        /*    background: #f5f7fb;*/
-        /*}*/
-        /*.search-container {*/
-        /*    max-width: 1200px;*/
-        /*    margin: 0 auto;*/
-        /*    padding: 0 20px;*/
-        /*}*/
+        body {
+            background-color: #f5f7fb;
+        }
+        .main-content {
+            padding-top: 120px; /* 헤더 높이만큼 내림 */
+            padding-bottom: 60px;
+            min-height: 100vh;
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            margin-bottom: 24px;
+        }
+
+        /*!* Trip Selector *!*/
         /*.trip-selector {*/
-        /*    margin-bottom: 20px;*/
+        /*    margin-bottom: 12px;*/
+        /*    display: flex;*/
+        /*    gap: 4px;*/
         /*    justify-content: flex-start;*/
         /*}*/
+        /*.trip-btn {*/
+        /*    padding: 6px 14px;*/
+        /*    border-radius: 8px;*/
+        /*    font-size: 14px;*/
+        /*    font-weight: 700;*/
+        /*    color: #64748b;*/
+        /*    background: transparent;*/
+        /*    border: none;*/
+        /*    cursor: pointer;*/
+        /*    transition: all 0.2s;*/
+        /*}*/
+        /*.trip-btn.active {*/
+        /*    background: #1f6feb;*/
+        /*    color: #fff;*/
+        /*}*/
+        /*.trip-indicator { display: none; }*/
+
+        /*!* Search Bar Panel *!*/
+        /*.search-glass-panel {*/
+        /*    background: #ffffff;*/
+        /*    border: 1px solid #e2e8f0;*/
+        /*    border-radius: 16px;*/
+        /*    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);*/
+        /*    padding: 20px;*/
+        /*}*/
+
         /*.search-grid {*/
         /*    display: grid;*/
         /*    grid-template-columns: 1.2fr 1.2fr 1.5fr 1.2fr auto;*/
         /*    gap: 12px;*/
         /*    align-items: center;*/
         /*}*/
+
         /*.search-btn-logo {*/
         /*    width: 56px;*/
         /*    height: 56px;*/
-        /*    border-radius: 16px;*/
+        /*    border-radius: 12px;*/
         /*    background: #1f6feb;*/
         /*    border: none;*/
         /*    cursor: pointer;*/
@@ -67,35 +98,113 @@
         /*    filter: brightness(0) invert(1);*/
         /*}*/
 
-        /* 필터 스타일 */
-        .search-filters {
-            margin-top: 20px;
+        /* 필터 및 정렬 행 */
+        .filter-sort-row {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
             gap: 12px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 10px;
             flex-wrap: wrap;
         }
+
+        /* Flight.jsp 스타일의 필터 버튼 */
         .filter-button {
-            padding: 8px 16px;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #475569;
+            padding: 10px 12px 10px 16px;
+            border-radius: 9999px;
+            border: 1px solid #e5e7eb;
+            background-color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            color: #374151;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .filter-button:hover {
+            border-color: #bfdbfe;
+            background-color: rgba(239, 246, 255, 0.5);
+        }
+        .filter-button.active {
+            border-color: #1f6feb;
+            color: #1f6feb;
+            background-color: #eff6ff;
+        }
+
+        .filter-icon-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            background-color: #f3f4f6;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .filter-button:hover .filter-icon-circle {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+
+        /* 정렬 버튼 */
+        .sort-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+        .result-count {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+        }
+        .result-count strong {
+            color: #111827;
+        }
+        .divider {
+            height: 16px;
+            width: 1px;
+            background-color: #d1d5db;
+        }
+        .sort-button {
             display: flex;
             align-items: center;
             gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #2563eb;
+            background: transparent;
+            border: none;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .filter-button:hover {
-            border-color: #1f6feb;
-            color: #1f6feb;
+        .sort-button:hover {
+            background-color: #ffffff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
-        .filter-icon {
-            width: 12px;
-            height: 12px;
-            opacity: 0.6;
+
+        /* Flights Header (Title only) */
+        .flights-header {
+            max-width: 1200px;
+            margin: 0 auto 12px;
+            padding: 0 20px;
+        }
+        .flights-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
         }
     </style>
 </head>
@@ -106,164 +215,167 @@
 
 <!-- Main Content -->
 <main class="main-content">
-    <!-- Search Section -->
-    <section class="search-section">
-        <div class="search-container">
-            <!-- Trip Type Selector -->
-            <div class="trip-selector">
-                <div class="trip-indicator" id="tripIndicator"></div>
-                <button class="trip-btn active" data-trip="RT">왕복</button>
-                <button class="trip-btn" data-trip="OW">편도</button>
-            </div>
 
-            <!-- Search Bar (Home Style) -->
-            <div class="search-glass-panel">
-                <div class="search-grid" id="searchBox">
+    <div class="search-container">
+        <!-- Trip Type Selector -->
+        <div class="trip-selector">
+            <button class="trip-btn active" data-trip="RT">왕복</button>
+            <button class="trip-btn" data-trip="OW">편도</button>
+        </div>
 
-                    <!-- 출발 공항 -->
-                    <div class="search-field" data-field="from">
-                        <label class="field-label" id="label-from">Departure</label>
-                        <div class="field-input dropdown-toggle"
-                             role="button" tabindex="0"
-                             aria-expanded="false" aria-labelledby="label-from"
-                             aria-haspopup="listbox">
-                            <div class="field-icon departure">
-                                <i class="fa-solid fa-plane-departure"></i>
-                            </div>
-                            <span class="field-value" data-value>출발지 선택</span>
+        <!-- Search Bar (Home Style) -->
+        <div class="search-glass-panel">
+            <div class="search-grid" id="searchBox">
+
+                <!-- 출발 공항 -->
+                <div class="search-field" data-field="from">
+                    <label class="field-label" id="label-from">Departure</label>
+                    <div class="field-input dropdown-toggle"
+                         role="button" tabindex="0"
+                         aria-expanded="false" aria-labelledby="label-from"
+                         aria-haspopup="listbox">
+                        <div class="field-icon departure">
+                            <i class="fa-solid fa-plane-departure"></i>
                         </div>
-                        <div class="dropdown-panel" hidden>
-                            <input class="dropdown-search" type="text" placeholder="공항 검색 (예: ICN, 인천)" autocomplete="off">
-                            <ul class="dropdown-list" data-list role="listbox"></ul>
-                        </div>
+                        <span class="field-value" data-value>출발지 선택</span>
                     </div>
-
-                    <!-- 도착 공항 -->
-                    <div class="search-field" data-field="to">
-                        <label class="field-label" id="label-to">Destination</label>
-                        <div class="field-input dropdown-toggle"
-                             role="button" tabindex="0"
-                             aria-expanded="false" aria-labelledby="label-to"
-                             aria-haspopup="listbox">
-                            <div class="field-icon">
-                                <i class="fa-solid fa-location-dot"></i>
-                            </div>
-                            <span class="field-value" data-value>도착지 선택</span>
-                        </div>
-                        <div class="dropdown-panel" hidden>
-                            <input class="dropdown-search" type="text" placeholder="공항 검색 (예: NRT, 나리타)" autocomplete="off">
-                            <ul class="dropdown-list" data-list role="listbox"></ul>
-                        </div>
+                    <div class="dropdown-panel" hidden>
+                        <input class="dropdown-search" type="text" placeholder="공항 검색 (예: ICN, 인천)" autocomplete="off">
+                        <ul class="dropdown-list" data-list role="listbox"></ul>
                     </div>
-
-                    <!-- 날짜 -->
-                    <div class="search-field date-field" data-field="dates">
-                        <label class="field-label" id="label-dates">Dates</label>
-                        <div class="field-input date-input-wrap" id="dateFieldWrap"
-                             role="button" tabindex="0"
-                             aria-labelledby="label-dates">
-                            <div class="field-icon">
-                                <i class="fa-regular fa-calendar"></i>
-                            </div>
-                            <div class="date-display-text">
-                                <span class="date-range-text" id="dateRangeText">날짜를 선택하세요</span>
-                            </div>
-                            <input type="hidden" id="dateStart">
-                            <input type="hidden" id="dateEnd">
-                        </div>
-                        <p class="date-help" id="dateError" hidden>도착일은 출발일보다 같거나 이후여야 해요.</p>
-                    </div>
-
-                    <!-- 인원 + 좌석 -->
-                    <div class="search-field pax-field" data-field="paxCabin">
-                        <label class="field-label" id="label-pax">Travelers</label>
-                        <div class="field-input dropdown-toggle"
-                             role="button" tabindex="0"
-                             aria-expanded="false" aria-labelledby="label-pax"
-                             aria-haspopup="true">
-                            <div class="field-icon">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            <span class="field-value" data-value>1명 / 이코노미</span>
-                        </div>
-                        <div class="dropdown-panel" hidden>
-                            <div class="pax-row">
-                                <span class="label">탑승 인원</span>
-                                <div class="stepper">
-                                    <button type="button" class="stepper-btn" data-action="dec">-</button>
-                                    <span class="stepper-value" id="paxCount">1</span>
-                                    <button type="button" class="stepper-btn" data-action="inc">+</button>
-                                </div>
-                            </div>
-                            <div class="cabin-section">
-                                <span class="label">좌석 등급</span>
-                                <div class="cabin-cards">
-                                    <label class="cabin-card" data-cabin="FST">
-                                        <input type="radio" name="cabin" value="FST">
-                                        <div class="cabin-card-inner">
-                                            <div class="cabin-icon">
-                                                <i class="fa-solid fa-crown"></i>
-                                            </div>
-                                            <div class="cabin-info">
-                                                <span class="cabin-name">퍼스트</span>
-                                                <span class="cabin-desc">최고급 서비스</span>
-                                            </div>
-                                            <div class="cabin-check">
-                                                <i class="fa-solid fa-check"></i>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <label class="cabin-card" data-cabin="BIZ">
-                                        <input type="radio" name="cabin" value="BIZ">
-                                        <div class="cabin-card-inner">
-                                            <div class="cabin-icon">
-                                                <i class="fa-solid fa-briefcase"></i>
-                                            </div>
-                                            <div class="cabin-info">
-                                                <span class="cabin-name">비즈니스</span>
-                                                <span class="cabin-desc">편안한 출장</span>
-                                            </div>
-                                            <div class="cabin-check">
-                                                <i class="fa-solid fa-check"></i>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <label class="cabin-card" data-cabin="ECO">
-                                        <input type="radio" name="cabin" value="ECO" checked>
-                                        <div class="cabin-card-inner">
-                                            <div class="cabin-icon">
-                                                <i class="fa-solid fa-chair"></i>
-                                            </div>
-                                            <div class="cabin-info">
-                                                <span class="cabin-name">이코노미</span>
-                                                <span class="cabin-desc">합리적인 선택</span>
-                                            </div>
-                                            <div class="cabin-check">
-                                                <i class="fa-solid fa-check"></i>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="panel-actions">
-                                <button type="button" class="btn" data-action="applyPaxCabin">적용</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 검색 버튼 -->
-                    <button class="search-btn-logo" id="btnSearch" type="button">
-                        <img src="${pageContext.request.contextPath}/resources/seat/img/logo-icon.svg" alt="Search" class="search-logo-icon">
-                    </button>
                 </div>
-            </div>
 
+                <!-- 도착 공항 -->
+                <div class="search-field" data-field="to">
+                    <label class="field-label" id="label-to">Destination</label>
+                    <div class="field-input dropdown-toggle"
+                         role="button" tabindex="0"
+                         aria-expanded="false" aria-labelledby="label-to"
+                         aria-haspopup="listbox">
+                        <div class="field-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <span class="field-value" data-value>도착지 선택</span>
+                    </div>
+                    <div class="dropdown-panel" hidden>
+                        <input class="dropdown-search" type="text" placeholder="공항 검색 (예: NRT, 나리타)" autocomplete="off">
+                        <ul class="dropdown-list" data-list role="listbox"></ul>
+                    </div>
+                </div>
+
+                <!-- 날짜 -->
+                <div class="search-field date-field" data-field="dates">
+                    <label class="field-label" id="label-dates">Dates</label>
+                    <div class="field-input date-input-wrap" id="dateFieldWrap"
+                         role="button" tabindex="0"
+                         aria-labelledby="label-dates">
+                        <div class="field-icon">
+                            <i class="fa-regular fa-calendar"></i>
+                        </div>
+                        <div class="date-display-text">
+                            <span class="date-range-text" id="dateRangeText">날짜를 선택하세요</span>
+                        </div>
+                        <input type="hidden" id="dateStart">
+                        <input type="hidden" id="dateEnd">
+                    </div>
+                    <p class="date-help" id="dateError" hidden>도착일은 출발일보다 같거나 이후여야 해요.</p>
+                </div>
+
+                <!-- 인원 + 좌석 -->
+                <div class="search-field pax-field" data-field="paxCabin">
+                    <label class="field-label" id="label-pax">Travelers</label>
+                    <div class="field-input dropdown-toggle"
+                         role="button" tabindex="0"
+                         aria-expanded="false" aria-labelledby="label-pax"
+                         aria-haspopup="true">
+                        <div class="field-icon">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <span class="field-value" data-value>1명 / 이코노미</span>
+                    </div>
+                    <div class="dropdown-panel" hidden>
+                        <div class="pax-row">
+                            <span class="label">탑승 인원</span>
+                            <div class="stepper">
+                                <button type="button" class="stepper-btn" data-action="dec">-</button>
+                                <span class="stepper-value" id="paxCount">1</span>
+                                <button type="button" class="stepper-btn" data-action="inc">+</button>
+                            </div>
+                        </div>
+                        <div class="cabin-section">
+                            <span class="label">좌석 등급</span>
+                            <div class="cabin-cards">
+                                <label class="cabin-card" data-cabin="FST">
+                                    <input type="radio" name="cabin" value="FST">
+                                    <div class="cabin-card-inner">
+                                        <div class="cabin-icon">
+                                            <i class="fa-solid fa-crown"></i>
+                                        </div>
+                                        <div class="cabin-info">
+                                            <span class="cabin-name">퍼스트</span>
+                                            <span class="cabin-desc">최고급 서비스</span>
+                                        </div>
+                                        <div class="cabin-check">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cabin-card" data-cabin="BIZ">
+                                    <input type="radio" name="cabin" value="BIZ">
+                                    <div class="cabin-card-inner">
+                                        <div class="cabin-icon">
+                                            <i class="fa-solid fa-briefcase"></i>
+                                        </div>
+                                        <div class="cabin-info">
+                                            <span class="cabin-name">비즈니스</span>
+                                            <span class="cabin-desc">편안한 출장</span>
+                                        </div>
+                                        <div class="cabin-check">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cabin-card" data-cabin="ECO">
+                                    <input type="radio" name="cabin" value="ECO" checked>
+                                    <div class="cabin-card-inner">
+                                        <div class="cabin-icon">
+                                            <i class="fa-solid fa-chair"></i>
+                                        </div>
+                                        <div class="cabin-info">
+                                            <span class="cabin-name">이코노미</span>
+                                            <span class="cabin-desc">합리적인 선택</span>
+                                        </div>
+                                        <div class="cabin-check">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="panel-actions">
+                            <button type="button" class="btn" data-action="applyPaxCabin">적용</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 검색 버튼 -->
+                <button class="search-btn-logo" id="btnSearch" type="button">
+                    <img src="${pageContext.request.contextPath}/resources/seat/img/logo-icon.svg" alt="Search" class="search-logo-icon">
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter & Sort Row -->
+        <div class="filter-sort-row">
             <!-- Filters -->
             <div class="search-filters">
                 <div class="filter" data-filter-wrap="airline">
                     <button class="filter-button" data-filter="airline" type="button">
+                        <div class="filter-icon-circle">
+                            <i data-lucide="plane" style="width: 12px; height: 12px;"></i>
+                        </div>
                         <span>항공사</span>
-                        <img src="${pageContext.request.contextPath}/resources/search/img/dropdown-arrow.svg" alt="" class="filter-icon" />
+                        <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9ca3af;"></i>
                     </button>
 
                     <div class="filter-panel airline-options" data-filter-panel="airline" hidden>
@@ -276,8 +388,11 @@
                 <!-- 가격 -->
                 <div class="filter" data-filter-wrap="price">
                     <button class="filter-button" data-filter="price" type="button">
+                        <div class="filter-icon-circle">
+                            <i data-lucide="banknote" style="width: 12px; height: 12px;"></i>
+                        </div>
                         <span>가격</span>
-                        <img src="${pageContext.request.contextPath}/resources/search/img/dropdown-arrow.svg" alt="" class="filter-icon" />
+                        <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9ca3af;"></i>
                     </button>
 
                     <div class="filter-panel price-options" data-filter-panel="price" hidden>
@@ -307,8 +422,11 @@
 
                 <div class="filter" data-filter-wrap="out-time">
                     <button class="filter-button" data-filter="out-time">
+                        <div class="filter-icon-circle">
+                            <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                        </div>
                         <span>가는 날 시간대</span>
-                        <img src="${pageContext.request.contextPath}/resources/search/img/dropdown-arrow.svg" alt="" class="filter-icon" />
+                        <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9ca3af;"></i>
                     </button>
                     <div class="filter-panel time-filter-panel" data-filter-panel="out-time" hidden>
                         <div class="time-filter-header">
@@ -354,8 +472,11 @@
                 <!-- 오는 날 시간대 (왕복만) -->
                 <div class="filter" data-filter-wrap="in-time" data-rt-only>
                     <button class="filter-button" data-filter="in-time">
+                        <div class="filter-icon-circle">
+                            <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                        </div>
                         <span>오는 날 시간대</span>
-                        <img src="${pageContext.request.contextPath}/resources/search/img/dropdown-arrow.svg" alt="" class="filter-icon" />
+                        <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9ca3af;"></i>
                     </button>
 
                     <div class="filter-panel time-filter-panel" data-filter-panel="in-time" hidden>
@@ -399,17 +520,25 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Sort Button -->
+            <div class="sort-container">
+                <span class="result-count">
+                    <strong id="resultCount">0개</strong>의 항공편
+                </span>
+                <div class="divider"></div>
+                <button class="sort-button">
+                    <i data-lucide="arrow-down-wide-narrow" style="width: 16px; height: 16px;"></i>
+                    최저가순
+                </button>
+            </div>
         </div>
-    </section>
+    </div>
 
     <!-- Flight Results -->
     <section class="flights-section">
         <div class="flights-header">
             <h2 class="flights-title">항공편</h2>
-            <button class="sort-button">
-                <img src="${pageContext.request.contextPath}/resources/search/img/sort-icon.svg" alt="" class="sort-icon" />
-                <span>가격순 정렬</span>
-            </button>
         </div>
 
         <div id="resultList" class="flights-list"></div>
@@ -606,6 +735,11 @@
             setTimeout(initFlatpickr, 100);
         }
     })();
+
+    // Lucide 아이콘 초기화
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 </script>
 <script>
     // 1. 기본값은 비로그인(false)으로 설정
