@@ -27,7 +27,7 @@ const lastPriceLabelPlugin = {
         const y = lastPoint.y;
 
         ctx.save();
-        ctx.font = "12px sans-serif";
+        ctx.font = "12px Pretendard, sans-serif";
         ctx.textBaseline = "middle";
 
         const paddingX = 10;
@@ -73,72 +73,117 @@ function renderSegment(f) {
 
     // 항공사, 아이콘 표시
     let airlineName = "항공사";
-    let airlineLogoHtml = "";
+    let airlineLogoUrl = "";
 
     const prefix = flightNumber.substring(0, 2).toUpperCase();
 
     if (prefix === 'OZ') {
         airlineName = '아시아나항공';
-        airlineLogoHtml = '<img src="/resources/search/img/asiana-logo.svg" alt="Asiana" class="airline-logo">';
+        airlineLogoUrl = '/resources/search/img/asiana-logo.svg';
     } else if (prefix === 'KE') {
         airlineName = '대한항공';
-        airlineLogoHtml = '<img src="/resources/search/img/korean-logo.svg" alt="Korean" class="airline-logo">';
+        airlineLogoUrl = '/resources/search/img/korean-logo.svg';
     }
 
+    // 직항/경유 여부 (임시 로직: durationMinutes가 있으면 직항으로 간주)
+    const isDirect = true; 
+    const directBadge = isDirect 
+        ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-600 border border-green-100 font-pretendard">직항</span>`
+        : `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 font-pretendard">경유</span>`;
+
+    // 도착일 +1일 체크
+    const depDateObj = new Date(f.departureTime);
+    const arrDateObj = new Date(f.arrivalTime);
+    const dayDiff = isNextDay(depDateObj, arrDateObj);
+    const nextDayBadge = dayDiff > 0 ? `<span class="text-[10px] font-bold text-red-500 mt-1 font-pretendard">+${dayDiff}일</span>` : '';
+
     return `
-      <div class="flight-segment">
-        <div class="airline-info-group">
-          ${airlineLogoHtml}
-          <div class="airline-text">
-            <span class="flight-number">${airlineName}</span>
-            <span class="flight-number">${flightNumber}</span>
-          </div>
+      <div class="flex flex-col sm:flex-row sm:items-center py-8 gap-4 sm:gap-6 border-b border-gray-100 last:border-0 group px-5 sm:px-7 font-pretendard">
+        <!-- Airline -->
+        <div class="flex items-center gap-3 min-w-[140px]">
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-white border border-gray-100 flex items-center justify-center p-1.5 shrink-0 shadow-sm">
+                <img src="${airlineLogoUrl}" alt="${airlineName}" class="w-full h-full object-contain" />
+            </div>
+            <div class="flex flex-col">
+                <span class="text-sm font-bold text-gray-900 font-pretendard">${airlineName}</span>
+                <span class="text-xs text-gray-400 font-medium font-pretendard">${flightNumber}</span>
+            </div>
         </div>
-        
-        <div class="flight-details">
-          <div class="flight-time">
-            <div class="time-info">
-              <div class="time">${depTime}</div>
-              <div class="airport">${depAirport}</div>
+
+        <!-- Timeline -->
+        <div class="flex-1 flex items-center justify-between gap-2 sm:gap-6">
+            <div class="text-right min-w-[70px]">
+                <div class="text-xl font-bold text-gray-900 leading-tight font-pretendard">${depTime}</div>
+                <div class="text-xs font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded inline-block mt-1 font-pretendard">${depAirport}</div>
             </div>
-            <div class="duration-info">
-              <span class="duration-badge">직항</span>
-              <div class="duration-time">${time}</div>
+
+            <div class="flex-1 flex flex-col items-center px-2">
+                <div class="text-xs text-gray-500 mb-1 font-medium font-pretendard">${time}</div>
+                <div class="w-full h-[2px] bg-gray-200 relative flex items-center justify-center">
+                    <div class="absolute w-1.5 h-1.5 rounded-full bg-gray-300 left-0"></div>
+                    <div class="absolute w-1.5 h-1.5 rounded-full bg-gray-300 right-0"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plane" aria-hidden="true" class="lucide lucide-plane text-slate-400 transform rotate-45 w-4 h-4"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"></path></svg>
+                </div>
+                <div class="mt-1">
+                    ${directBadge}
+                </div>
             </div>
-            <div class="time-info">
-              <div class="time">${arrTime}</div>
-              <div class="airport">${arrAirport}</div>
+
+            <div class="text-left min-w-[70px]">
+                <div class="flex items-start gap-1">
+                    <span class="text-xl font-bold text-gray-900 leading-tight font-pretendard">${arrTime.split(' ')[0]}</span> <!-- +1일 제거된 시간만 -->
+                    ${nextDayBadge}
+                </div>
+                <div class="text-xs font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded inline-block mt-1 font-pretendard">${arrAirport}</div>
             </div>
-          </div>
         </div>
       </div>
     `;
 }
+
 function renderFooter(option, index) {
     const seatCount = option.totalSeats ?? "-";
     const totalPrice = option.totalPrice ?? "-";
 
     let totalSeatCount = seatCount;
+    let seatBadge = "";
 
-    if (totalSeatCount !== "-" && totalSeatCount > 9) {
-        totalSeatCount = 9;
+    if (totalSeatCount !== "-" && totalSeatCount <= 9) {
+        seatBadge = `
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 bg-red-50 whitespace-nowrap border border-red-100 font-pretendard">
+                <i data-lucide="armchair" class="w-3.5 h-3.5"></i>
+                ${totalSeatCount}석 남음
+            </div>
+        `;
     }
+    
     const price = formatPrice(totalPrice);
 
     return `
-      <div class="flight-footer">
-        <div class="flight-sub-actions">
-          <button class="flight-sub-action" type="button" data-action="open-graph">
-            <i data-lucide="trending-up" class="icon-sm"></i> 가격 변동
-          </button>
-          <button class="flight-sub-action" data-action="open-detail" onclick="openDetailPage(${index})">
-            <i data-lucide="info" class="icon-sm"></i> 여정 상세
-          </button>
+      <div class="bg-gray-50/50 border-t border-gray-100 px-5 sm:px-7 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-sm font-pretendard">
+        <div class="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+            <button class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-blue-600 bg-gradient-to-b from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 shadow-sm hover:shadow-md transition-all active:scale-95 whitespace-nowrap cursor-pointer font-pretendard border-0" type="button" data-action="open-graph">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                가격 변동
+            </button>
+            <button class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 bg-gradient-to-b from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 shadow-sm hover:shadow-md transition-all active:scale-95 whitespace-nowrap cursor-pointer font-pretendard border-0" data-action="open-detail" onclick="openDetailPage(${index})">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                여정 상세
+            </button>
+            ${seatBadge}
         </div>
-        <div class="seats-remaining">${totalSeatCount}석 이상 남음</div>
-        <div class="flight-price" tabindex="0">
-          <span class="price">${price}원</span>
-          <img src="${CONTEXT_PATH}/resources/search/img/arrow-right.svg" alt="" class="price-arrow" />
+
+        <div class="flex items-center justify-end gap-4 w-full sm:w-auto">
+            <div class="text-right">
+                <div class="text-2xl font-bold text-gray-900 tracking-tight font-pretendard">
+                    ${price}<span class="text-lg font-medium text-gray-500 ml-1 font-pretendard">원</span>
+                </div>
+                <div class="text-[10px] text-gray-400 font-normal font-pretendard">유류할증료 및 세금 포함</div>
+            </div>
+
+            <button class="flex items-center justify-center w-auto h-auto px-6 py-3 bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 flight-select-btn cursor-pointer border-0 font-pretendard">
+                <span class="font-bold text-sm font-pretendard">선택</span>
+            </button>
         </div>
       </div>
     `;
@@ -146,14 +191,16 @@ function renderFooter(option, index) {
 
 // 아이콘 활성화
 function refreshIcons() {
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 }
 
 function createOneWayCard(option, index) {
     const f = option.outbound;
 
     return `
-    <article class="flight-card" data-out-id="${option.outbound.flightId}">
+    <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden w-full mx-auto flight-card mb-5 font-pretendard" data-out-id="${option.outbound.flightId}">
       ${renderSegment(f)}
       ${renderFooter(option, index)}
       
@@ -163,12 +210,12 @@ function createOneWayCard(option, index) {
         </div>
 
         <div class="price-graph-body">
-          <div class="price-graph-loading" hidden>불러오는 중..</div>
-          <div class="price-graph-empty" hidden>가격 이력이 없습니다.</div>
+          <div class="price-graph-loading font-pretendard" hidden>불러오는 중..</div>
+          <div class="price-graph-empty font-pretendard" hidden>가격 이력이 없습니다.</div>
           <canvas class="price-graph-canvas"></canvas>
         </div>
 
-        <button type="button" class="price-graph-closebar" data-action="close-graph">
+        <button type="button" class="price-graph-closebar font-pretendard" data-action="close-graph">
           그래프 닫기
         </button>
       </div>
@@ -181,7 +228,7 @@ function createRoundTripCard(option, index) {
     const i = option.inbound;
 
     return `
-    <article class="flight-card" data-out-id="${o.flightId}" data-in-id="${i.flightId}">
+    <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden w-full mx-auto flight-card mb-5 font-pretendard" data-out-id="${o.flightId}" data-in-id="${i.flightId}">
       ${renderSegment(o)}
       ${renderSegment(i)}
       ${renderFooter(option, index)}
@@ -190,7 +237,7 @@ function createRoundTripCard(option, index) {
       <div class="price-graph-panel" hidden>
         <div class="price-graph-head">
 
-          <div class="price-graph-tabs">
+          <div class="price-graph-tabs font-pretendard">
             <button type="button" class="price-graph-tab is-active"
                     data-action="graph-tab" data-target="sum">합산가</button>    
             <button type="button" class="price-graph-tab"
@@ -201,12 +248,12 @@ function createRoundTripCard(option, index) {
         </div>
 
         <div class="price-graph-body">
-          <div class="price-graph-loading" hidden>불러오는 중..</div>
-          <div class="price-graph-empty" hidden>가격 이력이 없습니다.</div>
+          <div class="price-graph-loading font-pretendard" hidden>불러오는 중..</div>
+          <div class="price-graph-empty font-pretendard" hidden>가격 이력이 없습니다.</div>
           <canvas class="price-graph-canvas"></canvas>
         </div>
 
-        <button type="button" class="price-graph-closebar" data-action="close-graph">
+        <button type="button" class="price-graph-closebar font-pretendard" data-action="close-graph">
           그래프 닫기
         </button>
       </div>
@@ -617,58 +664,59 @@ document.getElementById("resultList").addEventListener("click", async (e) => {
         return;
     }
 
-    if (e.target.closest(".action-button") || e.target.closest("button")) {
-        return;
-    }
+    // 선택 버튼 클릭 시
+    const selectBtn = e.target.closest(".flight-select-btn");
+    if (selectBtn) {
+        const card = selectBtn.closest(".flight-card");
+        if (!card) return;
 
-    const card = e.target.closest(".flight-card");
-    if (!card) return;
+        const outId = card.dataset.outId;
+        const inId = card.dataset.inId || null; // 편도일 경우 null
+        let priceData = null;
 
-    const outId = card.dataset.outId;
-    const inId = card.dataset.inId || null; // 편도일 경우 null
-    let priceData = null;
-
-    try {
-        const params = new URLSearchParams({
-            outFlightId: outId,
-            cabinClassCode: state.cabin
-        });
-        if (inId) {
-            params.set("inFlightId", inId);
-        }
-
-        const response = await fetch(`/api/public/flights/prices?${params}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+        try {
+            const params = new URLSearchParams({
+                outFlightId: outId,
+                cabinClassCode: state.cabin
+            });
+            if (inId) {
+                params.set("inFlightId", inId);
             }
-        });
 
-        if (!response.ok) {
-            throw new Error("가격 못 불러옴");
+            const response = await fetch(`${CONTEXT_PATH}/api/public/flights/prices?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("가격 못 불러옴");
+            }
+            priceData = await response.json();
+        } catch (error) {
+            console.log("가격조회 실패", error);
+            return;
         }
-        priceData = await response.json();
-    } catch (error) {
-        console.log("가격조회 실패", error);
+
+        const outFlight = priceData.find(p => p.flightId == outId);
+        const inFlight = inId ? priceData.find(p => p.flightId == inId) : null;
+
+        if(!outFlight) {
+            alert("항공편 정보 x");
+            return;
+        }
+
+        // hidden 폼에 값 설정
+        document.getElementById("hiddenOutFlightId").value = card.dataset.outId;
+        document.getElementById("hiddenInFlightId").value = card.dataset.inId || "";
+        document.getElementById("hiddenPassengerCount").value = state.passengers;
+        document.getElementById("hiddenCabinClassCode").value = state.cabin;
+        document.getElementById("hiddenOutPrice").value = outFlight.flightPrice;
+        document.getElementById("hiddenInPrice").value = inFlight ? inFlight.flightPrice : 0;
+
+        // 폼 제출 → /reservations/draft → 동의 페이지로 redirect
+        document.getElementById("reservationForm").submit();
         return;
     }
-
-    const outFlight = priceData.find(p => p.flightId == outId);
-    const inFlight = inId ? priceData.find(p => p.flightId == inId) : null;
-
-    if(!outFlight) {
-        alert("항공편 정보 x");
-        return;
-    }
-
-    // hidden 폼에 값 설정
-    document.getElementById("hiddenOutFlightId").value = card.dataset.outId;
-    document.getElementById("hiddenInFlightId").value = card.dataset.inId || "";
-    document.getElementById("hiddenPassengerCount").value = state.passengers;
-    document.getElementById("hiddenCabinClassCode").value = state.cabin;
-    document.getElementById("hiddenOutPrice").value = outFlight.flightPrice;
-    document.getElementById("hiddenInPrice").value = inFlight ? inFlight.flightPrice : 0;
-
-    // 폼 제출 → /reservations/draft → 동의 페이지로 redirect
-    document.getElementById("reservationForm").submit();
 });
