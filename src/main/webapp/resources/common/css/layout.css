@@ -6,9 +6,6 @@
 :root {
     --brand-blue: #2563eb;
     --brand-blue-hover: #1d4ed8;
-    /* 세련된 비행기 모양의 SVG 커서 */
-    --plane-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%232563eb'%3E%3Cpath d='M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z' transform='rotate(45 12 12)'/%3E%3C/svg%3E") 16 16, auto;
-    --plane-hover-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%231d4ed8'%3E%3Cpath d='M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z' transform='rotate(60 12 12) scale(1.1)'/%3E%3C/svg%3E") 16 16, auto;
 }
 
 html {
@@ -19,14 +16,8 @@ body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     background: linear-gradient(to bottom, #dbeafe 0%, #eff6ff 50%, #ffffff 100%);
     background-attachment: fixed;
-    cursor: var(--plane-cursor);
     overflow-x: hidden;
     min-height: 100vh;
-}
-
-/* 인터랙티브 요소 커서 변경 */
-a, button, input, select, .interactive {
-    cursor: var(--plane-hover-cursor) !important;
 }
 
 /* --- Glassmorphism Header --- */
@@ -397,4 +388,134 @@ body.scrolled .glass-header-bg {
     background: var(--brand-blue) !important;
     color: white !important;
     border-color: var(--brand-blue) !important;
+}
+
+/* ========================================
+   반응형 레이아웃 (Header & Buttons)
+   ======================================== */
+
+/* 태블릿 (1024px 이하) */
+@media (max-width: 1024px) {
+    .glass-header {
+        width: 96%;
+    }
+
+    .glass-header .px-10 {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* 모바일 (768px 이하) */
+@media (max-width: 768px) {
+    .glass-header {
+        width: 94%;
+        top: 0.5rem;
+        border-radius: 1.5rem;
+    }
+
+    .glass-header-bg {
+        border-radius: 1.5rem;
+    }
+
+    .glass-header .px-10 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* 헤더 버튼 영역 */
+    .glass-header .flex.items-center.space-x-3 {
+        gap: 0.25rem;
+    }
+
+    /* 헤더 버튼 크기 축소 */
+    .tilt-btn.auth-text-btn {
+        min-width: auto;
+        height: 36px;
+        padding: 0.4rem 0.6rem !important;
+    }
+
+    .tilt-btn.auth-text-btn .btn-text,
+    .auth-text-btn {
+        font-size: 12px;
+    }
+
+    /* 로고 크기 축소 */
+    .logo-text-3d {
+        height: 32px !important;
+    }
+}
+
+/* 소형 모바일 (480px 이하) */
+@media (max-width: 480px) {
+    .glass-header {
+        width: 92%;
+        top: 0.4rem;
+        border-radius: 1.25rem;
+    }
+
+    .glass-header-bg {
+        border-radius: 1.25rem;
+    }
+
+    .glass-header .px-10 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    /* 헤더 버튼 더 작게 */
+    .tilt-btn.auth-text-btn {
+        height: 32px;
+        padding: 0.3rem 0.5rem !important;
+    }
+
+    .auth-text-btn {
+        font-size: 11px !important;
+    }
+
+    /* 로고 더 작게 */
+    .logo-text-3d {
+        height: 28px !important;
+    }
+}
+
+/* 극소형 모바일 (360px 이하) - 버튼 한 줄에 안 맞을 때 */
+@media (max-width: 360px) {
+    .glass-header {
+        width: 94%;
+    }
+
+    .glass-header .px-10 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* 버튼 텍스트 숨기고 아이콘만 표시하거나 더 작게 */
+    .tilt-btn.auth-text-btn {
+        padding: 0.25rem 0.4rem !important;
+        font-size: 10px !important;
+    }
+
+    .logo-text-3d {
+        height: 24px !important;
+    }
+}
+
+/* overflow 방지 */
+.glass-header .flex.items-center.space-x-3 {
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+/* 헤더 spacer 반응형 */
+@media (max-width: 768px) {
+    .header-spacer {
+        height: 80px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-spacer {
+        height: 72px !important;
+    }
 }

@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 4. 토스트 알림 (있으면)
     showToastNotifications();
+
+    // 5. 다크모드 초기화
+    initDarkMode();
 });
 
 /**
@@ -57,9 +60,18 @@ function setupLogoutConfirm() {
     const logoutForm = document.querySelector('form[action*="logout"]');
 
     if (logoutForm) {
-        logoutForm.addEventListener('submit', function(e) {
-            if (!confirm('정말 로그아웃하시겠습니까?')) {
-                e.preventDefault();
+        logoutForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const confirmed = await Swal.confirm('정말 로그아웃하시겠습니까?', {
+                title: '로그아웃',
+                icon: 'question',
+                confirmText: '로그아웃',
+                cancelText: '취소'
+            });
+
+            if (confirmed) {
+                this.submit();
             }
         });
     }
@@ -113,6 +125,61 @@ function refreshDashboard() {
 }
 
 /**
+ * 다크모드 초기화 및 토글
+ */
+function initDarkMode() {
+    const toggle = document.getElementById('darkmode-toggle');
+    if (!toggle) return;
+
+    // 저장된 설정 불러오기 (기본: 다크모드)
+    const isDark = localStorage.getItem('adminDarkMode') !== 'false';
+    applyDarkMode(isDark);
+
+    toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const currentDark = document.body.classList.contains('admin-dark');
+        const newDark = !currentDark;
+
+        localStorage.setItem('adminDarkMode', newDark);
+        applyDarkMode(newDark);
+
+        // 토스트 알림
+        if (typeof Swal !== 'undefined' && Swal.toast) {
+            Swal.toast(newDark ? '다크모드 활성화' : '라이트모드 활성화', 'success', 1500);
+        }
+    });
+
+    function applyDarkMode(isDark) {
+        const iconEl = document.getElementById('darkmode-icon');
+
+        if (isDark) {
+            document.body.classList.add('admin-dark');
+            document.body.classList.remove('admin-light');
+        } else {
+            document.body.classList.remove('admin-dark');
+            document.body.classList.add('admin-light');
+        }
+
+        // 아이콘 교체
+        if (iconEl) {
+            const iconName = isDark ? 'moon' : 'sun';
+            const newIcon = document.createElement('i');
+            newIcon.setAttribute('data-lucide', iconName);
+            newIcon.id = 'darkmode-icon';
+            newIcon.className = 'w-5 h-5 flex-shrink-0';
+            iconEl.parentNode.replaceChild(newIcon, iconEl);
+        }
+
+        // Lucide 아이콘 다시 렌더링
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+}
+
+/**
  * AJAX 헬퍼 함수
  */
 async function fetchJSON(url, options = {}) {
@@ -136,3 +203,4 @@ async function fetchJSON(url, options = {}) {
         throw error;
     }
 }
+

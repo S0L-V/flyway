@@ -92,6 +92,34 @@ public class StatisticsScheduler {
 	}
 
 	/**
+	 * 누락된 일일 통계 백필 (수동 호출용)
+	 * @param fromDate 시작일
+	 * @param toDate 종료일
+	 */
+	public void backfillDailyStatistics(LocalDate fromDate, LocalDate toDate) {
+		log.info("[Statistics] 일일 통계 백필 시작: {} ~ {}", fromDate, toDate);
+
+		LocalDate current = fromDate;
+		int successCount = 0;
+		int failCount = 0;
+
+		while (!current.isAfter(toDate)) {
+			try {
+				StatisticsDto stats = calculateStatistics("DAILY", current, current);
+				statisticsRepository.saveStatistics(stats);
+				successCount++;
+				log.debug("[Statistics] 백필 완료: {}", current);
+			} catch (Exception e) {
+				failCount++;
+				log.error("[Statistics] 백필 실패: {} - {}", current, e.getMessage());
+			}
+			current = current.plusDays(1);
+		}
+
+		log.info("[Statistics] 일일 통계 백필 완료: 성공={}, 실패={}", successCount, failCount);
+	}
+
+	/**
 	 * 통계 계산 공통 메서드
 	 */
 	private StatisticsDto calculateStatistics(String statType, LocalDate startDate, LocalDate endDate) {

@@ -1212,9 +1212,67 @@
     }
 }
 
+/* 태블릿 (1024px 이하) */
+@media (max-width: 1024px) {
+    .hero-content {
+        padding: 0 1.5rem;
+    }
+
+    .search-glass-panel {
+        padding: 1.2rem;
+    }
+
+    .field-input {
+        padding: 0.8rem 1rem;
+        height: 56px;
+    }
+
+    .field-value {
+        font-size: 14px;
+    }
+
+    .search-btn-logo {
+        width: 56px;
+        height: 56px;
+        min-width: 56px;
+    }
+}
+
+/* 태블릿 세로 (768px 이하) */
 @media (max-width: 768px) {
+    .hero-section {
+        padding-top: 100px;
+        padding-bottom: 60px;
+    }
+
+    .hero-content {
+        padding: 0 1rem;
+    }
+
+    .hero-badge span {
+        font-size: 10px;
+        padding: 0.5rem 1rem;
+        letter-spacing: 0.2em;
+    }
+
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+    }
+
+    .trip-selector {
+        margin-bottom: 1rem;
+    }
+
+    .trip-btn {
+        padding: 0.5rem 1.2rem;
+        font-size: 12px;
+        min-width: 60px;
+    }
+
+    .search-glass-panel {
+        border-radius: 1.5rem;
+        padding: 1rem;
     }
 
     .search-grid {
@@ -1222,19 +1280,55 @@
         gap: 0.6rem;
     }
 
+    .field-label {
+        font-size: 10px;
+        margin-left: 1rem;
+    }
+
+    .field-input {
+        padding: 0.7rem 0.9rem;
+        height: 52px;
+        gap: 0.6rem;
+    }
+
+    .field-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+    }
+
+    .field-icon i {
+        font-size: 12px;
+    }
+
+    .field-value {
+        font-size: 13px;
+    }
+
+    .date-field .date-range-text {
+        font-size: 12px;
+    }
+
     .search-btn-logo {
         width: 100%;
-        height: 56px;
-        border-radius: 2rem;
+        height: 52px;
+        border-radius: 1.5rem;
         grid-column: span 2;
     }
 
-    .search-glass-panel {
-        border-radius: 2rem;
-        padding: 1rem;
+    .search-logo-icon {
+        width: 26px;
+        height: 26px;
     }
 
-    /* Cabin cards mobile */
+    /* Dropdown panels */
+    .search-field .dropdown-panel {
+        min-width: calc(100vw - 3rem);
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 350px;
+    }
+
     .search-field[data-field="paxCabin"] .dropdown-panel {
         min-width: 280px;
         width: 280px;
@@ -1263,5 +1357,102 @@
 
     .search-field .cabin-desc {
         font-size: 9px;
+    }
+}
+
+/* 소형 모바일 (480px 이하) */
+@media (max-width: 480px) {
+    .hero-section {
+        padding-top: 90px;
+        padding-bottom: 50px;
+    }
+
+    .hero-content {
+        padding: 0 0.75rem;
+    }
+
+    .hero-badge span {
+        font-size: 9px;
+        padding: 0.4rem 0.8rem;
+        letter-spacing: 0.15em;
+    }
+
+    .hero-title {
+        font-size: 1.35rem;
+        line-height: 1.4;
+    }
+
+    .trip-selector {
+        padding: 3px;
+    }
+
+    .trip-btn {
+        padding: 0.4rem 1rem;
+        font-size: 11px;
+        min-width: 50px;
+    }
+
+    .search-glass-panel {
+        padding: 0.8rem;
+        border-radius: 1.25rem;
+    }
+
+    .search-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .field-input {
+        padding: 0.6rem 0.8rem;
+        height: 48px;
+    }
+
+    .field-icon {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+    }
+
+    .field-icon i {
+        font-size: 11px;
+    }
+
+    .field-value {
+        font-size: 12px;
+    }
+
+    .date-field .date-range-text {
+        font-size: 11px;
+    }
+
+    .search-btn-logo {
+        grid-column: span 1;
+        height: 48px;
+        border-radius: 1.25rem;
+    }
+
+    .search-logo-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Dropdown panels 모바일 */
+    .search-field .dropdown-panel {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        min-width: 100%;
+        max-width: 100%;
+        border-radius: 1.5rem 1.5rem 0 0;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .search-field[data-field="paxCabin"] .dropdown-panel {
+        min-width: 100%;
+        width: 100%;
     }
 }

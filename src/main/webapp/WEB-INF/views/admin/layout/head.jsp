@@ -15,6 +15,11 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="${pageContext.request.contextPath}/resources/common/js/swal-utils.js"></script>
+
     <!-- CountUp.js (숫자 애니메이션) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"></script>
 
@@ -44,5 +49,12 @@
     <script>
         window.CONTEXT_PATH = '${pageContext.request.contextPath}';
     </script>
+    <!-- 다크모드 초기 설정 (깜빡임 방지) -->
+    <script>
+        (function() {
+            const isDark = localStorage.getItem('adminDarkMode') !== 'false';
+            document.documentElement.classList.add(isDark ? 'admin-dark' : 'admin-light');
+        })();
+    </script>
 </head>
-<body class="bg-[#f1f5f9]">
+<body class="admin-dark">

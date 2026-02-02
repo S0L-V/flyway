@@ -140,6 +140,7 @@
 
             var html = notifications.map(function(notification) {
                 var icon = getNotificationIconGlass(notification.notificationType);
+                var typeLabel = getNotificationTypeLabel(notification.notificationType);
                 var isUnread = notification.isRead === 'N';
                 var timeAgo = formatTimeAgo(notification.createdAt);
                 var bgClass = isUnread ? 'bg-blue-500/20 border-l-2 border-l-blue-400' : 'bg-white/5';
@@ -153,9 +154,12 @@
                     '<i data-lucide="' + icon.name + '" class="w-5 h-5"></i>' +
                     '</div>' +
                     '<div class="flex-1 min-w-0">' +
+                    '<div class="flex items-center gap-2 mb-1">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ' + typeLabel.bgColor + ' ' + typeLabel.textColor + '">' + typeLabel.label + '</span>' +
+                    '<span class="text-xs text-white/50">' + timeAgo + '</span>' +
+                    '</div>' +
                     '<div class="text-sm ' + (isUnread ? 'font-bold text-white' : 'font-medium text-white/90') + '">' + escapeHtml(notification.title) + '</div>' +
-                    '<div class="text-[13px] text-white/80 mt-1.5 leading-relaxed line-clamp-2">' + escapeHtml(notification.message) + '</div>' +
-                    '<div class="text-xs text-white/60 mt-2 font-medium">' + timeAgo + '</div>' +
+                    '<div class="text-[13px] text-white/70 mt-1 leading-relaxed">' + escapeHtml(notification.message) + '</div>' +
                     '</div>' +
                     (isUnread ? '<span class="w-2.5 h-2.5 bg-blue-400 rounded-full shrink-0 mt-1.5 animate-pulse shadow-lg shadow-blue-400/50"></span>' : '') +
                     '</div>' +
@@ -321,9 +325,22 @@
             switch (type) {
                 case 'NEW_RESERVATION': return { name: 'ticket', bgColor: 'bg-blue-500/20', textColor: 'text-blue-400' };
                 case 'REFUND_REQUEST': return { name: 'rotate-ccw', bgColor: 'bg-orange-500/20', textColor: 'text-orange-400' };
+                case 'REFUND_COMPLETED': return { name: 'check-circle', bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-400' };
                 case 'PAYMENT_FAILED': return { name: 'alert-circle', bgColor: 'bg-rose-500/20', textColor: 'text-rose-400' };
                 case 'SYSTEM_ALERT': return { name: 'alert-triangle', bgColor: 'bg-yellow-500/20', textColor: 'text-yellow-400' };
                 default: return { name: 'bell', bgColor: 'bg-white/10', textColor: 'text-glass-secondary' };
+            }
+        }
+
+        // 알림 타입 라벨 (흰색 텍스트)
+        function getNotificationTypeLabel(type) {
+            switch (type) {
+                case 'NEW_RESERVATION': return { label: '신규예약', bgColor: 'bg-blue-500', textColor: 'text-white' };
+                case 'REFUND_REQUEST': return { label: '환불요청', bgColor: 'bg-orange-500', textColor: 'text-white' };
+                case 'REFUND_COMPLETED': return { label: '환불완료', bgColor: 'bg-emerald-500', textColor: 'text-white' };
+                case 'PAYMENT_FAILED': return { label: '결제실패', bgColor: 'bg-rose-500', textColor: 'text-white' };
+                case 'SYSTEM_ALERT': return { label: '시스템', bgColor: 'bg-yellow-500', textColor: 'text-white' };
+                default: return { label: '알림', bgColor: 'bg-slate-500', textColor: 'text-white' };
             }
         }
     })();

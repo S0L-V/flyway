@@ -101,7 +101,7 @@ const AdminDashboard = (function() {
             labelRevenue: document.getElementById('label-revenue'),
 
             // 기간 선택 탭 (iOS 세그먼트)
-            periodTabs: document.querySelectorAll('.ios-segment-btn'),
+            periodTabs: document.querySelectorAll('#period-segment .ios-segment-btn'),
             periodSegment: document.getElementById('period-segment'),
 
             // 알림
@@ -375,7 +375,7 @@ const AdminDashboard = (function() {
     }
 
     /**
-     * 알림 업데이트
+     * 알림 업데이트 (글래스 스타일 - topbar.jsp와 동일)
      */
     function updateNotifications(notifications) {
         console.log('[Dashboard] Updating notifications:', notifications.length);
@@ -385,31 +385,42 @@ const AdminDashboard = (function() {
 
         if (notifications.length === 0) {
             elements.notificationList.innerHTML = `
-                <div class="text-center text-slate-400 py-4 px-4">
-                    알림이 없습니다.
+                <div class="flex flex-col items-center justify-center py-12 px-4">
+                    <i data-lucide="bell-off" class="w-10 h-10 text-white/30 mb-3"></i>
+                    <p class="text-white/50 text-sm">새로운 알림이 없습니다</p>
                 </div>
             `;
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
             return;
         }
 
         const html = notifications.map(notification => {
-            const icon = getNotificationIcon(notification.notificationType);
+            const icon = getNotificationIconGlass(notification.notificationType);
+            const typeLabel = getNotificationTypeLabel(notification.notificationType);
             const isUnread = notification.isRead === 'N';
-            const timeAgo = formatTimeAgo(notification.createdAt);
+            const timeAgo = formatTimeAgoKorean(notification.createdAt);
+            const bgClass = isUnread ? 'bg-blue-500/20 border-l-2 border-l-blue-400' : 'bg-white/5';
 
             return `
-                <div class="notification-item p-4 ${isUnread ? 'bg-blue-50' : ''} hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
-                     data-notification-id="${escapeHtml(notification.notificationId)}">
-                    <div class="flex items-start gap-3">
-                        <div class="p-1.5 ${icon.bgColor} ${icon.textColor} rounded-full">
-                            <i data-lucide="${icon.name}" class="w-4 h-4"></i>
+                <div class="notification-item p-4 ${bgClass} hover:bg-white/15 cursor-pointer border-b border-white/10 last:border-b-0 transition-all duration-200"
+                     data-notification-id="${escapeHtml(notification.notificationId)}"
+                     data-resource-type="${escapeHtml(notification.relatedResourceType || '')}"
+                     data-resource-id="${escapeHtml(notification.relatedResourceId || '')}">
+                    <div class="flex items-start gap-4">
+                        <div class="p-2.5 ${icon.bgColor} ${icon.textColor} rounded-lg shrink-0">
+                            <i data-lucide="${icon.name}" class="w-5 h-5"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="font-medium text-sm text-slate-800 ${isUnread ? 'font-semibold' : ''}">${escapeHtml(notification.title)}</div>
-                            <div class="text-xs text-slate-500 mt-0.5 truncate">${escapeHtml(notification.message)}</div>
-                            <div class="text-xs text-slate-400 mt-1">${timeAgo}</div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ${typeLabel.bgColor} ${typeLabel.textColor}">${typeLabel.label}</span>
+                                <span class="text-xs text-white/50">${timeAgo}</span>
+                            </div>
+                            <div class="text-sm ${isUnread ? 'font-bold text-white' : 'font-medium text-white/90'}">${escapeHtml(notification.title)}</div>
+                            <div class="text-[13px] text-white/70 mt-1 leading-relaxed">${escapeHtml(notification.message)}</div>
                         </div>
-                        ${isUnread ? '<span class="w-2 h-2 bg-blue-500 rounded-full"></span>' : ''}
+                        ${isUnread ? '<span class="w-2.5 h-2.5 bg-blue-400 rounded-full shrink-0 mt-1.5 animate-pulse shadow-lg shadow-blue-400/50"></span>' : ''}
                     </div>
                 </div>
             `;
@@ -421,8 +432,10 @@ const AdminDashboard = (function() {
         elements.notificationList.querySelectorAll('.notification-item').forEach(function(item) {
             item.addEventListener('click', function() {
                 var id = this.getAttribute('data-notification-id');
+                var resourceType = this.getAttribute('data-resource-type');
+                var resourceId = this.getAttribute('data-resource-id');
                 if (id) {
-                    markAsRead(id);
+                    markAsReadAndNavigate(id, resourceType, resourceId);
                 }
             });
         });
@@ -464,6 +477,36 @@ const AdminDashboard = (function() {
                 }
             })
             .catch(error => console.error('[Dashboard] Failed to mark as read:', error));
+    }
+
+    /**
+     * 알림 읽음 처리 후 결제 내역으로 이동
+     */
+    function markAsReadAndNavigate(notificationId, resourceType, resourceId) {
+        fetch(basePath + '/admin/api/dashboard/notifications/' + encodeURIComponent(notificationId) + '/read', {
+            method: 'POST',
+            credentials: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 결제/예약 관련이면 결제 내역 페이지로 이동
+                if (resourceType === 'RESERVATION' || resourceType === 'PAYMENT') {
+                    var url = basePath + '/admin/payments';
+                    if (resourceId) {
+                        url += '?keyword=' + encodeURIComponent(resourceId);
+                    }
+                    window.location.href = url;
+                } else {
+                    // 그 외의 경우 WebSocket으로 알림 새로고침
+                    AdminWebSocket.requestNotifications();
+                    AdminWebSocket.requestStats();
+                }
+            })
+            .catch(error => {
+                console.error('[Dashboard] Failed to mark as read:', error);
+                // 에러가 나도 페이지 이동 시도
+                window.location.href = basePath + '/admin/payments';
+            });
     }
 
     /**
@@ -1573,6 +1616,64 @@ const AdminDashboard = (function() {
             default:
                 return { name: 'bell', bgColor: 'bg-slate-100', textColor: 'text-slate-600' };
         }
+    }
+
+    // 글래스 테마용 알림 아이콘
+    function getNotificationIconGlass(type) {
+        switch (type) {
+            case 'NEW_RESERVATION':
+                return { name: 'ticket', bgColor: 'bg-blue-500/20', textColor: 'text-blue-400' };
+            case 'REFUND_REQUEST':
+                return { name: 'rotate-ccw', bgColor: 'bg-orange-500/20', textColor: 'text-orange-400' };
+            case 'REFUND_COMPLETED':
+                return { name: 'check-circle', bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-400' };
+            case 'PAYMENT_FAILED':
+                return { name: 'alert-circle', bgColor: 'bg-rose-500/20', textColor: 'text-rose-400' };
+            case 'SYSTEM_ALERT':
+                return { name: 'alert-triangle', bgColor: 'bg-yellow-500/20', textColor: 'text-yellow-400' };
+            default:
+                return { name: 'bell', bgColor: 'bg-white/10', textColor: 'text-glass-secondary' };
+        }
+    }
+
+    // 알림 타입 라벨
+    function getNotificationTypeLabel(type) {
+        switch (type) {
+            case 'NEW_RESERVATION':
+                return { label: '신규예약', bgColor: 'bg-blue-500', textColor: 'text-white' };
+            case 'REFUND_REQUEST':
+                return { label: '환불요청', bgColor: 'bg-orange-500', textColor: 'text-white' };
+            case 'REFUND_COMPLETED':
+                return { label: '환불완료', bgColor: 'bg-emerald-500', textColor: 'text-white' };
+            case 'PAYMENT_FAILED':
+                return { label: '결제실패', bgColor: 'bg-rose-500', textColor: 'text-white' };
+            case 'SYSTEM_ALERT':
+                return { label: '시스템', bgColor: 'bg-yellow-500', textColor: 'text-white' };
+            default:
+                return { label: '알림', bgColor: 'bg-slate-500', textColor: 'text-white' };
+        }
+    }
+
+    // 알림용 한국어 시간 포맷 (topbar.jsp와 동일)
+    function formatTimeAgoKorean(dateInput) {
+        if (!dateInput) return '';
+        var date;
+        if (typeof dateInput === 'string') {
+            date = new Date(dateInput.replace('T', ' '));
+        } else if (Array.isArray(dateInput)) {
+            date = new Date(dateInput[0], (dateInput[1] || 1) - 1, dateInput[2] || 1, dateInput[3] || 0, dateInput[4] || 0, dateInput[5] || 0);
+        } else {
+            date = new Date(dateInput);
+        }
+        if (isNaN(date.getTime())) return '';
+
+        var now = new Date();
+        var diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return '방금 전';
+        if (diff < 3600) return Math.floor(diff / 60) + '분 전';
+        if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
+        if (diff < 604800) return Math.floor(diff / 86400) + '일 전';
+        return date.toLocaleDateString('ko-KR');
     }
 
     // Public API
