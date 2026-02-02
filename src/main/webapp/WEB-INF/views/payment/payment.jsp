@@ -192,6 +192,57 @@
                 <span class="payment-value"><c:out value="${customerName}"/></span>
             </div>
         </div>
+        <!--항공편 및 좌석/부가서비스 정보 -->
+        <div class="payment-info" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee;">
+            <div style="font-weight: 700; margin-bottom: 12px; color: #333;">예약 상세</div>
+
+            <c:forEach var="seg" items="${segments}">
+                <div style="background: #f9f9f9; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <div style="font-weight: 600; color: #1f6feb; margin-bottom: 8px;">
+                            ${seg.segmentOrder == 1 ? '가는편' : '오는편'} | ${seg.snapFlightNumber}
+                    </div>
+                    <div style="font-size: 13px; color: #666; margin-bottom: 4px;">
+                            ${seg.snapDepartureAirport} → ${seg.snapArrivalAirport}
+                    </div>
+
+                    <!-- 좌석 정보 -->
+                    <c:if test="${not empty seg.passengerSeats}">
+                        <div style="font-size: 12px; color: #888; margin-top: 8px;">
+                            <span style="color: #333; font-weight: 600;">좌석:</span>
+                            <c:forEach var="seat" items="${seg.passengerSeats}" varStatus="st">
+                                ${seat.passengerName} ${seat.seatNo}<c:if test="${!st.last}">, </c:if>
+                            </c:forEach>
+                        </div>
+                    </c:if>
+
+                    <!-- 부가서비스 정보 -->
+                    <c:forEach var="svc" items="${seg.passengerServices}">
+                        <div style="font-size: 12px; color: #888; margin-top: 4px;">
+                            <c:if test="${svc.serviceType == '0'}">
+                                <span style="color: #333; font-weight: 600;">수하물:</span> ${svc.passengerName}
+                                ${svc.serviceName}
+                            </c:if>
+                            <c:if test="${svc.serviceType == '1'}">
+                                <span style="color: #333; font-weight: 600;">기내식:</span> ${svc.passengerName}
+                                ${svc.serviceName}
+                            </c:if>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:forEach>
+        </div>
+
+        <!-- 금액 상세 -->
+        <div class="payment-info" style="margin-top: 16px;">
+            <div class="payment-row">
+                <span class="payment-label">항공 운임 (${passengerCount}명)</span>
+                <span class="payment-value"><fmt:formatNumber value="${flightTotal}" type="number"/>원</span>
+            </div>
+            <div class="payment-row">
+                <span class="payment-label">부가서비스</span>
+                <span class="payment-value"><fmt:formatNumber value="${serviceTotal}" type="number"/>원</span>
+            </div>
+        </div>
 
         <!-- 총 결제 금액 -->
         <div class="payment-total">
