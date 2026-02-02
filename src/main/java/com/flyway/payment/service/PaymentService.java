@@ -72,7 +72,7 @@ public class PaymentService {
      * 1단계: 결제 준비 - 예약 검증 및 PENDING 상태로 결제 생성
      */
     @Transactional
-    public PaymentViewDto  preparePaymentByOrderId(PaymentConfirmRequest request) {
+    public PaymentViewDto preparePaymentByOrderId(PaymentConfirmRequest request) {
         String reservationId = extractReservationId(request.getOrderId());
 
         // 예약 row 잠금 (동시 결제 방지)
@@ -117,7 +117,7 @@ public class PaymentService {
     }
 
     /**
-     *  결제 완료 처리
+     * 결제 완료 처리
      */
     @Transactional
     public PaymentViewDto completePayment(String paymentId, TossPaymentResponse tossResponse) {
@@ -186,7 +186,7 @@ public class PaymentService {
         AdminNotificationDto notification = AdminNotificationDto.builder()
                 .notificationType("PAYMENT_FAILED")
                 .title("결제 실패 발생")
-                .message("결제 실패가 발생했습니다: " )
+                .message("결제 실패가 발생했습니다: ")
                 .relatedResourceType("RESERVATION")
                 .relatedResourceId(reservationId)
                 .priority("HIGH")
@@ -220,7 +220,8 @@ public class PaymentService {
      */
     @Transactional
     public PaymentViewDto prepareRefund(String paymentId) {
-        PaymentViewDto payment = paymentRepository.findByPaymentId(paymentId)
+        // Row Lock으로 동시 환불 방지
+        PaymentViewDto payment = paymentRepository.lockPaymentForUpdate(paymentId)
                 .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다: " + paymentId));
 
         if (!PaymentStatus.PAID.name().equals(payment.getStatus())) {
@@ -318,6 +319,7 @@ public class PaymentService {
     public PaymentViewDto findByReservationId(String reservationId) {
         return paymentRepository.findByReservationId(reservationId).orElse(null);
     }
+
     //환불에서 조회
     @Transactional(readOnly = true)
     public List<PaymentViewDto> findPaymentsByUserId(String userId) {
@@ -352,7 +354,6 @@ public class PaymentService {
     public String generateOrderId(String reservationId) {
         return "ORDER_" + reservationId + "_" + System.currentTimeMillis();
     }
-
 
 
     /**
@@ -405,15 +406,23 @@ public class PaymentService {
             throw new RuntimeException("예약 구간 정보가 없습니다: " + reservationId);
         }
 
-        // 승객 수 조회
+        // 승객 수 조회 - null 체크 추가
         BookingViewModel booking = reservationBookingRepository.findReservationHeader(reservationId);
+        if (booking == null) {
+            throw new RuntimeException("예약 정보를 찾을 수 없습니다: " + reservationId);
+        }
+
+        Integer passengerCount = booking.getPassengerCount();
+        if (passengerCount == null || passengerCount <= 0) {
+            throw new RuntimeException("승객 수가 올바르지 않습니다: " + reservationId);
+        }
 
         long flightTotal = segments.stream()
                 .mapToLong(seg -> seg.getSnapPrice() != null ? seg.getSnapPrice() : 0L)
                 .sum();
 
         // 승객 수 곱하기
-        flightTotal *= booking.getPassengerCount();
+        flightTotal *= passengerCount;
 
         Long serviceTotal = passengerServiceRepository.findServiceTotal(reservationId);
 
