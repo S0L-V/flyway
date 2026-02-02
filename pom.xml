@@ -129,13 +129,6 @@
             <version>2.23.1</version>
         </dependency>
 
-        <!-- Spring Cache Abstraction -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${org.springframework-version}</version>
-        </dependency>
-
         <!-- Caffeine Cache (경량) -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
@@ -354,13 +347,6 @@
             <version>2.11.0</version>
         </dependency>
 
-        <!-- JavaMail API -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-
         <!-- Apache Commons Lang -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -437,7 +423,6 @@
             <version>4.3.0</version>
         </dependency>
 
-
     </dependencies>
 
     <build>
@@ -457,6 +442,27 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.2</version>
             </plugin>
+
+            <!-- classes.jar 추가 산출 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-classes-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>classes</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
+
 </project>
