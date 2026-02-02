@@ -106,8 +106,11 @@ window.SeatConfirm = (() => {
                     return;
                 }
 
-                // 정상 완료
-                window.opener ? window.close() : history.back();
+                // 정상 완료 - 부모 창 좌석 정보 갱신 후 닫기
+                if (window.opener && typeof window.opener.refreshSeatInfo === 'function') {
+                    window.opener.refreshSeatInfo();
+                }
+                window.opener ? window.close() : history.back();drl
             });
         }
 
