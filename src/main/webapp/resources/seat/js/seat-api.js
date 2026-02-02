@@ -1,4 +1,3 @@
-// resources/seat/seat-api.js
 (function (global) {
     async function safeJson(res) {
         const ct = res.headers.get("content-type") || "";
@@ -17,22 +16,25 @@
     }
 
     function fetchSeatMap(ctx, reservationId, segmentId) {
-        return fetch(`${ctx}/api/public/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/seats`)
-            .then(safeJson).then(d => d?.data ?? []);
+        return fetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}`, {
+            credentials: 'include'  // 쿠키 포함 (JWT 인증용)
+        }).then(safeJson).then(d => d?.data ?? []);
     }
 
     function holdSeat(ctx, reservationId, segmentId, body) {
-        return fetch(`${ctx}/api/public/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/seats/hold`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Accept": "application/json" },
-            body: JSON.stringify(body)
-        }).then(safeJson);
+        return fetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/hold`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                credentials: 'include',
+                body: JSON.stringify(body)
+            }).then(safeJson);
     }
-
     function releaseHold(ctx, reservationId, segmentId, passengerId) {
-        return fetch(`${ctx}/api/public/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/seats/hold/${encodeURIComponent(passengerId)}`, {
+        return fetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/hold/${encodeURIComponent(passengerId)}`, {
             method: "DELETE",
-            headers: { "Accept": "application/json" }
+            headers: { "Accept": "application/json" },
+            credentials: 'include'
         }).then(safeJson);
     }
 

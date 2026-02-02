@@ -5,6 +5,8 @@ import com.flyway.seat.dto.*;
 import java.util.List;
 
 public interface SeatService {
+    void validateReservationOwner(String reservationId, String userId);
+
     // 항공편별 좌석 맵 조회
     List<SeatDTO> getSeatMap(String flightId);
 
