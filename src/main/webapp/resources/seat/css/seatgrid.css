@@ -4,19 +4,25 @@
     min-height: 400px;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 6px;
+    padding: 16px;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 16px;
 }
 
 /* 좌석 행 */
 .seat-row {
     display: flex;
     align-items: center;
-    gap: 12px; /* 가운데 통로 간격(기존 8px → 12px) */
+    gap: 8px;
+    justify-content: center;
 }
 
 /* 컬럼 헤더 (A~F) */
 .seat-row--header {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px dashed #e2e8f0;
 }
 
 /* 좌/우 컬럼 텍스트 묶음(헤더용) */
@@ -27,101 +33,189 @@
 }
 
 .seat-col {
-    width: 63px;
-    height: 24px;
+    width: 56px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
 
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-subtle);
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    background: #e2e8f0;
+    border-radius: 6px;
 }
 
-/* 가운데 행 번호(통로 중앙) */
+/* 가운데 행 번호(통로 중앙) - 숫자만 표시 */
 .seat-row__number--mid {
-    width: 48px; /* 가운데 번호 폭 */
+    width: 36px;
+    min-width: 36px;
     text-align: center;
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-subtle);
-    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    flex: 0 0 36px;
+    background: transparent;
+    padding: 0;
 }
 
 /* (호환용) 예전 클래스가 남아있어도 깨지지 않게 */
 .seat-row__number {
-    width: 63px;
+    width: 56px;
     text-align: center;
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-subtle);
+    font-size: 13px;
+    font-weight: 700;
+    color: #94a3b8;
 }
 
 /* 좌/우 좌석 묶음 */
 .seat-row__seats {
     display: flex;
-    gap: 8px;
-    flex: 0 0 auto; /* 기존 flex:1 제거 (중앙 배치 위해) */
+    gap: 6px;
+    flex: 0 0 auto;
 }
 
 .seat-row__seats--left,
 .seat-row__seats--right {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex: 0 0 auto;
 }
 
-/* 좌석 버튼 기본 */
+/* 좌석 버튼 기본 - 비행기 좌석 모양 */
 .seat-item {
-    width: 63px;
-    height: 51px;
+    width: 56px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: 10px 10px 6px 6px;
     font-family: var(--font-family-primary);
-    font-size: 17px;
-    font-weight: var(--font-weight-semibold);
+    font-size: 14px;
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 좌석 상단 등받이 효과 */
+.seat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 4px;
+    right: 4px;
+    height: 8px;
+    border-radius: 6px 6px 0 0;
+    background: inherit;
+    filter: brightness(0.9);
+}
+
+/* 좌석 팔걸이 효과 */
+.seat-item::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 2px;
+    right: 2px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 /* 좌석 상태 */
 .seat-item--available {
-    background-color: var(--color-seat-available);
-    color: var(--color-seat-text-white);
+    background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+    color: #ffffff;
+    border: 2px solid #2563eb;
 }
 
 .seat-item--available:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(42, 116, 227, 0.3);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%);
+}
+
+.seat-item--available:active {
+    transform: translateY(-1px) scale(1.01);
 }
 
 .seat-item--selected {
-    background-color: var(--color-seat-selected);
-    color: var(--color-seat-text-white);
+    background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+    color: #ffffff;
+    border: 2px solid #1e3a8a;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.seat-item--selected::before {
+    background: #1e40af;
+}
+
+/* 선택됨 체크 아이콘 */
+.seat-item--selected .seat-check {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background: #10b981;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .seat-item--hold {
-    background-color: #ffa500;
-    color: var(--color-seat-text-white);
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    color: #ffffff;
+    border: 2px solid #d97706;
     cursor: not-allowed;
+    opacity: 0.85;
 }
 
 .seat-item--unavailable {
-    background-color: var(--color-seat-unavailable);
-    color: var(--color-seat-text-white);
+    background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+    color: #94a3b8;
+    border: 2px solid #94a3b8;
     cursor: not-allowed;
-    opacity: 0.6;
+}
+
+.seat-item--unavailable::before {
+    background: #cbd5e1;
+}
+
+/* X 표시 */
+.seat-item--unavailable::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 2px;
+    background: #94a3b8;
+    transform: translate(-50%, -50%) rotate(45deg);
+    border-radius: 0;
+    bottom: auto;
 }
 
 .seat-item--empty {
     background: transparent;
     cursor: default;
+    border: none;
+    box-shadow: none;
+}
+
+.seat-item--empty::before,
+.seat-item--empty::after {
+    display: none;
 }
 
 /* ==================== 좌석 섹션 3개 front/mid/rear ==================== */
@@ -152,4 +246,77 @@
 .seat-grid--rear .seat-row[data-section="rear"] {
     display: flex;
 }
+
+/* ==================== Loading State ==================== */
+.seat-grid__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.seat-grid__loading::before {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== Empty State ==================== */
+.selected-summary__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    text-align: center;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px dashed #e5e7eb;
+}
+
+.selected-summary__empty p {
+    color: #9ca3af;
+    font-size: 13px;
+    font-weight: 400;
+    margin: 0;
+}
+
+/* ==================== Animations ==================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.seat-row {
+    animation: fadeInUp 0.3s ease forwards;
+}
+
+.seat-row:nth-child(1) { animation-delay: 0.02s; }
+.seat-row:nth-child(2) { animation-delay: 0.04s; }
+.seat-row:nth-child(3) { animation-delay: 0.06s; }
+.seat-row:nth-child(4) { animation-delay: 0.08s; }
+.seat-row:nth-child(5) { animation-delay: 0.10s; }
+.seat-row:nth-child(6) { animation-delay: 0.12s; }
+.seat-row:nth-child(7) { animation-delay: 0.14s; }
+.seat-row:nth-child(8) { animation-delay: 0.16s; }
+.seat-row:nth-child(9) { animation-delay: 0.18s; }
+.seat-row:nth-child(10) { animation-delay: 0.20s; }
 
