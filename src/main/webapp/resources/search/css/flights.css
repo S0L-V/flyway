@@ -1,9 +1,6 @@
 .flights-section {
   border-radius: var(--radius-md);
   padding: var(--spacing-xl);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
 }
 
 /* Flights Header */

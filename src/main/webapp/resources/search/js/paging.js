@@ -14,6 +14,8 @@ function renderPage(pageNum) {
 
     renderPagination(currentPage, totalPages);
 
+    updateCount();
+
     const listEl = document.getElementById('resultList');
     if(listEl) listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -70,4 +72,11 @@ function renderPagination(currentPage, totalPages) {
     }
 
     numbersContainer.innerHTML = html;
+}
+
+function updateCount() {
+    const countElement = document.getElementById('resultCount');
+    if (countElement) {
+        countElement.textContent = displayedOptions.length;
+    }
 }

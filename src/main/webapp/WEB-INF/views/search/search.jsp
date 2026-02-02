@@ -151,6 +151,70 @@
             color: #1e293b;
             font-family: 'Pretendard', sans-serif;
         }
+
+        /* Pagination Jelly Style */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+            margin-bottom: 60px;
+        }
+
+        .pg-btn {
+            min-width: 40px;
+            height: 40px;
+            border: none;
+            background: #ffffff;
+            color: #64748b;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        .pg-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+            color: #1f6feb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.15);
+        }
+
+        .pg-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .pg-btn.active {
+            background: linear-gradient(135deg, #1f6feb, #165bca);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+            font-weight: 700;
+        }
+
+        .pg-btn:disabled {
+            background: #f8fafc;
+            color: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .pg-control {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+
+        .pg-pages {
+            display: flex;
+            gap: 8px;
+        }
     </style>
 </head>
 
@@ -469,7 +533,7 @@
             <!-- Sort Button -->
             <div class="sort-container">
                 <span class="result-count">
-                    <strong id="resultCount">0개</strong>의 항공편
+                    <strong id="resultCount">${displayedOptions.length}개</strong>의 항공편
                 </span>
                 <div class="divider"></div>
                 <button class="sort-button">
