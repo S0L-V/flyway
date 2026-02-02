@@ -822,11 +822,11 @@
                     ? (incomplete.depCity + ' → ' + incomplete.arrCity)
                     : '';
 
+                const detail = segmentLabel + (routeText ? ' (' + routeText + ')' : '');
                 Swal.fire({
                     icon: 'warning',
                     title: '좌석 미선택',
-                    html: '<b>' + segmentLabel + '</b>' + (routeText ? ' (' + routeText + ')' : '') +
-                        '<br>모든 승객의 좌석을 선택해주세요.',
+                    text: detail + '\n 모든 승객의 좌석을 선택해주세요.',
                     confirmButtonText: '좌석 선택하기',
                     confirmButtonColor: '#1f6feb',
                     showCancelButton: true,
@@ -1282,6 +1282,7 @@
                 const minExpiry = new Date();
                 minExpiry.setMonth(minExpiry.getMonth() + 6);
                 if (new Date(passportExpiry) < minExpiry) {
+
                     const confirmResult = await Swal.fire({
                         icon: 'warning',
                         title: '여권 만료일 확인',

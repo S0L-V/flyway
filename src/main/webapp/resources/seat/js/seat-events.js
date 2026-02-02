@@ -115,17 +115,56 @@ window.SeatEvents = (() => {
                         }
                         updateSummaryUI();
 
-                        // 서버 해제
+                        // api 호출
+                        let releasedPrevOnServer = false;
+
                         try {
-                            await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+                            // 중복 HOLD 방지 기존 HOLD가 있으면 먼저 해제
+                            try {
+                                await SeatAPI.releaseHold(ctx.base, ctx.reservationId, segId, pid);
+                                releasedPrevOnServer = true;
+                            } catch (_) {
+                                // 기존 HOLD가 없으면 무시
+                            }
+
+                            // 새 좌석 HOLD
+                            await SeatAPI.holdSeat(ctx.base, ctx.reservationId, segId, {
+                                passengerId: pid,
+                                seatNo,
+                            });
+
+                            // 성공하면 서버가 source of truth니까 한 번 싱크
+                            await renderer.refreshAndRender().catch(() => {});
                         } catch (err) {
-                            // 실패 시 롤백
-                            if (!state.selectedSeatsBySegment[segId]) state.selectedSeatsBySegment[segId] = {};
-                            state.selectedSeatsBySegment[segId][pid] = seatNo;
-                            SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "HOLD");
+                            // UI/로컬 롤백
+                            SeatGrid.updateSeatUI(dom.seatGridEl, seatNo, "AVAILABLE");
+
+                            if (currentSeatNo) {
+                                state.selectedSeatsBySegment[segId][pid] = currentSeatNo;
+                                SeatGrid.updateSeatUI(dom.seatGridEl, currentSeatNo, "HOLD");
+                            } else {
+                                delete state.selectedSeatsBySegment[segId][pid];
+                            }
                             updateSummaryUI();
-                            Swal.error("좌석 해제에 실패했습니다.", "오류");
+
+                            // releaseHold가 서버에서 성공했을 수도 있으니 이전 좌석을 서버에도 복구 시도
+                            if (currentSeatNo && releasedPrevOnServer) {
+                                try {
+                                    await SeatAPI.holdSeat(ctx.base, ctx.reservationId, segId, {
+                                        passengerId: pid,
+                                        seatNo: currentSeatNo,
+                                    });
+                                } catch (_) {
+                                    // 복구 실패하면 서버 기준 재동기화
+                                }
+                            }
+
+                            // 서버 기준 재동기화 (상태 불일치 방지)
+                            await renderer.refreshAndRender().catch(() => {});
+
+                            Swal.error("좌석 선택에 실패했습니다. 다시 시도해주세요.", "오류");
                         }
+
                         return;
                     }
 
