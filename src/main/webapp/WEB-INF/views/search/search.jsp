@@ -227,7 +227,8 @@
 
     <div class="search-container">
         <!-- Trip Type Selector -->
-        <div class="trip-selector">
+        <div class="trip-selector" id="tripSelector">
+            <div class="trip-indicator" id="tripIndicator"></div>
             <button class="trip-btn active" data-trip="RT">왕복</button>
             <button class="trip-btn" data-trip="OW">편도</button>
         </div>
@@ -404,26 +405,42 @@
                         <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9ca3af;"></i>
                     </button>
 
-                    <div class="filter-panel price-options" data-filter-panel="price" hidden>
-                        <div class="price-header text-left pt-4">
-                            <h3 class="text-lg font-bold">가격대</h3>
-                            <p class="text-gray-500 text-sm mb-2">성인 1인 기준 요금</p>
-                            <p class="selected-price text-blue-600 font-bold text-lg">
-                                <span class="currency">￦</span>
-                                <span id="price-min-display">0</span> - <span id="price-max-display">0</span>
-                            </p>
-                        </div>
+                    <div class="filter-panel price-panel" data-filter-panel="price" hidden>
+                        <div class="price-filter-content">
+                            <div class="price-filter-header">
+                                <div class="price-filter-title">
+                                    <i data-lucide="wallet" class="price-title-icon"></i>
+                                    <span>가격 범위 설정</span>
+                                </div>
+                                <p class="price-filter-subtitle">성인 1인 기준 편도 요금</p>
+                            </div>
 
-                        <div class="range-slider-container px-4 py-4 relative h-16">
-                            <div class="slider-track absolute top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 rounded"></div>
-                            <div class="slider-range absolute top-1/2 transform -translate-y-1/2 h-1 bg-blue-600 rounded" id="slider-range-bar"></div>
+                            <div class="price-display-box">
+                                <div class="price-display-item">
+                                    <span class="price-label">최저</span>
+                                    <span class="price-value" id="price-min-display">0</span>
+                                    <span class="price-unit">원</span>
+                                </div>
+                                <div class="price-display-divider">
+                                    <i data-lucide="arrow-right"></i>
+                                </div>
+                                <div class="price-display-item">
+                                    <span class="price-label">최고</span>
+                                    <span class="price-value" id="price-max-display">0</span>
+                                    <span class="price-unit">원</span>
+                                </div>
+                            </div>
 
-                            <input type="range" id="price-min-input" class="range-input min-range absolute top-1/2 transform -translate-y-1/2 w-full pointer-events-none appearance-none bg-transparent z-20" min="0" max="1000000" value="0" step="1000">
-                            <input type="range" id="price-max-input" class="range-input max-range absolute top-1/2 transform -translate-y-1/2 w-full pointer-events-none appearance-none bg-transparent z-10" min="0" max="1000000" value="1000000" step="1000">
+                            <div class="range-slider-container">
+                                <div class="slider-track"></div>
+                                <div class="slider-range" id="slider-range-bar"></div>
+                                <input type="range" id="price-min-input" class="range-input min-range" min="0" max="1000000" value="0" step="5000">
+                                <input type="range" id="price-max-input" class="range-input max-range" min="0" max="1000000" value="1000000" step="5000">
+                            </div>
 
-                            <div class="range-labels flex justify-between text-gray-500 text-sm mt-8">
-                                <span id="total-min-price" hidden>0</span>
-                                <span id="total-max-price" hidden>0</span>
+                            <div class="price-range-labels">
+                                <span class="range-label-min" id="total-min-price">0원</span>
+                                <span class="range-label-max" id="total-max-price">1,000,000원</span>
                             </div>
                         </div>
                     </div>
