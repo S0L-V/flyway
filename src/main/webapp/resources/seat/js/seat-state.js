@@ -7,6 +7,7 @@ window.SeatState = (() => {
             seatGridEl,
             summaryEl: document.getElementById("selected-summary"),
             actionEl: document.getElementById("seat-action"),
+            segmentTabsEl: document.getElementById("segment-tabs"),
 
             termsToggle: document.getElementById("terms-toggle"),
             termsContent: document.getElementById("terms-content"),
@@ -26,13 +27,42 @@ window.SeatState = (() => {
             cabinClassCode: seatGridEl.dataset.cabin || null,
         };
 
+        // 세그먼트 목록 수집
+        const segments = [];
+        document.querySelectorAll("#segment-tabs .segment-tab").forEach((tab) => {
+            segments.push({
+                segmentId: tab.dataset.segmentId,
+                dep: tab.dataset.dep,
+                arr: tab.dataset.arr,
+                deptime: tab.dataset.deptime,
+            });
+        });
+
         const state = {
             isHolding: false,
             activePassengerId: "",
-            selectedSeatsByPassenger: {}, // { passengerId: seatNo }
-            passengers: [], // [{ passengerId, name }]
+            activeSegmentId: ctx.segmentId,
+            segments: segments,
+
+            // 세그먼트별 선택 좌석 저장 { segmentId: { passengerId: seatNo } }
+            selectedSeatsBySegment: {},
+
+            // 현재 세그먼트의 선택 좌석 (편의용 getter/setter)
+            get selectedSeatsByPassenger() {
+                return this.selectedSeatsBySegment[this.activeSegmentId] || {};
+            },
+            set selectedSeatsByPassenger(val) {
+                this.selectedSeatsBySegment[this.activeSegmentId] = val;
+            },
+
+            passengers: [],
             passengerNameById: {},
         };
+
+        // 각 세그먼트 초기화
+        segments.forEach((seg) => {
+            state.selectedSeatsBySegment[seg.segmentId] = {};
+        });
 
         // 승객 목록
         document.querySelectorAll("#passenger-source .passenger-source").forEach((el) => {

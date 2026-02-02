@@ -71,6 +71,139 @@
             width: 14px;
             height: 14px;
         }
+
+        /* Passport Toggle Checkbox */
+        .passport-toggle:checked + span {
+            border-color: #1f6feb;
+            background-color: #1f6feb;
+        }
+        .passport-toggle:checked + span svg {
+            opacity: 1;
+        }
+        .passport-toggle:focus + span {
+            box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.2);
+        }
+
+        /* Wheel Date Picker - Inline Dropdown Style */
+        .wheel-picker-wrapper {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding-top: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+        .wheel-picker-wrapper.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .wheel-picker {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+        .wheel-picker__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+        .wheel-picker__title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+        }
+        .wheel-picker__btn {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .wheel-picker__btn--cancel {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+        .wheel-picker__btn--cancel:hover {
+            background: #cbd5e1;
+        }
+        .wheel-picker__btn--confirm {
+            background: #1f6feb;
+            color: white;
+        }
+        .wheel-picker__btn--confirm:hover {
+            background: #1a5fd1;
+        }
+        .wheel-picker__wheels {
+            display: flex;
+            padding: 0 8px;
+            position: relative;
+        }
+        .wheel-picker__wheel {
+            flex: 1;
+            height: 150px;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .wheel-picker__wheel::-webkit-scrollbar {
+            display: none;
+        }
+        .wheel-picker__wheel::before,
+        .wheel-picker__wheel::after {
+            content: '';
+            display: block;
+            height: 55px;
+        }
+        .wheel-picker__item {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #9ca3af;
+            scroll-snap-align: center;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .wheel-picker__item:hover {
+            color: #64748b;
+        }
+        .wheel-picker__item.selected {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f6feb;
+        }
+        .wheel-picker__highlight {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            right: 12px;
+            height: 40px;
+            transform: translateY(-50%);
+            background: rgba(31, 111, 235, 0.06);
+            border-radius: 8px;
+            border-top: 1.5px solid #1f6feb;
+            border-bottom: 1.5px solid #1f6feb;
+            pointer-events: none;
+        }
+        /* 생년월일 필드 wrapper */
+        .birth-input-wrapper {
+            position: relative;
+        }
     </style>
 </head>
 
@@ -159,7 +292,7 @@
                                 </div>
                                 <div class="airport-code uppercase">${s.snapArrivalAirport}</div>
                                 <div class="airport-name">
-                                    ${s.snapArrivalCity}
+                                        ${s.snapArrivalCity}
                                     <fmt:formatDate value="${depDate}" pattern="yyyyMMdd" var="depDay"/>
                                     <fmt:formatDate value="${arrDate}" pattern="yyyyMMdd" var="arrDay"/>
                                     <c:set var="dayDiff" value="${arrDay - depDay}"/>
@@ -186,9 +319,9 @@
                 </div>
 
                 <c:url var="saveUrl" value="/reservations/${vm.reservationId}/passengers"/>
-                <form id="passengerForm" onsubmit="return savePassengers(event)">
+                <form id="passengerForm">
                     <c:forEach var="p" items="${vm.passengers}" varStatus="st">
-                        <div class="mb-8 last:mb-0 border-b last:border-0 border-gray-100 pb-8 last:pb-0">
+                        <div class="mb-8 last:mb-0 pb-8 last:pb-0">
                             <h4 class="font-bold text-sm text-gray-800 mb-4">탑승자 ${st.index + 1}</h4>
                             <input type="hidden" name="passengers[${st.index}].passengerId" value="${p.passengerId}"/>
 
@@ -197,35 +330,39 @@
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">한글 성</label>
                                     <input name="passengers[${st.index}].krLastName" value="${p.krLastName}" placeholder="홍" pattern="^[가-힣]+$" required
-                                           oninput="this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '')"
-                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                           oninput="handleKoreanInput(this)"
+                                           class="kr-name-input w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
                                 </div>
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">한글 이름</label>
                                     <input name="passengers[${st.index}].krFirstName" value="${p.krFirstName}" placeholder="길동" pattern="^[가-힣]+$" required
-                                           oninput="this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '')"
-                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                           oninput="handleKoreanInput(this)"
+                                           class="kr-name-input w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
                                 </div>
 
                                 <!-- Row 2: English Name -->
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">영문 성 (Last Name)</label>
                                     <input name="passengers[${st.index}].lastName" value="${p.lastName}" placeholder="HONG" pattern="^[A-Z\s]+$" required
-                                           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()"
-                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
+                                           oninput="handleEnglishInput(this)"
+                                           class="en-name-input w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
                                 </div>
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">영문 이름 (First Name)</label>
                                     <input name="passengers[${st.index}].firstName" value="${p.firstName}" placeholder="GILDONG" pattern="^[A-Z\s]+$" required
-                                           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase()"
-                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
+                                           oninput="handleEnglishInput(this)"
+                                           class="en-name-input w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase"/>
                                 </div>
 
                                 <!-- Row 3: Birth & Gender -->
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">생년월일</label>
-                                    <input type="date" name="passengers[${st.index}].birth" value="${p.birth}" max="9999-12-31" required
-                                           class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"/>
+                                    <div class="birth-input-wrapper">
+                                        <input type="text" name="passengers[${st.index}].birth" value="${p.birth}"
+                                               placeholder="생년월일 선택" readonly required
+                                               data-passenger-index="${st.index}"
+                                               class="birth-input w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold focus:bg-white focus:border-primary focus:ring-4 focus:ring-blue-500/10 outline-none transition-all cursor-pointer"/>
+                                    </div>
                                 </div>
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-xs font-bold text-slate-500 ml-0.5">성별</label>
@@ -256,11 +393,24 @@
 
                                 <!-- Row 5: Passport Info -->
                                 <div class="md:col-span-2 mt-2">
-                                    <div class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2">
-                                        여권 정보
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <label class="flex items-center gap-2 cursor-pointer group">
+                                            <input type="checkbox" class="passport-toggle sr-only" data-index="${st.index}"
+                                                   <c:if test="${not empty p.passportNo}">checked</c:if>>
+                                            <span class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all
+                                                         group-hover:border-primary
+                                                         [input:checked+&]:border-primary [input:checked+&]:bg-primary">
+                                                <svg class="w-3 h-3 text-white opacity-0 [input:checked~&]:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </span>
+                                            <span class="text-xs font-bold text-gray-800">여권 정보</span>
+                                        </label>
                                         <span class="text-[11px] font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">선택사항 (나중에 등록 가능)</span>
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="passport-fields grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300"
+                                         data-index="${st.index}"
+                                         style="${empty p.passportNo ? 'display: none; opacity: 0;' : ''}">
                                         <div class="flex flex-col gap-1.5">
                                             <label class="text-xs font-bold text-slate-500 ml-0.5">여권번호</label>
                                             <input name="passengers[${st.index}].passportNo" value="${p.passportNo}" placeholder="M12345678" pattern="^[A-Z0-9]{7,9}$" oninput="this.value = this.value.toUpperCase()"
@@ -309,26 +459,37 @@
                     탑승자 정보 저장 후 선택 가능합니다. (현재: <span class="${vm.passengerSaved ? 'text-green-600 font-bold' : 'text-red-500 font-bold'}">${vm.passengerSaved ? '저장 완료' : '미저장'}</span>)
                 </div>
 
-                <div class="flex flex-col gap-3">
-                    <c:forEach var="s" items="${vm.segments}" varStatus="status">
-                        <div class="flex items-center justify-between bg-slate-50 border border-slate-200 p-4 rounded-xl hover:bg-white hover:border-primary transition-all group">
-                            <div>
-                                <span class="inline-block px-2 py-0.5 rounded text-[11px] font-extrabold mb-1 ${status.first ? 'bg-blue-50 text-primary' : 'bg-slate-100 text-slate-600'}">
-                                    ${status.first ? '가는편' : '오는편'}
-                                </span>
-                                <div class="text-sm font-bold text-gray-800">
-                                    <c:out value="${s.snapDepartureCity}"/> → <c:out value="${s.snapArrivalCity}"/>
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    <c:out value="${s.snapAirlineName}"/> <c:out value="${s.snapFlightNumber}"/>
-                                </div>
-                            </div>
-                            <button type="button" ${vm.passengerSaved ? "" : "disabled"} onclick="openSeatPopup('${s.reservationSegmentId}')"
-                                    class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                좌석 선택
-                            </button>
+                <!-- 좌석 선택 통합 카드 -->
+                <div class="flex items-center justify-between bg-slate-50 border border-slate-200 p-4 rounded-xl hover:bg-white hover:border-primary transition-all group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-50 text-primary rounded-xl flex items-center justify-center shrink-0">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+                                <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+                                <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+                                <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+                            </svg>
                         </div>
-                    </c:forEach>
+                        <div>
+                            <div class="text-sm font-bold text-gray-800">좌석 선택</div>
+                            <div class="text-xs text-gray-500">
+                                <c:forEach var="s" items="${vm.segments}" varStatus="status">
+                                    <c:out value="${s.snapDepartureCity}"/> → <c:out value="${s.snapArrivalCity}"/><c:if test="${!status.last}"> / </c:if>
+                                </c:forEach>
+                            </div>
+                        </div>
+                    </div>
+                    <c:set var="firstSegmentId" value="${vm.segments[0].reservationSegmentId}" />
+                    <button type="button" ${vm.passengerSaved ? "" : "disabled"} onclick="openSeatPopup('${firstSegmentId}')"
+                            class="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+                            <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+                            <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+                            <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+                        </svg>
+                        선택하기
+                    </button>
                 </div>
 
                 <!-- Baggage / Ancillary Banner -->
@@ -466,6 +627,25 @@
     </div>
 </div>
 
+<!-- Wheel Date Picker Template (will be cloned for each birth input) -->
+<template id="wheelPickerTemplate">
+    <div class="wheel-picker-wrapper">
+        <div class="wheel-picker">
+            <div class="wheel-picker__header">
+                <button type="button" class="wheel-picker__btn wheel-picker__btn--cancel js-wheel-cancel">취소</button>
+                <span class="wheel-picker__title">생년월일</span>
+                <button type="button" class="wheel-picker__btn wheel-picker__btn--confirm js-wheel-confirm">확인</button>
+            </div>
+            <div class="wheel-picker__wheels">
+                <div class="wheel-picker__highlight"></div>
+                <div class="wheel-picker__wheel js-year-wheel"></div>
+                <div class="wheel-picker__wheel js-month-wheel"></div>
+                <div class="wheel-picker__wheel js-day-wheel"></div>
+            </div>
+        </div>
+    </div>
+</template>
+
 <script type="module">
     import { fetchWithRefresh } from '/resources/common/js/authFetch.js';
     var reservationId = '${vm.reservationId}';
@@ -473,15 +653,28 @@
     var passengerCount = ${vm.passengerCount};
     var segments = [
         <c:forEach var="s" items="${vm.segments}" varStatus="st">
-        { snapPrice: ${s.snapPrice != null ? s.snapPrice : 0} }<c:if test="${!st.last}">,</c:if>
+        {
+            snapPrice: ${s.snapPrice != null ? s.snapPrice : 0},
+            segmentId: '${s.reservationSegmentId}',
+            segmentOrder: ${s.segmentOrder},
+            depCity: '${s.snapDepartureCity}',
+            arrCity: '${s.snapArrivalCity}',
+            seatCount: ${fn:length(s.passengerSeats)}
+        }<c:if test="${!st.last}">,</c:if>
         </c:forEach>
     ];
 
     // 좌석 팝업
     function openSeatPopup(segmentId) {
-        if (!passengerSaved) { alert('탑승자 정보를 먼저 저장해주세요.'); return; }
+        if (!passengerSaved) {
+            Swal.warning('탑승자 정보를 먼저 저장해주세요.', '정보 미입력');
+            return;
+        }
 
-        if (!segmentId) { alert('구간 정보를 찾을 수 없습니다.'); return; }
+        if (!segmentId) {
+            Swal.error('구간 정보를 찾을 수 없습니다.', '오류');
+            return;
+        }
         const popupUrl = '/reservations/' + encodeURIComponent(reservationId)
             + '/segments/' + encodeURIComponent(segmentId) + '/seats';
         window.open(popupUrl, 'seatPopup', 'width=1100,height=800,scrollbars=yes,resizable=yes');
@@ -490,7 +683,7 @@
     // 부가서비스 팝업 열기
     function openServicePopup() {
         if (!passengerSaved) {
-            alert('탑승자 정보를 먼저 저장해주세요.');
+            Swal.warning('탑승자 정보를 먼저 저장해주세요.', '정보 미입력');
             return;
         }
 
@@ -605,9 +798,34 @@
     // 결제 페이지 이동
     function goPayment() {
         if (!passengerSaved) {
-            alert('탑승자 정보를 먼저 저장해주세요.');
+            Swal.warning('탑승자 정보를 먼저 저장해주세요.', '정보 미입력');
             return;
         }
+
+        // 좌석 선택 여부 체크
+        const incompleteSegment = segments.find(seg => seg.seatCount < passengerCount);
+
+        if (incompleteSegment) {
+            const segmentLabel = incompleteSegment.segmentOrder === 1 ? '가는편' : '오는편';
+            const routeText = incompleteSegment.depCity + ' → ' + incompleteSegment.arrCity;
+
+            Swal.fire({
+                icon: 'warning',
+                title: '좌석 미선택',
+                html: '<b>' + segmentLabel + '</b> (' + routeText + ')<br>모든 승객의 좌석을 선택해주세요.',
+                confirmButtonText: '좌석 선택하기',
+                confirmButtonColor: '#1f6feb',
+                showCancelButton: true,
+                cancelButtonText: '취소',
+                cancelButtonColor: '#64748b'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openSeatPopup(incompleteSegment.segmentId);
+                }
+            });
+            return;
+        }
+
         // 결제 페이지로 이동 (PaymentController)
         location.href = '/payments/' + reservationId;
     }
@@ -642,7 +860,298 @@
                 el.min = today; // 여권만료는 오늘부터만 가능
             }
         });
+
+        // 여권 정보 토글
+        document.querySelectorAll('.passport-toggle').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const idx = this.dataset.index;
+                const fields = document.querySelector('.passport-fields[data-index="' + idx + '"]');
+                if (this.checked) {
+                    fields.style.display = 'grid';
+                    setTimeout(() => { fields.style.opacity = '1'; }, 10);
+                } else {
+                    fields.style.opacity = '0';
+                    setTimeout(() => { fields.style.display = 'none'; }, 300);
+                    // 필드 초기화
+                    fields.querySelectorAll('input').forEach(input => { input.value = ''; });
+                }
+            });
+        });
+
+        // 휠 날짜 피커 초기화
+        initWheelDatePicker();
+
+        // 외부 클릭 시 피커 닫기
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.birth-input-wrapper')) {
+                document.querySelectorAll('.wheel-picker-wrapper.active').forEach(picker => {
+                    picker.classList.remove('active');
+                });
+            }
+        });
+
+        // 폼 제출 이벤트 리스너
+        const passengerForm = document.getElementById('passengerForm');
+        if (passengerForm) {
+            passengerForm.addEventListener('submit', savePassengers);
+        }
     });
+
+    // 휠 날짜 피커 초기화
+    function initWheelDatePicker() {
+        const template = document.getElementById('wheelPickerTemplate');
+        const currentYear = new Date().getFullYear();
+
+        document.querySelectorAll('.birth-input').forEach(input => {
+            const wrapper = input.closest('.birth-input-wrapper');
+
+            // 템플릿 복제하여 각 입력 필드에 추가
+            const pickerClone = template.content.cloneNode(true);
+            const pickerWrapper = pickerClone.querySelector('.wheel-picker-wrapper');
+            const yearWheel = pickerClone.querySelector('.js-year-wheel');
+            const monthWheel = pickerClone.querySelector('.js-month-wheel');
+            const dayWheel = pickerClone.querySelector('.js-day-wheel');
+
+            // 휠 아이템 생성
+            for (let y = currentYear; y >= 1920; y--) {
+                const item = document.createElement('div');
+                item.className = 'wheel-picker__item';
+                item.dataset.value = y;
+                item.textContent = y + '년';
+                yearWheel.appendChild(item);
+            }
+
+            for (let m = 1; m <= 12; m++) {
+                const item = document.createElement('div');
+                item.className = 'wheel-picker__item';
+                item.dataset.value = String(m).padStart(2, '0');
+                item.textContent = m + '월';
+                monthWheel.appendChild(item);
+            }
+
+            for (let d = 1; d <= 31; d++) {
+                const item = document.createElement('div');
+                item.className = 'wheel-picker__item';
+                item.dataset.value = String(d).padStart(2, '0');
+                item.textContent = d + '일';
+                dayWheel.appendChild(item);
+            }
+
+            wrapper.appendChild(pickerClone);
+
+            // 입력 필드 클릭 시 피커 열기
+            input.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // 다른 피커 닫기
+                document.querySelectorAll('.wheel-picker-wrapper.active').forEach(p => {
+                    if (p !== pickerWrapper) p.classList.remove('active');
+                });
+
+                const isOpen = pickerWrapper.classList.contains('active');
+                if (isOpen) {
+                    pickerWrapper.classList.remove('active');
+                } else {
+                    pickerWrapper.classList.add('active');
+
+                    // 기존 값으로 스크롤
+                    const currentValue = input.value;
+                    let year = 2000, month = '01', day = '01';
+                    if (currentValue) {
+                        const parts = currentValue.split('-');
+                        year = parseInt(parts[0]);
+                        month = parts[1];
+                        day = parts[2];
+                    }
+                    scrollToValue(yearWheel, year);
+                    scrollToValue(monthWheel, month);
+                    scrollToValue(dayWheel, day);
+                }
+            });
+
+            // 스크롤 이벤트
+            [yearWheel, monthWheel, dayWheel].forEach(wheel => {
+                wheel.addEventListener('scroll', () => updateSelectedItem(wheel));
+                wheel.addEventListener('scrollend', () => snapToItem(wheel));
+            });
+
+            // 취소 버튼
+            wrapper.querySelector('.js-wheel-cancel').addEventListener('click', (e) => {
+                e.stopPropagation();
+                pickerWrapper.classList.remove('active');
+            });
+
+            // 확인 버튼
+            wrapper.querySelector('.js-wheel-confirm').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const year = getSelectedValue(yearWheel);
+                const month = getSelectedValue(monthWheel);
+                const day = getSelectedValue(dayWheel);
+                if (year && month && day) {
+                    input.value = year + '-' + month + '-' + day;
+                }
+                pickerWrapper.classList.remove('active');
+            });
+        });
+    }
+
+    function scrollToValue(wheel, value) {
+        const items = wheel.querySelectorAll('.wheel-picker__item');
+        for (const item of items) {
+            if (item.dataset.value == value) {
+                const itemTop = item.offsetTop - 55;
+                wheel.scrollTop = itemTop;
+                break;
+            }
+        }
+        setTimeout(() => updateSelectedItem(wheel), 50);
+    }
+
+    function updateSelectedItem(wheel) {
+        const items = wheel.querySelectorAll('.wheel-picker__item');
+        const wheelCenter = wheel.scrollTop + wheel.clientHeight / 2;
+
+        items.forEach(item => {
+            const itemCenter = item.offsetTop + item.clientHeight / 2 - 55;
+            const distance = Math.abs(wheelCenter - itemCenter - 55);
+
+            if (distance < 25) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
+
+    function snapToItem(wheel) {
+        const selected = wheel.querySelector('.wheel-picker__item.selected');
+        if (selected) {
+            const targetTop = selected.offsetTop - 55;
+            wheel.scrollTo({ top: targetTop, behavior: 'smooth' });
+        }
+    }
+
+    function getSelectedValue(wheel) {
+        const selected = wheel.querySelector('.wheel-picker__item.selected');
+        return selected ? selected.dataset.value : null;
+    }
+
+    // =============================================
+    // 한글 ↔ 영문 자동 변환
+    // =============================================
+
+    // 한글 → 영문 로마자 변환 (Revised Romanization)
+    const CHO = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'ch', 'k', 't', 'p', 'h'];
+    const JUNG = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i'];
+    const JONG = ['', 'k', 'k', 'k', 'n', 'n', 'n', 't', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'm', 'p', 'p', 't', 't', 'ng', 't', 't', 'k', 't', 'p', 't'];
+
+    function koreanToRoman(str) {
+        let result = '';
+        for (let i = 0; i < str.length; i++) {
+            const code = str.charCodeAt(i);
+            // 한글 완성형 범위 (가-힣)
+            if (code >= 0xAC00 && code <= 0xD7A3) {
+                const syllable = code - 0xAC00;
+                const cho = Math.floor(syllable / 588);
+                const jung = Math.floor((syllable % 588) / 28);
+                const jong = syllable % 28;
+                result += CHO[cho] + JUNG[jung] + JONG[jong];
+            } else if (/[a-zA-Z]/.test(str[i])) {
+                result += str[i];
+            }
+        }
+        return result.toUpperCase();
+    }
+
+    // 영문 키보드 → 한글 변환 (두벌식 기준)
+    const EN_TO_KR = {
+        'q': 'ㅂ', 'w': 'ㅈ', 'e': 'ㄷ', 'r': 'ㄱ', 't': 'ㅅ', 'y': 'ㅛ', 'u': 'ㅕ', 'i': 'ㅑ', 'o': 'ㅐ', 'p': 'ㅔ',
+        'a': 'ㅁ', 's': 'ㄴ', 'd': 'ㅇ', 'f': 'ㄹ', 'g': 'ㅎ', 'h': 'ㅗ', 'j': 'ㅓ', 'k': 'ㅏ', 'l': 'ㅣ',
+        'z': 'ㅋ', 'x': 'ㅌ', 'c': 'ㅊ', 'v': 'ㅍ', 'b': 'ㅠ', 'n': 'ㅜ', 'm': 'ㅡ',
+        'Q': 'ㅃ', 'W': 'ㅉ', 'E': 'ㄸ', 'R': 'ㄲ', 'T': 'ㅆ', 'O': 'ㅒ', 'P': 'ㅖ'
+    };
+
+    // 자모 조합
+    const CHO_MAP = { 'ㄱ': 0, 'ㄲ': 1, 'ㄴ': 2, 'ㄷ': 3, 'ㄸ': 4, 'ㄹ': 5, 'ㅁ': 6, 'ㅂ': 7, 'ㅃ': 8, 'ㅅ': 9, 'ㅆ': 10, 'ㅇ': 11, 'ㅈ': 12, 'ㅉ': 13, 'ㅊ': 14, 'ㅋ': 15, 'ㅌ': 16, 'ㅍ': 17, 'ㅎ': 18 };
+    const JUNG_MAP = { 'ㅏ': 0, 'ㅐ': 1, 'ㅑ': 2, 'ㅒ': 3, 'ㅓ': 4, 'ㅔ': 5, 'ㅕ': 6, 'ㅖ': 7, 'ㅗ': 8, 'ㅘ': 9, 'ㅙ': 10, 'ㅚ': 11, 'ㅛ': 12, 'ㅜ': 13, 'ㅝ': 14, 'ㅞ': 15, 'ㅟ': 16, 'ㅠ': 17, 'ㅡ': 18, 'ㅢ': 19, 'ㅣ': 20 };
+    const JONG_MAP = { '': 0, 'ㄱ': 1, 'ㄲ': 2, 'ㄳ': 3, 'ㄴ': 4, 'ㄵ': 5, 'ㄶ': 6, 'ㄷ': 7, 'ㄹ': 8, 'ㄺ': 9, 'ㄻ': 10, 'ㄼ': 11, 'ㄽ': 12, 'ㄾ': 13, 'ㄿ': 14, 'ㅀ': 15, 'ㅁ': 16, 'ㅂ': 17, 'ㅄ': 18, 'ㅅ': 19, 'ㅆ': 20, 'ㅇ': 21, 'ㅈ': 22, 'ㅊ': 23, 'ㅋ': 24, 'ㅌ': 25, 'ㅍ': 26, 'ㅎ': 27 };
+
+    function englishToKorean(str) {
+        // 영문 → 자모 변환
+        let jamo = '';
+        for (let i = 0; i < str.length; i++) {
+            jamo += EN_TO_KR[str[i]] || str[i];
+        }
+        // 자모 → 한글 조합 (간단 버전)
+        return assembleKorean(jamo);
+    }
+
+    function assembleKorean(jamo) {
+        // 간단한 자모 조합 (완벽하지 않지만 기본적인 조합)
+        const CHO_SET = new Set(Object.keys(CHO_MAP));
+        const JUNG_SET = new Set(Object.keys(JUNG_MAP));
+        const JONG_SET = new Set(Object.keys(JONG_MAP));
+
+        let result = '';
+        let i = 0;
+        while (i < jamo.length) {
+            const c = jamo[i];
+
+            // 초성 + 중성 조합 시도
+            if (CHO_SET.has(c) && i + 1 < jamo.length && JUNG_SET.has(jamo[i + 1])) {
+                const cho = CHO_MAP[c];
+                const jung = JUNG_MAP[jamo[i + 1]];
+                let jong = 0;
+
+                // 종성 확인
+                if (i + 2 < jamo.length && JONG_SET.has(jamo[i + 2])) {
+                    // 다음 글자가 초성+중성이면 종성으로 사용 안함
+                    if (i + 3 < jamo.length && JUNG_SET.has(jamo[i + 3])) {
+                        // 종성 없이 조합
+                    } else {
+                        jong = JONG_MAP[jamo[i + 2]];
+                        i++;
+                    }
+                }
+
+                result += String.fromCharCode(0xAC00 + (cho * 588) + (jung * 28) + jong);
+                i += 2;
+            } else {
+                result += c;
+                i++;
+            }
+        }
+        return result;
+    }
+
+    // 영문 필드 입력 핸들러
+    function handleEnglishInput(el) {
+        const val = el.value;
+        // 한글이 포함되어 있으면 로마자로 변환
+        if (/[가-힣]/.test(val)) {
+            el.value = koreanToRoman(val);
+        } else {
+            // 영문만 허용
+            el.value = val.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
+        }
+    }
+
+    // 한글 필드 입력 핸들러
+    function handleKoreanInput(el) {
+        const val = el.value;
+        // 영문이 포함되어 있으면 한글로 변환
+        if (/[a-zA-Z]/.test(val)) {
+            const converted = englishToKorean(val);
+            // 한글만 남기기
+            el.value = converted.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '');
+        } else {
+            // 한글만 허용
+            el.value = val.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ]/g, '');
+        }
+    }
+
+    window.handleEnglishInput = handleEnglishInput;
+    window.handleKoreanInput = handleKoreanInput;
     window.openSeatPopup = openSeatPopup;
     window.openServicePopup = openServicePopup;
     window.refreshServiceTotal = refreshServiceTotal;
@@ -652,6 +1161,7 @@
 
     async function savePassengers(event) {
         event.preventDefault();
+        console.log('savePassengers 함수 시작');
 
         const passengers = [];
         let index = 0;
@@ -679,38 +1189,60 @@
 
             const pNum = index + 1; // 탑승자 번호
 
+            // 0. 필수 필드 빈 값 체크
+            if (!krLastName || !krFirstName) {
+                Swal.warning('탑승자 ' + pNum + '의 한글 성명을 입력해주세요.', '입력 오류');
+                return false;
+            }
+            if (!lastName || !firstName) {
+                Swal.warning('탑승자 ' + pNum + '의 영문 성명을 입력해주세요.', '입력 오류');
+                return false;
+            }
+            if (!birth) {
+                Swal.warning('탑승자 ' + pNum + '의 생년월일을 입력해주세요.', '입력 오류');
+                return false;
+            }
+            if (!phoneNumber) {
+                Swal.warning('탑승자 ' + pNum + '의 연락처를 입력해주세요.', '입력 오류');
+                return false;
+            }
+            if (!email) {
+                Swal.warning('탑승자 ' + pNum + '의 이메일을 입력해주세요.', '입력 오류');
+                return false;
+            }
+
             // 1. 성별 체크
             if (!genderEl) {
-                alert(`탑승자 \${pNum}의 성별을 선택해주세요.`);
+                Swal.warning('탑승자 ' + pNum + '의 성별을 선택해주세요.', '입력 오류');
                 return false;
             }
 
             // 2. 한글 이름 검사
             if (!regKr.test(krLastName) || !regKr.test(krFirstName)) {
-                alert(`탑승자 \${pNum}의 한글 성명은 한글만 입력 가능합니다.`);
+                Swal.warning('탑승자 ' + pNum + '의 한글 성명은 한글만 입력 가능합니다.', '입력 오류');
                 return false;
             }
 
             // 3. 영문 이름 검사
             if (!regEn.test(lastName) || !regEn.test(firstName)) {
-                alert(`탑승자 \${pNum}의 영문 성명은 영문 대문자만 입력 가능합니다.`);
+                Swal.warning('탑승자 ' + pNum + '의 영문 성명은 영문 대문자만 입력 가능합니다.', '입력 오류');
                 return false;
             }
 
             // 4. 생년월일 검사 (미래 날짜 선택 방지)
             const today = getLocalISODate();
             if (birth > today) {
-                alert(`탑승자 \${pNum}의 생년월일이 올바르지 않습니다.`);
+                Swal.warning('탑승자 ' + pNum + '의 생년월일이 올바르지 않습니다.', '입력 오류');
                 return false;
             }
 
             // 5. 연락처 및 이메일 형식 검사
             if (!regPhone.test(phoneNumber)) {
-                alert(`탑승자 \${pNum}의 연락처 형식이 올바르지 않습니다. (예: 01012345678)`);
+                Swal.warning('탑승자 ' + pNum + '의 연락처 형식이 올바르지 않습니다. (예: 01012345678)', '입력 오류');
                 return false;
             }
             if (!regEmail.test(email)) {
-                alert(`탑승자 \${pNum}의 이메일 형식이 올바르지 않습니다.`);
+                Swal.warning('탑승자 ' + pNum + '의 이메일 형식이 올바르지 않습니다.', '입력 오류');
                 return false;
             }
 
@@ -723,7 +1255,17 @@
                 const minExpiry = new Date();
                 minExpiry.setMonth(minExpiry.getMonth() + 6);
                 if (new Date(passportExpiry) < minExpiry) {
-                    if(!confirm(`탑승자 \${pNum}의 여권 만료일이 6개월 미만입니다. 계속하시겠습니까?`)) return false;
+                    const confirmResult = await Swal.fire({
+                        icon: 'warning',
+                        title: '여권 만료일 확인',
+                        text: '탑승자 ' + pNum + '의 여권 만료일이 6개월 미만입니다. 계속하시겠습니까?',
+                        confirmButtonText: '계속',
+                        confirmButtonColor: '#1f6feb',
+                        showCancelButton: true,
+                        cancelButtonText: '취소',
+                        cancelButtonColor: '#64748b'
+                    });
+                    if (!confirmResult.isConfirmed) return false;
                 }
             }
 
@@ -742,6 +1284,15 @@
             index++;
         }
 
+        // 로딩 표시
+        Swal.fire({
+            title: '탑승자 정보를 저장하는 중...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
         try {
             const res = await fetchWithRefresh('/reservations/' + reservationId + '/passengers/api', {
                 method: 'POST',
@@ -749,15 +1300,44 @@
                 body: JSON.stringify({ passengers: passengers })
             });
 
+            // 응답 상태 확인
+            if (!res.ok) {
+                Swal.close();
+                Swal.error('서버 오류가 발생했습니다. (HTTP ' + res.status + ')', '저장 실패');
+                return false;
+            }
+
             const data = await res.json();
+            Swal.close();
 
             if (data.success) {
-                location.href = '/reservations/' + reservationId + '/booking?saved=1';
+                // 저장 성공 시 상태 업데이트
+                passengerSaved = true;
+
+                // 좌석 선택, 부가서비스 버튼 활성화
+                document.querySelectorAll('button[onclick*="openSeatPopup"], button[onclick*="openServicePopup"]').forEach(btn => {
+                    btn.disabled = false;
+                });
+
+                // 결제 버튼 활성화
+                const payBtn = document.getElementById('payBtn');
+                if (payBtn) payBtn.disabled = false;
+
+                // 안내 텍스트 업데이트
+                const statusSpan = document.querySelector('.text-red-500.font-bold, .text-green-600.font-bold');
+                if (statusSpan) {
+                    statusSpan.className = 'text-green-600 font-bold';
+                    statusSpan.textContent = '저장 완료';
+                }
+
+                Swal.success('탑승자 정보가 저장되었습니다.', '저장 완료');
             } else {
-                alert('저장 실패: ' + (data.message || '오류가 발생했습니다.'));
+                Swal.error(data.message || '오류가 발생했습니다.', '저장 실패');
             }
         } catch (err) {
-            alert('저장 실패: ' + err.message);
+            Swal.close();
+            console.error('탑승자 저장 오류:', err);
+            Swal.error('저장 중 오류가 발생했습니다: ' + (err.message || '알 수 없는 오류'), '저장 실패');
         }
 
         return false;

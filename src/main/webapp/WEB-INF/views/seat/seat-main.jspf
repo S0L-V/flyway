@@ -5,13 +5,19 @@
 <div class="segment-tabs" id="segment-tabs"
      data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
      data-rid="${fn:escapeXml(reservationId)}">
-    <c:forEach var="seg" items="${segments}">
+    <c:forEach var="seg" items="${segments}" varStatus="status">
         <button type="button"
                 class="segment-tab ${seg.reservationSegmentId == reservationSegmentId ? 'segment-tab--active' : ''}"
                 data-segment-id="${fn:escapeXml(seg.reservationSegmentId)}"
                 data-dep="${fn:escapeXml(seg.depAirportCode)}"
                 data-arr="${fn:escapeXml(seg.arrAirportCode)}"
                 data-deptime="${fn:escapeXml(seg.depTimeText)}">
+            <div class="segment-tab__label">
+                <c:choose>
+                    <c:when test="${status.first}">가는편</c:when>
+                    <c:otherwise>오는편</c:otherwise>
+                </c:choose>
+            </div>
             <div class="segment-tab__route">
                 <c:out value="${seg.depAirportCode}"/> → <c:out value="${seg.arrAirportCode}"/>
             </div>
@@ -29,25 +35,82 @@
     <div class="minimap-col">
         <div class="minimap" id="seat-minimap">
             <div class="minimap__plane">
+                <%-- 기수 (노즈콘) --%>
+                <div class="minimap__nose"></div>
+
+                <%-- 조종석 --%>
                 <div class="minimap__cockpit"></div>
 
-                <div class="minimap__seats" aria-hidden="true">
-                    <c:forEach var="i" begin="1" end="60">
-                        <span class="minimap__seat"></span>
+                <%-- 주날개 --%>
+                <div class="minimap__wing"></div>
+
+                <%-- 비상구 표시 (앞쪽) --%>
+                <div class="minimap__exit minimap__exit--front">
+                    <span class="minimap__exit-marker minimap__exit-marker--left"></span>
+                    <span class="minimap__exit-marker minimap__exit-marker--right"></span>
+                </div>
+
+                <%-- 비상구 표시 (날개 위) --%>
+                <div class="minimap__exit minimap__exit--overwing">
+                    <span class="minimap__exit-marker minimap__exit-marker--left"></span>
+                    <span class="minimap__exit-marker minimap__exit-marker--right"></span>
+                </div>
+
+                <%-- 비상구 표시 (뒤쪽) --%>
+                <div class="minimap__exit minimap__exit--rear">
+                    <span class="minimap__exit-marker minimap__exit-marker--left"></span>
+                    <span class="minimap__exit-marker minimap__exit-marker--right"></span>
+                </div>
+
+                <%-- 좌석 영역 --%>
+                <div class="minimap__cabin" aria-hidden="true">
+                    <c:forEach var="i" begin="1" end="20">
+                        <div class="minimap__seat-row">
+                            <div class="minimap__seat-group">
+                                <span class="minimap__seat"></span>
+                                <span class="minimap__seat"></span>
+                                <span class="minimap__seat"></span>
+                            </div>
+                            <div class="minimap__aisle"></div>
+                            <div class="minimap__seat-group">
+                                <span class="minimap__seat"></span>
+                                <span class="minimap__seat"></span>
+                                <span class="minimap__seat"></span>
+                            </div>
+                        </div>
                     </c:forEach>
                 </div>
 
+                <%-- 구역 선택 버튼 --%>
                 <button type="button"
                         class="minimap__zone minimap__zone--front is-active"
-                        data-zone="front" aria-label="앞쪽 구역 보기"></button>
+                        data-zone="front" aria-label="앞쪽 구역 보기">
+                    <span class="minimap__zone-label">앞</span>
+                </button>
 
                 <button type="button"
                         class="minimap__zone minimap__zone--mid"
-                        data-zone="mid" aria-label="중간 구역 보기"></button>
+                        data-zone="mid" aria-label="중간 구역 보기">
+                    <span class="minimap__zone-label">중간</span>
+                </button>
 
                 <button type="button"
                         class="minimap__zone minimap__zone--rear"
-                        data-zone="rear" aria-label="뒤쪽 구역 보기"></button>
+                        data-zone="rear" aria-label="뒤쪽 구역 보기">
+                    <span class="minimap__zone-label">뒤</span>
+                </button>
+            </div>
+
+            <%-- 범례 --%>
+            <div class="minimap__info">
+                <div class="minimap__info-item">
+                    <span class="minimap__info-icon minimap__info-icon--exit"></span>
+                    <span>비상구</span>
+                </div>
+                <div class="minimap__info-item">
+                    <span class="minimap__info-icon minimap__info-icon--wing"></span>
+                    <span>날개 위치</span>
+                </div>
             </div>
         </div>
     </div>
@@ -65,18 +128,18 @@
                 </c:forEach>
             </div>
 
-                <div id="seat-grid"
-                     class="seat-grid seat-grid--front"
-                     data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
-                     data-rid="${fn:escapeXml(reservationId)}"
-                     data-sid="${fn:escapeXml(reservationSegmentId)}"
-                     data-pid="${fn:escapeXml(passengerId)}"
-                     data-cabin="${fn:escapeXml(cabinClassCode)}">
-                    <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
-                </div>
+            <div id="seat-grid"
+                 class="seat-grid seat-grid--front"
+                 data-ctx="${fn:escapeXml(pageContext.request.contextPath)}"
+                 data-rid="${fn:escapeXml(reservationId)}"
+                 data-sid="${fn:escapeXml(reservationSegmentId)}"
+                 data-pid="${fn:escapeXml(passengerId)}"
+                 data-cabin="${fn:escapeXml(cabinClassCode)}">
+                <p class="seat-grid__loading">좌석 정보를 불러오는 중...</p>
+            </div>
 
 
-                <div class="seat-legend">
+            <div class="seat-legend">
                 <div class="seat-legend__item">
                     <span class="seat-legend__icon seat-legend__icon--available"></span>
                     <span class="seat-legend__label">선택 가능</span>

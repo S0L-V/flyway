@@ -1,12 +1,35 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <header class="seat-header">
     <div class="seat-header__content">
-        <div class="seat-header__logo">
-            <img src="${pageContext.request.contextPath}/resources/seat/img/logo-icon.svg"
-                 alt="Flyway Logo"
-                 class="seat-header__logo-icon" />
-            <span class="seat-header__logo-text">flyway</span>
+        <div class="seat-header__left">
+            <div class="seat-header__logo">
+                <img src="${pageContext.request.contextPath}/resources/seat/img/logo-icon.svg"
+                     alt="Flyway Logo"
+                     class="seat-header__logo-icon" />
+                <span class="seat-header__logo-text">flyway</span>
+            </div>
+            <h1 class="seat-header__title">좌석 선택</h1>
         </div>
-        <h1 class="seat-header__title">사전 좌석 지정</h1>
+        <div class="seat-header__steps">
+            <div class="seat-header__step seat-header__step--done">
+                <span class="seat-header__step-number"></span>
+                <span>항공편</span>
+            </div>
+            <span class="seat-header__step-arrow"></span>
+            <div class="seat-header__step seat-header__step--done">
+                <span class="seat-header__step-number"></span>
+                <span>탑승객</span>
+            </div>
+            <span class="seat-header__step-arrow"></span>
+            <div class="seat-header__step seat-header__step--active">
+                <span class="seat-header__step-number">3</span>
+                <span>좌석</span>
+            </div>
+            <span class="seat-header__step-arrow"></span>
+            <div class="seat-header__step">
+                <span class="seat-header__step-number">4</span>
+                <span>결제</span>
+            </div>
+        </div>
     </div>
 </header>
