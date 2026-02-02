@@ -1,7 +1,7 @@
 let currentPage = 1;
 const pageSize = 10;
 
-function renderPage(pageNum) {
+function renderPage(pageNum, scroll = true) {
     if (pageNum < 1) pageNum = 1;
     currentPage = pageNum;
     const totalPages = Math.ceil(displayedOptions.length / pageSize);
@@ -16,8 +16,10 @@ function renderPage(pageNum) {
 
     updateCount();
 
-    const listEl = document.getElementById('resultList');
-    if(listEl) listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (scroll) {
+        const listEl = document.getElementById('resultList');
+        if(listEl) listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function goToPage(pageNum) {

@@ -98,45 +98,67 @@
             color: #2563eb;
         }
 
-        /* 정렬 버튼 */
+        /* 정렬 컨테이너 */
         .sort-container {
             display: flex;
             align-items: center;
             gap: 12px;
             margin-left: auto;
         }
-        .result-count {
-            font-size: 14px;
-            font-weight: 500;
-            color: #6b7280;
-            font-family: 'Pretendard', sans-serif;
-        }
-        .result-count strong {
-            color: #111827;
-        }
-        .divider {
-            height: 16px;
-            width: 1px;
-            background-color: #d1d5db;
-        }
-        .sort-button {
-            display: flex;
+
+        /* 검색결과 배지 */
+        .result-badge {
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             padding: 6px 12px;
+            background: #f0f7ff;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+            font-family: 'Pretendard', sans-serif;
+        }
+        .result-badge i {
+            width: 14px;
+            height: 14px;
+            color: #3093F7;
+        }
+        .result-badge strong {
+            color: #3093F7;
             font-weight: 700;
-            color: #2563eb;
-            background: transparent;
-            border: none;
+            margin-left: 2px;
+        }
+
+        /* 정렬 버튼 */
+        .sort-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            background: white;
+            border: 1px solid #e2e8f0;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             font-family: 'Pretendard', sans-serif;
         }
         .sort-button:hover {
-            background-color: #ffffff;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border-color: #3093F7;
+            color: #3093F7;
+        }
+        .sort-button.asc,
+        .sort-button.desc {
+            background: #3093F7;
+            border-color: #3093F7;
+            color: white;
+        }
+        .sort-button i {
+            width: 14px;
+            height: 14px;
         }
 
         /* Flights Header (Title only) */
@@ -549,13 +571,14 @@
 
             <!-- Sort Button -->
             <div class="sort-container">
-                <span class="result-count">
-                    <strong id="resultCount">0개</strong>의 항공편
-                </span>
-                <div class="divider"></div>
-                <button class="sort-button">
-                    <i data-lucide="arrow-down-wide-narrow" style="width: 16px; height: 16px;"></i>
-                    가격정렬
+                <div class="result-badge">
+                    <i data-lucide="plane"></i>
+                    <span>검색결과</span>
+                    <strong id="resultCount">0</strong>
+                </div>
+                <button class="sort-button" id="sortPriceBtn">
+                    <span id="sortLabel">가격순</span>
+                    <i data-lucide="chevrons-up-down" id="sortIcon"></i>
                 </button>
             </div>
         </div>
