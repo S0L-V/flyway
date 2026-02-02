@@ -12,6 +12,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Profile("batch")
@@ -20,6 +22,8 @@ import java.time.format.DateTimeFormatter;
 @EnableScheduling   // 스케줄링 기능 활성화
 @RequiredArgsConstructor
 public class RepriceBatchScheduler {
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     private final JobLauncher jobLauncher;
     private final Job repriceJob;
@@ -32,9 +36,9 @@ public class RepriceBatchScheduler {
      * - 대상: D-30일 ~ D-3일
      * - 빈도: 매일 자정 00:02 실행
      */
-    @Scheduled(cron = "0 2 0 * * *")
+    @Scheduled(cron = "0 2 0 * * *", zone = "Asia/Seoul")
     public void runLongTermForecast() {
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(KST);
 
         // 범위 계산: 지금으로부터 2일 뒤 ~ 30일 뒤까지 출발하는 항공편
         String rangeStart = now.plusDays(2).format(FORMATTER);
@@ -49,7 +53,7 @@ public class RepriceBatchScheduler {
      * - 대상: D-48시간(2일) ~ D-0시간(출발 직전)
      * - 빈도: 1시간마다 실행 (정각)
      */
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 0 * * * *", zone = "Asia/Seoul")
     public void runShortTermForecast() {
         LocalDateTime now = LocalDateTime.now();
 
