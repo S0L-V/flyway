@@ -43,6 +43,11 @@ function initFilters() {
             closeAllFilterPanels();
             panel.hidden = false;
             btn.setAttribute("aria-expanded", "true");
+
+            // Lucide 아이콘 초기화
+            if (typeof lucide !== 'undefined') {
+                setTimeout(() => lucide.createIcons(), 10);
+            }
         });
     });
 
@@ -143,8 +148,17 @@ function initPriceSlider(minPrice, maxPrice) {
     if (!minInput || !maxInput) return; // 요소가 없으면 안전하게 종료
 
     // 1. 데이터가 없거나 이상할 경우 기본값 설정 방어 로직
-    const totalMin = (minPrice !== undefined && minPrice !== null) ? minPrice : 0;
-    const totalMax = (maxPrice !== undefined && maxPrice !== null && maxPrice > totalMin) ? maxPrice : (totalMin + 1000000);
+    let totalMin = (minPrice !== undefined && minPrice !== null) ? minPrice : 0;
+    let totalMax = (maxPrice !== undefined && maxPrice !== null) ? maxPrice : totalMin;
+
+    // 2. 가격 범위가 너무 좁으면 버퍼 추가 (최소 20만원 범위 확보)
+    const MIN_RANGE = 200000; // 20만원
+    if (totalMax - totalMin < MIN_RANGE) {
+        // 중간값 기준으로 ±10만원 범위 설정
+        const midPrice = Math.round((totalMin + totalMax) / 2);
+        totalMin = Math.max(0, midPrice - (MIN_RANGE / 2));
+        totalMax = midPrice + (MIN_RANGE / 2);
+    }
 
     // 2. 슬라이더 범위 및 초기값 설정 (처음엔 전체 범위로 선택)
     minInput.max = totalMax;

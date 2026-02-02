@@ -565,21 +565,79 @@ function cabinText(code) {
 function initSearchButton() {
     document.getElementById("btnSearch").addEventListener("click", async () => {
 
-        // 최소 검증
-        if (!state.from || !state.to) {
-            alert("출발/도착 공항을 선택해 주세요.");
+        // 최소 검증 - 출발지
+        if (!state.from) {
+            Swal.fire({
+                icon: 'warning',
+                title: '입력 필요',
+                text: '출발지를 선택해 주세요.',
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: '확인',
+                scrollbarPadding: false
+            }).then(() => {
+                setTimeout(() => {
+                    const fromField = document.querySelector('.search-field[data-field="from"]');
+                    if (fromField) fromField.querySelector(".dropdown-toggle")?.click();
+                }, 100);
+            });
+            return;
+        }
+
+        // 도착지
+        if (!state.to) {
+            Swal.fire({
+                icon: 'warning',
+                title: '입력 필요',
+                text: '도착지를 선택해 주세요.',
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: '확인',
+                scrollbarPadding: false
+            }).then(() => {
+                setTimeout(() => {
+                    const toField = document.querySelector('.search-field[data-field="to"]');
+                    if (toField) toField.querySelector(".dropdown-toggle")?.click();
+                }, 100);
+            });
             return;
         }
 
         // 출발일은 항상 필수
         if (!state.dateStart) {
-            alert("출발일을 선택해 주세요.");
+            Swal.fire({
+                icon: 'warning',
+                title: '날짜 선택',
+                text: '출발일을 선택해 주세요.',
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: '확인',
+                scrollbarPadding: false
+            }).then(() => {
+                setTimeout(() => {
+                    const dateField = document.getElementById("dateFieldWrap");
+                    if (dateField && dateField._flatpickr) {
+                        dateField._flatpickr.open();
+                    }
+                }, 300);
+            });
             return;
         }
 
         // 왕복이면 도착일도 필수
         if (state.tripType === "RT" && !state.dateEnd) {
-            alert("도착일을 선택해 주세요.");
+            Swal.fire({
+                icon: 'warning',
+                title: '날짜 선택',
+                text: '귀국일을 선택해 주세요.',
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: '확인',
+                scrollbarPadding: false
+            }).then(() => {
+                setTimeout(() => {
+                    const dateField = document.getElementById("dateFieldWrap");
+                    if (dateField && dateField._flatpickr) {
+                        dateField._flatpickr.open();
+                    }
+                }, 300);
+            });
             return;
         }
 

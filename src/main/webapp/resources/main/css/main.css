@@ -17,6 +17,7 @@
 
 html, body {
     margin: 0; padding: 0;
+    font-family: 'Pretendard Variable', sans-serif;
     color: var(--color-text-primary);
     overflow-x: hidden;
 }
@@ -188,71 +189,392 @@ html, body {
 .nav-btn.next { right: 10%; }
 
 /* =========================================
-  실시간 인기
+   실시간 인기 (Bento Grid V2)
    ========================================= */
-.trending-section { position: relative; }
-.trending-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
-.view-all-link { font-size: 14px; color: var(--color-primary-blue); text-decoration: none; font-weight: 600; margin-bottom: 24px; }
-.trending-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.trend-item {
-    background: #f8f9fa; /* 여기는 약간 회색 유지 (구분감) */
-    border-radius: 16px; padding: 20px;
-    display: flex; align-items: center;
-    transition: background 0.2s, transform 0.2s; cursor: pointer;
-}
-.trend-item:hover { background: #eef2f6; transform: translateY(-2px); }
-.rank-num { font-size: 28px; font-weight: 900; font-style: italic; color: var(--color-primary-blue); width: 40px; text-align: center; margin-right: 16px; flex-shrink: 0; }
-.rank-num.bottom { color: #949494; }
-.trend-thumb { width: 64px; height: 64px; border-radius: 10px; background-color: #ddd; background-size: cover; background-position: center; margin-right: 16px; flex-shrink: 0; }
-.trend-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.trend-city { font-size: 17px; font-weight: 700; }
-.trend-score { text-align: right; margin-left: 10px; flex-shrink: 0; }
-.score-label { font-size: 11px; color: #949494; display: block; margin-bottom: 2px; }
-.score-val { font-size: 20px; font-weight: 800; color: var(--color-primary-blue); }
-.score-val.bottom { color: #949494; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap');
 
-.tag-container {
+.trending-section-v2 {
+    background: #f8fafc;
+    padding: 80px 0 100px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.trending-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Header */
+.trending-header-v2 {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
+    flex-direction: column;
+    margin-bottom: 48px;
 }
 
-.tag-badge {
-    padding: 4px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    border-radius: 999px;
-    background: #f1f6ff;
-    color: #2f6cf7;
-    white-space: nowrap;
+.trending-title-area {
+    max-width: 600px;
 }
 
-.diff.up {
-    color: #e53935;
+.trending-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: #60a5fa;
+    margin-bottom: 16px;
 }
 
-.diff.down {
-    color: #1e88e5;
+.trending-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0;
 }
 
-.diff.new {
-    display: inline-block;
-    margin-left: 6px;
-    padding: 2px 6px;
-    font-size: 11px;
-    color: #ff9800;
-    font-weight: bold;
-    background: moccasin;
+.trending-title .highlight {
+    color: #2563eb;
+}
+
+@keyframes pulse-live {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Bento Grid */
+.trending-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 200px);
+    gap: 20px;
+}
+
+/* Card Base */
+.trend-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trend-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+}
+
+/* Hero Card (Rank 1) - 2x2 */
+.trend-card.hero {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+/* Small Cards */
+.trend-card.small {
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+/* Wide Cards */
+.trend-card.wide {
+    grid-column: span 2;
+    grid-row: span 1;
+}
+
+/* Full Width Card (8th) */
+.trend-card.full {
+    grid-column: span 4;
+    grid-row: span 1;
+}
+
+/* Card Inner Structure */
+.trend-card-inner {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* Rank Ribbon */
+.trend-rank-ribbon {
+    width: 48px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 10;
+}
+
+.trend-card.hero .trend-rank-ribbon {
+    background: #2563eb;
+}
+
+.trend-card:not(.hero) .trend-rank-ribbon {
+    background: rgba(241, 245, 249, 0.95);
+}
+
+.rank-label {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+}
+
+.trend-card.hero .rank-label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.trend-card:not(.hero) .rank-label {
+    color: #94a3b8;
+}
+
+.rank-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.trend-card.hero .rank-number {
+    color: #ffffff;
+}
+
+.trend-card:not(.hero) .rank-number {
+    color: #2563eb;
+}
+
+/* Card Content */
+.trend-card-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.trend-card-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.7s ease;
+}
+
+.trend-card:hover .trend-card-bg {
+    transform: scale(1.1);
+}
+
+.trend-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.3) 50%, transparent 100%);
+}
+
+/* Top Stats */
+.trend-card-top {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 10;
+}
+
+.live-views {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 6px 12px;
+    width: fit-content;
+}
+
+.live-views .dot {
+    width: 6px;
+    height: 6px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: pulse-live 1.5s ease-in-out infinite;
+}
+
+.live-views span {
+    font-size: 10px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.hot-badge {
+    background: #fbbf24;
+    color: #0f172a;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 6px 10px;
     border-radius: 10px;
-    vertical-align: middle;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+    animation: bounce-soft 2s ease-in-out infinite;
 }
 
-.trending-desc {
-    color: #666;
-    margin-top: -15px;
-    margin-bottom: 20px;
-    font-size: 14px;
+@keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+/* Diff Badge */
+.diff-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.diff-badge.up {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.diff-badge.down {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+}
+
+.diff-badge.new {
+    background: rgba(251, 191, 36, 0.3);
+    color: #fcd34d;
+}
+
+.diff-badge.same {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Bottom Info */
+.trend-card-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    z-index: 10;
+}
+
+.trend-country {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #60a5fa;
+    margin-bottom: 4px;
+}
+
+.trend-city-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+.trend-card.hero .trend-city-name {
+    font-size: 42px;
+}
+
+.trend-card:not(.hero) .trend-city-name {
+    font-size: 24px;
+}
+
+.trend-tagline {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Live Views Badge - Bottom Position */
+.trend-card-bottom .live-views {
+    margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .trending-bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto;
+    }
+
+    .trend-card.hero {
+        grid-column: span 2;
+        grid-row: span 1;
+        min-height: 360px;
+    }
+
+    .trend-card.small {
+        grid-column: span 1;
+        min-height: 240px;
+    }
+
+    .trend-card.wide,
+    .trend-card.full {
+        grid-column: span 2;
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .trending-section-v2 {
+        padding: 60px 0 80px;
+    }
+
+    .trending-title {
+        font-size: 42px;
+    }
+
+    .trending-bento-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .trend-card.hero,
+    .trend-card.small,
+    .trend-card.wide,
+    .trend-card.full {
+        grid-column: span 1;
+        min-height: 280px;
+    }
+
+    .trend-rank-ribbon {
+        width: 40px;
+    }
+
+    .rank-number {
+        font-size: 22px;
+    }
+
+    .trend-card.hero .trend-city-name {
+        font-size: 32px;
+    }
 }
 
 @media (max-width: 1400px) {

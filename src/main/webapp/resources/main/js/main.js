@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadHotSixAirport();
-    setInterval(loadHotSixAirport, 180_000);
+    setInterval(loadHotSixAirport, 30_000);
 })
 
 async function loadHotSixAirport() {
@@ -10,61 +10,96 @@ async function loadHotSixAirport() {
             throw new Error(`HTTP ${res.status}`);
         }
         const data = await res.json();
-        renderHotSix(data);
+        renderBentoGrid(data);
     } catch (e) {
         console.error("실시간 랭킹 로딩 실패", e);
     }
 }
 
-function renderHotSix(list) {
-    const grid = document.querySelector(".trending-grid");
+function renderBentoGrid(list) {
+    const grid = document.getElementById("trendingBentoGrid");
+    if (!grid) return;
+
     grid.innerHTML = "";
 
-    list.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "trend-item";
+    // 최대 8개 표시
+    const items = list.slice(0, 8);
 
-        div.innerHTML = `
-            <div class="rank-num ${getRankClass(item.rank)}">${item.rank}</div>
-            <div class="trend-thumb" 
-                style="background-image: url('${item.imageUrl}');">
-            </div>
-            <div class="trend-info">
-                <div class="trend-city">${item.city}</div>
-                <div class="trend-tags">${renderTags(item.tag)}</div>
-            </div>
-            <div class="diff ${getDiffClass(item)}">
-                ${renderDiff(item)}
-            </div>
-            <div class="trend-score">
-                <span class="score-label">Score</span>
-                <div class="score-val ${getRankClass(item.rank)}">${item.searchCount.toLocaleString()}</div>
-            </div>
-        `;
-
-        grid.appendChild(div);
-    })
+    items.forEach((item, index) => {
+        const card = createTrendCard(item, index);
+        grid.appendChild(card);
+    });
 }
 
-function renderDiff(item) {
-    if (item.new) return "NEW";
-    if (item.diff > 0) return `▲ ${item.diff}`;
-    if (item.diff < 0) return `▼ ${Math.abs(item.diff)}`;
-    return "-";
+function createTrendCard(item, index) {
+    const div = document.createElement("div");
+
+    // 카드 타입 결정: 0=hero(2x2), 1-4=small, 5-6=wide, 7=full
+    let cardType = 'small';
+    if (index === 0) cardType = 'hero';
+    else if (index === 5 || index === 6) cardType = 'wide';
+    else if (index === 7) cardType = 'full';
+
+    div.className = `trend-card ${cardType}`;
+
+    const isHero = index === 0;
+    const isTop3 = item.rank <= 3;
+
+    div.innerHTML = `
+        <div class="trend-card-inner">
+            <!-- Rank Ribbon -->
+            <div class="trend-rank-ribbon">
+                <span class="rank-label">Rank</span>
+                <span class="rank-number">0${item.rank}</span>
+            </div>
+
+            <!-- Content -->
+            <div class="trend-card-content">
+                <div class="trend-card-bg" style="background-image: url('${item.imageUrl}');"></div>
+                <div class="trend-card-overlay"></div>
+
+                <!-- Top Stats -->
+                <div class="trend-card-top">
+                    ${renderDiffBadge(item)}
+                    ${isHero ? '<span class="hot-badge">HOT 🔥</span>' : ''}
+                </div>
+
+                <!-- Bottom Info -->
+                <div class="trend-card-bottom">
+                    <p class="trend-country">${item.country || ''}</p>
+                    <h3 class="trend-city-name">${item.city}</h3>
+                    <p class="trend-tagline">${renderTags(item.tag)}</p>
+
+                    <div class="live-views">
+                        <span class="dot"></span>
+                        <span>${formatNumber(item.searchCount)} Views</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return div;
 }
 
-function getDiffClass(item) {
-    if (item.new) return "new";
-    if (item.diff > 0) return "up";
-    if (item.diff < 0) return "down";
-    return "same";
-}
-
-function getRankClass(rank) {
-    if(rank > 3) {
-        return "bottom";
+function renderDiffBadge(item) {
+    if (item.new) {
+        return '<span class="diff-badge new">NEW</span>';
     }
-    return "";
+    if (item.diff > 0) {
+        return `<span class="diff-badge up">▲ ${item.diff}</span>`;
+    }
+    if (item.diff < 0) {
+        return `<span class="diff-badge down">▼ ${Math.abs(item.diff)}</span>`;
+    }
+    return '<span class="diff-badge same">-</span>';
+}
+
+function formatNumber(num) {
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toLocaleString();
 }
 
 function parseTags(tagString) {
@@ -80,8 +115,10 @@ function parseTags(tagString) {
 
 function renderTags(tagString) {
     const tags = parseTags(tagString);
+    if (tags.length === 0) return '';
 
     return tags
-        .map(tag => `<span class="tag-badge">#${tag}</span>`)
-        .join('');
+        .slice(0, 2)
+        .map(tag => `#${tag}`)
+        .join(' ');
 }
