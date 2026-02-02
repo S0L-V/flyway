@@ -474,7 +474,7 @@
                 <div class="divider"></div>
                 <button class="sort-button">
                     <i data-lucide="arrow-down-wide-narrow" style="width: 16px; height: 16px;"></i>
-                    최저가순
+                    가격정렬
                 </button>
             </div>
         </div>
@@ -483,7 +483,6 @@
     <!-- Flight Results -->
     <section class="flights-section">
         <div class="flights-header">
-            <h2 class="flights-title">항공편</h2>
         </div>
 
         <div id="resultList" class="flights-list"></div>

@@ -1,5 +1,4 @@
 .flights-section {
-  background-color: var(--color-white);
   border-radius: var(--radius-md);
   padding: var(--spacing-xl);
   display: flex;
@@ -47,7 +46,7 @@
 .flights-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4xl);
+  gap: var(--spacing-2xl);
 }
 
 /* Flight Card */
