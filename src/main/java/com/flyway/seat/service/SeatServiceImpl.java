@@ -1,5 +1,4 @@
 package com.flyway.seat.service;
-
 import com.flyway.seat.dto.*;
 import com.flyway.seat.mapper.SeatMapper;
 import org.springframework.dao.DuplicateKeyException;
@@ -17,6 +16,29 @@ public class SeatServiceImpl implements SeatService {
 
     public SeatServiceImpl(SeatMapper seatMapper) {
         this.seatMapper = seatMapper;
+    }
+
+    /**
+     * ★ 추가: 예약 소유자 검증
+     * 본인의 예약이 아니면 예외 발생
+     */
+    @Override
+    public void validateReservationOwner(String reservationId, String userId) {
+        if (reservationId == null || reservationId.isBlank()) {
+            throw new IllegalArgumentException("예약 ID는 필수입니다.");
+        }
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException("사용자 ID는 필수입니다.");
+        }
+
+        String ownerUserId = seatMapper.selectUserIdByReservationId(reservationId);
+
+        if (ownerUserId == null) {
+            throw new IllegalArgumentException("존재하지 않는 예약입니다.");
+        }
+        if (!ownerUserId.equals(userId)) {
+            throw new SecurityException("본인의 예약만 접근할 수 있습니다.");
+        }
     }
 
     @Override
@@ -100,7 +122,8 @@ public class SeatServiceImpl implements SeatService {
         LocalDateTime holdExpiresAt = expiredAt;
 
         // (동시성) aircraft_seat 행을 FOR UPDATE로 먼저 락
-        String aircraftSeatId = seatMapper.selectAircraftSeatIdByFlightAndSeatNoForUpdate(flightId, request.getSeatNo());
+        String aircraftSeatId = seatMapper.selectAircraftSeatIdByFlightAndSeatNoForUpdate(flightId,
+                request.getSeatNo());
         if (aircraftSeatId == null || aircraftSeatId.isBlank()) {
             throw new IllegalArgumentException("존재하지 않는 좌석입니다.");
         }

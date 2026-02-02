@@ -133,4 +133,5 @@ public interface SeatMapper {
     String selectCabinClassCodeByReservationSegment(
             @Param("reservationSegmentId") String reservationSegmentId
     );
+    String selectUserIdByReservationId(@Param("reservationId") String reservationId);
 }
