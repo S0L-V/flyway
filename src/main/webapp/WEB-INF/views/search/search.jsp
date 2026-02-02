@@ -405,7 +405,7 @@
                     </button>
 
                     <div class="filter-panel price-options" data-filter-panel="price" hidden>
-                        <div class="price-header text-left px-4 pt-4">
+                        <div class="price-header text-left pt-4">
                             <h3 class="text-lg font-bold">가격대</h3>
                             <p class="text-gray-500 text-sm mb-2">성인 1인 기준 요금</p>
                             <p class="selected-price text-blue-600 font-bold text-lg">
@@ -577,7 +577,6 @@
 
 <jsp:include page="include/flight-detail.jsp" />
 
-<script src="https://unpkg.com/lucide@latest"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/search.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/paging.js?v=<%= System.currentTimeMillis() %>"></script>
 <script src="${pageContext.request.contextPath}/resources/search/js/filtering.js?v=<%= System.currentTimeMillis() %>"></script>

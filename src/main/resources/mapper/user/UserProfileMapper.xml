@@ -14,7 +14,7 @@
         ) VALUES (
                      #{userId},
                      #{name},
-                     #{phoneNumber}
+                     COALESCE(#{phoneNumber}, '')
                  )
     </insert>
 
@@ -63,20 +63,20 @@
     <update id="nullifyProfileIfWithdrawn">
         UPDATE user_profile up
             JOIN users u ON u.user_id = up.user_id
-        SET
-            up.passport_no = NULL,
-            up.country = NULL,
-            up.gender = NULL,
-            up.first_name  = NULL,
-            up.last_name   = NULL,
-            up.name        = #{maskedName},
-            up.kr_first_name = NULL,
-            up.kr_last_name = NULL,
-            up.birth = NULL,
-            up.email = NULL,
-            up.phone_number = '',
-            up.passport_expiry_date = NULL,
-            up.passport_issue_country = NULL
+            SET
+                up.passport_no = NULL,
+                up.country = NULL,
+                up.gender = NULL,
+                up.first_name  = NULL,
+                up.last_name   = NULL,
+                up.name        = #{maskedName},
+                up.kr_first_name = NULL,
+                up.kr_last_name = NULL,
+                up.birth = NULL,
+                up.email = NULL,
+                up.phone_number = '',
+                up.passport_expiry_date = NULL,
+                up.passport_issue_country = NULL
         WHERE up.user_id = #{userId}
           AND u.status = 'WITHDRAWN'
     </update>
