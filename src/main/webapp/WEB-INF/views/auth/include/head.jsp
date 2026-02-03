@@ -3,22 +3,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          primary: {
-            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
-            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
-            800: '#1e40af', 900: '#1e3a8a',
-          }
-        },
-        fontFamily: {
-          sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: {
+                        50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                        400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                        800: '#1e40af', 900: '#1e3a8a',
+                    }
+                },
+                fontFamily: {
+                    sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                }
+            }
         }
-      }
     }
-  }
 </script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/layout.css?v=<%= System.currentTimeMillis() %>">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/mypage/css/styles.css">
@@ -26,3 +26,12 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/static/pretendard.css" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css">
 <script src="https://unpkg.com/lucide@latest"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="${pageContext.request.contextPath}/resources/common/js/swal-utils.js"></script>
+<!-- Flatpickr (달력) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+<!-- 메인 페이지 달력 스타일 -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/main/css/hero.css">

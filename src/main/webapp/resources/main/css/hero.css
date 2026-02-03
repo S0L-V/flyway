@@ -73,7 +73,78 @@
     text-align: center;
 }
 
-/* Badge */
+/* Badge with Marquee */
+.hero-badge-marquee {
+    margin-bottom: 1.5rem;
+    max-width: 320px;
+    overflow: hidden;
+    background: #e9f4ff;
+    border: 1px solid #d6ecff;
+    border-radius: 9999px;
+    padding: 0.6rem 0;
+    position: relative;
+}
+
+/* 좌우 페이드 효과 */
+.hero-badge-marquee::before,
+.hero-badge-marquee::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.hero-badge-marquee::before {
+    left: 0;
+    background: linear-gradient(to right, #e9f4ff 0%, transparent 100%);
+}
+
+.hero-badge-marquee::after {
+    right: 0;
+    background: linear-gradient(to left, #e9f4ff 0%, transparent 100%);
+}
+
+.marquee-track {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    white-space: nowrap;
+    animation: marquee 20s linear infinite;
+}
+
+.marquee-text {
+    color: #3093F7;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.marquee-separator {
+    color: #93c5fd;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* 호버 시 일시정지 */
+.hero-badge-marquee:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+/* Legacy Badge (keep for backwards compatibility) */
 .hero-badge {
     margin-bottom: 1.5rem;
 }
@@ -1249,6 +1320,20 @@
         padding: 0 1rem;
     }
 
+    .hero-badge-marquee {
+        max-width: 260px;
+        padding: 0.5rem 0;
+    }
+
+    .marquee-text {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+    }
+
+    .marquee-separator {
+        font-size: 8px;
+    }
+
     .hero-badge span {
         font-size: 10px;
         padding: 0.5rem 1rem;
@@ -1369,6 +1454,20 @@
 
     .hero-content {
         padding: 0 0.75rem;
+    }
+
+    .hero-badge-marquee {
+        max-width: 220px;
+        padding: 0.4rem 0;
+    }
+
+    .marquee-text {
+        font-size: 9px;
+        letter-spacing: 0.15em;
+    }
+
+    .marquee-track {
+        gap: 1rem;
     }
 
     .hero-badge span {

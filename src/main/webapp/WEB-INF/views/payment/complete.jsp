@@ -10,10 +10,9 @@
     <meta charset="UTF-8"/>
     <title>결제 완료 - Flyway</title>
     <jsp:include page="/WEB-INF/views/common/head.jsp" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css"/>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container {
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f5f7fb; }
+        .complete-container {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
@@ -139,7 +138,7 @@
 <body>
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
 
-<div class="container">
+<div class="complete-container">
 
     <c:choose>
         <%-- 결제 성공 --%>

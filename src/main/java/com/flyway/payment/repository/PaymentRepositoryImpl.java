@@ -1,6 +1,7 @@
 package com.flyway.payment.repository;
 
 import com.flyway.payment.dto.PaymentViewDto;
+import com.flyway.payment.dto.RecentPaymentTickerDto;
 import com.flyway.payment.mapper.PaymentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -62,6 +63,11 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public Optional<PaymentViewDto> lockPaymentForUpdate(String paymentId) {
         return Optional.ofNullable(paymentMapper.selectByPaymentIdForUpdate(paymentId));
+    }
+
+    @Override
+    public List<RecentPaymentTickerDto> findRecentPaymentsForTicker() {
+        return paymentMapper.selectRecentPaymentsForTicker();
     }
 
 }

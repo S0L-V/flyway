@@ -6,6 +6,7 @@ import com.flyway.passenger.mapper.PassengerQueryMapper;
 import com.flyway.payment.domain.*;
 import com.flyway.payment.dto.PaymentViewDto;
 import com.flyway.payment.client.TossPaymentsClient;
+import com.flyway.payment.dto.RecentPaymentTickerDto;
 import com.flyway.payment.mapper.RefundMapper;
 import com.flyway.payment.repository.PaymentRepository;
 import com.flyway.pricing.event.PricingEventService;
@@ -427,5 +428,13 @@ public class PaymentService {
         Long serviceTotal = passengerServiceRepository.findServiceTotal(reservationId);
 
         return flightTotal + (serviceTotal != null ? serviceTotal : 0L);
+    }
+
+    /**
+     * 최근 결제 티커용 조회 (메인 페이지 공개 API)
+     */
+    @Transactional(readOnly = true)
+    public List<RecentPaymentTickerDto> getRecentPaymentsForTicker() {
+        return paymentRepository.findRecentPaymentsForTicker();
     }
 }

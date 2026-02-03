@@ -75,3 +75,302 @@
     background-size: 10px 2px;
     background-repeat: repeat-x;
 }
+
+/* ===== SweetAlert2 Custom Styles ===== */
+.swal2-popup {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    border-radius: 16px !important;
+    padding: 2rem !important;
+}
+
+.swal2-title {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+}
+
+.swal2-html-container {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.95rem !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+}
+
+.swal2-textarea,
+.swal2-input {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.9rem !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.swal2-textarea:focus,
+.swal2-input:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    outline: none !important;
+}
+
+.swal2-textarea::placeholder,
+.swal2-input::placeholder {
+    color: #94a3b8 !important;
+}
+
+.swal2-confirm,
+.swal2-cancel {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.swal2-confirm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.swal2-cancel:hover {
+    transform: translateY(-1px);
+}
+
+.swal2-validation-message {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.85rem !important;
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+}
+
+/* ===== Date Picker Wrapper ===== */
+.date-picker-wrapper {
+    position: relative;
+}
+
+.date-picker-wrapper input {
+    padding-right: 44px !important;
+    cursor: pointer;
+}
+
+.date-picker-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #3093F7;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 1;
+    transition: color 0.2s ease;
+}
+
+.date-picker-wrapper:hover .date-picker-icon {
+    color: #1d6fe0;
+}
+
+/* ===== Flatpickr 커스텀 년/월 드롭다운 ===== */
+
+/* 마이페이지 전용 flatpickr-month 높이 재정의 */
+.flatpickr-calendar:has(.fp-custom-nav) .flatpickr-months .flatpickr-month {
+    height: auto !important;
+    min-height: 56px !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.flatpickr-calendar:has(.fp-custom-nav) .flatpickr-months {
+    overflow: visible !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.flatpickr-current-month.fp-custom-nav {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 10px 0 !important;
+    height: auto !important;
+    width: 100% !important;
+    position: static !important;
+    font-size: inherit !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    overflow: visible !important;
+    left: 0 !important;
+    transform: none !important;
+}
+
+.fp-custom-nav {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 10px 0 !important;
+    height: auto !important;
+    width: 100% !important;
+    position: static !important;
+    left: 0 !important;
+    transform: none !important;
+}
+
+.fp-custom-dropdown {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.fp-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-width: 95px;
+    justify-content: center;
+}
+
+.fp-year-dropdown .fp-dropdown-btn {
+    min-width: 105px;
+}
+
+.fp-dropdown-btn:hover {
+    border-color: #3093F7;
+    background-color: #f8fbff;
+}
+
+.fp-custom-dropdown.open .fp-dropdown-btn {
+    border-color: #3093F7;
+    box-shadow: 0 0 0 3px rgba(48, 147, 247, 0.12);
+}
+
+.fp-dropdown-text {
+    flex: 1;
+    text-align: center;
+}
+
+.fp-dropdown-arrow {
+    width: 14px;
+    height: 14px;
+    color: #3093F7;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.fp-custom-dropdown.open .fp-dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.fp-dropdown-list {
+    position: fixed;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 999999;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    min-width: 110px;
+    padding: 6px;
+}
+
+.fp-dropdown-list.fp-year-list {
+    min-width: 120px;
+}
+
+.fp-dropdown-list.fp-month-list {
+    min-width: 100px;
+}
+
+.fp-dropdown-list.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.fp-dropdown-option {
+    padding: 10px 16px;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.1s ease;
+    text-align: center;
+}
+
+.fp-dropdown-option:hover {
+    background: #f0f7ff;
+    color: #3093F7;
+}
+
+.fp-dropdown-option.selected {
+    background: #3093F7;
+    color: #fff;
+    font-weight: 600;
+}
+
+.fp-dropdown-option.selected:hover {
+    background: #1d7fe0;
+    color: #fff;
+}
+
+/* 스크롤바 스타일 */
+.fp-dropdown-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.fp-dropdown-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fp-dropdown-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.fp-dropdown-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 달력 전체 여백 조정 - 커스텀 년월 선택이 있는 달력 */
+.flatpickr-calendar:has(.fp-custom-nav) .flatpickr-months {
+    padding: 10px 12px 6px !important;
+    margin-bottom: 4px !important;
+    overflow: visible !important;
+}
+
+.flatpickr-calendar:has(.fp-custom-nav) .flatpickr-months .flatpickr-month {
+    height: auto !important;
+    min-height: 56px !important;
+    overflow: visible !important;
+}
+
+/* 마이페이지 달력 전체 overflow 허용 */
+.flatpickr-calendar:has(.fp-custom-nav) {
+    overflow: visible !important;
+}

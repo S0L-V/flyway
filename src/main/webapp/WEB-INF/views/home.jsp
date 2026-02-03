@@ -30,9 +30,18 @@
     </div>
 
     <div class="hero-content">
-        <!-- Badge -->
-        <div class="hero-badge animate-flyway">
-            <span>Infinite Horizon, Perfect Flight</span>
+        <!-- Badge with Marquee -->
+        <div class="hero-badge-marquee animate-flyway">
+            <div class="marquee-track">
+                <span class="marquee-text">Infinite Horizon, Perfect Flight</span>
+                <span class="marquee-separator">✦</span>
+                <span class="marquee-text">Infinite Horizon, Perfect Flight</span>
+                <span class="marquee-separator">✦</span>
+                <span class="marquee-text">Infinite Horizon, Perfect Flight</span>
+                <span class="marquee-separator">✦</span>
+                <span class="marquee-text">Infinite Horizon, Perfect Flight</span>
+                <span class="marquee-separator">✦</span>
+            </div>
         </div>
 
         <!-- Title -->

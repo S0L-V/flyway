@@ -52,7 +52,10 @@
         </div>
         <div class="space-y-1.5 md:col-span-2">
           <label class="text-sm font-medium text-slate-500">생년월일</label>
-          <input id="profileBirth" type="date" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all outline-none" value="" />
+          <div class="date-picker-wrapper">
+            <input id="profileBirth" type="text" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all outline-none cursor-pointer bg-white hover:border-slate-300" value="" placeholder="날짜를 선택하세요" readonly />
+            <i data-lucide="calendar" class="date-picker-icon"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -91,7 +94,10 @@
         </div>
         <div class="space-y-1.5">
           <label class="text-sm font-medium text-slate-500">만료일</label>
-          <input id="profilePassportExpiryDate" type="date" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all outline-none" value="" />
+          <div class="date-picker-wrapper">
+            <input id="profilePassportExpiryDate" type="text" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all outline-none cursor-pointer bg-white hover:border-slate-300" value="" placeholder="날짜를 선택하세요" readonly />
+            <i data-lucide="calendar" class="date-picker-icon"></i>
+          </div>
         </div>
       </div>
     </div>
