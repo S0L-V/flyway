@@ -4,31 +4,222 @@
 <%@ include file="layout/topbar.jsp" %>
 
 <style>
-    /* Add styles for the dropdown similar to search.jsp */
+    /* 2단계 드롭다운 스타일 */
     .filter-dropdown .dropdown-panel { display: none; }
-    .filter-dropdown.open .dropdown-panel { display: block; }
+    .filter-dropdown.open .dropdown-panel { display: flex; }
 
     /* 글래스 테마용 드롭다운 */
     .filter-dropdown .dropdown-panel {
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.99) 100%);
         border: 1px solid rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(20px);
+        border-radius: 0.75rem;
+        overflow: hidden;
     }
-    .filter-dropdown .dropdown-search {
+
+    /* 2단계 드롭다운 레이아웃 */
+    .dropdown-panel {
+        flex-direction: row;
+        width: 420px;
+    }
+
+    /* 국가 패널 */
+    .country-panel {
+        width: 160px;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .country-panel-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .country-list {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 280px;
+    }
+
+    .country-item {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.75);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.15s ease;
+    }
+
+    .country-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    .country-item.active {
+        background: rgba(10, 132, 255, 0.2);
+        color: #0a84ff;
+    }
+
+    .country-item .count {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.125rem 0.5rem;
+        border-radius: 999px;
+    }
+
+    .country-item.active .count {
+        background: rgba(10, 132, 255, 0.3);
+        color: rgba(10, 132, 255, 0.8);
+    }
+
+    /* 도시/공항 패널 */
+    .airport-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .airport-panel-header {
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .airport-search {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
         background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
         color: rgba(255, 255, 255, 0.9);
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s ease;
     }
-    .filter-dropdown .dropdown-search::placeholder {
+
+    .airport-search:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(10, 132, 255, 0.5);
+    }
+
+    .airport-search::placeholder {
         color: rgba(255, 255, 255, 0.4);
     }
-    .filter-dropdown .dropdown-list li {
-        color: rgba(255, 255, 255, 0.8);
-        padding: 0.5rem 1rem;
-        cursor: pointer;
+
+    .airport-list {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 240px;
     }
-    .filter-dropdown .dropdown-list li:hover {
-        background: rgba(255, 255, 255, 0.1);
+
+    .airport-item {
+        padding: 0.625rem 1rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .airport-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .airport-item:last-child {
+        border-bottom: none;
+    }
+
+    .airport-item .city-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .airport-item .airport-code {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-left: 0.5rem;
+    }
+
+    .airport-item .airport-name {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-top: 0.125rem;
+    }
+
+    /* 선택 안내 */
+    .select-country-hint {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.875rem;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .select-country-hint i {
+        width: 2.5rem;
+        height: 2.5rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.5;
+    }
+
+    /* 빈 결과 */
+    .no-results {
+        padding: 1.5rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.875rem;
+    }
+
+    /* 커스텀 스크롤바 (드롭다운 내부) */
+    .country-list::-webkit-scrollbar,
+    .airport-list::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .country-list::-webkit-scrollbar-thumb,
+    .airport-list::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+    }
+
+    body.admin-light .country-list::-webkit-scrollbar-thumb,
+    body.admin-light .airport-list::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* 드롭다운 열기 애니메이션 */
+    .filter-dropdown .dropdown-panel {
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        pointer-events: none;
+    }
+
+    .filter-dropdown.open .dropdown-panel {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    /* 선택된 값 표시 스타일 */
+    .dropdown-toggle [data-value].selected {
+        color: #0a84ff;
+        font-weight: 500;
+    }
+
+    body.admin-light .dropdown-toggle [data-value].selected {
+        color: #0a84ff;
     }
 
     /* Drag and drop styles (글래스 테마) */
@@ -53,6 +244,83 @@
         background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
         background-size: 200% 100%;
     }
+
+    /* 라이트 모드 드롭다운 */
+    body.admin-light .filter-dropdown .dropdown-panel {
+        background: rgba(255, 255, 255, 0.98);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.admin-light .country-panel {
+        border-right-color: rgba(0, 0, 0, 0.08);
+    }
+
+    body.admin-light .country-panel-header {
+        color: rgba(15, 23, 42, 0.5);
+        border-bottom-color: rgba(0, 0, 0, 0.05);
+    }
+
+    body.admin-light .country-item {
+        color: rgba(15, 23, 42, 0.75);
+    }
+
+    body.admin-light .country-item:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: rgba(15, 23, 42, 0.95);
+    }
+
+    body.admin-light .country-item.active {
+        background: rgba(10, 132, 255, 0.1);
+        color: #0a84ff;
+    }
+
+    body.admin-light .country-item .count {
+        color: rgba(15, 23, 42, 0.4);
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    body.admin-light .airport-panel-header {
+        border-bottom-color: rgba(0, 0, 0, 0.05);
+    }
+
+    body.admin-light .airport-search {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: rgba(15, 23, 42, 0.9);
+    }
+
+    body.admin-light .airport-search:focus {
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    body.admin-light .airport-search::placeholder {
+        color: rgba(15, 23, 42, 0.4);
+    }
+
+    body.admin-light .airport-item {
+        border-bottom-color: rgba(0, 0, 0, 0.05);
+    }
+
+    body.admin-light .airport-item:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    body.admin-light .airport-item .city-name {
+        color: rgba(15, 23, 42, 0.9);
+    }
+
+    body.admin-light .airport-item .airport-code {
+        color: rgba(15, 23, 42, 0.5);
+    }
+
+    body.admin-light .airport-item .airport-name {
+        color: rgba(15, 23, 42, 0.4);
+    }
+
+    body.admin-light .select-country-hint,
+    body.admin-light .no-results {
+        color: rgba(15, 23, 42, 0.4);
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
@@ -73,29 +341,70 @@
         <div class="glass-section">
             <div class="p-6 border-b border-white/5 flex items-center justify-between flex-wrap gap-4">
                 <h2 class="text-lg font-bold text-glass-primary">항공편 목록</h2>
-                <div id="flight-filters" class="flex items-center space-x-2">
-                    <!-- Departure Airport -->
+                <div id="flight-filters" class="flex items-center space-x-2 flex-wrap gap-y-2">
+                    <!-- Departure Airport (2단계 선택) -->
                     <div class="relative filter-dropdown" data-field="from">
-                        <button type="button" class="dropdown-toggle p-2 bg-white/5 border border-white/10 rounded-lg text-sm w-44 text-left flex justify-between items-center text-glass-secondary hover:bg-white/10 transition-colors">
-                            <span data-value>출발 공항</span> <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        <button type="button" class="dropdown-toggle p-2 bg-white/5 border border-white/10 rounded-lg text-sm w-48 text-left flex justify-between items-center text-glass-secondary hover:bg-white/10 transition-colors">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="plane-takeoff" class="w-4 h-4 opacity-60"></i>
+                                <span data-value>출발지 선택</span>
+                            </span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </button>
-                        <div class="dropdown-panel absolute z-20 w-64 mt-1 rounded-lg shadow-xl">
-                            <input class="dropdown-search w-full p-2 border-b border-white/10 rounded-t-lg" type="text" placeholder="공항 검색 (ICN, 인천)" autocomplete="off">
-                            <ul class="dropdown-list max-h-60 overflow-y-auto rounded-b-lg" data-list></ul>
+                        <div class="dropdown-panel absolute z-50 mt-1 shadow-xl">
+                            <!-- 국가 패널 -->
+                            <div class="country-panel">
+                                <div class="country-panel-header">국가 선택</div>
+                                <div class="country-list" data-country-list></div>
+                            </div>
+                            <!-- 도시/공항 패널 -->
+                            <div class="airport-panel">
+                                <div class="airport-panel-header">
+                                    <input class="airport-search" type="text" placeholder="도시 또는 공항 검색..." autocomplete="off">
+                                </div>
+                                <div class="airport-list" data-airport-list>
+                                    <div class="select-country-hint">
+                                        <i data-lucide="map-pin"></i>
+                                        <span>좌측에서 국가를<br>먼저 선택해주세요</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <!-- Arrival Airport -->
+                    <!-- Arrival Airport (2단계 선택) -->
                     <div class="relative filter-dropdown" data-field="to">
-                        <button type="button" class="dropdown-toggle p-2 bg-white/5 border border-white/10 rounded-lg text-sm w-44 text-left flex justify-between items-center text-glass-secondary hover:bg-white/10 transition-colors">
-                            <span data-value>도착 공항</span> <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        <button type="button" class="dropdown-toggle p-2 bg-white/5 border border-white/10 rounded-lg text-sm w-48 text-left flex justify-between items-center text-glass-secondary hover:bg-white/10 transition-colors">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="plane-landing" class="w-4 h-4 opacity-60"></i>
+                                <span data-value>도착지 선택</span>
+                            </span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </button>
-                        <div class="dropdown-panel absolute z-20 w-64 mt-1 rounded-lg shadow-xl">
-                            <input class="dropdown-search w-full p-2 border-b border-white/10 rounded-t-lg" type="text" placeholder="공항 검색 (NRT, 나리타)" autocomplete="off">
-                            <ul class="dropdown-list max-h-60 overflow-y-auto rounded-b-lg" data-list></ul>
+                        <div class="dropdown-panel absolute z-50 mt-1 shadow-xl right-0">
+                            <!-- 국가 패널 -->
+                            <div class="country-panel">
+                                <div class="country-panel-header">국가 선택</div>
+                                <div class="country-list" data-country-list></div>
+                            </div>
+                            <!-- 도시/공항 패널 -->
+                            <div class="airport-panel">
+                                <div class="airport-panel-header">
+                                    <input class="airport-search" type="text" placeholder="도시 또는 공항 검색..." autocomplete="off">
+                                </div>
+                                <div class="airport-list" data-airport-list>
+                                    <div class="select-country-hint">
+                                        <i data-lucide="map-pin"></i>
+                                        <span>좌측에서 국가를<br>먼저 선택해주세요</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button id="search-flights-btn" class="glass-btn px-3 py-2 text-white text-sm">
                         <i data-lucide="search" class="w-4 h-4 inline-block mr-1"></i> 검색
+                    </button>
+                    <button id="reset-filters-btn" class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-glass-muted hover:text-glass-secondary hover:bg-white/10 transition-colors" title="필터 초기화">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
@@ -153,6 +462,6 @@
 <script>
     window.CONTEXT_PATH = '${pageContext.request.contextPath}';
 </script>
-<script src="${pageContext.request.contextPath}/resources/admin/promotions.js"></script>
+<script src="${pageContext.request.contextPath}/resources/admin/promotions.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

@@ -5,9 +5,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let allAirports = [];
+    let groupedByCountry = {}; // { country: [airports] }
     const state = {
         from: null,  // { code, name }
-        to: null     // { code, name }
+        to: null,    // { code, name }
+        fromCountry: null,  // 선택된 출발 국가
+        toCountry: null     // 선택된 도착 국가
     };
     const pagination = {
         currentPage: 1,
@@ -175,12 +178,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return dateValue.substring(0, 16);
     };
 
-    // --- Dropdown Logic ---
+    // --- Dropdown Logic (2단계: 국가 → 도시) ---
     function initDropdowns() {
         document.querySelectorAll('.filter-dropdown').forEach(dd => {
             const toggle = dd.querySelector('.dropdown-toggle');
-            const panel = dd.querySelector('.dropdown-panel');
-            const searchInput = dd.querySelector('.dropdown-search');
+            const fieldName = dd.dataset.field;
 
             toggle.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -188,16 +190,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Close other dropdowns
                 document.querySelectorAll('.filter-dropdown').forEach(other => {
-                    if (other !== dd) other.classList.remove('open');
+                    if (other !== dd) {
+                        other.classList.remove('open');
+                        // 다른 드롭다운의 국가 선택 초기화
+                        const otherField = other.dataset.field;
+                        if (otherField) {
+                            state[otherField + 'Country'] = null;
+                            resetAirportPanel(other);
+                        }
+                    }
                 });
 
                 // Toggle this dropdown
+                const wasOpen = dd.classList.contains('open');
                 dd.classList.toggle('open');
 
-                if (dd.classList.contains('open') && searchInput) {
-                    searchInput.focus();
-                    searchInput.value = '';
-                    renderAirportList(dd, allAirports);
+                if (!wasOpen) {
+                    // 드롭다운 열릴 때: 국가 목록 렌더링
+                    renderCountryList(dd, fieldName);
+                    // 이전에 선택된 국가가 있으면 해당 공항 표시
+                    const selectedCountry = state[fieldName + 'Country'];
+                    if (selectedCountry) {
+                        renderAirportList(dd, selectedCountry);
+                        highlightCountry(dd, selectedCountry);
+                    } else {
+                        resetAirportPanel(dd);
+                    }
+                    // 아이콘 초기화
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
                 }
             });
         });
@@ -212,35 +232,131 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function renderAirportList(dropdown, airports) {
-        const ul = dropdown.querySelector('[data-list]');
-        if (!ul) return;
+    // 국가 목록 렌더링
+    function renderCountryList(dropdown, fieldName) {
+        const countryListEl = dropdown.querySelector('[data-country-list]');
+        if (!countryListEl) return;
+
+        // 국가별 공항 수와 함께 정렬
+        const countries = Object.entries(groupedByCountry)
+            .map(([country, airports]) => ({ country, count: airports.length }))
+            .sort((a, b) => {
+                // 한국을 최상단에
+                if (a.country === '한국') return -1;
+                if (b.country === '한국') return 1;
+                // 나머지는 공항 수 내림차순
+                return b.count - a.count;
+            });
+
+        countryListEl.innerHTML = countries.map(({ country, count }) => `
+            <div class="country-item" data-country="${country}">
+                <span>${country}</span>
+                <span class="count">${count}</span>
+            </div>
+        `).join('');
+
+        // 국가 클릭 이벤트
+        countryListEl.querySelectorAll('.country-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const country = item.dataset.country;
+
+                // 국가 선택 상태 업데이트
+                state[fieldName + 'Country'] = country;
+
+                // 활성 상태 표시
+                countryListEl.querySelectorAll('.country-item').forEach(ci => ci.classList.remove('active'));
+                item.classList.add('active');
+
+                // 해당 국가 공항 목록 렌더링
+                renderAirportList(dropdown, country);
+
+                // 검색 입력 초기화 및 포커스
+                const searchInput = dropdown.querySelector('.airport-search');
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.focus();
+                }
+            });
+        });
+    }
+
+    // 선택된 국가 하이라이트
+    function highlightCountry(dropdown, country) {
+        const countryListEl = dropdown.querySelector('[data-country-list]');
+        if (!countryListEl) return;
+
+        countryListEl.querySelectorAll('.country-item').forEach(item => {
+            if (item.dataset.country === country) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    // 공항 패널 초기화 (안내 메시지 표시)
+    function resetAirportPanel(dropdown) {
+        const airportListEl = dropdown.querySelector('[data-airport-list]');
+        if (!airportListEl) return;
+
+        airportListEl.innerHTML = `
+            <div class="select-country-hint">
+                <i data-lucide="map-pin"></i>
+                <span>좌측에서 국가를<br>먼저 선택해주세요</span>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // 공항 목록 렌더링 (선택된 국가의 공항만)
+    function renderAirportList(dropdown, country) {
+        const airportListEl = dropdown.querySelector('[data-airport-list]');
+        if (!airportListEl) return;
+
+        const airports = groupedByCountry[country] || [];
 
         if (airports.length === 0) {
-            ul.innerHTML = '<li class="p-3 text-sm text-slate-500">결과 없음</li>';
+            airportListEl.innerHTML = '<div class="no-results">공항이 없습니다</div>';
             return;
         }
 
-        // Group by country
-        const grouped = airports.reduce((acc, a) => {
-            const country = a.country || '기타';
-            if (!acc[country]) acc[country] = [];
-            acc[country].push(a);
-            return acc;
-        }, {});
+        airportListEl.innerHTML = airports.map(a => `
+            <div class="airport-item" data-code="${a.airportId}" data-name="${a.city}" data-country="${country}">
+                <div>
+                    <span class="city-name">${a.city}</span>
+                    <span class="airport-code">${a.airportId}</span>
+                </div>
+                ${a.name ? `<div class="airport-name">${a.name}</div>` : ''}
+            </div>
+        `).join('');
+    }
 
-        ul.innerHTML = Object.entries(grouped).map(([country, list]) => `
-            <li class="country-group">
-                <div class="px-3 py-1 text-xs font-semibold text-slate-400 bg-slate-50">${country}</div>
-                <ul>
-                    ${list.map(a => `
-                        <li class="airport-item px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
-                            data-code="${a.airportId}" data-name="${a.city}">
-                            ${a.city} (${a.airportId})
-                        </li>
-                    `).join('')}
-                </ul>
-            </li>
+    // 공항 목록 필터링 (검색어)
+    function filterAirportList(dropdown, country, query) {
+        const airportListEl = dropdown.querySelector('[data-airport-list]');
+        if (!airportListEl) return;
+
+        const airports = groupedByCountry[country] || [];
+        const filtered = airports.filter(a =>
+            a.city.toLowerCase().includes(query) ||
+            a.airportId.toLowerCase().includes(query) ||
+            (a.name && a.name.toLowerCase().includes(query))
+        );
+
+        if (filtered.length === 0) {
+            airportListEl.innerHTML = '<div class="no-results">검색 결과가 없습니다</div>';
+            return;
+        }
+
+        airportListEl.innerHTML = filtered.map(a => `
+            <div class="airport-item" data-code="${a.airportId}" data-name="${a.city}" data-country="${country}">
+                <div>
+                    <span class="city-name">${a.city}</span>
+                    <span class="airport-code">${a.airportId}</span>
+                </div>
+                ${a.name ? `<div class="airport-name">${a.name}</div>` : ''}
+            </div>
         `).join('');
     }
 
@@ -248,32 +364,43 @@ document.addEventListener('DOMContentLoaded', function() {
         const dd = document.querySelector(`.filter-dropdown[data-field="${fieldName}"]`);
         if (!dd) return;
 
-        const searchInput = dd.querySelector('.dropdown-search');
-        const ul = dd.querySelector('[data-list]');
+        const searchInput = dd.querySelector('.airport-search');
+        const airportListEl = dd.querySelector('[data-airport-list]');
 
-        // Search filtering
-        searchInput.addEventListener('input', () => {
-            const query = searchInput.value.toLowerCase().trim();
-            const filtered = allAirports.filter(a =>
-                a.city.toLowerCase().includes(query) ||
-                a.airportId.toLowerCase().includes(query) ||
-                (a.country && a.country.toLowerCase().includes(query))
-            );
-            renderAirportList(dd, filtered);
-        });
+        // 검색 필터링
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                const selectedCountry = state[fieldName + 'Country'];
 
-        // Selection
-        ul.addEventListener('click', (e) => {
-            const item = e.target.closest('.airport-item');
-            if (!item) return;
+                if (!selectedCountry) return;
 
-            const code = item.dataset.code;
-            const name = item.dataset.name;
+                if (query === '') {
+                    renderAirportList(dd, selectedCountry);
+                } else {
+                    filterAirportList(dd, selectedCountry, query);
+                }
+            });
+        }
 
-            state[fieldName] = { code, name };
-            dd.querySelector('[data-value]').textContent = `${name} (${code})`;
-            dd.classList.remove('open');
-        });
+        // 공항 선택
+        if (airportListEl) {
+            airportListEl.addEventListener('click', (e) => {
+                const item = e.target.closest('.airport-item');
+                if (!item) return;
+
+                const code = item.dataset.code;
+                const name = item.dataset.name;
+
+                state[fieldName] = { code, name };
+                const valueEl = dd.querySelector('[data-value]');
+                valueEl.textContent = `${name} (${code})`;
+                valueEl.classList.add('selected');
+                dd.classList.remove('open');
+
+                // 선택 후 국가 상태 유지 (다음에 열 때 같은 국가 표시)
+            });
+        }
     }
 
     // --- Data Fetching ---
@@ -283,6 +410,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const json = await res.json();
             if (json.success) {
                 allAirports = json.data;
+
+                // 국가별 그룹화
+                groupedByCountry = allAirports.reduce((acc, a) => {
+                    const country = a.country || '기타';
+                    if (!acc[country]) acc[country] = [];
+                    acc[country].push(a);
+                    return acc;
+                }, {});
+
                 initDropdowns();
                 setupAirportDropdown('from');
                 setupAirportDropdown('to');
@@ -672,7 +808,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    flightFilterSearchBtn.addEventListener('click', () => fetchFlights(1));
+    if (flightFilterSearchBtn) {
+        flightFilterSearchBtn.addEventListener('click', () => fetchFlights(1));
+    }
+
+    // 필터 초기화
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+            // 상태 초기화
+            state.from = null;
+            state.to = null;
+            state.fromCountry = null;
+            state.toCountry = null;
+
+            // UI 초기화
+            document.querySelectorAll('.filter-dropdown').forEach(dd => {
+                const field = dd.dataset.field;
+                const valueEl = dd.querySelector('[data-value]');
+                if (valueEl) {
+                    valueEl.textContent = field === 'from' ? '출발지 선택' : '도착지 선택';
+                    valueEl.classList.remove('selected');
+                }
+                resetAirportPanel(dd);
+            });
+
+            // 검색 실행
+            fetchFlights(1, true);
+        });
+    }
 
     // 모달 열 때 lucide 아이콘 재초기화
     const initModalIcons = () => {
@@ -687,17 +851,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (radio) radio.checked = true;
     };
 
-    addFlightBtn.addEventListener('click', () => {
-        flightForm.reset();
-        flightForm.querySelector('#flight-crud-id').value = '';
-        setRadioValue('routeType', 'DOMESTIC');
-        setRadioValue('terminalNo', '');
-        flightCrudModal.querySelector('#flight-modal-title').textContent = '새 항공편 등록';
-        flightCrudModal.classList.remove('hidden');
-        initModalIcons();
-    });
+    if (addFlightBtn) {
+        addFlightBtn.addEventListener('click', () => {
+            flightForm.reset();
+            flightForm.querySelector('#flight-crud-id').value = '';
+            setRadioValue('routeType', 'DOMESTIC');
+            setRadioValue('terminalNo', '');
+            flightCrudModal.querySelector('#flight-modal-title').textContent = '새 항공편 등록';
+            flightCrudModal.classList.remove('hidden');
+            initModalIcons();
+        });
+    }
 
-    flightListBody.addEventListener('click', e => {
+    if (flightListBody) flightListBody.addEventListener('click', e => {
         const target = e.target;
         const flightId = target.dataset.id || target.dataset.flightId;
 
@@ -742,7 +908,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    promotionListBody.addEventListener('click', e => {
+    if (promotionListBody) promotionListBody.addEventListener('click', e => {
         const target = e.target.closest('.ios-toggle, .promo-delete-btn');
         if (!target) return;
 
@@ -789,7 +955,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    promotionForm.addEventListener('submit', e => {
+    if (promotionForm) promotionForm.addEventListener('submit', e => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
         data.passengerCount = parseInt(data.passengerCount, 10);
@@ -810,7 +976,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    flightForm.addEventListener('submit', e => {
+    if (flightForm) flightForm.addEventListener('submit', e => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
         const flightId = data.flightId;
