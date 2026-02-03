@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadHotSixAirport();
-    setInterval(loadHotSixAirport, 30_000);
+    setInterval(loadHotSixAirport, 180_000);
 })
 
 async function loadHotSixAirport() {
@@ -33,6 +33,10 @@ function renderBentoGrid(list) {
 
 function createTrendCard(item, index) {
     const div = document.createElement("div");
+
+    div.addEventListener("click", () => {
+        goToSearch(item);
+    })
 
     // 카드 타입 결정: 0=hero(2x2), 1-4=small, 5-6=wide, 7=full
     let cardType = 'small';
@@ -121,4 +125,33 @@ function renderTags(tagString) {
         .slice(0, 2)
         .map(tag => `#${tag}`)
         .join(' ');
+}
+
+function goToSearch(item) {
+    let origin;
+    const destinationCode = item.airportId;
+
+    if (item.country === "대한민국") {
+        origin = "GMP";
+    } else {
+        origin = "ICN";
+    }
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 14);
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 3);
+
+    const params = new URLSearchParams({
+        tripType: "RT",
+        from: origin,
+        to: destinationCode,
+        dateStart: startDate.toISOString().split('T')[0],
+        dateEnd: endDate.toISOString().split('T')[0],
+        passengers: 1,
+        cabinClass: "ECO"
+    });
+
+    window.location.href = `${CONTEXT_PATH}/search?${params.toString()}`;
 }
