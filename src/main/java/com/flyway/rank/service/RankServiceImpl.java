@@ -92,6 +92,7 @@ public class RankServiceImpl implements RankService {
 
                     RankItemDto dto = new RankItemDto();
                     dto.setAirportId(entry.getKey());
+                    dto.setCountry(airport.getCountry());
                     dto.setSearchCount(entry.getValue());
                     dto.setCity(airport.getCity());
                     dto.setImageUrl(airport.getImageUrl());
