@@ -1,6 +1,8 @@
 package com.flyway.payment.mapper;
 
 import com.flyway.payment.dto.PaymentViewDto;
+import com.flyway.payment.dto.RecentPaymentTickerDto;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -34,5 +36,8 @@ public interface PaymentMapper {
     List<PaymentViewDto> selectByUserId(@Param("userId") String userId);
     // 결제 row lock (FOR UPDATE)
     PaymentViewDto selectByPaymentIdForUpdate(@Param("paymentId") String paymentId);
+
+    // 최근 결제 티커용 조회 (메인 페이지)
+    List<RecentPaymentTickerDto> selectRecentPaymentsForTicker();
 
 }

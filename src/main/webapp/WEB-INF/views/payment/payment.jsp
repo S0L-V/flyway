@@ -7,10 +7,10 @@
 <head>
     <meta charset="UTF-8"/>
     <title>결제 - Flyway</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css"/>
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container {
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f5f7fb; }
+        .payment-container {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
@@ -75,42 +75,58 @@
             margin-bottom: 24px;
         }
         .payment-method-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #111;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
             margin-bottom: 12px;
         }
         .method-buttons {
             display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 10px;
         }
         .method-btn {
             flex: 1;
-            min-width: 100px;
-            padding: 16px;
-            border: 2px solid #e5e5e5;
-            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 16px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
             background: #fff;
             cursor: pointer;
-            text-align: center;
             transition: all 0.2s;
         }
         .method-btn:hover {
             border-color: #1f6feb;
+            background: #f8fafc;
         }
         .method-btn.active {
             border-color: #1f6feb;
-            background: #f0f7ff;
+            background: #eff6ff;
+        }
+        .method-btn.active .method-btn-icon {
+            color: #1f6feb;
+        }
+        .method-btn.active .method-btn-label {
+            color: #1f6feb;
         }
         .method-btn-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            transition: color 0.2s;
+        }
+        .method-btn-icon svg {
+            width: 20px;
+            height: 20px;
         }
         .method-btn-label {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            color: #333;
+            color: #374151;
+            transition: color 0.2s;
         }
 
         /* 버튼 */
@@ -173,7 +189,7 @@
 <body>
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
 
-<div class="container">
+<div class="payment-container">
     <div class="payment-card">
         <h1 class="payment-title">결제하기</h1>
 
@@ -259,16 +275,30 @@
             <div class="payment-method-title">결제 수단 선택</div>
             <div class="method-buttons">
                 <button type="button" class="method-btn active" data-method="CARD">
-                    <div class="method-btn-icon">💳</div>
-                    <div class="method-btn-label">카드</div>
+                    <span class="method-btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                            <path d="M2 10h20"/>
+                        </svg>
+                    </span>
+                    <span class="method-btn-label">카드</span>
                 </button>
                 <button type="button" class="method-btn" data-method="TRANSFER">
-                    <div class="method-btn-icon">🏦</div>
-                    <div class="method-btn-label">계좌이체</div>
+                    <span class="method-btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/>
+                        </svg>
+                    </span>
+                    <span class="method-btn-label">계좌이체</span>
                 </button>
                 <button type="button" class="method-btn" data-method="EASY_PAY">
-                    <div class="method-btn-icon">📱</div>
-                    <div class="method-btn-label">간편결제</div>
+                    <span class="method-btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <rect x="5" y="2" width="14" height="20" rx="2"/>
+                            <path d="M12 18h.01"/>
+                        </svg>
+                    </span>
+                    <span class="method-btn-label">간편결제</span>
                 </button>
             </div>
         </div>

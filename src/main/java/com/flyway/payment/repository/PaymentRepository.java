@@ -1,6 +1,7 @@
 package com.flyway.payment.repository;
 
 import com.flyway.payment.dto.PaymentViewDto;
+import com.flyway.payment.dto.RecentPaymentTickerDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,5 +56,10 @@ public interface PaymentRepository {
      * 사용자 ID로 결제 목록 조회
      */
     List<PaymentViewDto> findByUserId(String userId);
+
+    /**
+     * 최근 결제 티커용 조회 (메인 페이지)
+     */
+    List<RecentPaymentTickerDto> findRecentPaymentsForTicker();
 
 }

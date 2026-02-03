@@ -152,4 +152,32 @@
         WHERE payment_id = #{paymentId}
     </update>
 
+    <!-- 최근 결제 티커용 조회 (메인 페이지 라이브 피드) -->
+    <select id="selectRecentPaymentsForTicker" resultType="com.flyway.payment.dto.RecentPaymentTickerDto">
+        SELECT
+            CONCAT(
+                    SUBSTRING(u.email, 1, 3),
+                    '***@',
+                    SUBSTRING_INDEX(u.email, '@', -1)
+            ) AS maskedEmail,
+            CONCAT(
+                    SUBSTRING(COALESCE(up.kr_last_name, up.last_name, '고'), 1, 1),
+                    '**'
+            ) AS passengerName,
+            COALESCE(rs.snap_departure_airport, 'ICN') AS departureAirport,
+            COALESCE(rs.snap_arrival_airport, 'NRT') AS arrivalAirport,
+            p.amount AS amount,
+            p.paid_at AS paidAt
+        FROM payment p
+                 INNER JOIN reservation r ON p.reservation_id = r.reservation_id
+                 INNER JOIN users u ON r.user_id = u.user_id
+                 LEFT JOIN user_profile up ON u.user_id = up.user_id
+                 LEFT JOIN reservation_segment rs ON r.reservation_id = rs.reservation_id AND rs.segment_order = 1
+        WHERE p.status = 'PAID'
+          AND p.paid_at IS NOT NULL
+          AND p.paid_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        ORDER BY p.paid_at DESC
+            LIMIT 10
+    </select>
+
 </mapper>

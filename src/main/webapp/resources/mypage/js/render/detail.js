@@ -293,12 +293,51 @@ export function initRefundButton(payment) {
 
     button.addEventListener("click", async () => {
         if (button.disabled) return;
-        const reason = window.prompt("환불 사유를 입력해주세요.");
+
+        let reason = null;
+        if (typeof Swal !== "undefined") {
+            const result = await Swal.fire({
+                title: '환불 사유',
+                input: 'textarea',
+                inputPlaceholder: '환불 사유를 입력해주세요',
+                inputAttributes: {
+                    'aria-label': '환불 사유',
+                    style: 'font-family: Pretendard, -apple-system, sans-serif; font-size: 14px; line-height: 1.6; resize: none;'
+                },
+                showCancelButton: true,
+                confirmButtonText: '확인',
+                cancelButtonText: '취소',
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#64748b',
+                reverseButtons: true,
+                customClass: {
+                    title: 'swal-title-custom',
+                    input: 'swal-input-custom',
+                    confirmButton: 'swal-btn-custom',
+                    cancelButton: 'swal-btn-custom'
+                },
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return '환불 사유를 입력해주세요';
+                    }
+                }
+            });
+            reason = result.isConfirmed ? result.value : null;
+        } else {
+            reason = window.prompt("환불 사유를 입력해주세요.");
+        }
         if (!reason) return;
+
         const confirmMessage = amount
             ? `환불 금액 ${formatCurrency(amount)}이(가) 요청됩니다. 진행하시겠습니까?`
             : "환불 요청을 진행하시겠습니까?";
-        const ok = window.confirm(confirmMessage);
+
+        let ok = false;
+        if (typeof Swal !== "undefined" && typeof Swal.confirm === "function") {
+            ok = await Swal.confirm(confirmMessage, { title: "환불 확인", confirmText: "환불", cancelText: "취소" });
+        } else {
+            ok = window.confirm(confirmMessage);
+        }
         if (!ok) return;
 
         const originalText = button.textContent;
@@ -315,18 +354,18 @@ export function initRefundButton(payment) {
                 return;
             }
             setState({ label: "환불 완료", disabled: true, message: "환불 처리 완료" });
-            if (typeof window.showToast === "function") {
+            if (typeof Swal !== "undefined") {
+                Swal.success("환불이 완료되었습니다.");
+            } else if (typeof window.showToast === "function") {
                 window.showToast("환불이 완료되었습니다.");
-            } else {
-                alert("환불이 완료되었습니다.");
             }
         } catch (e) {
             console.error(e);
             setState({ label: originalText || "환불 요청", disabled: false, message: "환불 요청에 실패했습니다." });
-            if (typeof window.showToast === "function") {
+            if (typeof Swal !== "undefined") {
+                Swal.error("환불 요청에 실패했습니다.");
+            } else if (typeof window.showToast === "function") {
                 window.showToast("환불 요청에 실패했습니다.");
-            } else {
-                alert("환불 요청에 실패했습니다.");
             }
         }
     });

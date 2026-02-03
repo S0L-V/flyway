@@ -6,49 +6,299 @@
 <head>
     <meta charset="UTF-8"/>
     <title>부가서비스 선택</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; margin: 0; padding: 16px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .tabs { display: flex; border-bottom: 2px solid #1f6feb; margin-bottom: 16px; }
-        .tab { padding: 12px 24px; cursor: pointer; border: none; background: #f0f0f0; margin-right: 4px; border-radius: 8px 8px 0 0; }
-        .tab.active { background: #1f6feb; color: #fff; }
-        .tab:disabled { opacity: 0.4; cursor: not-allowed; }
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f7fb;
+            min-height: 100vh;
+            padding: 24px;
+            color: #1a1a1a;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f6feb;
+            margin-bottom: 20px;
+        }
+
+        /* 탭 스타일 */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 4px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .tab:hover:not(:disabled) {
+            background: #f3f4f6;
+            color: #1f6feb;
+        }
+        .tab.active {
+            background: #1f6feb;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+        }
+        .tab:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .segment-box { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
-        .segment-title { font-weight: bold; margin-bottom: 12px; color: #333; }
+        /* 구간 박스 */
+        .segment-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+        .segment-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .segment-title::before {
+            content: '✈';
+            font-size: 1.1rem;
+            color: #1f6feb;
+        }
+        .segment-title span {
+            color: #9ca3af;
+            font-weight: 400;
+            font-size: 0.85rem;
+        }
 
-        .passenger-box { background: #f9f9f9; border-radius: 6px; padding: 12px; margin-bottom: 12px; }
-        .passenger-name { font-weight: bold; margin-bottom: 8px; }
+        /* 승객 박스 */
+        .passenger-box {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .passenger-name {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1f6feb;
+            font-size: 0.95rem;
+        }
 
-        .form-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .form-row label { min-width: 100px; color: #555; }
-        .form-row select { padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; }
-        .form-row .price { color: #1f6feb; font-weight: bold; min-width: 100px; text-align: right; }
+        /* 폼 요소 */
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .form-row label {
+            min-width: 80px;
+            color: #6b7280;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .form-row select {
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1a1a1a;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .form-row select:hover {
+            border-color: #1f6feb;
+        }
+        .form-row select:focus {
+            outline: none;
+            border-color: #1f6feb;
+            box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.15);
+        }
+        .form-row select option {
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+        .form-row .price {
+            color: #1f6feb;
+            font-weight: 700;
+            min-width: 100px;
+            text-align: right;
+            font-size: 1rem;
+        }
 
-        .policy-info { background: #e8f4fd; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; }
-        .policy-info b { color: #1f6feb; }
+        /* 안내 박스 */
+        .policy-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        .policy-info b {
+            color: #1f6feb;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
 
-        .meal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
-        .meal-item { border: 2px solid #ddd; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; font-size: 12px; }
-        .meal-item:hover { border-color: #1f6feb; }
-        .meal-item.selected { border-color: #1f6feb; background: #e8f0fe; }
-        .meal-item img { width: 100%; height: 60px; object-fit: cover; border-radius: 4px; margin-bottom: 4px; }
+        /* 기내식 그리드 */
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .meal-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            background: #ffffff;
+            transition: all 0.3s ease;
+            color: #374151;
+            position: relative;
+        }
+        .meal-item:hover {
+            border-color: #1f6feb;
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+        .meal-item.selected {
+            border-color: #1f6feb;
+            background: #eff6ff;
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.2);
+        }
+        .meal-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #1f6feb;
+            color: #fff;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .meal-item img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
 
-        .footer { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #ddd; padding: 16px; margin: 16px -16px -16px; display: flex; justify-content: space-between; align-items: center; }
-        .total-price { font-size: 1.2em; }
-        .total-price span { color: #1f6feb; font-weight: bold; }
+        /* 푸터 */
+        .footer {
+            position: sticky;
+            bottom: 0;
+            background: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 20px;
+            margin: 20px -24px -24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+        }
+        .total-price {
+            font-size: 1rem;
+            color: #6b7280;
+        }
+        .total-price span {
+            color: #1f6feb;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-left: 8px;
+        }
 
-        .btn { padding: 10px 24px; border: 1px solid #333; background: #fff; cursor: pointer; border-radius: 6px; }
-        .btn.primary { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+        /* 버튼 */
+        .btn {
+            padding: 12px 28px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #374151;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .btn.primary {
+            background: #1f6feb;
+            border: none;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+        }
+        .btn.primary:hover {
+            background: #1a5fd1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(31, 111, 235, 0.4);
+        }
+
+        .footer > div {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 스크롤바 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 <body>
 
-<h3 style="margin-top:0;">부가서비스 선택</h3>
+<h3>부가서비스 선택</h3>
 
 <!-- 탭 버튼 -->
 <div class="tabs">
@@ -294,11 +544,23 @@
             } else if (window.opener && typeof window.opener.refreshServiceTotal === 'function') {
                 window.opener.refreshServiceTotal();  // fallback
             }
-            alert('저장되었습니다.');
+            await Swal.fire({
+                icon: 'success',
+                title: '저장 완료',
+                text: '부가서비스가 저장되었습니다.',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#1f6feb'
+            });
             window.close();
 
         } catch (err) {
-            alert('저장 실패: ' + err.message);
+            Swal.fire({
+                icon: 'error',
+                title: '저장 실패',
+                text: err.message,
+                confirmButtonText: '확인',
+                confirmButtonColor: '#1f6feb'
+            });
         }
     }
     function numberWithCommas(x) {
