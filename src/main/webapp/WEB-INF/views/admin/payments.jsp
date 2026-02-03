@@ -186,7 +186,7 @@
         let currentPage = 0;
         const pageSize = 10;
         let currentFilterStatus = '';
-        let currentViewMode = 'card'; // 'card' or 'list'
+        let currentViewMode = 'list'; // 기본값: 리스트 형태
 
         const elements = {
             stats: {
@@ -210,6 +210,21 @@
         const keywordParam = urlParams.get('keyword');
         if (keywordParam && elements.searchKeyword) {
             elements.searchKeyword.value = keywordParam;
+        }
+
+        // 초기 보기 형태 설정 (리스트)
+        elements.paymentCardGrid.classList.add('hidden');
+        elements.paymentListTable.classList.remove('hidden');
+        if (elements.viewToggle) {
+            elements.viewToggle.setAttribute('data-active', '1');
+            var viewBtns = elements.viewToggle.querySelectorAll('.ios-segment-btn');
+            viewBtns.forEach(function(btn) {
+                if (btn.getAttribute('data-view') === 'list') {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
 
         // 초기 데이터 로딩

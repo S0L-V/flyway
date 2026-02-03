@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const pageSize = 10;
     let currentFilterStatus = 'ACTIVE'; // 기본값: 활성 회원만 표시
     let currentSearchKeyword = '';
-    let currentViewMode = 'card'; // 'card' or 'list'
+    let currentViewMode = 'list'; // 기본값: 리스트 형태
 
     const elements = {
         stats: {
@@ -46,6 +46,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 초기 필터 상태 설정 (활성 회원)
     elements.filterStatus.value = 'ACTIVE';
+
+    // 초기 보기 형태 설정 (리스트)
+    elements.userCardGrid.classList.add('hidden');
+    elements.userListTable.classList.remove('hidden');
+    if (elements.viewToggle) {
+        elements.viewToggle.setAttribute('data-active', '1');
+        var viewBtns = elements.viewToggle.querySelectorAll('.ios-segment-btn');
+        viewBtns.forEach(function(btn) {
+            if (btn.getAttribute('data-view') === 'list') {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
 
     // 초기 데이터 로딩
     fetchUserStats();

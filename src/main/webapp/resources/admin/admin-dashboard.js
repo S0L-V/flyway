@@ -345,15 +345,29 @@ const AdminDashboard = (function() {
             const statusBadge = getStatusBadgeGlass(activity.status);
             const timeBadge = getTimeBadge(activity.createdAt);
 
+            // 결제 완료 여부 체크
+            const isPaymentCompleted = activity.activityType === 'PAYMENT' &&
+                (activity.status === 'PAID' || activity.status === 'CONFIRMED' || activity.status === 'APPROVED');
+
+            // 결제 완료시 특별 스타일
+            const itemClass = isPaymentCompleted
+                ? 'glass-activity-item flex items-start gap-3 bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r-xl'
+                : 'glass-activity-item flex items-start gap-3';
+
+            const iconBg = isPaymentCompleted
+                ? 'bg-emerald-500/30 ring-2 ring-emerald-500/50'
+                : icon.glassBg;
+
             return `
-                <div class="glass-activity-item flex items-start gap-3">
-                    <div class="p-2.5 rounded-xl ${icon.glassBg} ${icon.textColor} flex-shrink-0">
+                <div class="${itemClass}">
+                    <div class="p-2.5 rounded-xl ${iconBg} ${icon.textColor} flex-shrink-0">
                         <i data-lucide="${icon.name}" class="w-5 h-5"></i>
                     </div>
                     <div class="flex-1 min-w-0 overflow-hidden">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-medium text-glass-primary text-sm">${escapeHtml(activity.description)}</span>
+                            <span class="font-medium ${isPaymentCompleted ? 'text-emerald-300' : 'text-glass-primary'} text-sm">${escapeHtml(activity.description)}</span>
                             ${statusBadge}
+                            ${isPaymentCompleted ? '<span class="px-1.5 py-0.5 text-[10px] font-bold bg-emerald-500 text-white rounded animate-pulse">NEW</span>' : ''}
                         </div>
                         <div class="text-xs text-glass-muted mt-0.5 truncate">
                             ${escapeHtml(activity.userName)} · ${escapeHtml(activity.userEmail)}
