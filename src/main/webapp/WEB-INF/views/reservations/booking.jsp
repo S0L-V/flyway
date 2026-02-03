@@ -486,12 +486,6 @@
                     <c:set var="firstSegmentId" value="${vm.segments[0].reservationSegmentId}" />
                     <button type="button" ${vm.passengerSaved ? "" : "disabled"} onclick="openSeatPopup('${firstSegmentId}')"
                             class="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="4" y="4" width="6" height="6" rx="1"></rect>
-                            <rect x="14" y="4" width="6" height="6" rx="1"></rect>
-                            <rect x="4" y="14" width="6" height="6" rx="1"></rect>
-                            <rect x="14" y="14" width="6" height="6" rx="1"></rect>
-                        </svg>
                         선택하기
                     </button>
                 </div>

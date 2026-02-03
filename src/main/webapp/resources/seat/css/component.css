@@ -366,7 +366,7 @@
 }
 
 .seat-summary-card__route {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 700;
     color: #1e40af;
 }
@@ -374,7 +374,7 @@
 .seat-summary-card__datetime {
     font-size: 12px;
     font-weight: 500;
-    color: #3b82f6;
+    color: #64748b;
 }
 
 /* 점선 구분선 - 숨김 */
@@ -420,7 +420,6 @@
 }
 
 .seat-summary-row.is-active .seat-summary-row__name {
-    color: #1d4ed8;
 }
 
 /* 좌측: 이름 + 좌석 */
@@ -432,7 +431,7 @@
 }
 
 .seat-summary-row__name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
@@ -440,8 +439,8 @@
 }
 
 .seat-summary-row__seat {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     line-height: 1.1;
     min-height: 18px;
     color: #3b82f6;
@@ -519,7 +518,7 @@
 }
 
 .seat-action-row__name {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
@@ -527,7 +526,7 @@
 }
 
 .seat-action-row.is-active .seat-action-row__name {
-    color: #1d4ed8;
+    color: #1e293b;
 }
 
 .seat-action-row__seat {
