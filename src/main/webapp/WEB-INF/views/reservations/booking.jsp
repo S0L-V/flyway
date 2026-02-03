@@ -294,9 +294,9 @@
                                 <div class="airport-name">
                                     ${s.snapArrivalCity}
                                     <c:set var="depDayMillis"
-                                           value="${Math.floor(depDate.time / (1000*60*60*24))}"/>
+                                           value="${Math.floor((depDate.time - (depDate.timezoneOffset * 60 * 1000)) / (1000*60*60*24))}"/>
                                     <c:set var="arrDayMillis"
-                                           value="${Math.floor(arrDate.time / (1000*60*60*24))}"/>
+                                           value="${Math.floor((arrDate.time - (arrDate.timezoneOffset * 60 * 1000)) / (1000*60*60*24))}"/>
 
                                     <c:set var="dayDiff" value="${arrDayMillis - depDayMillis}"/>
 
