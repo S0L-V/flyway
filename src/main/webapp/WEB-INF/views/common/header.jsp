@@ -21,22 +21,47 @@
     <!-- User Buttons -->
     <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
       <sec:authorize access="isAuthenticated()">
-        <a href="${pageContext.request.contextPath}/mypage"
-           class="tilt-btn btn-text auth-text-btn px-2 md:px-3 py-2 rounded-full
-                          no-underline transition-all duration-300 active:scale-95 whitespace-nowrap"
-           data-tilt data-tilt-glare data-tilt-max-glare="0.3"
-           data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
-          마이페이지
-        </a>
-        <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="inline">
-          <button type="submit"
-                  class="tilt-btn btn-text auth-text-btn px-2 md:px-3 py-2 rounded-full
-                                   transition-all duration-300 active:scale-95 whitespace-nowrap"
-                  data-tilt data-tilt-glare data-tilt-max-glare="0.4"
-                  data-tilt-scale="1.02" data-tilt-max="8" data-tilt-speed="400">
-            로그아웃
+        <!-- User Profile Dropdown -->
+        <div class="user-dropdown-wrapper">
+          <button type="button" class="user-dropdown-trigger">
+            <span class="user-avatar">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+              </svg>
+            </span>
+            <span class="user-email-short"><sec:authentication property="principal.user.email"/></span>
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+            </svg>
           </button>
-        </form>
+
+          <!-- Dropdown Menu -->
+          <div class="user-dropdown-menu">
+            <div class="dropdown-user-info">
+              <div class="dropdown-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                </svg>
+              </div>
+              <div class="dropdown-email"><sec:authentication property="principal.user.email"/></div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="${pageContext.request.contextPath}/mypage" class="dropdown-item">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              마이페이지
+            </a>
+            <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="dropdown-form">
+              <button type="submit" class="dropdown-item dropdown-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                로그아웃
+              </button>
+            </form>
+          </div>
+        </div>
       </sec:authorize>
 
       <sec:authorize access="isAnonymous()">
