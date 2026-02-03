@@ -8,6 +8,11 @@ const filterState = {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // Force hide all panels initially to prevent display:flex from overriding hidden
+    document.querySelectorAll("[data-filter-panel]").forEach(p => {
+        if (p.hidden) p.style.display = 'none';
+    });
+
     initFilters();
     initTimeChips();
     await loadAirlines();
@@ -36,12 +41,14 @@ function initFilters() {
 
             if (!panel.hidden) {
                 panel.hidden = true;
+                panel.style.display = 'none';
                 btn.setAttribute("aria-expanded", "false");
                 return;
             }
 
             closeAllFilterPanels();
             panel.hidden = false;
+            panel.style.display = 'flex';
             btn.setAttribute("aria-expanded", "true");
 
             // Lucide 아이콘 초기화
@@ -75,6 +82,7 @@ function closeAllFilterPanels() {
     // 모든 패널 닫기
     document.querySelectorAll("[data-filter-panel]").forEach((p) => {
         p.hidden = true;
+        p.style.display = 'none';
     });
 
     // 버튼 aria 업데이트

@@ -237,6 +237,192 @@
             display: flex;
             gap: 8px;
         }
+
+        /* New Filter Styles */
+        .filter-panel {
+            padding: 0 !important;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-width: 320px;
+        }
+
+        /* Fix: Ensure hidden attribute works with display: flex */
+        .filter-panel[hidden] {
+            display: none !important;
+        }
+
+        .filter-header {
+            padding: 20px 20px 12px;
+            background: #fff;
+        }
+
+        .filter-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .filter-title-icon {
+            width: 18px;
+            height: 18px;
+            color: #3093F7;
+        }
+
+        .filter-subtitle {
+            font-size: 12px;
+            color: #9ca3af;
+            margin: 0;
+        }
+
+        /* Airline Filter */
+        .airline-search-box {
+            position: relative;
+            margin: 0 20px 12px;
+        }
+
+        .airline-search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .airline-search-box input:focus {
+            border-color: #3093F7;
+        }
+
+        .airline-search-box .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+        }
+
+        .airline-list-container {
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 0 20px;
+            margin-bottom: 12px;
+        }
+
+        .airline-list li {
+            padding: 0 !important;
+            margin-bottom: 4px;
+        }
+
+        /* Time Filter Grid */
+        .time-filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 0 20px 20px;
+        }
+
+        .time-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+            text-align: center;
+        }
+
+        .time-option:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .time-option.active {
+            background: #eff6ff;
+            border-color: #3093F7;
+            color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .time-option-icon {
+            margin-bottom: 8px;
+            color: #6b7280;
+            width: 20px;
+            height: 20px;
+        }
+
+        .time-option.active .time-option-icon {
+            color: #3093F7;
+        }
+
+        .time-option-label {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .time-option-range {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .time-option.active .time-option-range {
+            color: #60a5fa;
+        }
+
+        /* Panel Actions */
+        .panel-actions {
+            padding: 16px 20px;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            margin-top: auto;
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .btn-text:hover {
+            color: #1f2937;
+            text-decoration: underline;
+        }
+
+        .btn-primary {
+            background: #3093F7;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
     </style>
 </head>
 
@@ -401,6 +587,7 @@
         <div class="filter-sort-row">
             <!-- Filters -->
             <div class="search-filters">
+                <!-- Airline Filter -->
                 <div class="filter" data-filter-wrap="airline">
                     <button class="filter-button" data-filter="airline" type="button">
                         <div class="filter-icon-circle">
@@ -411,9 +598,29 @@
                     </button>
 
                     <div class="filter-panel airline-options" data-filter-panel="airline" hidden>
-                        <ul id="airlineFilterList" class="airline-list">
-                            <li class="text-xs text-gray-400">항공사 목록 불러오는 중...</li>
-                        </ul>
+                        <div class="filter-header">
+                            <div class="filter-title">
+                                <i data-lucide="plane" class="filter-title-icon"></i>
+                                <span>항공사 선택</span>
+                            </div>
+                            <p class="filter-subtitle">원하는 항공사를 선택하세요</p>
+                        </div>
+
+                        <div class="airline-search-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="airlineSearchInput" placeholder="항공사 검색">
+                        </div>
+
+                        <div class="airline-list-container">
+                            <ul id="airlineFilterList" class="airline-list">
+                                <li class="text-xs text-gray-400">항공사 목록 불러오는 중...</li>
+                            </ul>
+                        </div>
+
+                        <div class="panel-actions">
+                            <button type="button" class="btn-text" id="btnResetAirline">전체 선택</button>
+                            <button type="button" class="btn-primary" data-action="apply-airline">적용</button>
+                        </div>
                     </div>
                 </div>
 
@@ -468,6 +675,7 @@
                     </div>
                 </div>
 
+                <!-- Out Time Filter -->
                 <div class="filter" data-filter-wrap="out-time">
                     <button class="filter-button" data-filter="out-time">
                         <div class="filter-icon-circle">
@@ -477,47 +685,48 @@
                         <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9ca3af;"></i>
                     </button>
                     <div class="filter-panel time-filter-panel" data-filter-panel="out-time" hidden>
-                        <div class="time-filter-header">
-                            <span class="time-chip active" data-range="ALL">가는 날 전체</span>
+                        <div class="filter-header">
+                            <div class="filter-title">
+                                <i data-lucide="clock" class="filter-title-icon"></i>
+                                <span>가는 날 출발 시간</span>
+                            </div>
+                            <p class="filter-subtitle">원하는 시간대를 선택하세요</p>
                         </div>
 
-                        <div class="time-filter-group">
-                            <div class="time-label">새벽</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="0006">00:00~06:00</button>
-                            </div>
+                        <div class="time-filter-grid">
+                            <button type="button" class="time-chip time-option" data-range="0006">
+                                <i data-lucide="moon" class="time-option-icon"></i>
+                                <span class="time-option-label">새벽</span>
+                                <span class="time-option-range">00:00~06:00</span>
+                            </button>
+                            <button type="button" class="time-chip time-option" data-range="0612">
+                                <i data-lucide="sun" class="time-option-icon"></i>
+                                <span class="time-option-label">오전</span>
+                                <span class="time-option-range">06:00~12:00</span>
+                            </button>
+                            <button type="button" class="time-chip time-option" data-range="1218">
+                                <i data-lucide="sunset" class="time-option-icon"></i>
+                                <span class="time-option-label">오후</span>
+                                <span class="time-option-range">12:00~18:00</span>
+                            </button>
+                            <button type="button" class="time-chip time-option" data-range="1824">
+                                <i data-lucide="moon-star" class="time-option-icon"></i>
+                                <span class="time-option-label">밤</span>
+                                <span class="time-option-range">18:00~24:00</span>
+                            </button>
                         </div>
 
-                        <div class="time-filter-group">
-                            <div class="time-label">오전</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="0609">06:00~09:00</button>
-                                <button type="button" class="time-chip" data-range="0912">09:00~12:00</button>
-                            </div>
-                        </div>
+                        <!-- Hidden ALL chip for logic compatibility -->
+                        <button type="button" class="time-chip" data-range="ALL" hidden></button>
 
-                        <div class="time-filter-group">
-                            <div class="time-label">오후</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="1215">12:00~15:00</button>
-                                <button type="button" class="time-chip" data-range="1518">15:00~18:00</button>
-                            </div>
-                        </div>
-
-                        <div class="time-filter-group">
-                            <div class="time-label">밤</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="1821">18:00~21:00</button>
-                                <button type="button" class="time-chip" data-range="2124">21:00~24:00</button>
-                            </div>
-                        </div>
                         <div class="panel-actions">
-                            <button type="button" class="btn" data-action="apply-time" data-scope="out">적용</button>
+                            <button type="button" class="btn-text" data-action="reset-time">전체 선택</button>
+                            <button type="button" class="btn-primary" data-action="apply-time" data-scope="out">적용</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 오는 날 시간대 (왕복만) -->
+                <!-- In Time Filter -->
                 <div class="filter" data-filter-wrap="in-time" data-rt-only>
                     <button class="filter-button" data-filter="in-time">
                         <div class="filter-icon-circle">
@@ -528,42 +737,42 @@
                     </button>
 
                     <div class="filter-panel time-filter-panel" data-filter-panel="in-time" hidden>
-                        <div class="time-filter-header">
-                            <span class="time-chip active" data-range="ALL">오는 날 전체</span>
+                        <div class="filter-header">
+                            <div class="filter-title">
+                                <i data-lucide="clock" class="filter-title-icon"></i>
+                                <span>오는 날 출발 시간</span>
+                            </div>
+                            <p class="filter-subtitle">원하는 시간대를 선택하세요</p>
                         </div>
 
-                        <div class="time-filter-group">
-                            <div class="time-label">새벽</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="0006">00:00~06:00</button>
-                            </div>
+                        <div class="time-filter-grid">
+                            <button type="button" class="time-chip time-option" data-range="0006">
+                                <i data-lucide="moon" class="time-option-icon"></i>
+                                <span class="time-option-label">새벽</span>
+                                <span class="time-option-range">00:00~06:00</span>
+                            </button>
+                            <button type="button" class="time-chip time-option" data-range="0612">
+                                <i data-lucide="sun" class="time-option-icon"></i>
+                                <span class="time-option-label">오전</span>
+                                <span class="time-option-range">06:00~12:00</span>
+                            </button>
+                            <button type="button" class="time-chip time-option" data-range="1218">
+                                <i data-lucide="sunset" class="time-option-icon"></i>
+                                <span class="time-option-label">오후</span>
+                                <span class="time-option-range">12:00~18:00</span>
+                            </button>
+                            <button type="button" class="time-chip time-option" data-range="1824">
+                                <i data-lucide="moon-star" class="time-option-icon"></i>
+                                <span class="time-option-label">밤</span>
+                                <span class="time-option-range">18:00~24:00</span>
+                            </button>
                         </div>
 
-                        <div class="time-filter-group">
-                            <div class="time-label">오전</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="0609">06:00~09:00</button>
-                                <button type="button" class="time-chip" data-range="0912">09:00~12:00</button>
-                            </div>
-                        </div>
+                        <button type="button" class="time-chip" data-range="ALL" hidden></button>
 
-                        <div class="time-filter-group">
-                            <div class="time-label">오후</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="1215">12:00~15:00</button>
-                                <button type="button" class="time-chip" data-range="1518">15:00~18:00</button>
-                            </div>
-                        </div>
-
-                        <div class="time-filter-group">
-                            <div class="time-label">밤</div>
-                            <div class="time-chips">
-                                <button type="button" class="time-chip" data-range="1821">18:00~21:00</button>
-                                <button type="button" class="time-chip" data-range="2124">21:00~24:00</button>
-                            </div>
-                        </div>
                         <div class="panel-actions">
-                            <button type="button" class="btn" data-action="apply-time" data-scope="in">적용</button>
+                            <button type="button" class="btn-text" data-action="reset-time">전체 선택</button>
+                            <button type="button" class="btn-primary" data-action="apply-time" data-scope="in">적용</button>
                         </div>
                     </div>
                 </div>
@@ -801,6 +1010,74 @@
         isUserLoggedIn = true;
     </script>
 </sec:authorize>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Airline Search
+        const airlineSearchInput = document.getElementById('airlineSearchInput');
+        const airlineList = document.getElementById('airlineFilterList');
+
+        if (airlineSearchInput && airlineList) {
+            airlineSearchInput.addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase();
+                const items = airlineList.querySelectorAll('li');
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(term)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Airline Reset (Select All)
+        const btnResetAirline = document.getElementById('btnResetAirline');
+        if (btnResetAirline) {
+            btnResetAirline.addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('input[name="airline"]');
+                checkboxes.forEach(cb => cb.checked = true);
+                // Trigger change to update filter
+                if(checkboxes.length > 0) {
+                    checkboxes[0].dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        // Airline Apply
+        const btnApplyAirline = document.querySelector('[data-action="apply-airline"]');
+        if (btnApplyAirline) {
+            btnApplyAirline.addEventListener('click', function() {
+                // Close panel
+                const panel = document.querySelector('[data-filter-panel="airline"]');
+                if (panel) panel.hidden = true;
+                const btn = document.querySelector('[data-filter="airline"]');
+                if (btn) btn.setAttribute("aria-expanded", "false");
+            });
+        }
+
+        // Time Reset
+        document.querySelectorAll('[data-action="reset-time"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const panel = btn.closest('.filter-panel');
+                if (panel) {
+                    panel.querySelectorAll('.time-chip').forEach(chip => chip.classList.remove('active'));
+                    // If there's an ALL chip, activate it (though I hid it)
+                    // Or just clearing active class means "All" in some logic?
+                    // filtering.js: getSelectedTimeRanges returns [] if ALL is active.
+                    // If nothing is active, it returns [].
+                    // Wait, getSelectedTimeRanges:
+                    // const activeChips = panel.querySelectorAll('.time-chip.active:not([data-range="ALL"])');
+                    // return Array.from(activeChips).map(...)
+                    // If array is empty, does it mean ALL?
+                    // applyFilters: if (state.outTime && state.outTime.length > 0) ...
+                    // So if empty, it skips filtering -> ALL. Correct.
+                }
+            });
+        });
+    });
+</script>
 
 <%-- 예약 폼 (숨김) --%>
 <form id="reservationForm" action="${pageContext.request.contextPath}/reservations/draft" method="POST"

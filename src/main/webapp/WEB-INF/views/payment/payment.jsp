@@ -7,6 +7,7 @@
 <head>
     <meta charset="UTF-8"/>
     <title>결제 - Flyway</title>
+    <jsp:include page="/WEB-INF/views/common/head.jsp" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/common/css/base.css"/>
     <style>
         body { font-family: Arial, sans-serif; }

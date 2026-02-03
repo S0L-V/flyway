@@ -169,7 +169,7 @@ public class RankServiceImpl implements RankService {
         return currentRankCache;
     }
 
-    @Scheduled(cron = "0 00 02 * * *")
+    @Scheduled(cron = "0 30 02 * * *")
     public synchronized void flushDailyStats() {
         // 캐시 -> DB
         Map<String, Integer> toFlush = realTimeCount;
