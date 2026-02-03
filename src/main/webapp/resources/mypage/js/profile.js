@@ -93,7 +93,16 @@ async function handleWithdrawClick(event) {
             event.stopPropagation();
         }
     }
-    const ok = window.confirm("정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 개인정보 및 예약 내역이 삭제됩니다.");
+    let ok = false;
+    if (typeof Swal !== "undefined" && typeof Swal.confirmDelete === "function") {
+        ok = await Swal.confirmDelete("탈퇴 시 모든 개인정보 및 예약 내역이 삭제됩니다.", {
+            title: "정말로 탈퇴하시겠습니까?",
+            confirmText: "탈퇴",
+            cancelText: "취소"
+        });
+    } else {
+        ok = window.confirm("정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 개인정보 및 예약 내역이 삭제됩니다.");
+    }
     if (!ok) {
         withdrawInFlight = false;
         return false;
@@ -112,7 +121,9 @@ async function handleWithdrawClick(event) {
         return false;
     } catch (e) {
         console.error(e);
-        alert("회원 탈퇴에 실패했습니다.");
+        if (typeof Swal !== "undefined") {
+            Swal.error("회원 탈퇴에 실패했습니다.");
+        }
         if (withdrawButton) withdrawButton.disabled = false;
         withdrawInFlight = false;
         return false;
@@ -151,8 +162,6 @@ export function initProfileSave() {
         if (Object.keys(payload).length === 0) {
             if (typeof window.showToast === "function") {
                 window.showToast("변경사항이 없습니다.");
-            } else {
-                alert("변경사항이 없습니다.");
             }
             return;
         }
@@ -169,15 +178,11 @@ export function initProfileSave() {
             updateProfileTab(res.data);
             if (typeof window.showToast === "function") {
                 window.showToast("회원 정보가 저장되었습니다.");
-            } else {
-                alert("회원 정보가 저장되었습니다.");
             }
         } catch (e) {
             console.error(e);
             if (typeof window.showToast === "function") {
                 window.showToast("저장에 실패했습니다.");
-            } else {
-                alert("저장에 실패했습니다.");
             }
         }
     });
