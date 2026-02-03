@@ -382,12 +382,32 @@
             color: #60a5fa;
         }
 
+        /* All Button Style */
+        .time-option-all {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            gap: 8px;
+            padding: 12px;
+            background-color: #f8fafc;
+        }
+        .time-option-all .time-option-icon {
+            margin-bottom: 0;
+            color: #64748b;
+        }
+        .time-option-all.active {
+            background-color: #eff6ff;
+            border-color: #3093F7;
+        }
+        .time-option-all.active .time-option-icon {
+            color: #3093F7;
+        }
+
         /* Panel Actions */
         .panel-actions {
             padding: 16px 20px;
             border-top: 1px solid #f3f4f6;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end; /* Changed to flex-end since we removed reset button */
             align-items: center;
             background: #fff;
             margin-top: auto;
@@ -422,6 +442,15 @@
 
         .btn-primary:hover {
             background: #2563eb;
+        }
+
+        /* Specific override for airline panel actions to keep space-between */
+        .airline-options .panel-actions {
+            justify-content: space-between;
+        }
+
+        .search-filters .filter .filter-panel[hidden] {
+            display: none !important;
         }
     </style>
 </head>
@@ -694,6 +723,10 @@
                         </div>
 
                         <div class="time-filter-grid">
+                            <button type="button" class="time-chip time-option time-option-all" data-range="ALL">
+                                <i data-lucide="check-circle" class="time-option-icon"></i>
+                                <span class="time-option-label">전체 시간대</span>
+                            </button>
                             <button type="button" class="time-chip time-option" data-range="0006">
                                 <i data-lucide="moon" class="time-option-icon"></i>
                                 <span class="time-option-label">새벽</span>
@@ -716,11 +749,7 @@
                             </button>
                         </div>
 
-                        <!-- Hidden ALL chip for logic compatibility -->
-                        <button type="button" class="time-chip" data-range="ALL" hidden></button>
-
                         <div class="panel-actions">
-                            <button type="button" class="btn-text" data-action="reset-time">전체 선택</button>
                             <button type="button" class="btn-primary" data-action="apply-time" data-scope="out">적용</button>
                         </div>
                     </div>
@@ -746,6 +775,10 @@
                         </div>
 
                         <div class="time-filter-grid">
+                            <button type="button" class="time-chip time-option time-option-all" data-range="ALL">
+                                <i data-lucide="check-circle" class="time-option-icon"></i>
+                                <span class="time-option-label">전체 시간대</span>
+                            </button>
                             <button type="button" class="time-chip time-option" data-range="0006">
                                 <i data-lucide="moon" class="time-option-icon"></i>
                                 <span class="time-option-label">새벽</span>
@@ -768,10 +801,7 @@
                             </button>
                         </div>
 
-                        <button type="button" class="time-chip" data-range="ALL" hidden></button>
-
                         <div class="panel-actions">
-                            <button type="button" class="btn-text" data-action="reset-time">전체 선택</button>
                             <button type="button" class="btn-primary" data-action="apply-time" data-scope="in">적용</button>
                         </div>
                     </div>
@@ -1051,31 +1081,16 @@
             btnApplyAirline.addEventListener('click', function() {
                 // Close panel
                 const panel = document.querySelector('[data-filter-panel="airline"]');
-                if (panel) panel.hidden = true;
+                if (panel) {
+                    panel.hidden = true;
+                    panel.style.display = 'none';
+                }
                 const btn = document.querySelector('[data-filter="airline"]');
                 if (btn) btn.setAttribute("aria-expanded", "false");
             });
         }
 
-        // Time Reset
-        document.querySelectorAll('[data-action="reset-time"]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const panel = btn.closest('.filter-panel');
-                if (panel) {
-                    panel.querySelectorAll('.time-chip').forEach(chip => chip.classList.remove('active'));
-                    // If there's an ALL chip, activate it (though I hid it)
-                    // Or just clearing active class means "All" in some logic?
-                    // filtering.js: getSelectedTimeRanges returns [] if ALL is active.
-                    // If nothing is active, it returns [].
-                    // Wait, getSelectedTimeRanges:
-                    // const activeChips = panel.querySelectorAll('.time-chip.active:not([data-range="ALL"])');
-                    // return Array.from(activeChips).map(...)
-                    // If array is empty, does it mean ALL?
-                    // applyFilters: if (state.outTime && state.outTime.length > 0) ...
-                    // So if empty, it skips filtering -> ALL. Correct.
-                }
-            });
-        });
+        // Remove old Time Reset listeners since we removed the buttons
     });
 </script>
 

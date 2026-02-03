@@ -98,14 +98,31 @@ function initTimeChips() {
                 const chip = e.target.closest(".time-chip");
                 if (!chip) return;
 
-                const isAll = chip.textContent.trim().includes("전체");
+                const isAll = chip.dataset.range === "ALL";
+                const allChips = panel.querySelectorAll(".time-chip:not([data-range='ALL'])");
+                const allBtn = panel.querySelector(".time-chip[data-range='ALL']");
+
                 if (isAll) {
-                    panel.querySelectorAll(".time-chip").forEach(c => c.classList.remove("active"));
-                    chip.classList.add("active");
+                    // Toggle All button
+                    const newState = !chip.classList.contains("active");
+                    if (newState) {
+                        chip.classList.add("active");
+                        allChips.forEach(c => c.classList.add("active"));
+                    } else {
+                        chip.classList.remove("active");
+                        allChips.forEach(c => c.classList.remove("active"));
+                    }
                 } else {
-                    const allChip = panel.querySelector(".time-filter-header .time-chip");
-                    if (allChip) allChip.classList.remove("active");
+                    // Toggle specific chip
                     chip.classList.toggle("active");
+
+                    // Check if all are active
+                    const areAllActive = Array.from(allChips).every(c => c.classList.contains("active"));
+                    if (areAllActive) {
+                        if (allBtn) allBtn.classList.add("active");
+                    } else {
+                        if (allBtn) allBtn.classList.remove("active");
+                    }
                 }
             });
 
@@ -196,6 +213,10 @@ function initPriceSlider(minPrice, maxPrice) {
     function handleMinInput() {
         const minVal = parseInt(minInput.value);
         const maxVal = parseInt(maxInput.value);
+
+        minInput.style.zIndex = "3";
+        maxInput.style.zIndex = "2";
+
         // 최소 핸들이 최대 핸들보다 커지지 못하게 막음
         if (minVal > maxVal) {
             minInput.value = maxVal;
@@ -206,6 +227,10 @@ function initPriceSlider(minPrice, maxPrice) {
     function handleMaxInput() {
         const minVal = parseInt(minInput.value);
         const maxVal = parseInt(maxInput.value);
+
+        maxInput.style.zIndex = "3";
+        minInput.style.zIndex = "2";
+
         // 최대 핸들이 최소 핸들보다 작아지지 못하게 막음
         if (maxVal < minVal) {
             maxInput.value = minVal;
@@ -367,8 +392,10 @@ function applyFilters(allFlights, state) {
 
         // 2. 가는 날 시간대
         if (state.outTime && state.outTime.length > 0) {
-            const timeArray = flight.outbound.departureTime;
-            const hour = timeArray[3]; // 시간
+            const time = flight.outbound.departureTime;
+            const date = new Date(time);
+
+            const hour = date.getHours();
 
             if (!isHourInRange(hour, state.outTime)) {
                 return false;
@@ -377,8 +404,9 @@ function applyFilters(allFlights, state) {
 
         // 3. 오는 날 시간대
         if (state.inTime && state.inTime.length > 0 && flight.inbound) {
-            const timeArray = flight.inbound.departureTime;
-            const hour = timeArray[3];
+            const time = flight.inbound.departureTime;
+            const date = new Date(time);
+            const hour = date.getHours();
 
             if (!isHourInRange(hour, state.inTime)) {
                 return false;
