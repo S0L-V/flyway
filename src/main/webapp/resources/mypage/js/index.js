@@ -122,7 +122,9 @@ async function init() {
     }
 
     if (needProfile) {
-        const { initProfileSave, initProfileInputGuards, initWithdrawHandler } = await importWithVersion("./profile.js");
+        const { initProfileSave, initProfileInputGuards, initWithdrawHandler, initBirthDatePicker, initPassportDatePicker } = await importWithVersion("./profile.js");
+        initBirthDatePicker();
+        initPassportDatePicker();
         initProfileInputGuards();
         initProfileSave();
         initWithdrawHandler();

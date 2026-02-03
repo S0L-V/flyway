@@ -29,3 +29,9 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="${pageContext.request.contextPath}/resources/common/js/swal-utils.js"></script>
+<!-- Flatpickr (달력) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+<!-- 메인 페이지 달력 스타일 -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/main/css/hero.css">
