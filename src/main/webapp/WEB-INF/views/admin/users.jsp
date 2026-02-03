@@ -209,6 +209,6 @@
     </div>
 </div>
 
-<script src="${pageContext.request.contextPath}/resources/admin/users.js"></script>
+<script src="${pageContext.request.contextPath}/resources/admin/users.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

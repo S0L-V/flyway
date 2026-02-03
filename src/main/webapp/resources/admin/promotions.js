@@ -778,7 +778,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(err => {
                 console.error('Failed to update display order:', err);
-                alert('순서 변경에 실패했습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '순서 변경 실패',
+                    text: '순서 변경에 실패했습니다.',
+                    confirmButtonText: '확인'
+                });
                 fetchPromotions(true); // 실패 시 다시 로드
             });
     }
@@ -845,6 +850,77 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // --- 인원수 스테퍼 ---
+    const passengerInput = document.getElementById('passengerCount');
+    const passengerMinus = document.getElementById('passenger-minus');
+    const passengerPlus = document.getElementById('passenger-plus');
+
+    if (passengerMinus && passengerPlus && passengerInput) {
+        passengerMinus.addEventListener('click', () => {
+            const val = parseInt(passengerInput.value, 10);
+            if (val > 1) passengerInput.value = val - 1;
+        });
+
+        passengerPlus.addEventListener('click', () => {
+            const val = parseInt(passengerInput.value, 10);
+            if (val < 10) passengerInput.value = val + 1;
+        });
+
+        // 빠른 선택 칩
+        document.querySelectorAll('.passenger-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                passengerInput.value = chip.dataset.passenger;
+            });
+        });
+    }
+
+    // --- 할인율 버튼 ---
+    const discountInput = document.getElementById('discountPercentage');
+    const discountCustom = document.getElementById('discountCustom');
+    const discountBtns = document.querySelectorAll('.discount-btn');
+
+    const updateDiscountButtons = (activeValue) => {
+        discountBtns.forEach(btn => {
+            const val = btn.dataset.discount;
+            if (val === String(activeValue)) {
+                btn.classList.add('active');
+                btn.classList.remove('bg-white/5', 'border-white/10', 'text-glass-secondary');
+                btn.classList.add('bg-blue-500/20', 'border-blue-500/40', 'text-blue-400');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.remove('bg-blue-500/20', 'border-blue-500/40', 'text-blue-400');
+                btn.classList.add('bg-white/5', 'border-white/10');
+                // 30%, 50%는 특별 색상 유지
+                if (val === '30') {
+                    btn.classList.add('text-amber-400');
+                } else if (val === '50') {
+                    btn.classList.add('text-rose-400');
+                } else {
+                    btn.classList.add('text-glass-secondary');
+                }
+            }
+        });
+    };
+
+    discountBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const val = btn.dataset.discount;
+            discountInput.value = val;
+            if (discountCustom) discountCustom.value = '';
+            updateDiscountButtons(val);
+        });
+    });
+
+    if (discountCustom) {
+        discountCustom.addEventListener('input', () => {
+            const val = discountCustom.value;
+            if (val && val >= 1 && val <= 99) {
+                discountInput.value = val;
+                updateDiscountButtons(null); // 모든 버튼 비활성화
+            }
+        });
+    }
+
     // 라디오 버튼 값 설정 헬퍼
     const setRadioValue = (name, value) => {
         const radio = flightForm.querySelector(`input[name="${name}"][value="${value || ''}"]`);
@@ -871,6 +947,11 @@ document.addEventListener('DOMContentLoaded', function() {
             promotionForm.reset();
             promotionForm.querySelector('#flightId').value = target.dataset.flightId;
             promotionModal.querySelector('#modal-flight-info').textContent = target.dataset.flightInfo;
+            // 인원수, 할인율 초기화
+            if (passengerInput) passengerInput.value = 1;
+            if (discountInput) discountInput.value = 10;
+            if (discountCustom) discountCustom.value = '';
+            updateDiscountButtons(10);
             promotionModal.classList.remove('hidden');
             initModalIcons();
         } else if (target.classList.contains('edit-flight-btn')) {
@@ -890,21 +971,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     flightCrudModal.classList.remove('hidden');
                     initModalIcons();
                 } else {
-                    alert('항공편 정보 로딩 실패: ' + res.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '로딩 실패',
+                        text: res.message,
+                        confirmButtonText: '확인'
+                    });
                 }
             });
         } else if (target.classList.contains('delete-flight-btn')) {
-            if (confirm('정말 이 항공편을 삭제하시겠습니까?')) {
-                fetch(`${window.CONTEXT_PATH}/admin/api/flights/${flightId}`, { method: 'DELETE' }).then(res => res.json()).then(res => {
-                    if (res.success) {
-                        alert('항공편이 삭제되었습니다.');
-                        fetchFlights(pagination.currentPage, true);
-                        fetchPromotions(true);
-                    } else {
-                        alert('항공편 삭제 실패: ' + res.message);
-                    }
-                });
-            }
+            Swal.fire({
+                icon: 'warning',
+                title: '항공편 삭제',
+                text: '정말 이 항공편을 삭제하시겠습니까?',
+                showCancelButton: true,
+                confirmButtonText: '삭제',
+                cancelButtonText: '취소',
+                confirmButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${window.CONTEXT_PATH}/admin/api/flights/${flightId}`, { method: 'DELETE' }).then(res => res.json()).then(res => {
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '삭제 완료',
+                                text: '항공편이 삭제되었습니다.',
+                                confirmButtonText: '확인'
+                            });
+                            fetchFlights(pagination.currentPage, true);
+                            fetchPromotions(true);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '삭제 실패',
+                                text: res.message,
+                                confirmButtonText: '확인'
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 
@@ -930,7 +1036,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(res => {
                     if (!res.success) {
                         // 실패 시 롤백
-                        alert('상태 변경 실패: ' + res.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '상태 변경 실패',
+                            text: res.message,
+                            confirmButtonText: '확인'
+                        });
                         fetchPromotions(true);
                     }
                 })
@@ -942,16 +1053,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 삭제 버튼 클릭
         if (target.classList.contains('promo-delete-btn')) {
-            if (confirm('정말 이 특가 상품을 삭제하시겠습니까?')) {
-                fetch(`${window.CONTEXT_PATH}/admin/promotions/api/${id}`, { method: 'DELETE' }).then(res => res.json()).then(res => {
-                    if (res.success) {
-                        alert('삭제되었습니다.');
-                        fetchPromotions(true);
-                    } else {
-                        alert('삭제 실패: ' + res.message);
-                    }
-                });
-            }
+            Swal.fire({
+                icon: 'warning',
+                title: '특가 상품 삭제',
+                text: '정말 이 특가 상품을 삭제하시겠습니까?',
+                showCancelButton: true,
+                confirmButtonText: '삭제',
+                cancelButtonText: '취소',
+                confirmButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${window.CONTEXT_PATH}/admin/promotions/api/${id}`, { method: 'DELETE' }).then(res => res.json()).then(res => {
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '삭제 완료',
+                                text: '특가 상품이 삭제되었습니다.',
+                                confirmButtonText: '확인'
+                            });
+                            fetchPromotions(true);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '삭제 실패',
+                                text: res.message,
+                                confirmButtonText: '확인'
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 
@@ -967,11 +1098,21 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         }).then(res => res.json()).then(res => {
             if (res.success) {
-                alert('특가 상품이 생성되었습니다.');
+                Swal.fire({
+                    icon: 'success',
+                    title: '생성 완료',
+                    text: '특가 상품이 생성되었습니다.',
+                    confirmButtonText: '확인'
+                });
                 promotionModal.classList.add('hidden');
                 fetchPromotions(true);
             } else {
-                alert('생성 실패: ' + res.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: '생성 실패',
+                    text: res.message,
+                    confirmButtonText: '확인'
+                });
             }
         });
     });
@@ -989,11 +1130,21 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         }).then(res => res.json()).then(res => {
             if (res.success) {
-                alert('항공편이 저장되었습니다.');
+                Swal.fire({
+                    icon: 'success',
+                    title: '저장 완료',
+                    text: '항공편이 저장되었습니다.',
+                    confirmButtonText: '확인'
+                });
                 flightCrudModal.classList.add('hidden');
                 fetchFlights(pagination.currentPage, true);
             } else {
-                alert('저장 실패: ' + res.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: '저장 실패',
+                    text: res.message,
+                    confirmButtonText: '확인'
+                });
             }
         });
     });

@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentPage = 1;
     const pageSize = 10;
-    let currentFilterStatus = '';
+    let currentFilterStatus = 'ACTIVE'; // 기본값: 활성 회원만 표시
     let currentSearchKeyword = '';
     let currentViewMode = 'card'; // 'card' or 'list'
 
@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', function() {
         modalContent: document.getElementById('modal-content'),
         closeModalBtn: document.getElementById('close-modal-btn')
     };
+
+    // 초기 필터 상태 설정 (활성 회원)
+    elements.filterStatus.value = 'ACTIVE';
 
     // 초기 데이터 로딩
     fetchUserStats();
@@ -251,7 +254,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         users.forEach(function(user) {
             const card = document.createElement('div');
-            card.className = 'user-card glass-card p-5 hover:border-white/20 transition-all duration-300';
+            const isBlocked = user.status === 'BLOCKED';
+            const isWithdrawn = user.status === 'WITHDRAWN';
+
+            let cardExtraClass = '';
+            if (isBlocked) cardExtraClass = ' border-red-500/30 bg-red-500/5';
+            else if (isWithdrawn) cardExtraClass = ' border-white/5 bg-white/3 opacity-60';
+
+            card.className = 'user-card glass-card p-5 hover:border-white/20 transition-all duration-300' + cardExtraClass;
 
             const initial = escapeHtml(getInitial(user.displayName || user.email));
             const displayName = escapeHtml(user.displayName || '-');
@@ -262,16 +272,38 @@ document.addEventListener('DOMContentLoaded', function() {
             const createdAt = formatDate(user.createdAt);
             const userId = escapeHtml(user.userId);
 
+            // 아바타 스타일
+            let avatarClass = 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30';
+            if (isBlocked) avatarClass = 'bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/30';
+            else if (isWithdrawn) avatarClass = 'bg-gradient-to-br from-gray-500 to-gray-600 shadow-gray-500/30';
+
+            // 이름 색상
+            let nameClass = 'text-glass-primary';
+            if (isBlocked) nameClass = 'text-red-300';
+            else if (isWithdrawn) nameClass = 'text-gray-400 line-through';
+
+            // 상단 바 표시
+            let topBar = '';
+            if (isBlocked) topBar = '<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-400"></div>';
+            else if (isWithdrawn) topBar = '<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-500 to-gray-400"></div>';
+
+            // 상태 아이콘
+            let statusIcon = '';
+            if (isBlocked) statusIcon = '<i data-lucide="ban" class="w-3 h-3"></i>';
+            else if (isWithdrawn) statusIcon = '<i data-lucide="user-x" class="w-3 h-3"></i>';
+
             card.innerHTML = `
+                ${topBar}
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30">${initial}</div>
+                        <div class="w-10 h-10 flex-shrink-0 rounded-full ${avatarClass} flex items-center justify-center text-white font-bold text-sm shadow-lg">${initial}</div>
                         <div class="min-w-0">
-                            <p class="font-semibold text-glass-primary truncate">${displayName}</p>
+                            <p class="font-semibold ${nameClass} truncate">${displayName}</p>
                             <p class="text-xs text-glass-muted truncate">${email}</p>
                         </div>
                     </div>
-                    <span class="flex-shrink-0 inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClassGlass(user.status)}">
+                    <span class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClassGlass(user.status)}">
+                        ${statusIcon}
                         ${escapeHtml(user.statusDisplayName)}
                     </span>
                 </div>
@@ -291,18 +323,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="text-xs">${createdAt}</span>
                     </div>
                 </div>
-                <div class="mt-4 pt-4 border-t border-white/10 flex justify-end gap-2">
-                    <button data-action="detail" data-user-id="${userId}" class="p-2 hover:bg-white/10 rounded-lg transition-colors" title="상세보기">
-                        <i data-lucide="eye" class="w-4 h-4 text-glass-secondary pointer-events-none"></i>
-                    </button>
+                ${user.status === 'ACTIVE' || user.status === 'BLOCKED' ? `
+                <div class="mt-4 pt-4 border-t border-white/10 flex justify-end">
                     ${user.status === 'ACTIVE' ? `
-                    <button data-action="block" data-user-id="${userId}" class="p-2 hover:bg-red-500/20 rounded-lg transition-colors" title="차단하기">
-                        <i data-lucide="ban" class="w-4 h-4 text-red-400 pointer-events-none"></i>
-                    </button>` : user.status === 'BLOCKED' ? `
-                    <button data-action="unblock" data-user-id="${userId}" class="p-2 hover:bg-green-500/20 rounded-lg transition-colors" title="차단해제">
-                        <i data-lucide="check-circle" class="w-4 h-4 text-green-400 pointer-events-none"></i>
-                    </button>` : ''}
-                </div>
+                    <button data-action="block" data-user-id="${userId}" class="px-4 py-2 text-xs font-medium rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all flex items-center gap-2">
+                        <i data-lucide="ban" class="w-4 h-4 pointer-events-none"></i>
+                        <span class="pointer-events-none">차단하기</span>
+                    </button>` : `
+                    <button data-action="unblock" data-user-id="${userId}" class="px-4 py-2 text-xs font-medium rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 pointer-events-none"></i>
+                        <span class="pointer-events-none">차단 해제</span>
+                    </button>`}
+                </div>` : ''}
             `;
 
             elements.userCardGrid.appendChild(card);
@@ -326,23 +358,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         users.forEach(function(user) {
             const row = document.createElement('tr');
-            row.className = 'hover:bg-white/5 transition-colors';
+            const isBlocked = user.status === 'BLOCKED';
+            const isWithdrawn = user.status === 'WITHDRAWN';
+
+            let rowClass = 'hover:bg-white/5 transition-colors';
+            if (isBlocked) rowClass = 'bg-red-500/5 hover:bg-red-500/10 transition-colors border-l-2 border-red-500';
+            else if (isWithdrawn) rowClass = 'bg-white/2 hover:bg-white/5 transition-colors opacity-50 border-l-2 border-gray-500';
+
+            row.className = rowClass;
 
             const initial = escapeHtml(getInitial(user.displayName || user.email));
             const displayName = escapeHtml(user.displayName || '-');
             const email = escapeHtml(user.email);
             const providerBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getProviderBadgeClassGlass(user.provider)}">${escapeHtml(getProviderDisplayName(user.provider))}</span>`;
             const reservationCount = formatNumber(user.reservationCount) + '건';
-            const statusBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClassGlass(user.status)}">${escapeHtml(user.statusDisplayName)}</span>`;
             const createdAt = formatDate(user.createdAt);
             const userId = escapeHtml(user.userId);
+
+            // 아바타 스타일
+            let avatarClass = 'bg-gradient-to-br from-blue-500 to-purple-500';
+            if (isBlocked) avatarClass = 'bg-gradient-to-br from-red-500 to-red-600';
+            else if (isWithdrawn) avatarClass = 'bg-gradient-to-br from-gray-500 to-gray-600';
+
+            // 이름 색상
+            let nameClass = 'font-medium text-glass-primary text-sm';
+            if (isBlocked) nameClass = 'font-medium text-red-300 text-sm';
+            else if (isWithdrawn) nameClass = 'font-medium text-gray-400 text-sm line-through';
+
+            // 상태 뱃지 (아이콘 포함)
+            let statusIcon = '';
+            if (isBlocked) statusIcon = '<i data-lucide="ban" class="w-3 h-3 inline-block mr-1"></i>';
+            else if (isWithdrawn) statusIcon = '<i data-lucide="user-x" class="w-3 h-3 inline-block mr-1"></i>';
+
+            const statusBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full inline-flex items-center ${getStatusBadgeClassGlass(user.status)}">${statusIcon}${escapeHtml(user.statusDisplayName)}</span>`;
 
             row.innerHTML = `
                 <td class="px-4 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xs">${initial}</div>
+                        <div class="w-8 h-8 ${avatarClass} rounded-full flex items-center justify-center text-white font-bold text-xs">${initial}</div>
                         <div>
-                            <p class="font-medium text-glass-primary text-sm">${displayName}</p>
+                            <p class="${nameClass}">${displayName}</p>
                             <p class="text-xs text-glass-muted">${email}</p>
                         </div>
                     </div>
@@ -352,17 +407,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="px-4 py-4 text-sm">${statusBadge}</td>
                 <td class="px-4 py-4 text-sm text-glass-secondary">${createdAt}</td>
                 <td class="px-4 py-4">
-                    <div class="flex items-center justify-center gap-2">
-                        <button data-action="detail" data-user-id="${userId}" class="p-2 hover:bg-white/10 rounded-lg transition-colors" title="상세보기">
-                            <i data-lucide="eye" class="w-4 h-4 text-glass-secondary pointer-events-none"></i>
-                        </button>
+                    <div class="flex items-center justify-center">
                         ${user.status === 'ACTIVE' ? `
-                        <button data-action="block" data-user-id="${userId}" class="p-2 hover:bg-red-500/20 rounded-lg transition-colors" title="차단하기">
-                            <i data-lucide="ban" class="w-4 h-4 text-red-400 pointer-events-none"></i>
+                        <button data-action="block" data-user-id="${userId}" class="px-4 py-2 text-xs font-medium rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all flex items-center gap-2">
+                            <i data-lucide="ban" class="w-4 h-4 pointer-events-none"></i>
+                            <span class="pointer-events-none">차단하기</span>
                         </button>` : user.status === 'BLOCKED' ? `
-                        <button data-action="unblock" data-user-id="${userId}" class="p-2 hover:bg-green-500/20 rounded-lg transition-colors" title="차단해제">
-                            <i data-lucide="check-circle" class="w-4 h-4 text-green-400 pointer-events-none"></i>
-                        </button>` : ''}
+                        <button data-action="unblock" data-user-id="${userId}" class="px-4 py-2 text-xs font-medium rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-4 h-4 pointer-events-none"></i>
+                            <span class="pointer-events-none">차단 해제</span>
+                        </button>` : `
+                        <span class="text-xs text-glass-muted">-</span>`}
                     </div>
                 </td>
             `;
@@ -451,43 +506,79 @@ document.addEventListener('DOMContentLoaded', function() {
                     renderUserDetailModal(data.data);
                     elements.modal.classList.remove('hidden');
                 } else {
-                    alert('회원 정보를 불러오는데 실패했습니다.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: '조회 실패',
+                        text: '회원 정보를 불러오는데 실패했습니다.',
+                        confirmButtonText: '확인'
+                    });
                 }
             })
             .catch(function(error) {
                 console.error('Error fetching user detail:', error);
-                alert('회원 정보를 불러오는 중 오류가 발생했습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '오류 발생',
+                    text: '회원 정보를 불러오는 중 오류가 발생했습니다.',
+                    confirmButtonText: '확인'
+                });
             });
     }
 
     function changeUserStatus(userId, newStatus) {
         var statusText = newStatus === 'BLOCKED' ? '차단' : '차단해제';
-        if (!confirm('해당 회원을 ' + statusText + '하시겠습니까?')) {
-            return;
-        }
+        var iconType = newStatus === 'BLOCKED' ? 'warning' : 'question';
+        var confirmColor = newStatus === 'BLOCKED' ? '#ef4444' : '#22c55e';
 
-        // [보안 수정] encodeURIComponent 적용
-        fetch(window.CONTEXT_PATH + '/admin/users/api/' + encodeURIComponent(userId) + '/status', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ status: newStatus })
-        })
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    alert('회원 상태가 변경되었습니다.');
-                    fetchUserStats();
-                    fetchUserList();
-                } else {
-                    alert('상태 변경에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
-                }
-            })
-            .catch(function(error) {
-                console.error('Error changing user status:', error);
-                alert('상태 변경 중 오류가 발생했습니다.');
-            });
+        Swal.fire({
+            icon: iconType,
+            title: '회원 ' + statusText,
+            text: '해당 회원을 ' + statusText + '하시겠습니까?',
+            showCancelButton: true,
+            confirmButtonText: statusText,
+            cancelButtonText: '취소',
+            confirmButtonColor: confirmColor
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                // [보안 수정] encodeURIComponent 적용
+                fetch(window.CONTEXT_PATH + '/admin/users/api/' + encodeURIComponent(userId) + '/status', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: statusText + ' 완료',
+                                text: '회원 상태가 변경되었습니다.',
+                                confirmButtonText: '확인'
+                            });
+                            fetchUserStats();
+                            fetchUserList();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: statusText + ' 실패',
+                                text: data.message || '알 수 없는 오류가 발생했습니다.',
+                                confirmButtonText: '확인'
+                            });
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error changing user status:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '오류 발생',
+                            text: '상태 변경 중 오류가 발생했습니다.',
+                            confirmButtonText: '확인'
+                        });
+                    });
+            }
+        });
     }
 
     function renderUserDetailModal(user) {
@@ -546,12 +637,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 '<div class="pt-4 border-t border-white/10">' +
                 (user.status === 'ACTIVE' ?
                     // 차단하기: data-action="block"
-                    '<button data-action="block" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-red-500/80 text-white rounded-lg hover:bg-red-500 transition-colors">' +
-                    '<i data-lucide="ban" class="w-4 h-4 inline-block mr-2"></i>차단하기' +
+                    '<button data-action="block" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2.5 bg-red-500/20 border border-red-500/40 text-red-400 rounded-lg hover:bg-red-500/30 transition-all font-medium flex items-center justify-center gap-2">' +
+                    '<i data-lucide="ban" class="w-4 h-4"></i>회원 차단하기' +
                     '</button>' :
                     // 차단해제: data-action="unblock"
-                    '<button data-action="unblock" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2 bg-green-500/80 text-white rounded-lg hover:bg-green-500 transition-colors">' +
-                    '<i data-lucide="check-circle" class="w-4 h-4 inline-block mr-2"></i>차단해제' +
+                    '<button data-action="unblock" data-user-id="' + escapeHtml(user.userId) + '" class="w-full px-4 py-2.5 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-all font-medium flex items-center justify-center gap-2">' +
+                    '<i data-lucide="shield-check" class="w-4 h-4"></i>차단 해제하기' +
                     '</button>') +
                 '</div>' : '') +
             '</div>';
