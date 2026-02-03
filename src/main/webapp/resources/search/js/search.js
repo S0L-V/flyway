@@ -278,7 +278,13 @@ function setupAirportDropdown(fieldName, getDataFn) {
     // 나라 목록 렌더링
     const renderCountries = (items) => {
         const grouped = groupByCountry(items);
-        const countries = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'ko'));
+        // const countries = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'ko'));
+
+        const countries = Object.keys(grouped).sort((a, b) => {
+            if (a === "대한민국") return -1;
+            if (b === "대한민국") return 1;
+            return a.localeCompare(b, 'ko');
+        });
 
         ul.innerHTML = `
             <div class="dropdown-header">
@@ -296,7 +302,20 @@ function setupAirportDropdown(fieldName, getDataFn) {
     // 공항 목록 렌더링 (특정 나라)
     const renderAirports = (country, items) => {
         const grouped = groupByCountry(items);
-        const airports = (grouped[country] || []).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        const airports = (grouped[country] || [])    //.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+
+        if (country === "대한민국") {
+            airports.sort((a, b) => {
+                const priority = { "ICN": 1, "GMP": 2 };
+                const aOrder = priority[a.code] || 999;
+                const bOrder = priority[b.code] || 999;
+
+                if (aOrder !== bOrder) return aOrder - bOrder;
+                return a.name.localeCompare(b.name, 'ko'); // 그 외 도시명 순
+            });
+        } else {
+            airports.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        }
 
         ul.innerHTML = `
             <div class="dropdown-header">

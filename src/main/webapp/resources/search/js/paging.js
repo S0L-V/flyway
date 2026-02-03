@@ -17,8 +17,14 @@ function renderPage(pageNum, scroll = true) {
     updateCount();
 
     if (scroll) {
-        const listEl = document.getElementById('resultList');
-        if(listEl) listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // const listEl = document.getElementById('resultList');
+        // if(listEl) {
+        //     listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // }
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     }
 }
 
