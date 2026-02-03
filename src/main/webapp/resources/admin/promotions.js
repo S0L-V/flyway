@@ -182,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function initDropdowns() {
         document.querySelectorAll('.filter-dropdown').forEach(dd => {
             const toggle = dd.querySelector('.dropdown-toggle');
+            const panel = dd.querySelector('.dropdown-panel');
             const fieldName = dd.dataset.field;
 
             toggle.addEventListener('click', (e) => {
@@ -249,9 +250,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
         countryListEl.innerHTML = countries.map(({ country, count }) => `
-            <div class="country-item" data-country="${country}">
-                <span>${country}</span>
-                <span class="count">${count}</span>
+            <div class="country-item" data-country="${escapeHtml(country)}">
+                <span>${escapeHtml(country)}</span>
+                <span class="count">${escapeHtml(count)}</span>
             </div>
         `).join('');
 
@@ -322,12 +323,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         airportListEl.innerHTML = airports.map(a => `
-            <div class="airport-item" data-code="${a.airportId}" data-name="${a.city}" data-country="${country}">
+            <div class="airport-item" data-code="${escapeHtml(a.airportId)}" data-name="${escapeHtml(a.city)}" data-country="${escapeHtml(country)}">
                 <div>
-                    <span class="city-name">${a.city}</span>
-                    <span class="airport-code">${a.airportId}</span>
+                    <span class="city-name">${escapeHtml(a.city)}</span>
+                    <span class="airport-code">${escapeHtml(a.airportId)}</span>
                 </div>
-                ${a.name ? `<div class="airport-name">${a.name}</div>` : ''}
+                ${a.name ? `<div class="airport-name">${escapeHtml(a.name)}</div>` : ''}
             </div>
         `).join('');
     }
@@ -350,12 +351,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         airportListEl.innerHTML = filtered.map(a => `
-            <div class="airport-item" data-code="${a.airportId}" data-name="${a.city}" data-country="${country}">
+            <div class="airport-item" data-code="${escapeHtml(a.airportId)}" data-name="${escapeHtml(a.city)}" data-country="${escapeHtml(country)}">
                 <div>
-                    <span class="city-name">${a.city}</span>
-                    <span class="airport-code">${a.airportId}</span>
+                    <span class="city-name">${escapeHtml(a.city)}</span>
+                    <span class="airport-code">${escapeHtml(a.airportId)}</span>
                 </div>
-                ${a.name ? `<div class="airport-name">${a.name}</div>` : ''}
+                ${a.name ? `<div class="airport-name">${escapeHtml(a.name)}</div>` : ''}
             </div>
         `).join('');
     }

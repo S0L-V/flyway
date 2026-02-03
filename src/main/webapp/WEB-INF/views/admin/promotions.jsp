@@ -4,6 +4,24 @@
 <%@ include file="layout/topbar.jsp" %>
 
 <style>
+    /* 항공편 섹션이 특가 목록 위에 오도록 */
+    #flight-section {
+        position: relative;
+        z-index: 200;
+    }
+
+    /* 필터 영역 */
+    #flight-filters {
+        position: relative;
+        z-index: 9999;
+    }
+
+    /* 특가 목록 섹션은 낮은 z-index */
+    #promotion-section {
+        position: relative;
+        z-index: 1;
+    }
+
     /* 2단계 드롭다운 스타일 */
     .filter-dropdown .dropdown-panel { display: none; }
     .filter-dropdown.open .dropdown-panel { display: flex; }
@@ -204,6 +222,7 @@
         transform: translateY(-8px);
         transition: opacity 0.2s ease, transform 0.2s ease;
         pointer-events: none;
+        z-index: 99999 !important;
     }
 
     .filter-dropdown.open .dropdown-panel {
@@ -338,12 +357,12 @@
         </div>
 
         <!-- Top Panel: Flight Management -->
-        <div class="glass-section">
+        <div id="flight-section" class="glass-section">
             <div class="p-6 border-b border-white/5 flex items-center justify-between flex-wrap gap-4">
                 <h2 class="text-lg font-bold text-glass-primary">항공편 목록</h2>
                 <div id="flight-filters" class="flex items-center space-x-2 flex-wrap gap-y-2">
                     <!-- Departure Airport (2단계 선택) -->
-                    <div class="relative filter-dropdown" data-field="from">
+                    <div class="filter-dropdown" data-field="from" style="position: relative; z-index: 9999;">
                         <button type="button" class="dropdown-toggle p-2 bg-white/5 border border-white/10 rounded-lg text-sm w-48 text-left flex justify-between items-center text-glass-secondary hover:bg-white/10 transition-colors">
                             <span class="flex items-center gap-2">
                                 <i data-lucide="plane-takeoff" class="w-4 h-4 opacity-60"></i>
@@ -351,7 +370,7 @@
                             </span>
                             <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </button>
-                        <div class="dropdown-panel absolute z-50 mt-1 shadow-xl">
+                        <div class="dropdown-panel shadow-xl" style="position: absolute; top: 100%; left: 0; margin-top: 4px;">
                             <!-- 국가 패널 -->
                             <div class="country-panel">
                                 <div class="country-panel-header">국가 선택</div>
@@ -372,7 +391,7 @@
                         </div>
                     </div>
                     <!-- Arrival Airport (2단계 선택) -->
-                    <div class="relative filter-dropdown" data-field="to">
+                    <div class="filter-dropdown" data-field="to" style="position: relative; z-index: 9999;">
                         <button type="button" class="dropdown-toggle p-2 bg-white/5 border border-white/10 rounded-lg text-sm w-48 text-left flex justify-between items-center text-glass-secondary hover:bg-white/10 transition-colors">
                             <span class="flex items-center gap-2">
                                 <i data-lucide="plane-landing" class="w-4 h-4 opacity-60"></i>
@@ -380,7 +399,7 @@
                             </span>
                             <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </button>
-                        <div class="dropdown-panel absolute z-50 mt-1 shadow-xl right-0">
+                        <div class="dropdown-panel shadow-xl" style="position: absolute; top: 100%; right: 0; margin-top: 4px;">
                             <!-- 국가 패널 -->
                             <div class="country-panel">
                                 <div class="country-panel-header">국가 선택</div>
@@ -426,7 +445,7 @@
         </div>
 
         <!-- Bottom Panel: Promotion Management -->
-        <div class="glass-section">
+        <div id="promotion-section" class="glass-section">
             <div class="p-6 border-b border-white/5 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-glass-primary">생성된 특가 상품 목록</h2>
