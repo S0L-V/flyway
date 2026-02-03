@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class RankItemDto {
     private String airportId;
+    private String country;
     private String city;
     private String imageUrl;
     private String tag;

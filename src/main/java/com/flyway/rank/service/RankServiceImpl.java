@@ -92,6 +92,7 @@ public class RankServiceImpl implements RankService {
 
                     RankItemDto dto = new RankItemDto();
                     dto.setAirportId(entry.getKey());
+                    dto.setCountry(airport.getCountry());
                     dto.setSearchCount(entry.getValue());
                     dto.setCity(airport.getCity());
                     dto.setImageUrl(airport.getImageUrl());
@@ -169,7 +170,7 @@ public class RankServiceImpl implements RankService {
         return currentRankCache;
     }
 
-    @Scheduled(cron = "0 00 02 * * *")
+    @Scheduled(cron = "0 30 02 * * *")
     public synchronized void flushDailyStats() {
         // 캐시 -> DB
         Map<String, Integer> toFlush = realTimeCount;

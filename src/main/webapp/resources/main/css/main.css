@@ -17,7 +17,6 @@
 
 html, body {
     margin: 0; padding: 0;
-    font-family: 'Pretendard Variable', sans-serif;
     color: var(--color-text-primary);
     overflow-x: hidden;
 }
@@ -447,18 +446,18 @@ html, body {
 }
 
 .diff-badge.up {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
+    background: rgb(255, 0, 0);
+    color: #ffffff;
 }
 
 .diff-badge.down {
-    background: rgba(59, 130, 246, 0.2);
-    color: #93c5fd;
+    background: rgb(23, 115, 255);
+    color: #ffffff;
 }
 
 .diff-badge.new {
-    background: rgba(251, 191, 36, 0.3);
-    color: #fcd34d;
+    background: rgb(109, 251, 27);
+    color: #ffffff;
 }
 
 .diff-badge.same {

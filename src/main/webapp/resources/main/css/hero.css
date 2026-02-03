@@ -205,7 +205,7 @@
     z-index: 1;
     padding: 0.6rem 1.8rem;
     font-size: 13px;
-    font-weight: 900;
+    font-weight: 800;
     background: none;
     border: none;
     color: #6b7a90;
@@ -307,7 +307,7 @@
 
 .field-value {
     font-size: 16px;
-    font-weight: 900;
+    font-weight: 700;
     color: #0f172a;
     white-space: nowrap;
     overflow: hidden;
