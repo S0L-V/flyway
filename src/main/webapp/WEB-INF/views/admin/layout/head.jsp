@@ -42,8 +42,8 @@
     <script src="${pageContext.request.contextPath}/resources/admin/admin.js" defer></script>
 
     <!-- WebSocket & Dashboard JS -->
-    <script src="${pageContext.request.contextPath}/resources/admin/admin-websocket.js" defer></script>
-    <script src="${pageContext.request.contextPath}/resources/admin/admin-dashboard.js" defer></script>
+    <script src="${pageContext.request.contextPath}/resources/admin/admin-websocket.js?v=<%= System.currentTimeMillis() %>" defer></script>
+    <script src="${pageContext.request.contextPath}/resources/admin/admin-dashboard.js?v=<%= System.currentTimeMillis() %>" defer></script>
 
     <!-- Context Path 전달 -->
     <script>

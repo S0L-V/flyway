@@ -45,43 +45,66 @@
                                class="block w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-glass-primary placeholder:text-white/30 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-white/10 transition-all">
                     </div>
 
-                    <!-- Passenger & Discount Grid -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- Passenger Count -->
-                        <div>
-                            <label for="passengerCount" class="flex items-center gap-2 text-sm font-semibold text-glass-secondary mb-2">
-                                <i data-lucide="users" class="w-4 h-4 text-glass-muted"></i>
-                                인원수
-                            </label>
-                            <div class="relative">
+                    <!-- Passenger Count - Stepper -->
+                    <div>
+                        <label class="flex items-center gap-2 text-sm font-semibold text-glass-secondary mb-3">
+                            <i data-lucide="users" class="w-4 h-4 text-glass-muted"></i>
+                            인원수
+                        </label>
+                        <div class="flex items-center justify-center gap-4">
+                            <button type="button" id="passenger-minus" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-glass-secondary hover:bg-white/10 hover:border-white/20 transition-all flex items-center justify-center">
+                                <i data-lucide="minus" class="w-5 h-5"></i>
+                            </button>
+                            <div class="flex items-baseline gap-1">
                                 <input type="number" id="passengerCount" name="passengerCount" required
-                                       min="1" max="10" value="1"
-                                       class="block w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-glass-primary focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-white/10 text-center text-lg font-semibold transition-all">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-glass-muted text-sm">명</span>
+                                       min="1" max="10" value="1" readonly
+                                       class="w-16 bg-transparent text-center text-4xl font-bold text-glass-primary focus:outline-none">
+                                <span class="text-lg text-glass-muted">명</span>
                             </div>
+                            <button type="button" id="passenger-plus" class="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30 transition-all flex items-center justify-center">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                            </button>
                         </div>
-
-                        <!-- Discount Percentage -->
-                        <div>
-                            <label for="discountPercentage" class="flex items-center gap-2 text-sm font-semibold text-glass-secondary mb-2">
-                                <i data-lucide="percent" class="w-4 h-4 text-glass-muted"></i>
-                                할인율
-                            </label>
-                            <div class="relative">
-                                <input type="number" id="discountPercentage" name="discountPercentage" required
-                                       min="0" max="100" placeholder="10"
-                                       class="block w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-glass-primary placeholder:text-white/30 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-white/10 text-center text-lg font-semibold transition-all">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-glass-muted text-sm">%</span>
-                            </div>
+                        <!-- Quick Select Chips -->
+                        <div class="flex justify-center gap-2 mt-3">
+                            <button type="button" data-passenger="1" class="passenger-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-glass-secondary hover:bg-white/15 transition-all">1명</button>
+                            <button type="button" data-passenger="2" class="passenger-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-glass-secondary hover:bg-white/15 transition-all">2명</button>
+                            <button type="button" data-passenger="4" class="passenger-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-glass-secondary hover:bg-white/15 transition-all">4명</button>
+                            <button type="button" data-passenger="6" class="passenger-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-glass-secondary hover:bg-white/15 transition-all">6명</button>
                         </div>
                     </div>
 
-                    <!-- Quick Discount Buttons -->
-                    <div class="flex gap-2">
-                        <button type="button" onclick="document.getElementById('discountPercentage').value='10'" class="flex-1 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium text-glass-secondary transition-all">10%</button>
-                        <button type="button" onclick="document.getElementById('discountPercentage').value='20'" class="flex-1 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium text-glass-secondary transition-all">20%</button>
-                        <button type="button" onclick="document.getElementById('discountPercentage').value='30'" class="flex-1 py-2 px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-sm font-medium text-amber-400 transition-all">30%</button>
-                        <button type="button" onclick="document.getElementById('discountPercentage').value='50'" class="flex-1 py-2 px-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-sm font-medium text-rose-400 transition-all">50%</button>
+                    <!-- Discount Percentage - Segment Buttons -->
+                    <div>
+                        <label class="flex items-center gap-2 text-sm font-semibold text-glass-secondary mb-3">
+                            <i data-lucide="percent" class="w-4 h-4 text-glass-muted"></i>
+                            할인율
+                        </label>
+                        <input type="hidden" id="discountPercentage" name="discountPercentage" value="10" required>
+                        <div class="grid grid-cols-5 gap-2">
+                            <button type="button" data-discount="5" class="discount-btn py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-semibold text-glass-secondary hover:bg-white/10 transition-all">
+                                5%
+                            </button>
+                            <button type="button" data-discount="10" class="discount-btn active py-3 rounded-xl bg-blue-500/20 border border-blue-500/40 text-sm font-semibold text-blue-400 transition-all">
+                                10%
+                            </button>
+                            <button type="button" data-discount="20" class="discount-btn py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-semibold text-glass-secondary hover:bg-white/10 transition-all">
+                                20%
+                            </button>
+                            <button type="button" data-discount="30" class="discount-btn py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-semibold text-amber-400 hover:bg-amber-500/10 transition-all">
+                                30%
+                            </button>
+                            <button type="button" data-discount="50" class="discount-btn py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-semibold text-rose-400 hover:bg-rose-500/10 transition-all">
+                                50%
+                            </button>
+                        </div>
+                        <!-- Custom Input -->
+                        <div class="flex items-center gap-2 mt-3">
+                            <span class="text-xs text-glass-muted">직접 입력:</span>
+                            <input type="number" id="discountCustom" min="1" max="99" placeholder="15"
+                                   class="w-16 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-sm text-center text-glass-primary placeholder:text-white/30 focus:border-blue-500/50 focus:outline-none transition-all">
+                            <span class="text-xs text-glass-muted">%</span>
+                        </div>
                     </div>
 
                     <!-- Tags -->

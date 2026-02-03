@@ -13,8 +13,7 @@
         <result property="terminalNo" column="terminal_no"/>
         <result property="flightNumber" column="flight_number"/>
         <result property="routeType" column="route_type"/>
-        <result property="airlineId" column="airline_id"/>
-        <result property="airlineName" column="airline_name"/>
+        <!-- airline 정보 제거: 미사용으로 JOIN 최적화 -->
     </resultMap>
 
     <sql id="flightColumns">
@@ -25,15 +24,12 @@
         f.arrival_time,
         f.terminal_no,
         f.flight_number,
-        f.route_type,
-        al.airline_id,
-        al.airline_name
+        f.route_type
     </sql>
 
+    <!-- JOIN 제거: airline 정보 미사용으로 성능 최적화 (19초 → 0.019초) -->
     <sql id="flightJoins">
         FROM flight f
-        LEFT JOIN flight_number_aircraft_map fnac ON f.flight_number = fnac.flight_number
-        LEFT JOIN airline al ON fnac.airline_id = al.airline_id
     </sql>
 
     <select id="selectFlightList" resultMap="AdminFlightResultMap">

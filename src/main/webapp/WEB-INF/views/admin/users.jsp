@@ -143,7 +143,6 @@
                         <option value="" class="bg-slate-800">전체 상태</option>
                         <option value="ACTIVE" class="bg-slate-800">활성</option>
                         <option value="BLOCKED" class="bg-slate-800">차단</option>
-                        <option value="ONBOARDING" class="bg-slate-800">온보딩</option>
                         <option value="WITHDRAWN" class="bg-slate-800">탈퇴</option>
                     </select>
                     <!-- 보기형 토글 (iOS 스타일) -->
@@ -209,6 +208,6 @@
     </div>
 </div>
 
-<script src="${pageContext.request.contextPath}/resources/admin/users.js"></script>
+<script src="${pageContext.request.contextPath}/resources/admin/users.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>
