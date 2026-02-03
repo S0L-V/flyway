@@ -308,6 +308,13 @@
           AND passenger_id = #{passengerId}
     </update>
 
+    <!-- 예약 소유자 userId 조회 -->
+    <select id="selectUserIdByReservationId" parameterType="string" resultType="string">
+        SELECT user_id
+        FROM reservation
+        WHERE reservation_id = #{reservationId}
+    </select>
+
     <!-- 좌석 HOLD 해제용: passenger_seat 삭제 -->
     <delete id="deletePassengerSeatBySegmentAndPassenger">
         DELETE FROM passenger_seat

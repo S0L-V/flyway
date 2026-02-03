@@ -53,7 +53,7 @@
         if (status === "HOLD") {
             // 활성 승객이 잡은 HOLD만 주황색 + 클릭 가능(해제/변경)
             if (holderPid && activePassengerId && holderPid === String(activePassengerId)) {
-                btn.classList.add("seat-item--hold");
+                btn.classList.add("seat-item--hold", "seat-item--self-hold");
                 return btn;
             }
 
