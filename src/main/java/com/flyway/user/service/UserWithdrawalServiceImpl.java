@@ -14,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,9 +48,8 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
         /* Refresh Token 폐기 */
         authTokenService.revokeAllRefreshTokens(userId, now);
 
-        /* Kakao OAuth 회원의 경우 카카오 연동 해제 (after commit) */
-        String kakaoUserId = resolveKakaoUserId(userId);
-        runAfterCommit(() -> tryKakaoUnlink(userId, kakaoUserId));
+        /* Kakao OAuth 회원의 경우 카카오 연동 해제 */
+        tryKakaoUnlink(userId);
 
         /* 개인정보 익명화 처리 */
         anonymizeWithdrawnUser(userId);
@@ -73,15 +70,20 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
             throw new BusinessException(ErrorCode.USER_NOT_WITHDRAWN);
         }
 
-        var profile = userProfileRepository.findByUserId(userId);
-        String userName = profile != null ? profile.getName() : null;
+        String userName = userProfileRepository.findByUserId(userId).getName();
 
         /* 이름, provider_user_id 익명화  */
         userIdentityRepository.anonymizeProviderUserIdIfWithdrawn(userId, provider, anonymizedProviderUserId);
         userProfileRepository.nullifyProfileIfWithdrawn(userId, maskName(userName));
     }
 
-    private void tryKakaoUnlink(String userId, String kakaoUserId) {
+    private void tryKakaoUnlink(String userId) {
+        UserIdentity identity = userIdentityRepository.findByUserId(userId);
+        if (identity == null) return;
+
+        if (identity.getProvider() != AuthProvider.KAKAO) return;
+
+        String kakaoUserId = identity.getProviderUserId();
         if (kakaoUserId == null || kakaoUserId.isBlank()) {
             log.warn("kakao unlink skipped: providerUserId missing. userId={}", userId);
             return;
@@ -94,30 +96,10 @@ public class UserWithdrawalServiceImpl implements UserWithdrawalService {
         }
     }
 
-    private String resolveKakaoUserId(String userId) {
-        UserIdentity identity = userIdentityRepository.findByUserId(userId);
-        if (identity == null) return null;
-        if (identity.getProvider() != AuthProvider.KAKAO) return null;
-        return identity.getProviderUserId();
-    }
-
     private String maskName(String name) {
         if (name == null || name.isBlank()) return null;
         if (name.length() == 1) return "*";
         if (name.length() == 2) return name.charAt(0) + "*";
         return name.charAt(0) + "*".repeat(name.length() - 2) + name.charAt(name.length() - 1);
-    }
-
-    private void runAfterCommit(Runnable action) {
-        if (TransactionSynchronizationManager.isSynchronizationActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    action.run();
-                }
-            });
-        } else {
-            action.run();
-        }
     }
 }
