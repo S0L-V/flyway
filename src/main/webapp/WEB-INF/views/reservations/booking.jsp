@@ -292,12 +292,16 @@
                                 </div>
                                 <div class="airport-code uppercase">${s.snapArrivalAirport}</div>
                                 <div class="airport-name">
-                                        ${s.snapArrivalCity}
-                                    <fmt:formatDate value="${depDate}" pattern="yyyyMMdd" var="depDay"/>
-                                    <fmt:formatDate value="${arrDate}" pattern="yyyyMMdd" var="arrDay"/>
-                                    <c:set var="dayDiff" value="${arrDay - depDay}"/>
+                                    ${s.snapArrivalCity}
+                                    <c:set var="depDayMillis"
+                                           value="${Math.floor((depDate.time - (depDate.timezoneOffset * 60 * 1000)) / (1000*60*60*24))}"/>
+                                    <c:set var="arrDayMillis"
+                                           value="${Math.floor((arrDate.time - (arrDate.timezoneOffset * 60 * 1000)) / (1000*60*60*24))}"/>
+
+                                    <c:set var="dayDiff" value="${arrDayMillis - depDayMillis}"/>
+
                                     <c:if test="${dayDiff > 0}">
-                                        <span class="text-red-500 font-bold ml-1">+${dayDiff}일</span>
+                                        <span class="text-red-500 font-bold ml-1">+<fmt:formatNumber value="${dayDiff}" maxFractionDigits="0" />일</span>
                                     </c:if>
                                 </div>
                             </div>

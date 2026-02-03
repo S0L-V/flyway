@@ -1083,7 +1083,6 @@
                 const panel = document.querySelector('[data-filter-panel="airline"]');
                 if (panel) {
                     panel.hidden = true;
-                    panel.style.display = 'none';
                 }
                 const btn = document.querySelector('[data-filter="airline"]');
                 if (btn) btn.setAttribute("aria-expanded", "false");
