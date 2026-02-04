@@ -1,0 +1,130 @@
+/* Scoped styles for policy content */
+.policy-wrapper {
+    line-height: 1.6;
+    color: #333;
+    padding-right: 20px;
+    padding-bottom: 40px;
+    padding-left: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.policy-wrapper h1,
+.policy-wrapper h2,
+.policy-wrapper h3 {
+    color: #2f5fd7;
+    margin-top: 20px;
+}
+
+.policy-wrapper p {
+    margin: 10px 0;
+}
+
+.policy-wrapper ul {
+    margin: 10px 0 20px 20px;
+}
+
+.policy-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 40px 0;
+}
+
+.policy-wrapper th,
+.policy-wrapper td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.policy-wrapper th {
+    background-color: #f2f6ff;
+    font-weight: 600;
+}
+
+.policy-wrapper .note {
+    background: #f9fafc;
+    padding: 20px;
+    border-left: 4px solid #2f5fd7;
+    margin-top: 30px;
+}
+
+/* Modal Styles */
+.policy-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.policy-modal-overlay.active {
+    display: flex;
+}
+
+.policy-modal-container {
+    background: white;
+    width: 90%;
+    max-width: 1000px;
+    max-height: 85vh;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.policy-modal-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+
+.policy-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.policy-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.policy-modal-close:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.policy-modal-body {
+    overflow-y: auto;
+    flex: 1;
+    background: #fff;
+}

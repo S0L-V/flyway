@@ -452,6 +452,39 @@
         .search-filters .filter .filter-panel[hidden] {
             display: none !important;
         }
+
+        /* Trip Selector Row */
+        .trip-selector-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .policy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .policy-btn:hover {
+            border-color: #3093F7;
+            color: #3093F7;
+            background-color: #f0f7ff;
+        }
+
+        .policy-btn i {
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -463,11 +496,18 @@
 <main class="main-content">
 
     <div class="search-container">
-        <!-- Trip Type Selector -->
-        <div class="trip-selector" id="tripSelector">
-            <div class="trip-indicator" id="tripIndicator"></div>
-            <button class="trip-btn active" data-trip="RT">왕복</button>
-            <button class="trip-btn" data-trip="OW">편도</button>
+        <!-- Trip Type Selector Row -->
+        <div class="trip-selector-row">
+            <div class="trip-selector" id="tripSelector">
+                <div class="trip-indicator" id="tripIndicator"></div>
+                <button class="trip-btn active" data-trip="RT">왕복</button>
+                <button class="trip-btn" data-trip="OW">편도</button>
+            </div>
+
+            <button onclick="openPolicyModal()" class="policy-btn">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>가격정책</span>
+            </button>
         </div>
 
         <!-- Search Bar (Home Style) -->
@@ -850,8 +890,50 @@
         </div>
     </section>
 </main>
+
+<!-- Policy Modal -->
+<div id="policyModal" class="policy-modal-overlay">
+    <div class="policy-modal-container">
+        <div class="policy-modal-header">
+            <h3 class="policy-modal-title">가격 정책 안내</h3>
+            <button onclick="closePolicyModal()" class="policy-modal-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="policy-modal-body">
+            <jsp:include page="/WEB-INF/views/policy/policy.jsp" />
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/policy/css/policy.css">
+
 <script>
     const CONTEXT_PATH = "${pageContext.request.contextPath}";
+
+    function openPolicyModal() {
+        document.getElementById('policyModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePolicyModal() {
+        document.getElementById('policyModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('policyModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePolicyModal();
+        }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('policyModal').classList.contains('active')) {
+            closePolicyModal();
+        }
+    });
 </script>
 
 <jsp:include page="include/flight-detail.jsp" />
