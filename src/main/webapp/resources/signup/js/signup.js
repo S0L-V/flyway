@@ -383,7 +383,7 @@
               }
               return;
           }
-      }cd
+      }
 
       if (!isOauth) {
         const pw = document.getElementById("rawPassword")?.value || "";
