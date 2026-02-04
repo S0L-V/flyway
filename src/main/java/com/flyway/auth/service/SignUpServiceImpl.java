@@ -132,14 +132,12 @@ public class SignUpServiceImpl implements SignUpService {
                 .build();
 
         userIdentityRepository.save(identity);
-
         UserProfile profile = UserProfile.builder()
                 .userId(userId)
                 .name(nickname)
+                .phoneNumber("")
                 .build();
-
         userProfileRepository.createProfile(profile);
-
         return user;
     }
 
@@ -162,6 +160,10 @@ public class SignUpServiceImpl implements SignUpService {
         }
 
         userRepository.updateStatus(userId, AuthStatus.ACTIVE);
+
+        if (!smsVerificationService.isVerified(request.getPhoneNumber())) {
+            throw new BusinessException(ErrorCode.USER_PHONE_NOT_VERIFIED);
+        }
 
         UserProfile profile = UserProfile.builder()
                 .userId(userId)

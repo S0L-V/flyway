@@ -171,13 +171,15 @@
     const phoneOk = isValidPhone(phoneNumberInput?.value?.trim());
     let ok = nameOk && emailOk && phoneOk;
 
-    if (!isOauth) {
-      const verifiedOk = emailVerifiedHidden?.value === "true";
-      const pw = passwordInput?.value || "";
-      const confirm = passwordConfirmInput?.value || "";
-        const phoneVerifiedOk = phoneVerifiedHidden?.value === "true";
-        ok = ok && verifiedOk && phoneVerifiedOk && validatePassword(pw) && pw === confirm;
-    }
+      if (!isOauth) {
+          const verifiedOk = emailVerifiedHidden?.value === "true";
+          const pw = passwordInput?.value || "";
+          const confirm = passwordConfirmInput?.value || "";
+          ok = ok && verifiedOk && validatePassword(pw) && pw === confirm;
+      }
+      // 카카오/이메일 모두 SMS 인증 필요
+      const phoneVerifiedOk = phoneVerifiedHidden?.value === "true";
+      ok = ok && phoneVerifiedOk;
 
     submitBtn.disabled = !ok;
     submitBtn.classList.toggle("opacity-50", !ok);
@@ -363,27 +365,27 @@
     });
   }
 
-  if (signupForm) {
-    signupForm.addEventListener("submit", function (e) {
-      if (!isOauth && emailVerifiedHidden && emailVerifiedHidden.value !== "true") {
-          e.preventDefault();
-          if (typeof showToast === "function") {
-              showToast("이메일 인증을 완료해 주세요.", "error");
-          } else {
-              alert("이메일 인증을 완료해 주세요.");
-          }
-          return;
-          // SMS 인증 체크
-          if (!isOauth && phoneVerifiedHidden && phoneVerifiedHidden.value !== "true") {
-              e.preventDefault();
-              if (typeof showToast === "function") {
-                  showToast("전화번호 인증을 완료해 주세요.", "error");
-              } else {
-                  alert("전화번호 인증을 완료해 주세요.");
-              }
-              return;
-          }
-      }
+    if (signupForm) {
+        signupForm.addEventListener("submit", function (e) {
+            if (!isOauth && emailVerifiedHidden && emailVerifiedHidden.value !== "true") {
+                e.preventDefault();
+                if (typeof showToast === "function") {
+                    showToast("이메일 인증을 완료해 주세요.", "error");
+                } else {
+                    alert("이메일 인증을 완료해 주세요.");
+                }
+                return;
+            }
+            // SMS 인증 체크 (카카오/이메일 모두)
+            if (phoneVerifiedHidden && phoneVerifiedHidden.value !== "true") {
+                e.preventDefault();
+                if (typeof showToast === "function") {
+                    showToast("전화번호 인증을 완료해 주세요.", "error");
+                } else {
+                    alert("전화번호 인증을 완료해 주세요.");
+                }
+                return;
+            }
 
       if (!isOauth) {
         const pw = document.getElementById("rawPassword")?.value || "";
@@ -486,9 +488,10 @@
         updateSubmitState();
     }
 
-    if (phoneNumberInput && !isOauth) {
+    if (phoneNumberInput) {
         phoneNumberInput.addEventListener("input", resetSmsState);
     }
+
 
     async function handleSendSms() {
         const phone = (phoneNumberInput?.value || "").replace(/\D/g, "");
@@ -532,15 +535,14 @@
         }
     }
 
-    if (sendSmsBtn && !isOauth) {
+    if (sendSmsBtn) {
         sendSmsBtn.addEventListener("click", handleSendSms);
     }
 
-    if (resendSmsBtn && !isOauth) {
+    if (resendSmsBtn) {
         resendSmsBtn.addEventListener("click", handleSendSms);
     }
-
-    if (verifySmsBtn && !isOauth) {
+    if (verifySmsBtn) {
         verifySmsBtn.addEventListener("click", async function () {
             const phone = (phoneNumberInput?.value || "").replace(/\D/g, "");
             const code = (smsCodeInput?.value || "").trim();

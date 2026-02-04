@@ -35,7 +35,9 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return resolvePath(request).startsWith(ADMIN_PREFIX);
+        String path = resolvePath(request);
+        return path.startsWith(ADMIN_PREFIX)
+                || path.startsWith("/api/");
     }
 
     @Override
