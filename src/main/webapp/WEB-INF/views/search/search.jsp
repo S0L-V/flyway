@@ -37,6 +37,7 @@
             margin: 0 auto;
             padding: 0 20px;
             margin-bottom: 24px;
+            position: relative; /* For absolute positioning of scroll-to-top */
         }
 
         /* 필터 및 정렬 행 */
@@ -452,6 +453,83 @@
         .search-filters .filter .filter-panel[hidden] {
             display: none !important;
         }
+
+        /* Trip Selector Row */
+        .trip-selector-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .policy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .policy-btn:hover {
+            border-color: #3093F7;
+            color: #3093F7;
+            background-color: #f0f7ff;
+        }
+
+        .policy-btn i {
+            font-size: 14px;
+        }
+
+        /* Scroll To Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 50%; /* 화면 중간 높이 */
+            right: 40px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: rgba(47, 147, 247, 0.2); /* 파란 불투명 배경 */
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(47, 147, 247, 0.3);
+            color: #1d4ed8; /* 진파랑 화살표 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 90;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .scroll-to-top:hover {
+            background-color: rgba(47, 147, 247, 0.4); /* 호버 시 조금 더 진하게 */
+            color: #1e40af;
+            border-color: #3093F7;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(48, 147, 247, 0.25);
+        }
+
+        @media (max-width: 1400px) {
+            .scroll-to-top {
+                right: 20px;
+            }
+        }
     </style>
 </head>
 
@@ -463,11 +541,18 @@
 <main class="main-content">
 
     <div class="search-container">
-        <!-- Trip Type Selector -->
-        <div class="trip-selector" id="tripSelector">
-            <div class="trip-indicator" id="tripIndicator"></div>
-            <button class="trip-btn active" data-trip="RT">왕복</button>
-            <button class="trip-btn" data-trip="OW">편도</button>
+        <!-- Trip Type Selector Row -->
+        <div class="trip-selector-row">
+            <div class="trip-selector" id="tripSelector">
+                <div class="trip-indicator" id="tripIndicator"></div>
+                <button class="trip-btn active" data-trip="RT">왕복</button>
+                <button class="trip-btn" data-trip="OW">편도</button>
+            </div>
+
+            <button onclick="openPolicyModal()" class="policy-btn">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>가격정책</span>
+            </button>
         </div>
 
         <!-- Search Bar (Home Style) -->
@@ -850,8 +935,73 @@
         </div>
     </section>
 </main>
+
+<!-- Scroll To Top Button -->
+<button id="scrollToTopBtn" class="scroll-to-top" title="맨 위로">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<!-- Policy Modal -->
+<div id="policyModal" class="policy-modal-overlay">
+    <div class="policy-modal-container">
+        <div class="policy-modal-header">
+            <h3 class="policy-modal-title">가격 정책 안내</h3>
+            <button onclick="closePolicyModal()" class="policy-modal-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="policy-modal-body">
+            <jsp:include page="/WEB-INF/views/policy/policy.jsp" />
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/policy/css/policy.css">
+
 <script>
     const CONTEXT_PATH = "${pageContext.request.contextPath}";
+
+    function openPolicyModal() {
+        document.getElementById('policyModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePolicyModal() {
+        document.getElementById('policyModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('policyModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePolicyModal();
+        }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('policyModal').classList.contains('active')) {
+            closePolicyModal();
+        }
+    });
+
+    // Scroll To Top Logic
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollToTopBtn.classList.add('visible');
+        } else {
+            scrollToTopBtn.classList.remove('visible');
+        }
+    });
+
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
 </script>
 
 <jsp:include page="include/flight-detail.jsp" />

@@ -16,11 +16,6 @@
             </div>
 
             <div class="content-separator"></div>
-
-            <div class="policy-section">
-                <div class="policy-title">취소 및 변경</div>
-                <div class="policy-details">취소 수수료: 무료 (24시간 이내)<br>변경 수수료: ₩235,000 ~</div>
-            </div>
         </div>
     </div>
 </div>
