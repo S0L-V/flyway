@@ -37,6 +37,7 @@
             margin: 0 auto;
             padding: 0 20px;
             margin-bottom: 24px;
+            position: relative; /* For absolute positioning of scroll-to-top */
         }
 
         /* 필터 및 정렬 행 */
@@ -485,6 +486,50 @@
         .policy-btn i {
             font-size: 14px;
         }
+
+        /* Scroll To Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 50%; /* 화면 중간 높이 */
+            right: 40px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: rgba(47, 147, 247, 0.2); /* 파란 불투명 배경 */
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(47, 147, 247, 0.3);
+            color: #1d4ed8; /* 진파랑 화살표 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 90;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .scroll-to-top:hover {
+            background-color: rgba(47, 147, 247, 0.4); /* 호버 시 조금 더 진하게 */
+            color: #1e40af;
+            border-color: #3093F7;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(48, 147, 247, 0.25);
+        }
+
+        @media (max-width: 1400px) {
+            .scroll-to-top {
+                right: 20px;
+            }
+        }
     </style>
 </head>
 
@@ -891,6 +936,11 @@
     </section>
 </main>
 
+<!-- Scroll To Top Button -->
+<button id="scrollToTopBtn" class="scroll-to-top" title="맨 위로">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
+
 <!-- Policy Modal -->
 <div id="policyModal" class="policy-modal-overlay">
     <div class="policy-modal-container">
@@ -933,6 +983,24 @@
         if (e.key === 'Escape' && document.getElementById('policyModal').classList.contains('active')) {
             closePolicyModal();
         }
+    });
+
+    // Scroll To Top Logic
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollToTopBtn.classList.add('visible');
+        } else {
+            scrollToTopBtn.classList.remove('visible');
+        }
+    });
+
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     });
 </script>
 
