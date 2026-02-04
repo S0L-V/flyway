@@ -133,11 +133,39 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1.5">휴대전화</label>
-        <div class="relative">
-          <input type="tel" id="phoneNumber" name="phoneNumber" class="w-full pl-10 px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none" placeholder="01000000000" required>
-          <i data-lucide="smartphone" class="absolute left-3.5 top-3 text-slate-400 w-[18px] h-[18px]"></i>
-        </div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">휴대전화</label>
+          <div class="flex gap-2">
+              <div class="relative flex-1">
+                  <input type="tel" id="phoneNumber" name="phoneNumber" class="w-full pl-10 px-4 py-2.5 border
+  border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none"
+                         placeholder="01000000000" maxlength="11" required>
+                  <i data-lucide="smartphone" class="absolute left-3.5 top-3 text-slate-400 w-[18px] h-[18px]"></i>
+              </div>
+              <button type="button" id="sendSmsBtn" class="px-4 py-2 bg-slate-800 text-white text-sm font-bold rounded-xl
+  hover:bg-slate-900 disabled:bg-slate-300 whitespace-nowrap">인증번호</button>
+          </div>
+
+          <div id="smsErrorStatus" class="mt-2 text-xs text-red-600 hidden"></div>
+          <div id="smsSentBox" class="mt-3 hidden w-full rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+              <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                      <span id="smsStatus" class="text-sm text-[#2559a3]">인증번호가 발송되었습니다.</span>
+                      <button type="button" id="resendSmsBtn" class="text-sm font-semibold text-blue-500 underline
+  hover:text-blue-600">재전송</button>
+                  </div>
+              </div>
+              <div class="flex gap-2 mt-3">
+                  <input type="text" id="smsCode" class="flex-1 px-4 py-2 border border-slate-300 rounded-xl focus:ring-2
+  focus:ring-primary-100 focus:border-primary-500 outline-none" placeholder="인증번호 6자리" maxlength="6">
+                  <button type="button" id="verifySmsBtn" class="text-sm font-semibold text-white bg-primary-600 px-4 py-2
+  rounded-xl hover:bg-primary-700">확인</button>
+              </div>
+          </div>
+          <div id="smsSuccessBox" class="mt-3 hidden items-center gap-2 text-green-600 text-sm flex">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span id="smsVerifyStatus">전화번호가 인증되었습니다.</span>
+          </div>
+          <input type="hidden" id="phoneVerified" value="false">
       </div>
 
       <c:if test="${oauthSignUp}">

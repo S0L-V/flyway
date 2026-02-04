@@ -42,7 +42,8 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
         }
 
         return path.startsWith("/api/public/")
-                || path.startsWith("/api/auth/");
+                || path.startsWith("/api/auth/")
+                || path.startsWith("/api/sms/");
     }
 
     @Override

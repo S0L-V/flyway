@@ -11,11 +11,10 @@
             user_id,
             name,
             phone_number
-        ) VALUES (
-                     #{userId},
-                     #{name},
-                     COALESCE(#{phoneNumber}, '')
-                 )
+        ) VALUES (#{userId},
+                  #{name},
+                  #{phoneNumber}
+                          )
     </insert>
 
     <!-- user_id로 프로필 조회 -->

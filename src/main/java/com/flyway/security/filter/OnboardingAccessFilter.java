@@ -24,7 +24,8 @@ public class OnboardingAccessFilter extends OncePerRequestFilter {
             "/favicon.ico",
             "/error",
             "/api/auth/",
-            "/api/public/"
+            "/api/public/",
+            "/api/sms/"
     };
 
     @Override

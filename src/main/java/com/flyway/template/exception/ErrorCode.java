@@ -29,6 +29,7 @@ public enum ErrorCode {
 	USER_PASSWORD_ENCODE_ERROR(500, "U006", "비밀번호 처리 중 오류가 발생했습니다."),
 	USER_DB_ERROR(500, "U007", "회원 정보 저장 중 오류가 발생했습니다."),
 	USER_INVALID_SIGN_UP_ATTEMPT(400, "U008", "유효하지 않은 회원가입 요청입니다."),
+    USER_PHONE_NOT_VERIFIED(400, "U012", "전화번호 인증이 필요합니다."),
 	USER_ALREADY_WITHDRAWN(409, "U009", "이미 탈퇴 처리된 사용자입니다."),
 	USER_NOT_WITHDRAWN(409, "U010", "탈퇴 처리된 사용자만 익명화할 수 있습니다."),
 	USER_NOT_FOUND(404, "U011", "사용자를 찾을 수 없습니다."),

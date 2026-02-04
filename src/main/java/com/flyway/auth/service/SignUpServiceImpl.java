@@ -5,6 +5,7 @@ import com.flyway.auth.domain.AuthStatus;
 import com.flyway.auth.domain.KakaoUserInfo;
 import com.flyway.auth.dto.EmailSignUpRequest;
 import com.flyway.auth.repository.SignUpAttemptRepository;
+import com.flyway.sender.service.SmsVerificationService;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -30,12 +31,18 @@ public class SignUpServiceImpl implements SignUpService {
     private final UserProfileRepository userProfileRepository;
     private final SignUpAttemptRepository signUpAttemptRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SmsVerificationService smsVerificationService;
 
     @Override
     @Transactional
     public void signUp(EmailSignUpRequest request) {
         validateRequest(request);
         LocalDateTime now = LocalDateTime.now();
+
+        // SMS 인증 확인
+        if (!smsVerificationService.isVerified(request.getPhoneNumber())) {
+            throw new BusinessException(ErrorCode.USER_PHONE_NOT_VERIFIED);
+        }
 
         int validAttempt = signUpAttemptRepository.consumeIfVerified(request.getAttemptId(), request.getEmail(), now);
         if (validAttempt != 1) {
@@ -69,6 +76,7 @@ public class SignUpServiceImpl implements SignUpService {
                 .build();
 
         userRepository.save(user);
+
 
         // UserIdentity 생성
         UserIdentity identity = UserIdentity.builder()
@@ -124,14 +132,12 @@ public class SignUpServiceImpl implements SignUpService {
                 .build();
 
         userIdentityRepository.save(identity);
-
         UserProfile profile = UserProfile.builder()
                 .userId(userId)
                 .name(nickname)
+                .phoneNumber("")
                 .build();
-
         userProfileRepository.createProfile(profile);
-
         return user;
     }
 
@@ -154,6 +160,10 @@ public class SignUpServiceImpl implements SignUpService {
         }
 
         userRepository.updateStatus(userId, AuthStatus.ACTIVE);
+
+        if (!smsVerificationService.isVerified(request.getPhoneNumber())) {
+            throw new BusinessException(ErrorCode.USER_PHONE_NOT_VERIFIED);
+        }
 
         UserProfile profile = UserProfile.builder()
                 .userId(userId)

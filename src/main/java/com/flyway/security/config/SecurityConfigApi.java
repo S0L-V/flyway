@@ -72,7 +72,8 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
                 // 비회원 허용 API
                 .antMatchers(
                         "/api/auth/**",
-                        "/api/public/**"
+                        "/api/public/**",
+                        "/api/sms/**"
                 ).permitAll()
 
                 .anyRequest().authenticated()

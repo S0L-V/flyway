@@ -79,14 +79,21 @@ public class SmsService {
         sendSms(to, content);
     }
 
-    // 탑승객에게 티켓 정보 SMS 발송 (reservationId만 받음)
+    // 탑승객 티켓 정보를 예약자(회원) 번호로 SMS 발송
     public void sendTicketInfoToPassengers(String reservationId) {
 
-        // 항공편 정보 조회
+        // 1. 예약자(회원)의 전화번호 조회
+        String userPhone = smsMapper.selectPhoneByReservationId(reservationId);
+        if (userPhone == null || userPhone.isEmpty()) {
+            log.info("[SMS] 티켓 발송 실패 - 회원 전화번호 없음, reservationId: {}", reservationId);
+            return;
+        }
+
+        // 2. 항공편 정보 조회
         List<ReservationSegmentView> segments =
                 reservationBookingRepository.findSegments(reservationId);
 
-        // 탑승객별 티켓 정보 조회 (좌석/기내식/수하물 포함)
+        // 3. 탑승객별 티켓 정보 조회 (좌석/기내식/수하물 포함)
         List<PassengerTicketInfo> ticketInfoList =
                 smsMapper.selectPassengerTicketInfo(reservationId);
 
@@ -95,19 +102,20 @@ public class SmsService {
             return;
         }
 
-        // passengerId별로 그룹핑
+        // 4. passengerId별로 그룹핑
         Map<String, List<PassengerTicketInfo>> passengerMap = ticketInfoList.stream()
                 .collect(Collectors.groupingBy(PassengerTicketInfo::getPassengerId));
 
+        // 5. 각 탑승객 정보를 회원 번호로 발송
         for (Map.Entry<String, List<PassengerTicketInfo>> entry : passengerMap.entrySet()) {
             List<PassengerTicketInfo> paxInfoList = entry.getValue();
             PassengerTicketInfo firstInfo = paxInfoList.get(0);
 
             try {
                 String content = buildTicketSmsContent(firstInfo, segments, paxInfoList);
-                sendSms(firstInfo.getPhoneNumber(), content);
-                log.info("[SMS] 티켓 발송 - passenger: {} {}, phone: {}",
-                        firstInfo.getFirstName(), firstInfo.getLastName(), firstInfo.getPhoneNumber());
+                sendSms(userPhone, content);  // 회원 번호로 발송
+                log.info("[SMS] 티켓 발송 - passenger: {} {}, to userPhone: {}",
+                        firstInfo.getFirstName(), firstInfo.getLastName(), userPhone);
             } catch (Exception e) {
                 log.error("[SMS] 티켓 발송 실패 - passengerId: {}, error: {}",
                         firstInfo.getPassengerId(), e.getMessage());

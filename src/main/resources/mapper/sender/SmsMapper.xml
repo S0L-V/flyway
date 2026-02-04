@@ -31,13 +31,13 @@
           AND phone_number != ''
     </select>
     <!-- 탑승객별 티켓 정보 (좌석/기내식/수하물 ) -->
+    <!-- 탑승객별 티켓 정보 (좌석/기내식/수하물 ) -->
     <select id="selectPassengerTicketInfo"
             resultType="com.flyway.sender.dto.PassengerTicketInfo">
         SELECT
             p.passenger_id              AS passengerId,
             p.first_name                AS firstName,
             p.last_name                 AS lastName,
-            p.phone_number              AS phoneNumber,
             rs.reservation_segment_id   AS reservationSegmentId,
             rs.segment_order            AS segmentOrder,
             acs.seat_no                 AS seatNo,
@@ -60,8 +60,6 @@
                  LEFT JOIN meal_option mo
                            ON mo.meal_id = ps.meal_id
         WHERE p.reservation_id = #{reservationId}
-          AND p.phone_number IS NOT NULL
-          AND p.phone_number != ''
         ORDER BY p.passenger_id, rs.segment_order, ps.added_at
     </select>
 
