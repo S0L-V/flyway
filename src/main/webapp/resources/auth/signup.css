@@ -111,3 +111,6 @@ body {
     margin-top: 6px;
     font-size: 0.85rem;
 }
+.is-hidden {
+    display: none;
+}

@@ -4,6 +4,7 @@ import com.flyway.auth.domain.AuthProvider;
 import com.flyway.auth.domain.AuthStatus;
 import com.flyway.auth.dto.EmailSignUpRequest;
 import com.flyway.auth.repository.SignUpAttemptRepository;
+import com.flyway.sender.service.SmsVerificationService;
 import com.flyway.template.exception.BusinessException;
 import com.flyway.template.exception.ErrorCode;
 import com.flyway.user.domain.User;
@@ -36,6 +37,7 @@ class SignUpServiceImplTest {
     private SignUpAttemptRepository signUpAttemptRepository;
     private PasswordEncoder passwordEncoder;
     private SignUpServiceImpl signUpService;
+    private SmsVerificationService smsVerificationService;
 
     @BeforeEach
     void setUp() {
@@ -44,13 +46,15 @@ class SignUpServiceImplTest {
         userProfileRepository = Mockito.mock(UserProfileRepository.class);
         signUpAttemptRepository = Mockito.mock(SignUpAttemptRepository.class);
         passwordEncoder = Mockito.mock(PasswordEncoder.class);
+        smsVerificationService = Mockito.mock(SmsVerificationService.class);
 
         signUpService = new SignUpServiceImpl(
                 userRepository,
                 userIdentityRepository,
                 userProfileRepository,
                 signUpAttemptRepository,
-                passwordEncoder
+                passwordEncoder,
+                smsVerificationService
         );
     }
 

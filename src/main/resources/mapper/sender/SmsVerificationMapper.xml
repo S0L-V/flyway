@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="com.flyway.sender.mapper.SmsVerificationMapper">
+
+      <insert id="insert">
+          INSERT INTO sms_verification
+          (sms_verification_id, phone_number, code, expires_at, created_at)
+          VALUES (#{smsVerificationId}, #{phoneNumber}, #{code}, #{expiresAt}, NOW())
+      </insert>
+
+      <select id="findLatestByPhone" resultType="com.flyway.sender.domain.SmsVerification">
+          SELECT sms_verification_id AS smsVerificationId,
+                 phone_number AS phoneNumber, code,
+                 expires_at AS expiresAt, verified_at AS verifiedAt
+          FROM sms_verification
+          WHERE phone_number = #{phoneNumber} AND verified_at IS NULL
+          ORDER BY created_at DESC LIMIT 1
+      </select>
+
+      <update id="markVerified">
+          UPDATE sms_verification SET verified_at = #{verifiedAt}
+          WHERE sms_verification_id = #{smsVerificationId} AND verified_at IS NULL
+      </update>
+
+      <select id="countRecentByPhone" resultType="int">
+          SELECT COUNT(*) FROM sms_verification
+          WHERE phone_number = #{phoneNumber} AND created_at >= #{since}
+      </select>
+
+      <select id="existsVerifiedPhone" resultType="int">
+          SELECT COUNT(*) FROM sms_verification
+          WHERE phone_number = #{phoneNumber}
+            AND verified_at IS NOT NULL
+            AND verified_at >= #{since}
+      </select>
+
+  </mapper>

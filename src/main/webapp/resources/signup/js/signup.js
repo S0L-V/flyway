@@ -132,6 +132,16 @@
   const phoneNumberInput = document.getElementById("phoneNumber");
   const submitBtn = signupForm ? signupForm.querySelector('button[type="submit"]') : null;
 
+    const sendSmsBtn = document.getElementById("sendSmsBtn");
+    const resendSmsBtn = document.getElementById("resendSmsBtn");
+    const smsStatus = document.getElementById("smsStatus");
+    const smsErrorStatus = document.getElementById("smsErrorStatus");
+    const smsSentBox = document.getElementById("smsSentBox");
+    const smsSuccessBox = document.getElementById("smsSuccessBox");
+    const smsCodeInput = document.getElementById("smsCode");
+    const verifySmsBtn = document.getElementById("verifySmsBtn");
+    const smsVerifyStatus = document.getElementById("smsVerifyStatus");
+    const phoneVerifiedHidden = document.getElementById("phoneVerified");
   function setStatus(el, msg, ok) {
     if (!el) return;
     el.textContent = msg || "";
@@ -165,7 +175,8 @@
       const verifiedOk = emailVerifiedHidden?.value === "true";
       const pw = passwordInput?.value || "";
       const confirm = passwordConfirmInput?.value || "";
-      ok = ok && verifiedOk && validatePassword(pw) && pw === confirm;
+        const phoneVerifiedOk = phoneVerifiedHidden?.value === "true";
+        ok = ok && verifiedOk && phoneVerifiedOk && validatePassword(pw) && pw === confirm;
     }
 
     submitBtn.disabled = !ok;
@@ -355,14 +366,24 @@
   if (signupForm) {
     signupForm.addEventListener("submit", function (e) {
       if (!isOauth && emailVerifiedHidden && emailVerifiedHidden.value !== "true") {
-        e.preventDefault();
-        if (typeof showToast === "function") {
-          showToast("이메일 인증을 완료해 주세요.", "error");
-        } else {
-          alert("이메일 인증을 완료해 주세요.");
-        }
-        return;
-      }
+          e.preventDefault();
+          if (typeof showToast === "function") {
+              showToast("이메일 인증을 완료해 주세요.", "error");
+          } else {
+              alert("이메일 인증을 완료해 주세요.");
+          }
+          return;
+          // SMS 인증 체크
+          if (!isOauth && phoneVerifiedHidden && phoneVerifiedHidden.value !== "true") {
+              e.preventDefault();
+              if (typeof showToast === "function") {
+                  showToast("전화번호 인증을 완료해 주세요.", "error");
+              } else {
+                  alert("전화번호 인증을 완료해 주세요.");
+              }
+              return;
+          }
+      }cd
 
       if (!isOauth) {
         const pw = document.getElementById("rawPassword")?.value || "";
@@ -452,7 +473,125 @@
   if (emailInput) emailInput.addEventListener("input", updateSubmitState);
   if (phoneNumberInput) phoneNumberInput.addEventListener("input", updateSubmitState);
 
-  window.goToStep = goToStep;
+    function resetSmsState() {
+        if (phoneVerifiedHidden) phoneVerifiedHidden.value = "false";
+        if (smsSentBox) smsSentBox.classList.add("hidden");
+        if (smsSuccessBox) smsSuccessBox.classList.add("hidden");
+        if (smsErrorStatus) smsErrorStatus.classList.add("hidden");
+        if (sendSmsBtn) {
+            sendSmsBtn.disabled = false;
+            sendSmsBtn.classList.remove("hidden");
+        }
+        if (phoneNumberInput) phoneNumberInput.readOnly = false;
+        updateSubmitState();
+    }
+
+    if (phoneNumberInput && !isOauth) {
+        phoneNumberInput.addEventListener("input", resetSmsState);
+    }
+
+    async function handleSendSms() {
+        const phone = (phoneNumberInput?.value || "").replace(/\D/g, "");
+        if (!isValidPhone(phone)) {
+            if (smsErrorStatus) {
+                smsErrorStatus.textContent = "올바른 전화번호를 입력해 주세요.";
+                smsErrorStatus.classList.remove("hidden");
+            }
+            return;
+        }
+
+        if (sendSmsBtn) sendSmsBtn.disabled = true;
+        if (smsErrorStatus) smsErrorStatus.classList.add("hidden");
+
+        try {
+            const res = await fetch(`${contextPath}/api/sms/send?phoneNumber=${encodeURIComponent(phone)}`, {
+                method: "POST"
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                if (smsErrorStatus) {
+                    smsErrorStatus.textContent = data?.message || "인증번호 발송에 실패했습니다.";
+                    smsErrorStatus.classList.remove("hidden");
+                }
+                return;
+            }
+
+            if (smsStatus) smsStatus.textContent = data?.message || "인증번호가 발송되었습니다.";
+            if (smsSentBox) smsSentBox.classList.remove("hidden");
+            if (smsSuccessBox) smsSuccessBox.classList.add("hidden");
+            if (sendSmsBtn) sendSmsBtn.classList.add("hidden");
+            if (smsCodeInput) smsCodeInput.focus();
+        } catch (e) {
+            if (smsErrorStatus) {
+                smsErrorStatus.textContent = "네트워크 오류가 발생했습니다.";
+                smsErrorStatus.classList.remove("hidden");
+            }
+        } finally {
+            if (sendSmsBtn) sendSmsBtn.disabled = false;
+        }
+    }
+
+    if (sendSmsBtn && !isOauth) {
+        sendSmsBtn.addEventListener("click", handleSendSms);
+    }
+
+    if (resendSmsBtn && !isOauth) {
+        resendSmsBtn.addEventListener("click", handleSendSms);
+    }
+
+    if (verifySmsBtn && !isOauth) {
+        verifySmsBtn.addEventListener("click", async function () {
+            const phone = (phoneNumberInput?.value || "").replace(/\D/g, "");
+            const code = (smsCodeInput?.value || "").trim();
+
+            if (!code || code.length !== 6) {
+                if (smsErrorStatus) {
+                    smsErrorStatus.textContent = "6자리 인증번호를 입력해 주세요.";
+                    smsErrorStatus.classList.remove("hidden");
+                }
+                return;
+            }
+
+            verifySmsBtn.disabled = true;
+            if (smsErrorStatus) smsErrorStatus.classList.add("hidden");
+
+            try {
+                const params = new URLSearchParams({ phoneNumber: phone, code: code });
+                const res = await fetch(`${contextPath}/api/sms/verify?${params.toString()}`, {
+                    method: "POST"
+                });
+                const data = await res.json();
+
+                if (data?.data === true) {
+                    if (smsVerifyStatus) smsVerifyStatus.textContent = "전화번호가 인증되었습니다.";
+                    if (smsSuccessBox) smsSuccessBox.classList.remove("hidden");
+                    if (smsSentBox) smsSentBox.classList.add("hidden");
+                    if (phoneVerifiedHidden) phoneVerifiedHidden.value = "true";
+                    if (phoneNumberInput) phoneNumberInput.readOnly = true;
+                    if (sendSmsBtn) sendSmsBtn.disabled = true;
+                    if (smsCodeInput) smsCodeInput.readOnly = true;
+                    updateSubmitState();
+                } else {
+                    if (smsErrorStatus) {
+                        smsErrorStatus.textContent = data?.message || "인증번호가 일치하지 않습니다.";
+                        smsErrorStatus.classList.remove("hidden");
+                    }
+                    if (phoneVerifiedHidden) phoneVerifiedHidden.value = "false";
+                }
+            } catch (e) {
+                if (smsErrorStatus) {
+                    smsErrorStatus.textContent = "네트워크 오류가 발생했습니다.";
+                    smsErrorStatus.classList.remove("hidden");
+                }
+                if (phoneVerifiedHidden) phoneVerifiedHidden.value = "false";
+            } finally {
+                verifySmsBtn.disabled = false;
+            }
+        });
+    }
+
+    window.goToStep = goToStep;
   window.toggleAllAgreements = toggleAllAgreements;
   window.checkAllStatus = checkAllStatus;
   window.selectMethod = selectMethod;

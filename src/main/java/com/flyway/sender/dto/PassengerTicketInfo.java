@@ -12,7 +12,6 @@ public class PassengerTicketInfo {
     private String passengerId;
     private String firstName;
     private String lastName;
-    private String phoneNumber;
 
     // 구간 정보
     private String reservationSegmentId;
