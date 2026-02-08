@@ -22,6 +22,11 @@ public interface AuthTokenService {
     void logout(HttpServletRequest request, HttpServletResponse response);
 
     /**
+     * 강제 로그아웃: 세션/보안 컨텍스트 정리 + 쿠키 삭제
+     */
+    void forceLogout(HttpServletRequest request, HttpServletResponse response);
+
+    /**
      * 토큰 폐기
      */
     void revokeAllRefreshTokens(String userId, LocalDateTime now);

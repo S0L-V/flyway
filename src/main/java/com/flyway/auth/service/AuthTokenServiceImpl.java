@@ -12,13 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -32,7 +35,8 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     private static final String ACCESS_COOKIE = "accessToken";
     private static final String REFRESH_COOKIE = "refreshToken";
     private static final String ACCESS_COOKIE_PATH = "/";
-    private static final String REFRESH_COOKIE_PATH = "/auth";
+    private static final String REFRESH_COOKIE_PATH = "/";
+    private static final String LEGACY_REFRESH_COOKIE_PATH = "/auth";
 
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
@@ -77,23 +81,27 @@ public class AuthTokenServiceImpl implements AuthTokenService {
 
         String refreshRaw = readCookie(request, REFRESH_COOKIE);
         if (!StringUtils.hasText(refreshRaw)) {
+            forceLogout(request, response);
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_MISSING);
         }
 
         String hash = tokenHasher.hash(refreshRaw);
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hash);
         if (stored == null) {
+            forceLogout(request, response);
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_INVALID);
         }
 
         /* 만료/폐기 체크 */
         if (stored.getRevokedAt() != null || !stored.getExpiresAt().isAfter(now)) {
+            forceLogout(request, response);
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRED);
         }
 
         /* 재사용 탐지 */
         if (stored.getRotatedAt() != null) {
             refreshTokenRepository.revokeAllByUserId(stored.getUserId(), now);
+            forceLogout(request, response);
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_REUSED);
         }
 
@@ -123,6 +131,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
 
         /* 동시 요청/레이스: 이미 회전됐거나 revoke인 경우 */
         if (rotated == 0) {
+            forceLogout(request, response);
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_ALREADY_USED);
         }
 
@@ -147,7 +156,29 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         }
 
         deleteCookie(response, ACCESS_COOKIE, ACCESS_COOKIE_PATH);
-        deleteCookie(response, REFRESH_COOKIE, REFRESH_COOKIE_PATH);
+        deleteRefreshCookies(response);
+    }
+
+    @Override
+    public void forceLogout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            logout(request, response);
+        } catch (Exception e) {
+            log.warn("[AUTH] force logout - token cleanup failed", e);
+            deleteCookie(response, ACCESS_COOKIE, ACCESS_COOKIE_PATH);
+            deleteRefreshCookies(response);
+        }
+
+        try {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+        } catch (Exception e) {
+            log.warn("[AUTH] force logout - session invalidate failed", e);
+        }
+
+        SecurityContextHolder.clearContext();
     }
 
     @Transactional
@@ -193,6 +224,11 @@ public class AuthTokenServiceImpl implements AuthTokenService {
             .maxAge(0)
             .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    private void deleteRefreshCookies(HttpServletResponse response) {
+        deleteCookie(response, REFRESH_COOKIE, REFRESH_COOKIE_PATH);
+        deleteCookie(response, REFRESH_COOKIE, LEGACY_REFRESH_COOKIE_PATH);
     }
 
     private String readCookie(HttpServletRequest request, String name) {

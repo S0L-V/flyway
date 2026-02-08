@@ -1,7 +1,10 @@
 package com.flyway.security.config;
 
 import com.flyway.auth.service.AuthTokenService;
+import com.flyway.auth.repository.RefreshTokenRepository;
+import com.flyway.auth.util.TokenHasher;
 import com.flyway.security.filter.OnboardingAccessFilter;
+import com.flyway.security.filter.RefreshTokenSessionSyncFilter;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.handler.LoginSuccessHandler;
 import com.flyway.security.jwt.JwtProvider;
@@ -21,6 +24,10 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Slf4j
 @Configuration
 @Order(3)
@@ -32,7 +39,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/", "/login", "/loginProc", "/signup", "/auth/**", "/search/**",
-            "/payments/success", "/payments/fail", "/payments/complete", "/api/sms/**"
+            "/payments/success", "/payments/fail", "/payments/complete", "/api/sms/**", "/error", "/error/**",
     };
 
     private final JwtProvider jwtProvider;
@@ -42,6 +49,8 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userIdUserDetailsService;
     private final UserDetailsService emailUserDetailsService;
     private final AuthTokenService authTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenHasher tokenHasher;
 
     public SecurityConfigWeb(
             JwtProvider jwtProvider,
@@ -49,6 +58,8 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
             PasswordEncoder passwordEncoder,
             LoginSuccessHandler loginSuccessHandler,
             AuthTokenService authTokenService,
+            RefreshTokenRepository refreshTokenRepository,
+            TokenHasher tokenHasher,
             @Qualifier("userIdUserDetailsService") UserDetailsService userIdUserDetailsService,
             @Qualifier("emailUserDetailsService") UserDetailsService emailUserDetailsService
     ) {
@@ -57,6 +68,8 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
         this.passwordEncoder = passwordEncoder;
         this.loginSuccessHandler = loginSuccessHandler;
         this.authTokenService = authTokenService;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.tokenHasher = tokenHasher;
         this.userIdUserDetailsService = userIdUserDetailsService;
         this.emailUserDetailsService = emailUserDetailsService;
     }
@@ -67,6 +80,19 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 jwtProvider,
                 jwtAuthenticationEntryPoint,
                 userIdUserDetailsService
+        );
+    }
+
+    @Bean
+    public RefreshTokenSessionSyncFilter refreshTokenSessionSyncFilter() {
+        List<String> excludes = new ArrayList<>();
+        excludes.addAll(Arrays.asList(STATIC_RESOURCES));
+        excludes.addAll(Arrays.asList(PUBLIC_ENDPOINTS));
+        return new RefreshTokenSessionSyncFilter(
+                refreshTokenRepository,
+                tokenHasher,
+                authTokenService,
+                excludes
         );
     }
 
@@ -117,7 +143,8 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 .and()
 
                 .addFilterBefore(jwtWebAuthFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new OnboardingAccessFilter(), JwtWebAuthFilter.class);
+                .addFilterAfter(refreshTokenSessionSyncFilter(), JwtWebAuthFilter.class)
+                .addFilterAfter(new OnboardingAccessFilter(), RefreshTokenSessionSyncFilter.class);
     }
 
     @Bean
@@ -125,4 +152,3 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
         return (request, response, authentication) -> authTokenService.logout(request, response);
     }
 }
-
