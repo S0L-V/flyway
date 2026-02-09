@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 
@@ -17,7 +18,12 @@ public class AuthViewController {
     private static final String OAUTH_SIGNUP_EMAIL_ATTR = "OAUTH_SIGNUP_EMAIL";
 
     @GetMapping("/login")
-    public String loginView() {
+    public String loginView(@RequestParam(value = "returnUrl", required = false) String returnUrl,
+                            Model model) {
+        String safeReturnUrl = sanitizeReturnUrl(returnUrl);
+        if (safeReturnUrl != null) {
+            model.addAttribute("returnUrl", safeReturnUrl);
+        }
         return "login";
     }
 
@@ -55,6 +61,18 @@ public class AuthViewController {
         session.removeAttribute(OAUTH_SIGNUP_EMAIL_ATTR);
 
         return "signup";
+    }
+
+    private String sanitizeReturnUrl(String raw) {
+        if (raw == null) return null;
+        String path = raw.trim();
+        if (path.isEmpty()) return null;
+        if (!path.startsWith("/")) return null;
+        if (path.startsWith("//") || path.startsWith("/\\")) return null;
+        String lower = path.toLowerCase();
+        if (lower.startsWith("/http")) return null;
+        if (path.contains("://")) return null;
+        return path;
     }
 
 }
