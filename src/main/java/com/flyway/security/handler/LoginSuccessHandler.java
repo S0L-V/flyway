@@ -56,6 +56,10 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     }
 
     private String resolveTargetPath(HttpServletRequest request) {
+        String returnUrl = sanitizeReturnUrl(request.getParameter("returnUrl"));
+        if (returnUrl != null) {
+            return returnUrl;
+        }
         Object attribute = request.getAttribute(REDIRECT_PATH_ATTRIBUTE);
         if (attribute instanceof String) {
             String path = ((String) attribute).trim();
@@ -64,5 +68,17 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
             }
         }
         return "/";
+    }
+
+    private String sanitizeReturnUrl(String raw) {
+        if (raw == null) return null;
+        String path = raw.trim();
+        if (path.isEmpty()) return null;
+        if (!path.startsWith("/")) return null;
+        if (path.startsWith("//") || path.startsWith("/\\")) return null;
+        String lower = path.toLowerCase();
+        if (lower.startsWith("/http")) return null;
+        if (path.contains("://")) return null;
+        return path;
     }
 }
