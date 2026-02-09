@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -29,6 +30,7 @@
                 </div>
             </c:if>
             <form action="${pageContext.request.contextPath}/loginProc" method="post" class="space-y-5">
+                <sec:csrfInput/>
                 <input type="hidden" name="returnUrl" value="${fn:escapeXml(returnUrl)}">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">이메일</label>
