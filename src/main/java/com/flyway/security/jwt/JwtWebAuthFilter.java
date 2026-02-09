@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +20,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
 
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     private static final String ADMIN_PREFIX = "/admin/";
+    public static final String JWT_AUTHENTICATED_ATTR = "JWT_AUTHENTICATED";
 
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint entryPoint;
@@ -47,6 +49,12 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String path = resolvePath(request);
+        if (path.startsWith("/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             if (!isAuthenticated()) {
                 String token = extractAccessTokenFromCookie(request);
@@ -62,6 +70,7 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
                             );
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    request.setAttribute(JWT_AUTHENTICATED_ATTR, Boolean.TRUE);
 
                     log.debug("[JWT][WEB] authenticated. uri={}, userId={}",
                             request.getRequestURI(), userId);
@@ -74,15 +83,11 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
             log.warn("[JWT][WEB] bad credentials. uri={}, msg={}",
                     request.getRequestURI(), e.getMessage());
-            entryPoint.commence(request, response, e);
+            redirectToLogin(request, response);
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
             log.error("[JWT][WEB] unexpected exception. uri={}", request.getRequestURI(), e);
-            entryPoint.commence(
-                    request,
-                    response,
-                    new AuthenticationServiceException("JWT authentication failed", e)
-            );
+            redirectToLogin(request, response);
         }
     }
 
@@ -109,5 +114,27 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         String ctx = request.getContextPath();
         return (ctx != null && !ctx.isEmpty() && uri.startsWith(ctx)) ? uri.substring(ctx.length()) : uri;
+    }
+
+    private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String returnUrl = buildReturnUrl(request);
+        String encoded = URLEncoder.encode(returnUrl, StandardCharsets.UTF_8);
+        response.sendRedirect(request.getContextPath() + "/login?returnUrl=" + encoded);
+    }
+
+    private String buildReturnUrl(HttpServletRequest request) {
+        String method = request.getMethod();
+        if (method != null && !method.equalsIgnoreCase("GET")) {
+            return "/";
+        }
+        String path = resolvePath(request);
+        String query = request.getQueryString();
+        String raw = (query != null && !query.isBlank()) ? path + "?" + query : path;
+        if (raw == null || raw.isBlank()) return "/";
+        if (!raw.startsWith("/")) return "/";
+        if (raw.startsWith("//") || raw.startsWith("/\\")) return "/";
+        String lower = raw.toLowerCase();
+        if (lower.startsWith("/http") || raw.contains("://")) return "/";
+        return raw;
     }
 }

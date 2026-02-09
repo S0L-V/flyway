@@ -19,6 +19,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -85,7 +87,9 @@ public class RefreshTokenSessionSyncFilter extends OncePerRequestFilter {
     ) throws IOException {
         log.debug("[AUTH] force logout by refresh sync. reason={}, uri={}", reason, request.getRequestURI());
         authTokenService.forceLogout(request, response);
-        response.sendRedirect(request.getContextPath() + "/login");
+        String returnUrl = buildReturnUrl(request);
+        String encoded = URLEncoder.encode(returnUrl, StandardCharsets.UTF_8);
+        response.sendRedirect(request.getContextPath() + "/login?returnUrl=" + encoded);
     }
 
     private boolean isAuthenticated(Authentication auth) {
@@ -129,5 +133,21 @@ public class RefreshTokenSessionSyncFilter extends OncePerRequestFilter {
             return path.substring(contextPath.length());
         }
         return path;
+    }
+
+    private String buildReturnUrl(HttpServletRequest request) {
+        String method = request.getMethod();
+        if (method != null && !method.equalsIgnoreCase("GET")) {
+            return "/";
+        }
+        String path = resolvePath(request);
+        String query = request.getQueryString();
+        String raw = (query != null && !query.isBlank()) ? path + "?" + query : path;
+        if (raw == null || raw.isBlank()) return "/";
+        if (!raw.startsWith("/")) return "/";
+        if (raw.startsWith("//") || raw.startsWith("/\\")) return "/";
+        String lower = raw.toLowerCase();
+        if (lower.startsWith("/http") || raw.contains("://")) return "/";
+        return raw;
     }
 }
