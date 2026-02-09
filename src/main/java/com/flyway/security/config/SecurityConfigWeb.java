@@ -7,6 +7,7 @@ import com.flyway.security.filter.OnboardingAccessFilter;
 import com.flyway.security.filter.RefreshTokenSessionSyncFilter;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.handler.LoginSuccessHandler;
+import com.flyway.security.handler.WebLoginRedirectEntryPoint;
 import com.flyway.security.jwt.JwtProvider;
 import com.flyway.security.jwt.JwtWebAuthFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final PasswordEncoder passwordEncoder;
     private final LoginSuccessHandler loginSuccessHandler;
+    private final WebLoginRedirectEntryPoint webLoginRedirectEntryPoint;
     private final UserDetailsService userIdUserDetailsService;
     private final UserDetailsService emailUserDetailsService;
     private final AuthTokenService authTokenService;
@@ -57,6 +59,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
             PasswordEncoder passwordEncoder,
             LoginSuccessHandler loginSuccessHandler,
+            WebLoginRedirectEntryPoint webLoginRedirectEntryPoint,
             AuthTokenService authTokenService,
             RefreshTokenRepository refreshTokenRepository,
             TokenHasher tokenHasher,
@@ -67,6 +70,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.passwordEncoder = passwordEncoder;
         this.loginSuccessHandler = loginSuccessHandler;
+        this.webLoginRedirectEntryPoint = webLoginRedirectEntryPoint;
         this.authTokenService = authTokenService;
         this.refreshTokenRepository = refreshTokenRepository;
         this.tokenHasher = tokenHasher;
@@ -123,6 +127,10 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(STATIC_RESOURCES).permitAll()
                 .antMatchers(PUBLIC_ENDPOINTS).permitAll().anyRequest().authenticated()
+                .and()
+
+                .exceptionHandling()
+                .authenticationEntryPoint(webLoginRedirectEntryPoint)
                 .and()
 
                 .formLogin()
