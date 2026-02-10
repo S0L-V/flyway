@@ -455,7 +455,93 @@ Flyway는 항공권 가격이 불투명하게 결정되는 문제를 해결하�
 <br>
 
 ## 9. 핵심 설계
-추가 예정
+Flyway는 항공권 예매 과정에서 발생하는 인증 보안 문제, 좌석 중복 예약 문제,  불투명한 가격 정책으로 인한 정보 비대칭 문제를 해결하기 위해 다음 4가지 핵심 설계를 중심으로 구현했습니다.
+
+
+### 1) 인증/보안 설계 (JWT + Refresh + CSRF + Cookie)
+
+Flyway는 HttpOnly Cookie 기반 JWT 인증 방식을 적용하여 토큰 탈취 위험을 줄였습니다.
+
+또한 Refresh Token 회전(Rotation) 전략을 통해 Access Token 만료 시 자동 재발급이 가능하도록 구현하여 로그인 유지 경험을 개선했습니다.
+
+소셜 로그인 사용자를 고려하여 OAuth 2.0 기반 로그인(Kakao) 흐름을 적용하였으며, OAuth 인증 성공 이후에도 서비스 내부에서는 JWT를 발급하여 인증 방식을 일관되게 통합했습니다.
+
+API 요청은 JWT 기반으로 인증되며, 상태 변경 요청(POST/PUT/PATCH/DELETE)은 CSRF 토큰 검증을 통해 보호합니다.
+
+이를 통해 브라우저 환경에서의 안정성과 보안성을 강화하고, 확장 가능한 인증 구조를 구축했습니다.
+
+<details>
+<summary>
+  JWT 발급 / 회전 시퀀스 다이어그램
+</summary>
+  <img width="1000" height="1170" alt="auth_web" src="https://github.com/user-attachments/assets/3799fb44-c26b-4f02-a027-6b56651d1098" />
+<img width="1000" height="822" alt="auth_api" src="https://github.com/user-attachments/assets/f7774967-03a4-4e31-8dab-e0c868fbbdd0" />
+<img width="1000" height="1171" alt="auth_token rotation" src="https://github.com/user-attachments/assets/1af82d02-9257-4eeb-af17-ec613c623956" />
+</details>
+<details>
+<summary>
+  OAuth 시퀀스 다이어그램
+</summary>
+  <img width="1000" height="390" alt="kakao_oauth_3" src="https://github.com/user-attachments/assets/46be966f-2f5c-414d-a415-9a88da51c129" />
+<img width="1000" height="543" alt="kakao_oauth_2" src="https://github.com/user-attachments/assets/b7baafe6-e7fd-439e-b8d4-2c35f9f7261f" />
+<img width="1000" height="759" alt="kakao_oauth_1" src="https://github.com/user-attachments/assets/254558bb-a0be-4c7e-8c6b-cccbb6fc0122" />
+</details>
+
+
+### 2) 좌석 동시성 제어 (HOLD → PAYING → CONFIRMED)/>
+
+
+Flyway는 동일 좌석에 대한 중복 예약을 방지하기 위해 좌석을 단순 조회 데이터가 아닌
+
+공유 자원(Concurrency Resource) 으로 정의하고, 상태 기반 점유 모델을 설계했습니다.
+
+- 좌석 선택 시 `AVAILABLE → HELD`로 변경하여 임시 점유 처리
+- 결제 진행 시 `HELD → PAYING → CONFIRMED` 상태 전이로 경쟁 상태 방지
+- 일정 시간(10분) 내 결제가 완료되지 않으면 `HELD → EXPIRED → AVAILABLE`로 복구
+
+이를 통해 결제 중 경쟁 요청이 발생해도 중복 결제가 발생하지 않도록 제어했습니다.
+
+
+### 3) 동적 가격 투명성 모델 (M_time, M_load, alpha)
+
+기존 항공권 예매 서비스는 가격 변동 기준이 공개되지 않아 사용자가 가격의 적정성을 판단하기 어렵습니다.
+
+Flyway는 이러한 정보 비대칭 문제를 해결하기 위해 **가격 산정 기준을 공개하는 동적 가격 모델**을 적용했습니다.
+
+가격은 다음 요소를 기반으로 산정됩니다.
+
+- **M_time** : 출발일까지 남은 시간
+- **M_load** : 좌석 점유율 기반 수요 지표
+- **alpha** : 가격 변동 완화 계수
+
+또한 사용자에게 가격 변동 이력을 제공하여 합리적인 예매 판단이 가능하도록 설계했습니다.
+
+
+### 4) 예약 상태 및 결제 흐름 설계 (예약 세그먼트/승객/부가서비스 + 동시성 연계)
+
+Flyway는 항공권 예매가 단순 결제 처리로 끝나지 않고,
+
+**예약 정보 + 탑승자 정보 + 부가서비스 + 결제 상태**가 유기적으로 연결되는 복합 도메인임을 고려하여
+
+예약 흐름을 상태 기반으로 관리했습니다. 트랜잭션과 상태 기반 관리를 통한 동시성 제어로 오버 부킹 상황을 사전에 방지했습니다. 
+
+- 예약 상태 변경 과정에서 **좌석 동시성 제어 로직(HOLD/PAYING/CONFIRMED)** 이 함께 적용되어
+동일 좌석 중복 예약이 발생하지 않도록 설계했습니다.
+- 예약은 해당 항공편을 선택하여 동의 페이지로 이동하기 전 트랜잭션과 잔여석 행에 대한 비관적 락을 통해 잔여석을 인원수 만큼 차감하고 예약자의  상태 칼럼을 `HELD`로 변경합니다. 정보 입력 후 결제를 완료하면   `HELD → CONFIRMED` 흐름으로 상태가 변경되며, 결제 확정 처리됩니다.
+- 예약 세그먼트(왕복/경유) 구조를 반영하여 다구간 예약을 관리할 수 있도록 설계했습니다.
+- 탑승자(Passenger) 정보와 좌석(Seat) 선택이 예약과 강하게 연결되도록 구성했습니다.
+- 수하물/기내식 등 부가서비스는 Passenger 단위로 연결되어 확장 가능하도록 구현했습니다.
+
+### 5) 관리자 실시간 대시보드 (WebSocket + SockJS)
+
+Flyway는 관리자가 서비스 현황을 실시간으로 모니터링할 수 있도록 WebSocket 기반 실시간 대시보드를 구현했습니다.
+
+- WebSocket + SockJS를 활용하여 서버에서 클라이언트로 실시간 데이터를 푸시합니다.
+- 통계 데이터(매출, 예약, 방문자)는 15초 주기로 자동 브로드캐스트되어 새로고침 없이 최신 현황을 확인할 수 있습니다.
+- WebSocket 연결 실패 시 REST API 폴백을 통해 데이터 조회가 가능하도록 설계하여 안정성을 확보했습니다.
+- 알림 시스템을 통해 신규 예약, 결제 완료, 취소 요청 등 주요 이벤트를 실시간으로 전달합니다.
+
+또한 관리자 시스템은 일반 사용자 시스템과 완전히 분리된 Security FilterChain으로 구성하여, 한쪽 시스템이 침해되더라도 다른 시스템에 영향을 주지 않도록 보안을 격리했습니다.
 
 <br>
 
