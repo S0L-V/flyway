@@ -16,6 +16,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -56,7 +58,15 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
 
-                .csrf().disable()
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        // 로그인 전/토큰 재발급 같은 엔드포인트는 "의도적으로" 예외 가능
+                        .ignoringRequestMatchers(
+                                new AntPathRequestMatcher("/api/auth/loginProc", "POST"),
+                                new AntPathRequestMatcher("/api/auth/refresh", "POST"),
+                                new AntPathRequestMatcher("/api/auth/logout", "POST")
+                        )
+                )
                 .formLogin().disable()
                 .httpBasic().disable()
 
