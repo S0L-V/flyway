@@ -39,8 +39,8 @@ public class FlightApiController {
     }
 
     // 검색
-    @PostMapping("/api/public/flights/search")
-    public SearchResultDto search(@RequestBody FlightSearchRequest dto) {
+    @GetMapping("/api/public/flights/search")
+    public SearchResultDto search(@ModelAttribute FlightSearchRequest dto) {
         return service.search(dto);
     }
 

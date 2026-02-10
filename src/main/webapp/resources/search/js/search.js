@@ -3,6 +3,7 @@ let ARR_AIRPORTS = [];
 let allOptions = [];
 let displayedOptions = [];
 let details = {};
+const csrfFetch = window.csrfFetch || ((input, init = {}) => fetch(input, { credentials: "same-origin", ...init }));
 
 async function loadDepAirports() {
     const res = await fetch(`${CONTEXT_PATH}/api/public/depAirports`);
@@ -785,14 +786,16 @@ async function executeSearch() {
     };
 
     try {
-        // 3) 검색 API 호출 (POST)
-        const res = await fetch(`${CONTEXT_PATH}/api/public/flights/search`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify(payload)
+        const paramsBuilder = new URLSearchParams();
+        Object.entries(payload).forEach(([key, value]) => {
+            if (value === null || value === undefined || value === "") return;
+            paramsBuilder.append(key, value);
+        });
+        const params = paramsBuilder.toString();
+        // 3) 검색 API 호출 (GET)
+        const res = await csrfFetch(`${CONTEXT_PATH}/api/public/flights/search?${params}`, {
+            method: "GET",
+            headers: { "Accept": "application/json" }
         });
 
         const json = await res.json();
