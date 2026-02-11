@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 @Slf4j
@@ -179,10 +180,10 @@ public class OriginRefererCheckFilter extends OncePerRequestFilter {
 
     private String normalizeOrigin(String origin) {
         String value = origin.trim();
-        if (value.endsWith("/")) {
-            return value.substring(0, value.length() - 1);
+        while (value.length() > 1 && value.endsWith("/")) {
+            value = value.substring(0, value.length() - 1);
         }
-        return value;
+        return value.toLowerCase(Locale.ROOT);
     }
 
     private String normalizePath(String path) {

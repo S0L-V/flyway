@@ -38,7 +38,6 @@ function toFetchUrl(input) {
 export async function fetchWithRefresh(input, init = {}) {
     const doFetch = async (overrideInit = {}) => {
         const merged = { ...init, ...overrideInit };
-        // csrfFetch가 GET/POST 알아서 처리함
         return csrfFetch(input, merged);
     };
 

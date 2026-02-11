@@ -50,7 +50,7 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String path = resolvePath(request);
-        if (path.startsWith("/login")) {
+        if (path.equals("/login") || path.startsWith("/login/")) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -4,6 +4,31 @@ const CONFIG = {
     CSRF_BOOTSTRAP_URL: "/auth/csrf",
 };
 
+let csrfFetchReady = false;
+const pendingCsrfFetchCalls = [];
+
+function enqueueCsrfFetchCall(args) {
+    return new Promise((resolve, reject) => {
+        pendingCsrfFetchCalls.push({ args, resolve, reject });
+    });
+}
+
+function flushQueuedCsrfFetchCalls() {
+    while (pendingCsrfFetchCalls.length > 0) {
+        const call = pendingCsrfFetchCalls.shift();
+        csrfFetch(...call.args).then(call.resolve).catch(call.reject);
+    }
+}
+
+if (typeof window !== "undefined") {
+    window.csrfFetch = (...args) => {
+        if (csrfFetchReady) {
+            return csrfFetch(...args);
+        }
+        return enqueueCsrfFetchCall(args);
+    };
+}
+
 function getBasePath() {
     return window.APP?.contextPath ?? "";
 }
@@ -93,4 +118,11 @@ export async function csrfFetch(input, init = {}) {
     }
 
     return fetch(toFetchUrl(input), withCsrfHeader(merged));
+}
+
+csrfFetchReady = true;
+
+if (typeof window !== "undefined") {
+    window.csrfFetch = (...args) => csrfFetch(...args);
+    flushQueuedCsrfFetchCalls();
 }
