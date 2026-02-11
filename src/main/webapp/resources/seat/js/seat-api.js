@@ -1,4 +1,5 @@
 (function (global) {
+
     async function safeJson(res) {
         const ct = res.headers.get("content-type") || "";
         const text = await res.text();
@@ -16,13 +17,13 @@
     }
 
     function fetchSeatMap(ctx, reservationId, segmentId) {
-        return fetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}`, {
+        return csrfFetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}`, {
             credentials: 'include'  // 쿠키 포함 (JWT 인증용)
         }).then(safeJson).then(d => d?.data ?? []);
     }
 
     function holdSeat(ctx, reservationId, segmentId, body) {
-        return fetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/hold`,
+        return csrfFetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/hold`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -31,7 +32,7 @@
             }).then(safeJson);
     }
     function releaseHold(ctx, reservationId, segmentId, passengerId) {
-        return fetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/hold/${encodeURIComponent(passengerId)}`, {
+        return csrfFetch(`${ctx}/api/seats/reservations/${encodeURIComponent(reservationId)}/segments/${encodeURIComponent(segmentId)}/hold/${encodeURIComponent(passengerId)}`, {
             method: "DELETE",
             headers: { "Accept": "application/json" },
             credentials: 'include'

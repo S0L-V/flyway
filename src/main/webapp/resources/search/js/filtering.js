@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function loadAirlines() {
-    const res = await fetch(`${CONTEXT_PATH}/api/public/airlines`);
+    const res = await csrfFetch(`${CONTEXT_PATH}/api/public/airlines`);
     const data = await res.json();
 
     AIRLINES = data.map(a => ({

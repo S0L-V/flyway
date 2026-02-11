@@ -9,6 +9,7 @@ import {
     formatReservationId,
     getContextPath,
 } from "../utils.js";
+import { csrfFetch } from "../../../common/js/csrfFetch.js";
 
 export function updateDashboardProfile(profile) {
     const name = profile?.name || "";
@@ -113,7 +114,7 @@ function toAssetUrl(path) {
 
 function getAirlineMap() {
     const url = `${getContextPath()}/resources/mypage/json/airline.json`;
-    return fetch(url, { headers: { Accept: "application/json" } })
+    return csrfFetch(url, { headers: { Accept: "application/json" } })
         .then((res) => (res.ok ? res.json() : {}))
         .catch(() => ({}));
 }

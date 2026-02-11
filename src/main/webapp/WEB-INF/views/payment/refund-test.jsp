@@ -37,6 +37,10 @@
             cursor: not-allowed;
         }
     </style>
+    <script type="module">
+        import { csrfFetch } from "${pageContext.request.contextPath}/resources/common/js/csrfFetch.js";
+        window.csrfFetch = csrfFetch;
+    </script>
 </head>
 <body>
 <div class="container">
@@ -105,7 +109,7 @@
         }
 
         if (confirm('결제 ID: ' + paymentId + '\n환불 사유: ' + reason + '\n\n정말로 환불을 요청하시겠습니까?')) {
-            fetch(contextPath + '/api/payments/' + paymentId + '/refund',{
+            csrfFetch(contextPath + '/api/payments/' + paymentId + '/refund',{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -140,4 +144,3 @@
 </script>
 </body>
 </html>
-

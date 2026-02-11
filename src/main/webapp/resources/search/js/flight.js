@@ -285,7 +285,7 @@ async function fetchPriceHistory({ flightId, cabinClassCode, from, to }) {
 
     const url = `${CONTEXT_PATH}/api/public/flights/price-history?${params.toString()}`;
 
-    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    const res = await csrfFetch(url, { headers: { "Accept": "application/json" } });
     if (!res.ok) throw new Error("price-history fetch failed");
     return await res.json(); // { points: [{t, price, type}, ...] }
 }
@@ -683,10 +683,10 @@ document.getElementById("resultList").addEventListener("click", async (e) => {
                 params.set("inFlightId", inId);
             }
 
-            const response = await fetch(`${CONTEXT_PATH}/api/public/flights/prices?${params}`, {
+            const response = await csrfFetch(`${CONTEXT_PATH}/api/public/flights/prices?${params}`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Accept': 'application/json'
                 }
             });
 

@@ -3,10 +3,8 @@ let ARR_AIRPORTS = [];
 let allOptions = [];
 let displayedOptions = [];
 let details = {};
-const csrfFetch = window.csrfFetch || ((input, init = {}) => fetch(input, { credentials: "same-origin", ...init }));
-
 async function loadDepAirports() {
-    const res = await fetch(`${CONTEXT_PATH}/api/public/depAirports`);
+    const res = await csrfFetch(`${CONTEXT_PATH}/api/public/depAirports`);
     const data = await res.json();
     DEP_AIRPORTS = data.map(a => ({
         code: a.airportId,
@@ -241,7 +239,7 @@ function setFieldText(fieldName, mainText, hintText = "") {
 async function loadArrAirports(depCode) {
     if (!depCode) return;
 
-    const res = await fetch(
+    const res = await csrfFetch(
         `${CONTEXT_PATH}/api/public/arrAirports?depAirport=${depCode}`
     );
     const data = await res.json();

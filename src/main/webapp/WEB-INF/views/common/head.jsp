@@ -26,3 +26,7 @@
 
 <!-- SweetAlert2 공통 유틸리티 -->
 <script src="${pageContext.request.contextPath}/resources/common/js/swal-utils.js"></script>
+<script type="module">
+    import { csrfFetch } from "${pageContext.request.contextPath}/resources/common/js/csrfFetch.js";
+    window.csrfFetch = csrfFetch;
+</script>
