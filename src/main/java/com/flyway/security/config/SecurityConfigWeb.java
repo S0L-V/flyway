@@ -4,6 +4,7 @@ import com.flyway.auth.service.AuthTokenService;
 import com.flyway.auth.repository.RefreshTokenRepository;
 import com.flyway.auth.util.TokenHasher;
 import com.flyway.security.filter.OnboardingAccessFilter;
+import com.flyway.security.filter.OriginRefererCheckFilter;
 import com.flyway.security.filter.RefreshTokenSessionSyncFilter;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.handler.LoginSuccessHandler;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import java.util.ArrayList;
@@ -153,6 +155,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
 
+                .addFilterBefore(OriginRefererCheckFilter.forWeb(), CsrfFilter.class)
                 .addFilterBefore(jwtWebAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(refreshTokenSessionSyncFilter(), JwtWebAuthFilter.class)
                 .addFilterAfter(new OnboardingAccessFilter(), RefreshTokenSessionSyncFilter.class);

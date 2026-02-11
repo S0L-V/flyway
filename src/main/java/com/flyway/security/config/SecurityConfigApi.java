@@ -3,6 +3,7 @@ package com.flyway.security.config;
 import com.flyway.security.handler.JwtAccessDeniedHandler;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.filter.OnboardingAccessFilter;
+import com.flyway.security.filter.OriginRefererCheckFilter;
 import com.flyway.security.jwt.JwtApiAuthFilter;
 import com.flyway.security.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -89,6 +91,7 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
 
+                .addFilterBefore(OriginRefererCheckFilter.forApi(), CsrfFilter.class)
                 .addFilterBefore(jwtApiAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(new OnboardingAccessFilter(), JwtApiAuthFilter.class);
     }
