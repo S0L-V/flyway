@@ -29,7 +29,7 @@ public class JwtWebAuthFilter extends OncePerRequestFilter {
 
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     private static final String ADMIN_PREFIX = "/admin/";
-    public static final String JWT_AUTHENTICATED_ATTR = "JWT_AUTHENTICATED";
+    private static final String JWT_AUTHENTICATED_ATTR = "JWT_AUTHENTICATED";
 
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint entryPoint;

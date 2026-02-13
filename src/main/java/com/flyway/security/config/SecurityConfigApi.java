@@ -30,16 +30,19 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final UserDetailsService userIdUserDetailsService;
+    private final SecurityOriginProperties securityOriginProperties;
 
     public SecurityConfigApi(
             JwtProvider jwtProvider,
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
             JwtAccessDeniedHandler jwtAccessDeniedHandler,
+            SecurityOriginProperties securityOriginProperties,
             @Qualifier("userIdUserDetailsService") UserDetailsService userIdUserDetailsService
     ) {
         this.jwtProvider = jwtProvider;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+        this.securityOriginProperties = securityOriginProperties;
         this.userIdUserDetailsService = userIdUserDetailsService;
     }
 
@@ -50,6 +53,11 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
                 jwtAuthenticationEntryPoint,
                 userIdUserDetailsService
         );
+    }
+
+    @Bean
+    public OriginRefererCheckFilter apiOriginRefererCheckFilter() {
+        return OriginRefererCheckFilter.forApi(securityOriginProperties.getAllowedOrigins());
     }
 
     @Override
@@ -91,7 +99,7 @@ public class SecurityConfigApi extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
 
-                .addFilterBefore(OriginRefererCheckFilter.forApi(), CsrfFilter.class)
+                .addFilterBefore(apiOriginRefererCheckFilter(), CsrfFilter.class)
                 .addFilterBefore(jwtApiAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(new OnboardingAccessFilter(), JwtApiAuthFilter.class);
     }

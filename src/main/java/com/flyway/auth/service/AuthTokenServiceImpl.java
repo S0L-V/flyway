@@ -159,6 +159,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     }
 
     @Override
+    @Transactional
     public void forceLogout(HttpServletRequest request, HttpServletResponse response) {
         try {
             logout(request, response);

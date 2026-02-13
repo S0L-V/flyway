@@ -24,11 +24,6 @@ public class OriginRefererCheckFilter extends OncePerRequestFilter {
     private static final Set<String> STATE_CHANGING_METHODS =
             new LinkedHashSet<>(Arrays.asList("POST", "PUT", "PATCH", "DELETE"));
 
-    private static final List<String> DEFAULT_ALLOWED_ORIGINS = Arrays.asList(
-            "https://flyway.kr",
-            "http://localhost:8080"
-    );
-
     private final Set<String> allowedOrigins;
     private final List<String> includeBasePaths;
     private final List<String> excludeBasePaths;
@@ -53,18 +48,18 @@ public class OriginRefererCheckFilter extends OncePerRequestFilter {
         }
     }
 
-    public static OriginRefererCheckFilter forApi() {
+    public static OriginRefererCheckFilter forApi(Collection<String> allowedOrigins) {
         return new OriginRefererCheckFilter(
-                DEFAULT_ALLOWED_ORIGINS,
+                allowedOrigins,
                 Arrays.asList("/api"),
                 null,
                 null
         );
     }
 
-    public static OriginRefererCheckFilter forWeb() {
+    public static OriginRefererCheckFilter forWeb(Collection<String> allowedOrigins) {
         return new OriginRefererCheckFilter(
-                DEFAULT_ALLOWED_ORIGINS,
+                allowedOrigins,
                 Arrays.asList("/mypage", "/reservations", "/payment", "/payments"),
                 Arrays.asList("/oauth", "/auth"),
                 Arrays.asList("/loginProc")

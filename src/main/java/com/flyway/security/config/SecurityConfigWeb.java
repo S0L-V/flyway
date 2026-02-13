@@ -56,6 +56,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     private final AuthTokenService authTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenHasher tokenHasher;
+    private final SecurityOriginProperties securityOriginProperties;
 
     public SecurityConfigWeb(
             JwtProvider jwtProvider,
@@ -66,6 +67,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
             AuthTokenService authTokenService,
             RefreshTokenRepository refreshTokenRepository,
             TokenHasher tokenHasher,
+            SecurityOriginProperties securityOriginProperties,
             @Qualifier("userIdUserDetailsService") UserDetailsService userIdUserDetailsService,
             @Qualifier("emailUserDetailsService") UserDetailsService emailUserDetailsService
     ) {
@@ -77,6 +79,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
         this.authTokenService = authTokenService;
         this.refreshTokenRepository = refreshTokenRepository;
         this.tokenHasher = tokenHasher;
+        this.securityOriginProperties = securityOriginProperties;
         this.userIdUserDetailsService = userIdUserDetailsService;
         this.emailUserDetailsService = emailUserDetailsService;
     }
@@ -101,6 +104,11 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 authTokenService,
                 excludes
         );
+    }
+
+    @Bean
+    public OriginRefererCheckFilter webOriginRefererCheckFilter() {
+        return OriginRefererCheckFilter.forWeb(securityOriginProperties.getAllowedOrigins());
     }
 
     @Bean
@@ -155,7 +163,7 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
 
-                .addFilterBefore(OriginRefererCheckFilter.forWeb(), CsrfFilter.class)
+                .addFilterBefore(webOriginRefererCheckFilter(), CsrfFilter.class)
                 .addFilterBefore(jwtWebAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(refreshTokenSessionSyncFilter(), JwtWebAuthFilter.class)
                 .addFilterAfter(new OnboardingAccessFilter(), RefreshTokenSessionSyncFilter.class);
