@@ -114,9 +114,12 @@ public class OriginRefererCheckFilter extends OncePerRequestFilter {
     }
 
     private boolean isAllowedReferer(String referer) {
-        if (!StringUtils.hasText(referer)) return false;
+        String normalizedReferer = trimToNull(referer);
+        if (!StringUtils.hasText(normalizedReferer)) return false;
+        normalizedReferer = normalizeOrigin(normalizedReferer);
+
         for (String allowedOrigin : allowedOrigins) {
-            if (referer.equals(allowedOrigin) || referer.startsWith(allowedOrigin + "/")) {
+            if (normalizedReferer.equals(allowedOrigin) || normalizedReferer.startsWith(allowedOrigin + "/")) {
                 return true;
             }
         }

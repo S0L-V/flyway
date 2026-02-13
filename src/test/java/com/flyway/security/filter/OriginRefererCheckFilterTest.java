@@ -59,6 +59,20 @@ class OriginRefererCheckFilterTest {
     }
 
     @Test
+    @DisplayName("API POST + Origin 없고 대소문자 혼합 Referer여도 통과한다")
+    void apiPost_withMixedCaseAllowedReferer_passes() throws Exception {
+        OriginRefererCheckFilter filter = apiFilter();
+        MockFilterChain chain = new MockFilterChain();
+        MockHttpServletRequest request = apiRequest("POST", "/api/payments/confirm");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.addHeader("Referer", "HTTPS://LOCALHOST:8080/Reservations/abc/booking");
+
+        filter.doFilter(request, response, chain);
+
+        assertNotNull(chain.getRequest());
+    }
+
+    @Test
     @DisplayName("API POST + Origin/Referer 모두 없으면 403 차단한다")
     void apiPost_withoutOriginAndReferer_blocks() throws Exception {
         OriginRefererCheckFilter filter = apiFilter();
