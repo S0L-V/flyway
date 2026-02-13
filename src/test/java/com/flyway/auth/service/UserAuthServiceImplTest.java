@@ -55,6 +55,8 @@ class UserAuthServiceImplTest {
                 passwordEncoder,
                 smsVerificationService
         );
+
+        when(smsVerificationService.isVerified(anyString())).thenReturn(true);
     }
 
     @Test
@@ -66,6 +68,7 @@ class UserAuthServiceImplTest {
         req.setEmail("dup@example.com");
         req.setRawPassword("password1234");
         req.setAttemptId("AttemptId");
+        req.setPhoneNumber("01012345678");
 
         when(userIdentityRepository.existsEmailIdentity("dup@example.com"))
                 .thenReturn(true);
@@ -100,6 +103,7 @@ class UserAuthServiceImplTest {
         req.setEmail("test@example.com");
         req.setRawPassword("password1234");
         req.setAttemptId("AttemptId");
+        req.setPhoneNumber("01012345678");
 
         when(userIdentityRepository.existsEmailIdentity("test@example.com"))
                 .thenReturn(false);
@@ -165,6 +169,7 @@ class UserAuthServiceImplTest {
         req.setEmail("test@example.com");
         req.setRawPassword("password1234");
         req.setAttemptId("AttemptId");
+        req.setPhoneNumber("01012345678");
 
         when(signUpAttemptRepository.consumeIfVerified(
                 eq("AttemptId"),
@@ -264,6 +269,7 @@ class UserAuthServiceImplTest {
         req.setEmail("test@example.com");
         req.setRawPassword("password1234");
         req.setAttemptId("AttemptId");
+        req.setPhoneNumber("01012345678");
 
         when(userIdentityRepository.existsEmailIdentity(anyString()))
                 .thenReturn(false);

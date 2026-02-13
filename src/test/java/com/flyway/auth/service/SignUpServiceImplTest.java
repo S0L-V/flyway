@@ -56,6 +56,8 @@ class SignUpServiceImplTest {
                 passwordEncoder,
                 smsVerificationService
         );
+
+        when(smsVerificationService.isVerified(anyString())).thenReturn(true);
     }
 
     @Test
@@ -66,6 +68,7 @@ class SignUpServiceImplTest {
                 .email("test@example.com")
                 .rawPassword("password")
                 .attemptId("attempt-1")
+                .phoneNumber("01012345678")
                 .build();
 
         when(signUpAttemptRepository.consumeIfVerified(eq("attempt-1"), eq("test@example.com"), any()))
@@ -101,6 +104,7 @@ class SignUpServiceImplTest {
                 .email("test@example.com")
                 .rawPassword("password")
                 .attemptId("attempt-1")
+                .phoneNumber("01012345678")
                 .build();
 
         when(signUpAttemptRepository.consumeIfVerified(anyString(), anyString(), any()))
@@ -121,6 +125,7 @@ class SignUpServiceImplTest {
                 .email("test@example.com")
                 .rawPassword("password")
                 .attemptId("attempt-1")
+                .phoneNumber("01012345678")
                 .build();
 
         when(signUpAttemptRepository.consumeIfVerified(eq("attempt-1"), eq("test@example.com"), any()))
@@ -142,6 +147,7 @@ class SignUpServiceImplTest {
                 .email("test@example.com")
                 .rawPassword("password")
                 .attemptId("attempt-1")
+                .phoneNumber("01012345678")
                 .build();
 
         when(signUpAttemptRepository.consumeIfVerified(eq("attempt-1"), eq("test@example.com"), any()))
