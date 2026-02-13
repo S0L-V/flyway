@@ -40,7 +40,7 @@
         setText(sendStatus, "인증메일을 발송 중입니다...", true);
 
         try {
-            const res = await fetch(base + "/api/auth/email/issue", {
+            const res = await csrfFetch(base + "/api/auth/email/issue", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
@@ -89,7 +89,7 @@
                 email: email,
                 attemptId: attemptIdHidden.value
             });
-            const res = await fetch(base + "/api/auth/email/status?" + query.toString());
+            const res = await csrfFetch(base + "/api/auth/email/status?" + query.toString());
 
             if (!res.ok) {
                 setText(verifyStatus, "인증 확인에 실패했습니다.", false);

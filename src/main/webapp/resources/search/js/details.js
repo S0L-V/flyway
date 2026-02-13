@@ -27,7 +27,7 @@ async function openDetailPage(index) {
 
     const requestSeq = ++detailRequestSeq;
     try {
-        const res = await fetch(`${CONTEXT_PATH}/api/public/flights/details?cabinClass=${cabinClass}&routeType=${routeType}`);
+        const res = await csrfFetch(`${CONTEXT_PATH}/api/public/flights/details?cabinClass=${cabinClass}&routeType=${routeType}`);
 
         if (res.ok) {
             const details = await res.json();

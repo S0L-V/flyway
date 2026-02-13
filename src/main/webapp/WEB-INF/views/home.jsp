@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -240,6 +241,7 @@
 
 <!-- Hidden Form for Reservation -->
 <form id="reservationForm" action="${pageContext.request.contextPath}/reservations/draft" method="post" style="display:none;">
+    <sec:csrfInput/>
     <input type="hidden" id="hiddenOutFlightId" name="outFlightId">
     <input type="hidden" id="hiddenInFlightId" name="inFlightId">
     <input type="hidden" id="hiddenPassengerCount" name="passengerCount">

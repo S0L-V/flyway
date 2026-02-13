@@ -1,9 +1,14 @@
 package com.flyway.security.config;
 
 import com.flyway.auth.service.AuthTokenService;
+import com.flyway.auth.repository.RefreshTokenRepository;
+import com.flyway.auth.util.TokenHasher;
 import com.flyway.security.filter.OnboardingAccessFilter;
+import com.flyway.security.filter.OriginRefererCheckFilter;
+import com.flyway.security.filter.RefreshTokenSessionSyncFilter;
 import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import com.flyway.security.handler.LoginSuccessHandler;
+import com.flyway.security.handler.WebLoginRedirectEntryPoint;
 import com.flyway.security.jwt.JwtProvider;
 import com.flyway.security.jwt.JwtWebAuthFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -32,23 +43,31 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/", "/login", "/loginProc", "/signup", "/auth/**", "/search/**",
-            "/payments/success", "/payments/fail", "/payments/complete", "/api/sms/**"
+            "/payments/success", "/payments/fail", "/payments/complete", "/api/sms/**", "/error", "/error/**",
     };
 
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final PasswordEncoder passwordEncoder;
     private final LoginSuccessHandler loginSuccessHandler;
+    private final WebLoginRedirectEntryPoint webLoginRedirectEntryPoint;
     private final UserDetailsService userIdUserDetailsService;
     private final UserDetailsService emailUserDetailsService;
     private final AuthTokenService authTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenHasher tokenHasher;
+    private final SecurityOriginProperties securityOriginProperties;
 
     public SecurityConfigWeb(
             JwtProvider jwtProvider,
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
             PasswordEncoder passwordEncoder,
             LoginSuccessHandler loginSuccessHandler,
+            WebLoginRedirectEntryPoint webLoginRedirectEntryPoint,
             AuthTokenService authTokenService,
+            RefreshTokenRepository refreshTokenRepository,
+            TokenHasher tokenHasher,
+            SecurityOriginProperties securityOriginProperties,
             @Qualifier("userIdUserDetailsService") UserDetailsService userIdUserDetailsService,
             @Qualifier("emailUserDetailsService") UserDetailsService emailUserDetailsService
     ) {
@@ -56,7 +75,11 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.passwordEncoder = passwordEncoder;
         this.loginSuccessHandler = loginSuccessHandler;
+        this.webLoginRedirectEntryPoint = webLoginRedirectEntryPoint;
         this.authTokenService = authTokenService;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.tokenHasher = tokenHasher;
+        this.securityOriginProperties = securityOriginProperties;
         this.userIdUserDetailsService = userIdUserDetailsService;
         this.emailUserDetailsService = emailUserDetailsService;
     }
@@ -68,6 +91,24 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 jwtAuthenticationEntryPoint,
                 userIdUserDetailsService
         );
+    }
+
+    @Bean
+    public RefreshTokenSessionSyncFilter refreshTokenSessionSyncFilter() {
+        List<String> excludes = new ArrayList<>();
+        excludes.addAll(Arrays.asList(STATIC_RESOURCES));
+        excludes.addAll(Arrays.asList(PUBLIC_ENDPOINTS));
+        return new RefreshTokenSessionSyncFilter(
+                refreshTokenRepository,
+                tokenHasher,
+                authTokenService,
+                excludes
+        );
+    }
+
+    @Bean
+    public OriginRefererCheckFilter webOriginRefererCheckFilter() {
+        return OriginRefererCheckFilter.forWeb(securityOriginProperties.getAllowedOrigins());
     }
 
     @Bean
@@ -92,11 +133,17 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf()
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .and()
 
                 .authorizeRequests()
                 .antMatchers(STATIC_RESOURCES).permitAll()
                 .antMatchers(PUBLIC_ENDPOINTS).permitAll().anyRequest().authenticated()
+                .and()
+
+                .exceptionHandling()
+                .authenticationEntryPoint(webLoginRedirectEntryPoint)
                 .and()
 
                 .formLogin()
@@ -116,8 +163,10 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
 
+                .addFilterBefore(webOriginRefererCheckFilter(), CsrfFilter.class)
                 .addFilterBefore(jwtWebAuthFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new OnboardingAccessFilter(), JwtWebAuthFilter.class);
+                .addFilterAfter(refreshTokenSessionSyncFilter(), JwtWebAuthFilter.class)
+                .addFilterAfter(new OnboardingAccessFilter(), RefreshTokenSessionSyncFilter.class);
     }
 
     @Bean
@@ -125,4 +174,3 @@ public class SecurityConfigWeb extends WebSecurityConfigurerAdapter {
         return (request, response, authentication) -> authTokenService.logout(request, response);
     }
 }
-

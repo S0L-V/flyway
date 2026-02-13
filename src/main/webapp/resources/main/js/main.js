@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadHotSixAirport() {
     try {
-        const res = await fetch(`${CONTEXT_PATH}/api/public/rank/realtime`);
+        const res = await csrfFetch(`${CONTEXT_PATH}/api/public/rank/realtime`);
         if (!res.ok) {
             throw new Error(`HTTP ${res.status}`);
         }

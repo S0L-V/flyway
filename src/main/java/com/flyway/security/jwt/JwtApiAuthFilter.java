@@ -4,7 +4,6 @@ import com.flyway.security.handler.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +27,7 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
 
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     private static final int TOKEN_LOG_PREFIX_LEN = 20;
+    public static final String JWT_AUTHENTICATED_ATTR = "JWT_AUTHENTICATED";
 
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
@@ -62,14 +62,14 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (isAlreadyAuthenticated()) {
-            log.debug("[JWT][API] already authenticated. uri={}", uri);
+        if (isJwtAuthenticatedRequest(req)) {
+            log.debug("[JWT][API] already jwt-authenticated. uri={}", uri);
             chain.doFilter(req, res);
             return;
         }
 
         try {
-            authenticate(token);
+            authenticate(token, req);
             log.debug("[JWT][API] authenticated. uri={}, tokenPrefix={}", uri, safePrefix(token, TOKEN_LOG_PREFIX_LEN));
             chain.doFilter(req, res);
 
@@ -85,15 +85,17 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
         }
     }
 
-    private void authenticate(String token) {
+    private void authenticate(String token, HttpServletRequest req) {
         String userId = jwtProvider.getSubjectOrThrow(token);
 
         UserDetails userDetails = userIdUserDetailsService.loadUserByUsername(userId);
 
-        Authentication auth = new UsernamePasswordAuthenticationToken(
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities()
         );
+        auth.setDetails(JWT_AUTHENTICATED_ATTR);
         SecurityContextHolder.getContext().setAuthentication(auth);
+        req.setAttribute(JWT_AUTHENTICATED_ATTR, Boolean.TRUE);
     }
 
     private String extractAccessTokenFromCookie(HttpServletRequest req) {
@@ -108,11 +110,17 @@ public class JwtApiAuthFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private boolean isAlreadyAuthenticated() {
+    private boolean isJwtAuthenticatedRequest(HttpServletRequest req) {
+        Object flag = req.getAttribute(JWT_AUTHENTICATED_ATTR);
+        if (Boolean.TRUE.equals(flag)) {
+            return true;
+        }
         Authentication existing = SecurityContextHolder.getContext().getAuthentication();
-        return existing != null
-                && existing.isAuthenticated()
-                && !(existing instanceof AnonymousAuthenticationToken);
+        if (existing == null || !existing.isAuthenticated()) {
+            return false;
+        }
+        Object details = existing.getDetails();
+        return JWT_AUTHENTICATED_ATTR.equals(details) || Boolean.TRUE.equals(details);
     }
 
     private String resolvePath(HttpServletRequest request) {

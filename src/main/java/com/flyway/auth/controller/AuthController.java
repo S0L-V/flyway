@@ -116,6 +116,11 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/auth/csrf")
+    public ResponseEntity<Void> csrf() {
+        return ResponseEntity.noContent().build();
+    }
+
     private void autoLoginByEmail(String email, HttpServletRequest req, HttpServletResponse res) {
         UserDetails userDetails = emailUserDetailsService.loadUserByUsername(email);
         authenticateAndSave(userDetails, req, res);

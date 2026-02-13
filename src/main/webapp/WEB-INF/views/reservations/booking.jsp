@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <!doctype html>
 <html lang="ko">
@@ -324,6 +325,7 @@
 
                 <c:url var="saveUrl" value="/reservations/${vm.reservationId}/passengers"/>
                 <form id="passengerForm">
+                    <sec:csrfInput/>
                     <c:forEach var="p" items="${vm.passengers}" varStatus="st">
                         <div class="mb-8 last:mb-0 pb-8 last:pb-0">
                             <h4 class="font-bold text-sm text-gray-800 mb-4">탑승자 ${st.index + 1}</h4>

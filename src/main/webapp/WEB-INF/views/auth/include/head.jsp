@@ -29,6 +29,10 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="${pageContext.request.contextPath}/resources/common/js/swal-utils.js"></script>
+<script type="module">
+    import { csrfFetch } from "${pageContext.request.contextPath}/resources/common/js/csrfFetch.js";
+    window.csrfFetch = csrfFetch;
+</script>
 <!-- Flatpickr (달력) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

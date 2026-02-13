@@ -243,7 +243,7 @@
       if (verifySentBox) verifySentBox.classList.add("hidden");
 
       try {
-        const res = await fetch(`${contextPath}/api/auth/email/issue`, {
+        const res = await csrfFetch(`${contextPath}/api/auth/email/issue`, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -321,7 +321,7 @@
           email,
           attemptId: attemptIdHidden?.value || "",
         });
-        const res = await fetch(`${contextPath}/api/auth/email/status?${query.toString()}`);
+        const res = await csrfFetch(`${contextPath}/api/auth/email/status?${query.toString()}`);
 
         if (!res.ok) {
           if (verifyErrorStatus) {
@@ -507,7 +507,7 @@
         if (smsErrorStatus) smsErrorStatus.classList.add("hidden");
 
         try {
-            const res = await fetch(`${contextPath}/api/sms/send?phoneNumber=${encodeURIComponent(phone)}`, {
+            const res = await csrfFetch(`${contextPath}/api/sms/send?phoneNumber=${encodeURIComponent(phone)}`, {
                 method: "POST"
             });
             const data = await res.json();
@@ -560,7 +560,7 @@
 
             try {
                 const params = new URLSearchParams({ phoneNumber: phone, code: code });
-                const res = await fetch(`${contextPath}/api/sms/verify?${params.toString()}`, {
+                const res = await csrfFetch(`${contextPath}/api/sms/verify?${params.toString()}`, {
                     method: "POST"
                 });
                 const data = await res.json();

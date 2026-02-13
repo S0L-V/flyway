@@ -67,7 +67,7 @@ function moveNext() {
 // api 호출
 async function loadPromotionCard() {
     try {
-        const res = await fetch(`${CONTEXT_PATH}/api/public/promotions`);
+        const res = await csrfFetch(`${CONTEXT_PATH}/api/public/promotions`);
         if(!res.ok) {
             throw new Error(`HTTP ${res.status}`);
         }

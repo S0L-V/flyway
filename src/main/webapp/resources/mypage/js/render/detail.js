@@ -11,6 +11,7 @@ import {
     getContextPath,
 } from "../utils.js";
 import { fetchJson } from "../api.js";
+import { csrfFetch } from "../../../common/js/csrfFetch.js";
 
 let airlineMapPromise = null;
 
@@ -25,7 +26,7 @@ function toAssetUrl(path) {
 async function getAirlineMap() {
     if (airlineMapPromise) return airlineMapPromise;
     const url = `${getContextPath()}/resources/mypage/json/airline.json`;
-    airlineMapPromise = fetch(url, { headers: { Accept: "application/json" } })
+    airlineMapPromise = csrfFetch(url, { headers: { Accept: "application/json" } })
         .then((res) => (res.ok ? res.json() : {}))
         .catch(() => ({}));
     return airlineMapPromise;

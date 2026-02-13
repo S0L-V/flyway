@@ -33,6 +33,7 @@ class AuthTokenServiceImplTest {
     private JwtProperties jwtProperties;
     private RefreshTokenRepository refreshTokenRepository;
     private TokenHasher tokenHasher;
+    private RefreshTokenRevocationService refreshTokenRevocationService;
     private AuthTokenServiceImpl service;
 
     @BeforeEach
@@ -41,12 +42,14 @@ class AuthTokenServiceImplTest {
         jwtProperties = Mockito.mock(JwtProperties.class);
         refreshTokenRepository = Mockito.mock(RefreshTokenRepository.class);
         tokenHasher = Mockito.mock(TokenHasher.class);
+        refreshTokenRevocationService = Mockito.mock(RefreshTokenRevocationService.class);
 
         service = new AuthTokenServiceImpl(
                 jwtProvider,
                 jwtProperties,
                 refreshTokenRepository,
-                tokenHasher
+                tokenHasher,
+                refreshTokenRevocationService
         );
     }
 
@@ -92,5 +95,30 @@ class AuthTokenServiceImplTest {
         assertThatThrownBy(() -> service.refresh(request, response))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.AUTH_REFRESH_TOKEN_MISSING.getMessage());
+    }
+
+    @Test
+    @DisplayName("재사용 감지된 refresh token이면 REQUIRES_NEW revoke를 호출하고 예외를 던진다")
+    void refresh_reusedToken_callsRevocationServiceAndThrows() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new Cookie("refreshToken", "raw-refresh"));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(tokenHasher.hash("raw-refresh")).thenReturn("hash-refresh");
+        RefreshToken reused = RefreshToken.builder()
+                .refreshTokenId("refresh-id")
+                .userId("user-1")
+                .tokenHash("hash-refresh")
+                .issuedAt(LocalDateTime.now().minusMinutes(5))
+                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .rotatedAt(LocalDateTime.now().minusSeconds(10))
+                .build();
+        when(refreshTokenRepository.findByTokenHash("hash-refresh")).thenReturn(reused);
+
+        assertThatThrownBy(() -> service.refresh(request, response))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.AUTH_REFRESH_TOKEN_REUSED.getMessage());
+
+        verify(refreshTokenRevocationService).revokeAllByUserTokens(eq("user-1"), any(LocalDateTime.class));
     }
 }
