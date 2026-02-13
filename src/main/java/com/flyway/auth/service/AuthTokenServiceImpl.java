@@ -42,6 +42,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenHasher tokenHasher;
+    private final RefreshTokenRevocationService refreshTokenRevocationService;
 
     @Value("${cookie.secure:false}")
     private boolean cookieSecure;
@@ -99,7 +100,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
 
         /* 재사용 탐지 */
         if (stored.getRotatedAt() != null) {
-            refreshTokenRepository.revokeAllByUserId(stored.getUserId(), now);
+            refreshTokenRevocationService.revokeAllByUserTokens(stored.getUserId(), now);
             forceLogout(request, response);
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_REUSED);
         }

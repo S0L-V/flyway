@@ -16,10 +16,11 @@ function enqueueCsrfFetchCall(args) {
 function flushQueuedCsrfFetchCalls() {
     while (pendingCsrfFetchCalls.length > 0) {
         const call = pendingCsrfFetchCalls.shift();
-        csrfFetch(...call.args).then(call.resolve).catch(call.reject);
+        Promise.resolve(csrfFetch(...call.args)).then(call.resolve).catch(call.reject);
     }
 }
 
+// Early global binding: queue calls until this module finishes initialization.
 if (typeof window !== "undefined") {
     window.csrfFetch = (...args) => {
         if (csrfFetchReady) {
