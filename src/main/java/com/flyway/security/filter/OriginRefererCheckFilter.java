@@ -10,6 +10,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -122,8 +124,61 @@ public class OriginRefererCheckFilter extends OncePerRequestFilter {
             if (normalizedReferer.equals(allowedOrigin) || normalizedReferer.startsWith(allowedOrigin + "/")) {
                 return true;
             }
+            if (isLocalhostSchemeVariant(normalizedReferer, allowedOrigin)) {
+                return true;
+            }
         }
         return false;
+    }
+
+    private boolean isLocalhostSchemeVariant(String refererUrl, String allowedOrigin) {
+        OriginParts refererOrigin = extractOrigin(refererUrl);
+        OriginParts allowed = extractOrigin(allowedOrigin);
+        if (refererOrigin == null || allowed == null) return false;
+
+        if (!isLocalhostHost(refererOrigin.host) || !isLocalhostHost(allowed.host)) return false;
+        if (refererOrigin.port != allowed.port) return false;
+
+        boolean refererHttp = "http".equals(refererOrigin.scheme);
+        boolean refererHttps = "https".equals(refererOrigin.scheme);
+        boolean allowedHttp = "http".equals(allowed.scheme);
+        boolean allowedHttps = "https".equals(allowed.scheme);
+        return (refererHttp && allowedHttps) || (refererHttps && allowedHttp);
+    }
+
+    private boolean isLocalhostHost(String host) {
+        if (!StringUtils.hasText(host)) return false;
+        String h = host.toLowerCase(Locale.ROOT);
+        return "localhost".equals(h) || "127.0.0.1".equals(h) || "::1".equals(h) || "[::1]".equals(h);
+    }
+
+    private OriginParts extractOrigin(String url) {
+        try {
+            URI uri = new URI(url);
+            String scheme = trimToNull(uri.getScheme());
+            String host = trimToNull(uri.getHost());
+            if (!StringUtils.hasText(scheme) || !StringUtils.hasText(host)) return null;
+
+            int port = uri.getPort();
+            if (port < 0) {
+                port = "https".equalsIgnoreCase(scheme) ? 443 : 80;
+            }
+            return new OriginParts(scheme.toLowerCase(Locale.ROOT), host.toLowerCase(Locale.ROOT), port);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    private static final class OriginParts {
+        private final String scheme;
+        private final String host;
+        private final int port;
+
+        private OriginParts(String scheme, String host, int port) {
+            this.scheme = scheme;
+            this.host = host;
+            this.port = port;
+        }
     }
 
     private boolean isIncludedPath(String path) {
