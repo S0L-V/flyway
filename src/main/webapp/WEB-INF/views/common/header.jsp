@@ -92,6 +92,7 @@
 <script>
   (function() {
     const header = document.getElementById('mainHeader');
+    const contextPath = '${pageContext.request.contextPath}';
 
     function handleScroll() {
       if (window.scrollY > 20) {
@@ -118,5 +119,37 @@
         "max-glare": 0.3
       });
     }
+
+    const logoutForms = document.querySelectorAll('form.dropdown-form[action$="/auth/logout"]');
+    logoutForms.forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        if (typeof window.csrfFetch !== 'function') {
+          return;
+        }
+        event.preventDefault();
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
+
+        try {
+          const response = await window.csrfFetch(form.action, {
+            method: 'POST',
+            headers: { 'Accept': 'text/html' }
+          });
+
+          if (response.ok || response.redirected || response.status === 302) {
+            window.location.replace(contextPath + '/login');
+            return;
+          }
+
+          form.submit();
+        } catch (e) {
+          console.error('[logout] csrf logout failed, fallback to form submit', e);
+          form.submit();
+        } finally {
+          if (submitButton) submitButton.disabled = false;
+        }
+      });
+    });
   })();
 </script>
