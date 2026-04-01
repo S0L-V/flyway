@@ -374,7 +374,6 @@ Flyway는 항공권 가격이 불투명하게 결정되는 문제를 해결하�
 
 
 ## 6. 시스템 아키텍처
-<img width="600" alt="image" src="https://github.com/user-attachments/assets/2baa4307-e3c6-4dd0-9563-4d2366af02d4" />
 <img width="1840" height="1331" alt="Image" src="https://github.com/user-attachments/assets/c103e712-61c8-4719-b16c-225995c59251" />
 <br>
 
