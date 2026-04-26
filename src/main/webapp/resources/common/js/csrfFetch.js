@@ -104,12 +104,6 @@ function withCsrfHeader(init = {}) {
     return { ...init, headers };
 }
 
-/**
- * csrfFetch
- * - GET/HEAD/OPTIONS: 그냥 fetch
- * - POST/PUT/PATCH/DELETE: CSRF 쿠키 보장 + 헤더 자동첨부
- * - 401 처리/refresh/redirect 절대 안 함
- */
 export async function csrfFetch(input, init = {}) {
     const merged = { credentials: "same-origin", ...init };
 
