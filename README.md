@@ -14,7 +14,7 @@ Flyway는 소비자에게 합리적인 항공권 가격을 제공하기 위해
 
 **배포**: [https://flyway.kr](https://flyway.kr)
 
-**개발 기간**: 2026.01.07 ~ 진행 중
+**개발 기간**: 2026.01.07 ~ 2026.02.13
 
 
 ### 팀원
@@ -26,9 +26,9 @@ Flyway는 소비자에게 합리적인 항공권 가격을 제공하기 위해
   </colgroup>
 
   <tr>
-    <td><b>👩🏻‍💻 강희민</b><br> (<a href="https://github.com/kkhhmm3103">@kkhhmm3103</a>)</td>
-    <td><b>👩🏻‍💻 김민서</b><br> (<a href="https://github.com/minseokim0113">@minseokim0113</a>)</td>
-    <td><b>👩🏻‍💻 박수진</b><br> (<a href="https://github.com/cl-o-lc">@cl-o-lc</a>)</td>
+    <td><b>강희민</b><br> (<a href="https://github.com/kkhhmm3103">@kkhhmm3103</a>)</td>
+    <td><b>김민서</b><br> (<a href="https://github.com/minseokim0113">@minseokim0113</a>)</td>
+    <td><b>박수진</b><br> (<a href="https://github.com/cl-o-lc">@cl-o-lc</a>)</td>
   </tr>
 
   <tr>
@@ -62,9 +62,9 @@ Flyway는 소비자에게 합리적인 항공권 가격을 제공하기 위해
   </tr>
 
   <tr>
-    <td><b>🧑🏻‍💻 오찬혁</b><br> (<a href="https://github.com/ochanhyeok">@ochanhyeok</a>)</td>
-    <td><b>👩🏻‍💻 [팀장] 이가은</b><br> (<a href="https://github.com/gaeunnlee">@gaeunnlee</a>)</td>
-    <td><b>🧑🏻‍💻 한재훈</b><br> (<a href="https://github.com/hjh79gw">@hjh79gw</a>)</td>
+    <td><b>오찬혁</b><br> (<a href="https://github.com/ochanhyeok">@ochanhyeok</a>)</td>
+    <td><b>[팀장] 이가은</b><br> (<a href="https://github.com/gaeunnlee">@gaeunnlee</a>)</td>
+    <td><b>한재훈</b><br> (<a href="https://github.com/hjh79gw">@hjh79gw</a>)</td>
   </tr>
 
   <tr>
@@ -173,9 +173,10 @@ Flyway는 항공권 가격이 불투명하게 결정되는 문제를 해결하�
 
 
 ## 5. 시스템 아키텍처
-<img width="600" alt="image" src="https://github.com/user-attachments/assets/2baa4307-e3c6-4dd0-9563-4d2366af02d4" />
+<img width="1840" height="1331" alt="Image" src="https://github.com/user-attachments/assets/c103e712-61c8-4719-b16c-225995c59251" />
 
 <br>
+
 
 
 ## 6. ERD
